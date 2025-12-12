@@ -1,75 +1,93 @@
-# React + TypeScript + Vite
+# Future Stars Web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Tech Stack
 
-Currently, two official plugins are available:
+- **React 19** with React Compiler enabled
+- **TypeScript**
+- **Vite**
+- **ESLint** with TypeScript, React Hooks, and React Refresh plugins
+- **Prettier** for code formatting
+- **Husky** + **lint-staged** for pre-commit hooks
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Getting Started
 
-## React Compiler
+```bash
+# Install dependencies
+npm install
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+# Start development server
+npm run dev
 
-Note: This will impact Vite dev & build performances.
+# Build for production
+npm run build
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+# Preview production build
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Scripts
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x';
-import reactDom from 'eslint-plugin-react-dom';
+| Command                | Description                                  |
+| ---------------------- | -------------------------------------------- |
+| `npm run dev`          | Start development server with HMR            |
+| `npm run build`        | Type-check with tsc and build for production |
+| `npm run lint`         | Run ESLint                                   |
+| `npm run format`       | Format all files with Prettier               |
+| `npm run format:check` | Check if files are formatted                 |
+| `npm run preview`      | Preview production build locally             |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+## Project Structure
+
 ```
+src/
+├── app/              # Application layer (routes, providers, router config)
+├── assets/           # Static files (images, fonts, SVGs)
+├── components/       # Shared components used across the application
+├── config/           # Global configuration and environment variables
+├── features/         # Feature-based modules (primary code organization)
+├── hooks/            # Shared reusable hooks
+├── lib/              # Preconfigured reusable libraries
+├── stores/           # Global state management
+├── testing/          # Test utilities and mocks
+├── types/            # Shared TypeScript types
+└── utils/            # Shared utility functions
+```
+
+### Feature Structure
+
+Each feature in `src/features/` is self-contained:
+
+```
+src/features/example-feature/
+├── api/              # API requests and hooks for this feature
+├── assets/           # Feature-specific static files
+├── components/       # Feature-scoped components
+├── hooks/            # Feature-specific hooks
+├── stores/           # Feature state management
+├── types/            # TypeScript types for this feature
+└── utils/            # Feature utility functions
+```
+
+## Architecture
+
+The codebase follows a unidirectional architecture: `shared → features → app`
+
+- **Shared modules** (`components`, `hooks`, `utils`, etc.) can be imported anywhere
+- **Features** can import from shared modules but NOT from other features or the app layer
+- **App layer** can import from both features and shared modules
+
+## Conventions
+
+### Imports
+
+Use the `@/` path alias for imports:
+
+```typescript
+import { Button } from '@/components/button';
+import { useAuth } from '@/features/auth';
+```
+
+### Naming
+
+- **Files**: Use `kebab-case` for all `.ts` and `.tsx` files (e.g., `user-profile.tsx`)
+- **Folders**: Use `kebab-case` for all folders in `src/`
