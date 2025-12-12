@@ -5,10 +5,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run dev      # Start development server with HMR
-npm run build    # Type-check with tsc and build for production
-npm run lint     # Run ESLint
-npm run preview  # Preview production build locally
+npm run dev          # Start development server with HMR
+npm run build        # Type-check with tsc and build for production
+npm run lint         # Run ESLint
+npm run format       # Format all files with Prettier
+npm run format:check # Check if files are formatted
+npm run preview      # Preview production build locally
 ```
 
 ## Architecture
@@ -16,6 +18,7 @@ npm run preview  # Preview production build locally
 This is a React 19 + TypeScript + Vite application with the React Compiler enabled, following the [Bulletproof React](https://github.com/alan2207/bulletproof-react) project structure.
 
 **Key configuration:**
+
 - React Compiler is enabled via `babel-plugin-react-compiler` in `vite.config.ts`
 - TypeScript uses strict mode with additional linting rules (`noUnusedLocals`, `noUnusedParameters`)
 - ESLint configured with TypeScript, React Hooks, and React Refresh plugins
@@ -81,3 +84,17 @@ import { useAuth } from '@/features/auth';
 // Avoid
 import { Button } from '../../../components/button';
 ```
+
+### Naming Conventions
+
+Enforced by ESLint via `eslint-plugin-check-file`:
+
+- **Files**: All `.ts` and `.tsx` files must use `kebab-case` (e.g., `user-profile.tsx`)
+- **Folders**: All folders in `src/` must use `kebab-case` (except `__tests__`)
+
+### Pre-commit Hooks
+
+Husky runs lint-staged on every commit, which:
+
+- Runs ESLint with auto-fix on `.ts` and `.tsx` files
+- Formats all staged files with Prettier
