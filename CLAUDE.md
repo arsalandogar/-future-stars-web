@@ -24,6 +24,7 @@ This is a React 19 + TypeScript + Vite application with the React Compiler enabl
 - ESLint configured with TypeScript, React Hooks, and React Refresh plugins
 - Path alias `@/*` maps to `src/*` for clean imports
 - UI components use [Mantine](https://mantine.dev) - reference https://mantine.dev/llms.txt for documentation
+- Backend API documentation is in [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) - reference this for all API endpoints, request/response formats, and authentication
 
 **Entry point:** `src/main.tsx` renders `<AppProvider>` and `<AppRouter>` inside `<StrictMode>`
 
