@@ -1,6 +1,7 @@
-import { AppRoot } from './routes/app/root';
+import { RouterProvider } from '@tanstack/react-router';
+
+import { router } from '@/app/routes';
 
 export function AppRouter() {
-  // TODO: Add proper routing (e.g., react-router-dom, @tanstack/router)
-  return <AppRoot />;
+  return <RouterProvider router={router} />;
 }

@@ -3,7 +3,6 @@ import Axios, { type InternalAxiosRequestConfig } from 'axios';
 import { notifications } from '@mantine/notifications';
 
 import { env } from '@/config/env';
-import { paths } from '@/config/paths';
 
 function authRequestInterceptor(config: InternalAxiosRequestConfig) {
   if (config.headers) {
@@ -32,10 +31,8 @@ api.interceptors.response.use(
     });
 
     if (error.response?.status === 401) {
-      const searchParams = new URLSearchParams();
-      const redirectTo =
-        searchParams.get('redirectTo') || window.location.pathname;
-      window.location.href = paths.auth.login.getHref(redirectTo);
+      const redirectTo = window.location.pathname;
+      window.location.href = `/auth/login?redirectTo=${encodeURIComponent(redirectTo)}`;
     }
 
     return Promise.reject(error);
