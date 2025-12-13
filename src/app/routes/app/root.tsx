@@ -2,12 +2,14 @@ import { useState } from 'react';
 import reactLogo from '@/assets/react.svg';
 import viteLogo from '/vite.svg';
 import '@/app/routes/app/root.css';
+import { Head } from '@/components/seo/head';
 
 export function AppRoot() {
   const [count, setCount] = useState(0);
 
   return (
     <>
+      <Head title="Home" description="Welcome to Future Stars application" />
       <div>
         <a href="https://vite.dev" target="_blank" rel="noreferrer">
           <img src={viteLogo} className="logo" alt="Vite logo" />
