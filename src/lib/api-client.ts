@@ -1,12 +1,31 @@
-import Axios, { type InternalAxiosRequestConfig } from 'axios';
+import Axios, {
+  type AxiosError,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig,
+} from 'axios';
 
 import { notifications } from '@mantine/notifications';
 
 import { env } from '@/config/env';
 
+interface ApiErrorResponse {
+  errors?: Array<{ message: string }>;
+}
+
+let getAuthToken: () => string | null = () => null;
+
+export function setAuthTokenGetter(getter: () => string | null) {
+  getAuthToken = getter;
+}
+
 function authRequestInterceptor(config: InternalAxiosRequestConfig) {
   if (config.headers) {
     config.headers.Accept = 'application/json';
+
+    const token = getAuthToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
 
   config.withCredentials = true;
@@ -19,18 +38,21 @@ export const api = Axios.create({
 
 api.interceptors.request.use(authRequestInterceptor);
 api.interceptors.response.use(
-  (response) => {
-    return response.data;
+  (response: AxiosResponse): AxiosResponse<unknown> => {
+    return response.data as AxiosResponse<unknown>;
   },
-  (error) => {
-    const message = error.response?.data?.message || error.message;
+  (error: AxiosError<ApiErrorResponse>) => {
+    const errorResponse = error.response?.data;
+    const message = errorResponse?.errors?.[0]?.message ?? error.message;
+    const isAuthPage = window.location.pathname.startsWith('/auth/');
+
     notifications.show({
       color: 'red',
       title: 'Error',
       message,
     });
 
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !isAuthPage) {
       const redirectTo = window.location.pathname;
       window.location.href = `/auth/login?redirectTo=${encodeURIComponent(redirectTo)}`;
     }

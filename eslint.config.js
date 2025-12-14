@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import globals from 'globals';
+import pluginRouter from '@tanstack/eslint-plugin-router';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import reactX from 'eslint-plugin-react-x';
@@ -10,23 +11,25 @@ import prettier from 'eslint-config-prettier';
 import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', 'src/routeTree.gen.ts']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
       js.configs.recommended,
-      tseslint.configs.recommended,
+      tseslint.configs.recommendedTypeChecked,
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
       reactX.configs['recommended-typescript'],
       reactDom.configs.recommended,
+      pluginRouter.configs['flat/recommended'],
       prettier,
     ],
     plugins: {
       'check-file': checkFile,
     },
     languageOptions: {
-      ecmaVersion: 2020,
+      ecmaVersion: 'latest',
+      sourceType: 'module',
       globals: globals.browser,
       parserOptions: {
         project: ['./tsconfig.node.json', './tsconfig.app.json'],
@@ -49,6 +52,12 @@ export default defineConfig([
           'src/**/!(__tests__)': 'KEBAB_CASE',
         },
       ],
+    },
+  },
+  {
+    files: ['**/routes/__root.tsx'],
+    rules: {
+      'check-file/filename-naming-convention': 'off',
     },
   },
   // Enforce unidirectional codebase architecture for features

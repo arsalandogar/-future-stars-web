@@ -7,6 +7,11 @@ import '@mantine/charts/styles.css';
 import '@/index.css';
 import { AppProvider } from '@/app/provider';
 import { AppRouter } from '@/app/router';
+import { setAuthTokenGetter } from '@/lib/api-client';
+import { useAuthStore } from '@/features/auth';
+
+// Initialize auth token getter for API client
+setAuthTokenGetter(() => useAuthStore.getState().token);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
