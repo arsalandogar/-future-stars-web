@@ -1,7 +1,17 @@
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { routeTree } from '@/routeTree.gen';
+import { useAuthStore } from '@/features/auth';
+import type { RouterContext } from '@/routes/__root';
 
-const router = createRouter({ routeTree });
+const router = createRouter({
+  routeTree,
+  context: {
+    auth: {
+      isAuthenticated: false,
+      user: null,
+    },
+  },
+});
 
 declare module '@tanstack/react-router' {
   interface Register {
@@ -10,5 +20,19 @@ declare module '@tanstack/react-router' {
 }
 
 export function AppRouter() {
-  return <RouterProvider router={router} />;
+  const { isAuthenticated, user } = useAuthStore();
+
+  return (
+    <RouterProvider
+      router={router}
+      context={
+        {
+          auth: {
+            isAuthenticated,
+            user,
+          },
+        } satisfies RouterContext
+      }
+    />
+  );
 }

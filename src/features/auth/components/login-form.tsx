@@ -5,7 +5,7 @@ import {
   FloatingPasswordInput,
 } from '@/components/form/floating-label-input';
 import { revalidateLogic, useForm } from '@tanstack/react-form';
-import { Link, useNavigate, useSearch } from '@tanstack/react-router';
+import { Link, useRouter, useSearch } from '@tanstack/react-router';
 import * as v from 'valibot';
 
 import { useLogin } from '../api/login';
@@ -31,14 +31,15 @@ const defaultValues: LoginCredentials = {
 };
 
 export function LoginForm() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const search = useSearch({ from: '/auth/login' });
   const redirectTo = search.redirectTo || '/';
 
   const loginMutation = useLogin({
     mutationConfig: {
-      onSuccess: () => {
-        void navigate({ to: redirectTo });
+      onSuccess: async () => {
+        await router.invalidate();
+        await router.navigate({ to: redirectTo });
       },
     },
   });

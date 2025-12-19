@@ -1,5 +1,11 @@
-import { createRootRoute, Outlet, useRouter } from '@tanstack/react-router';
+import {
+  createRootRouteWithContext,
+  Outlet,
+  useRouter,
+} from '@tanstack/react-router';
 import { Center, Loader, Button, Stack, Text, Title } from '@mantine/core';
+
+import type { User } from '@/features/auth';
 
 function RootComponent() {
   return <Outlet />;
@@ -44,7 +50,14 @@ function NotFoundComponent() {
   );
 }
 
-export const Route = createRootRoute({
+export interface RouterContext {
+  auth: {
+    isAuthenticated: boolean;
+    user: User | null;
+  };
+}
+
+export const Route = createRootRouteWithContext<RouterContext>()({
   component: RootComponent,
   pendingComponent: PendingComponent,
   errorComponent: ErrorComponent,

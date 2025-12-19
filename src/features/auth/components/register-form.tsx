@@ -5,7 +5,7 @@ import {
   FloatingPasswordInput,
 } from '@/components/form/floating-label-input';
 import { revalidateLogic, useForm } from '@tanstack/react-form';
-import { Link, useNavigate } from '@tanstack/react-router';
+import { Link, useRouter } from '@tanstack/react-router';
 import * as v from 'valibot';
 
 import { useRegister } from '../api/register';
@@ -43,12 +43,13 @@ const defaultValues: RegisterCredentials = {
 };
 
 export function RegisterForm() {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const registerMutation = useRegister({
     mutationConfig: {
-      onSuccess: () => {
-        void navigate({ to: '/' });
+      onSuccess: async () => {
+        await router.invalidate();
+        await router.navigate({ to: '/' });
       },
     },
   });

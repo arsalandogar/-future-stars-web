@@ -1,13 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { Button, Center, Stack, Text, Title } from '@mantine/core';
-import { Link } from '@tanstack/react-router';
 import { Head } from '@/components/seo/head';
+import { useAuthStore } from '@/features/auth';
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute('/_authenticated/')({
   component: HomeComponent,
 });
 
 function HomeComponent() {
+  const { user, clearAuth } = useAuthStore();
+
   return (
     <>
       <Head
@@ -18,11 +20,11 @@ function HomeComponent() {
         <Stack align="center" gap="lg">
           <Title order={1}>Future Stars</Title>
           <Text size="xl" c="dimmed">
-            Discover and nurture young talent
+            Welcome back, {user?.firstName}!
           </Text>
           <Stack gap="sm" mt="md">
-            <Button component={Link} to="/auth/login" size="lg">
-              Get Started
+            <Button onClick={() => clearAuth()} variant="outline" color="red">
+              Logout
             </Button>
           </Stack>
         </Stack>

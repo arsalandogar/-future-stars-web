@@ -1,15 +1,17 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
 
-export const Route = createFileRoute('/auth')({
+export const Route = createFileRoute('/_authenticated/admin')({
   beforeLoad: ({ context }) => {
-    if (context.auth.isAuthenticated) {
+    if (!context.auth.user?.isAdmin) {
       // eslint-disable-next-line @typescript-eslint/only-throw-error
-      throw redirect({ to: '/' });
+      throw redirect({
+        to: '/',
+      });
     }
   },
-  component: AuthLayout,
+  component: AdminLayout,
 });
 
-function AuthLayout() {
+function AdminLayout() {
   return <Outlet />;
 }

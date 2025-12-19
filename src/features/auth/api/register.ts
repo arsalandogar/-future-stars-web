@@ -21,9 +21,10 @@ export function useRegister({ mutationConfig }: UseRegisterOptions = {}) {
 
   return useMutation({
     mutationFn: register,
-    onSuccess: (data) => {
-      setAuth(data.token, data.user);
-    },
     ...mutationConfig,
+    onSuccess: (data, ...args) => {
+      setAuth(data.token, data.user);
+      mutationConfig?.onSuccess?.(data, ...args);
+    },
   });
 }

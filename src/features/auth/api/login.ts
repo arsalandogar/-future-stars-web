@@ -21,9 +21,10 @@ export function useLogin({ mutationConfig }: UseLoginOptions = {}) {
 
   return useMutation({
     mutationFn: login,
-    onSuccess: (data) => {
-      setAuth(data.token, data.user);
-    },
     ...mutationConfig,
+    onSuccess: (data, ...args) => {
+      setAuth(data.token, data.user);
+      mutationConfig?.onSuccess?.(data, ...args);
+    },
   });
 }
