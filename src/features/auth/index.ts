@@ -4,8 +4,7 @@ export { LoginForm } from './components/login-form';
 export { RegisterForm } from './components/register-form';
 
 // Hooks
-export { useLogin } from './api/login';
-export { useRegister } from './api/register';
+export { useAuth } from './hooks/use-auth';
 
 // Store
 export { useAuthStore } from './stores/auth-store';

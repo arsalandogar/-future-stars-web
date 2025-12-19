@@ -5,10 +5,10 @@ import {
   FloatingPasswordInput,
 } from '@/components/form/floating-label-input';
 import { revalidateLogic, useForm } from '@tanstack/react-form';
-import { Link, useRouter } from '@tanstack/react-router';
+import { Link } from '@tanstack/react-router';
 import * as v from 'valibot';
 
-import { useRegister } from '../api/register';
+import { useAuth } from '../hooks/use-auth';
 import type { RegisterCredentials } from '../types';
 
 const registerSchema = v.object({
@@ -43,16 +43,7 @@ const defaultValues: RegisterCredentials = {
 };
 
 export function RegisterForm() {
-  const router = useRouter();
-
-  const registerMutation = useRegister({
-    mutationConfig: {
-      onSuccess: async () => {
-        await router.invalidate();
-        await router.navigate({ to: '/' });
-      },
-    },
-  });
+  const { register, isRegistering } = useAuth();
 
   const form = useForm({
     defaultValues,
@@ -60,8 +51,8 @@ export function RegisterForm() {
       onDynamic: registerSchema,
     },
     validationLogic: revalidateLogic(),
-    onSubmit: ({ value }) => {
-      registerMutation.mutate(value);
+    onSubmit: async ({ value }) => {
+      await register(value);
     },
   });
 
@@ -127,12 +118,7 @@ export function RegisterForm() {
           </form.Field>
         </Stack>
 
-        <Button
-          type="submit"
-          fullWidth
-          size="md"
-          loading={registerMutation.isPending}
-        >
+        <Button type="submit" fullWidth size="md" loading={isRegistering}>
           Create account
         </Button>
 

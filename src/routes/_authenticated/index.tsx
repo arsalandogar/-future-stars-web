@@ -1,14 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { Button, Center, Stack, Text, Title } from '@mantine/core';
 import { Head } from '@/components/seo/head';
-import { useAuthStore } from '@/features/auth';
+import { useAuth } from '@/features/auth';
 
 export const Route = createFileRoute('/_authenticated/')({
   component: HomeComponent,
 });
 
 function HomeComponent() {
-  const { user, clearAuth } = useAuthStore();
+  const { user, logout } = useAuth();
 
   return (
     <>
@@ -23,7 +23,7 @@ function HomeComponent() {
             Welcome back, {user?.firstName}!
           </Text>
           <Stack gap="sm" mt="md">
-            <Button onClick={() => clearAuth()} variant="outline" color="red">
+            <Button onClick={() => void logout()} variant="outline" color="red">
               Logout
             </Button>
           </Stack>

@@ -5,10 +5,10 @@ import {
   FloatingPasswordInput,
 } from '@/components/form/floating-label-input';
 import { revalidateLogic, useForm } from '@tanstack/react-form';
-import { Link, useRouter, useSearch } from '@tanstack/react-router';
+import { Link, useSearch } from '@tanstack/react-router';
 import * as v from 'valibot';
 
-import { useLogin } from '../api/login';
+import { useAuth } from '../hooks/use-auth';
 import type { LoginCredentials } from '../types';
 
 const loginSchema = v.object({
@@ -31,18 +31,10 @@ const defaultValues: LoginCredentials = {
 };
 
 export function LoginForm() {
-  const router = useRouter();
   const search = useSearch({ from: '/auth/login' });
   const redirectTo = search.redirectTo || '/';
 
-  const loginMutation = useLogin({
-    mutationConfig: {
-      onSuccess: async () => {
-        await router.invalidate();
-        await router.navigate({ to: redirectTo });
-      },
-    },
-  });
+  const { login, isLoggingIn } = useAuth();
 
   const form = useForm({
     defaultValues,
@@ -50,8 +42,8 @@ export function LoginForm() {
       onDynamic: loginSchema,
     },
     validationLogic: revalidateLogic(),
-    onSubmit: ({ value }) => {
-      loginMutation.mutate(value);
+    onSubmit: async ({ value }) => {
+      await login(value, redirectTo);
     },
   });
 
@@ -97,12 +89,7 @@ export function LoginForm() {
           </Anchor>
         </Group>
 
-        <Button
-          type="submit"
-          fullWidth
-          size="md"
-          loading={loginMutation.isPending}
-        >
+        <Button type="submit" fullWidth size="md" loading={isLoggingIn}>
           Sign in
         </Button>
 

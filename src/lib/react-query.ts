@@ -1,4 +1,13 @@
-import type { UseMutationOptions, DefaultOptions } from '@tanstack/react-query';
+import type { DefaultOptions } from '@tanstack/react-query';
+
+export {
+  createQuery,
+  createInfiniteQuery,
+  createMutation,
+  createSuspenseQuery,
+  createSuspenseInfiniteQuery,
+} from 'react-query-kit';
+export type { inferData, inferVariables } from 'react-query-kit';
 
 export const queryConfig = {
   queries: {
@@ -7,22 +16,3 @@ export const queryConfig = {
     staleTime: 1000 * 60,
   },
 } satisfies DefaultOptions;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyFunction = (...args: any[]) => Promise<any>;
-
-export type ApiFnReturnType<FnType extends AnyFunction> = Awaited<
-  ReturnType<FnType>
->;
-
-export type QueryConfig<T extends (...args: never[]) => unknown> = Omit<
-  ReturnType<T>,
-  'queryKey' | 'queryFn'
->;
-
-export type MutationConfig<MutationFnType extends AnyFunction> =
-  UseMutationOptions<
-    ApiFnReturnType<MutationFnType>,
-    Error,
-    Parameters<MutationFnType>[0]
-  >;
