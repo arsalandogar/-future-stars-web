@@ -4,7 +4,7 @@ import * as v from 'valibot';
 
 export const Route = createFileRoute('/auth/login')({
   validateSearch: v.object({
-    redirectTo: v.string(),
+    redirectTo: v.optional(v.string()),
   }),
   component: LoginPage,
 });

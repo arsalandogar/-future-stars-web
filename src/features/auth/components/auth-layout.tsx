@@ -14,11 +14,20 @@ export function AuthLayout({ title, description, children }: AuthLayoutProps) {
   return (
     <>
       <Head title={title} description={description} />
-      <Center mih="100vh" p="md">
-        <Paper shadow="md" p="xl" radius="md" w="100%" maw={420}>
-          <Stack gap="lg">
-            <Stack gap="xs" ta="center">
-              <Title order={2}>{title}</Title>
+      <Center h="100vh" w="100vw" p="md" bg="var(--mantine-color-gray-0)">
+        <Paper
+          shadow="xl"
+          p={{ base: 'lg', sm: 'xl' }}
+          radius="lg"
+          w="100%"
+          maw={440}
+          withBorder
+        >
+          <Stack gap="xl">
+            <Stack gap={4} ta="center">
+              <Title order={2} fw={700}>
+                {title}
+              </Title>
               {description && (
                 <Text c="dimmed" size="sm">
                   {description}

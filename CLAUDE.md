@@ -28,6 +28,27 @@ This is a React 19 + TypeScript + Vite application with the React Compiler enabl
 
 **Entry point:** `src/main.tsx` renders `<AppProvider>` and `<AppRouter>` inside `<StrictMode>`
 
+### Routing
+
+Uses **TanStack Router** with file-based routing:
+
+- Routes are defined in `src/routes/` directory
+- Route tree is auto-generated to `src/routeTree.gen.ts` (do not edit manually)
+- Layout routes use `route.tsx` files (e.g., `src/routes/auth/route.tsx` wraps `/auth/*`)
+- Root route at `src/routes/__root.tsx` defines global error, pending, and 404 components
+
+### Data Fetching
+
+Uses **TanStack Query** with preconfigured defaults in `src/lib/react-query.ts`:
+
+- Queries don't refetch on window focus, don't retry on failure, and have 1-minute stale time
+- Use `QueryConfig` and `MutationConfig` types from `@/lib/react-query` for type-safe query/mutation options
+- API requests use the Axios client from `@/lib/api-client` which handles auth tokens and error notifications
+
+### Forms
+
+Uses **TanStack Form** with **Valibot** for schema validation
+
 ## Project Structure
 
 ```

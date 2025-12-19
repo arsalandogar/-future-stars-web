@@ -1,12 +1,10 @@
+import { Anchor, Button, Divider, Group, Stack, Text } from '@mantine/core';
+
 import {
-  Anchor,
-  Button,
-  PasswordInput,
-  Stack,
-  Text,
-  TextInput,
-} from '@mantine/core';
-import { useForm } from '@tanstack/react-form';
+  FloatingLabelInput,
+  FloatingPasswordInput,
+} from '@/components/form/floating-label-input';
+import { revalidateLogic, useForm } from '@tanstack/react-form';
 import { Link, useNavigate, useSearch } from '@tanstack/react-router';
 import * as v from 'valibot';
 
@@ -48,8 +46,9 @@ export function LoginForm() {
   const form = useForm({
     defaultValues,
     validators: {
-      onBlur: loginSchema,
+      onDynamic: loginSchema,
     },
+    validationLogic: revalidateLogic(),
     onSubmit: ({ value }) => {
       loginMutation.mutate(value);
     },
@@ -62,46 +61,56 @@ export function LoginForm() {
         void form.handleSubmit();
       }}
     >
-      <Stack gap="md">
-        <form.Field name="email">
-          {(field) => (
-            <TextInput
-              label="Email"
-              placeholder="you@example.com"
-              type="email"
-              required
-              value={field.state.value}
-              onChange={(e) => field.handleChange(e.target.value)}
-              onBlur={field.handleBlur}
-              error={field.state.meta.errors[0]?.message}
-            />
-          )}
-        </form.Field>
-        <form.Field name="password">
-          {(field) => (
-            <PasswordInput
-              label="Password"
-              placeholder="Your password"
-              required
-              value={field.state.value}
-              onChange={(e) => field.handleChange(e.target.value)}
-              onBlur={field.handleBlur}
-              error={field.state.meta.errors[0]?.message}
-            />
-          )}
-        </form.Field>
+      <Stack gap="lg">
+        <Stack gap="lg">
+          <form.Field name="email">
+            {(field) => (
+              <FloatingLabelInput
+                label="Email address"
+                type="email"
+                size="md"
+                required
+                value={field.state.value}
+                onChange={(e) => field.handleChange(e.target.value)}
+                error={field.state.meta.errors[0]?.message}
+              />
+            )}
+          </form.Field>
+          <form.Field name="password">
+            {(field) => (
+              <FloatingPasswordInput
+                label="Password"
+                size="md"
+                required
+                value={field.state.value}
+                onChange={(e) => field.handleChange(e.target.value)}
+                error={field.state.meta.errors[0]?.message}
+              />
+            )}
+          </form.Field>
+        </Stack>
+
+        <Group justify="flex-end">
+          <Anchor component={Link} to="/auth/login" size="sm" c="dimmed">
+            Forgot password?
+          </Anchor>
+        </Group>
+
         <Button
           type="submit"
           fullWidth
+          size="md"
           loading={loginMutation.isPending}
-          mt="md"
         >
           Sign in
         </Button>
-        <Text size="sm" ta="center">
+
+        <Divider label="or" labelPosition="center" />
+
+        <Text size="sm" ta="center" c="dimmed">
           Don&apos;t have an account?{' '}
-          <Anchor component={Link} to="/auth/register">
-            Sign up
+          <Anchor component={Link} to="/auth/register" fw={500}>
+            Create account
           </Anchor>
         </Text>
       </Stack>

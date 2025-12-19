@@ -8,6 +8,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { MainErrorFallback } from '@/components/errors/main';
+import { theme } from '@/config/theme';
 import { queryConfig } from '@/lib/react-query';
 
 type AppProviderProps = {
@@ -30,7 +31,7 @@ export function AppProvider({ children }: AppProviderProps) {
       <ErrorBoundary FallbackComponent={MainErrorFallback}>
         <HelmetProvider>
           <QueryClientProvider client={queryClient}>
-            <MantineProvider>
+            <MantineProvider theme={theme}>
               <ModalsProvider>
                 <Notifications />
                 {children}

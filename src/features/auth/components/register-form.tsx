@@ -1,13 +1,10 @@
+import { Anchor, Button, Divider, Group, Stack, Text } from '@mantine/core';
+
 import {
-  Anchor,
-  Button,
-  Group,
-  PasswordInput,
-  Stack,
-  Text,
-  TextInput,
-} from '@mantine/core';
-import { useForm } from '@tanstack/react-form';
+  FloatingLabelInput,
+  FloatingPasswordInput,
+} from '@/components/form/floating-label-input';
+import { revalidateLogic, useForm } from '@tanstack/react-form';
 import { Link, useNavigate } from '@tanstack/react-router';
 import * as v from 'valibot';
 
@@ -59,8 +56,9 @@ export function RegisterForm() {
   const form = useForm({
     defaultValues,
     validators: {
-      onBlur: registerSchema,
+      onDynamic: registerSchema,
     },
+    validationLogic: revalidateLogic(),
     onSubmit: ({ value }) => {
       registerMutation.mutate(value);
     },
@@ -73,73 +71,75 @@ export function RegisterForm() {
         void form.handleSubmit();
       }}
     >
-      <Stack gap="md">
-        <Group grow>
-          <form.Field name="firstName">
+      <Stack gap="lg">
+        <Stack gap="lg">
+          <Group grow>
+            <form.Field name="firstName">
+              {(field) => (
+                <FloatingLabelInput
+                  label="First name"
+                  size="md"
+                  required
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  error={field.state.meta.errors[0]?.message}
+                />
+              )}
+            </form.Field>
+            <form.Field name="lastName">
+              {(field) => (
+                <FloatingLabelInput
+                  label="Last name"
+                  size="md"
+                  required
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  error={field.state.meta.errors[0]?.message}
+                />
+              )}
+            </form.Field>
+          </Group>
+          <form.Field name="email">
             {(field) => (
-              <TextInput
-                label="First name"
-                placeholder="John"
+              <FloatingLabelInput
+                label="Email address"
+                type="email"
+                size="md"
                 required
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
-                onBlur={field.handleBlur}
                 error={field.state.meta.errors[0]?.message}
               />
             )}
           </form.Field>
-          <form.Field name="lastName">
+          <form.Field name="password">
             {(field) => (
-              <TextInput
-                label="Last name"
-                placeholder="Doe"
+              <FloatingPasswordInput
+                label="Password"
+                size="md"
                 required
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
-                onBlur={field.handleBlur}
                 error={field.state.meta.errors[0]?.message}
               />
             )}
           </form.Field>
-        </Group>
-        <form.Field name="email">
-          {(field) => (
-            <TextInput
-              label="Email"
-              placeholder="you@example.com"
-              type="email"
-              required
-              value={field.state.value}
-              onChange={(e) => field.handleChange(e.target.value)}
-              onBlur={field.handleBlur}
-              error={field.state.meta.errors[0]?.message}
-            />
-          )}
-        </form.Field>
-        <form.Field name="password">
-          {(field) => (
-            <PasswordInput
-              label="Password"
-              placeholder="Create a password"
-              required
-              value={field.state.value}
-              onChange={(e) => field.handleChange(e.target.value)}
-              onBlur={field.handleBlur}
-              error={field.state.meta.errors[0]?.message}
-            />
-          )}
-        </form.Field>
+        </Stack>
+
         <Button
           type="submit"
           fullWidth
+          size="md"
           loading={registerMutation.isPending}
-          mt="md"
         >
           Create account
         </Button>
-        <Text size="sm" ta="center">
+
+        <Divider label="or" labelPosition="center" />
+
+        <Text size="sm" ta="center" c="dimmed">
           Already have an account?{' '}
-          <Anchor component={Link} to="/auth/login">
+          <Anchor component={Link} to="/auth/login" fw={500}>
             Sign in
           </Anchor>
         </Text>
