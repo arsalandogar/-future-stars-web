@@ -20,6 +20,7 @@
     "@mantine/hooks": "^8.3.10",
     "@mantine/modals": "^8.3.10",
     "@mantine/notifications": "^8.3.10",
+    "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-form": "^1.27.3",
     "@tanstack/react-query": "^5.90.12",
     "@tanstack/react-router": "^1.141.2",
@@ -30,6 +31,8 @@
     "react-dom": "^19.2.0",
     "react-error-boundary": "^6.0.0",
     "recharts": "^3.5.1",
+    "tailwind-preset-mantine": "^3.0.3",
+    "tailwindcss": "^4.1.18",
     "valibot": "^1.2.0",
     "zustand": "^5.0.9"
   },

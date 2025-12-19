@@ -24,7 +24,7 @@ This is a React 19 + TypeScript + Vite application with the React Compiler enabl
 - ESLint configured with TypeScript, React Hooks, and React Refresh plugins
 - Path alias `@/*` maps to `src/*` for clean imports
 - UI components use [Mantine](https://mantine.dev) - reference https://mantine.dev/llms.txt for documentation
-- Backend API documentation is in [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) - reference this for all API endpoints, request/response formats, and authentication
+- Backend API documentation is in [API_DOCUMENTATION.md](./docs/API_DOCUMENTATION.md) - reference this for all API endpoints, request/response formats, and authentication
 
 **Entry point:** `src/main.tsx` renders `<AppProvider>` and `<AppRouter>` inside `<StrictMode>`
 
@@ -48,6 +48,37 @@ Uses **TanStack Query** with preconfigured defaults in `src/lib/react-query.ts`:
 ### Forms
 
 Uses **TanStack Form** with **Valibot** for schema validation
+
+### State Management
+
+Uses **Zustand** with persist middleware for global state:
+
+- Feature stores go in `src/features/<feature>/stores/`
+- Shared stores go in `src/stores/`
+- Use `persist` middleware with `localStorage` for state that should survive page reloads (see `src/features/auth/stores/auth-store.ts` for example)
+
+### Styling
+
+Uses **Tailwind CSS v4** with **Mantine v7** via `tailwind-preset-mantine`. See [STYLING_GUIDE.md](./docs/STYLING_GUIDE.md) for detailed guidance.
+
+**Quick reference:**
+
+| Scenario                                    | Approach            |
+| ------------------------------------------- | ------------------- |
+| Layout (flex, grid, positioning)            | Tailwind            |
+| Spacing between components                  | Tailwind            |
+| Component appearance (color, size, variant) | Mantine props       |
+| Small tweaks (1-4 properties)               | Mantine style props |
+| State-based styling (`data-*` attributes)   | CSS Modules         |
+| Complex hover/focus combinations            | CSS Modules         |
+| 5+ style modifications                      | CSS Modules         |
+
+### Environment Variables
+
+Environment variables are accessed via `src/config/env.ts`:
+
+- `VITE_API_URL` - Backend API base URL (required)
+- Access via `import { env } from '@/config/env'`
 
 ## Project Structure
 
