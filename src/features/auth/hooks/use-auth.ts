@@ -1,4 +1,4 @@
-import { useRouter } from '@tanstack/react-router';
+import { useRouter, useSearch } from '@tanstack/react-router';
 
 import { useLogin } from '../api/login';
 import { useRegister } from '../api/register';
@@ -6,33 +6,35 @@ import { useAuthStore } from '../stores/auth-store';
 import type { LoginCredentials, RegisterCredentials } from '../types';
 
 export function useAuth() {
-  const router = useRouter();
+  const { invalidate, navigate } = useRouter();
   const { user, isAuthenticated, clearAuth } = useAuthStore();
+  const loginSearch = useSearch({
+    from: '/auth/login',
+    shouldThrow: false,
+  });
+
   const loginMutation = useLogin();
   const registerMutation = useRegister();
 
-  const login = async (
-    credentials: LoginCredentials,
-    redirectTo: string = '/'
-  ) => {
-    await loginMutation.mutateAsync(credentials);
-    await router.invalidate();
-    await router.navigate({ to: redirectTo });
+  const login = async (credentials: LoginCredentials) => {
+    const redirectTo = loginSearch?.redirectTo;
+    const result = await loginMutation.mutateAsync(credentials);
+    const destination = redirectTo ?? (result.user.isAdmin ? '/admin' : '/');
+
+    await invalidate();
+    await navigate({ to: destination });
   };
 
-  const register = async (
-    credentials: RegisterCredentials,
-    redirectTo: string = '/'
-  ) => {
+  const register = async (credentials: RegisterCredentials) => {
     await registerMutation.mutateAsync(credentials);
-    await router.invalidate();
-    await router.navigate({ to: redirectTo });
+    await invalidate();
+    await navigate({ to: '/' });
   };
 
   const logout = async () => {
     clearAuth();
-    await router.invalidate();
-    await router.navigate({ to: '/auth/login' });
+    await invalidate();
+    await navigate({ to: '/auth/login' });
   };
 
   return {
