@@ -1,15 +1,28 @@
 import {
   Group,
+  Burger,
   TextInput,
   ActionIcon,
   Avatar,
+  Menu,
+  UnstyledButton,
   Text,
-  Stack,
-  Burger,
+  Kbd,
 } from '@mantine/core';
-import { Search, Bell } from 'lucide-react';
+import {
+  Search,
+  Moon,
+  Bell,
+  ChevronDown,
+  MoreVertical,
+  User,
+  LogOut,
+} from 'lucide-react';
 
-import { useAuthStore } from '@/features/auth';
+import { useAuth, useAuthStore } from '@/features/auth';
+
+import { Logo } from './logo';
+import { useHeaderStore } from '../stores/header-store';
 
 interface AdminHeaderProps {
   opened: boolean;
@@ -17,56 +30,165 @@ interface AdminHeaderProps {
 }
 
 export function AdminHeader({ opened, toggle }: AdminHeaderProps) {
+  const { mobileMenuOpen, toggleMobileMenu } = useHeaderStore();
+  const { logout } = useAuth();
   const user = useAuthStore((state) => state.user);
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
+  const userMenuItems = (
+    <>
+      <Menu.Label>{user?.email}</Menu.Label>
+      <Menu.Divider />
+      <Menu.Item leftSection={<User size={16} />}>Profile</Menu.Item>
+      <Menu.Divider />
+      <Menu.Item
+        leftSection={<LogOut size={16} />}
+        color="red"
+        onClick={() => void logout()}
+      >
+        Log Out
+      </Menu.Item>
+    </>
+  );
 
   return (
-    <Group h="100%" px="md" justify="space-between">
-      <Group>
-        <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-        <Group gap="xs">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-sm">
-            FS
-          </div>
-          <Text fw={600} size="lg">
-            Future Stars
-          </Text>
+    <div className="flex h-full flex-col">
+      {/* Desktop Header */}
+      <Group h="100%" px="md" justify="space-between" visibleFrom="sm">
+        <TextInput
+          placeholder="Global search..."
+          leftSection={
+            <Search size={16} className="text-(--mantine-color-gray-5)" />
+          }
+          rightSection={
+            <Group gap={4}>
+              <Kbd size="xs">⌘</Kbd>
+              <Kbd size="xs">K</Kbd>
+            </Group>
+          }
+          rightSectionWidth={60}
+        />
+        <Group gap="sm">
+          <ActionIcon
+            variant="default"
+            size="lg"
+            radius="xl"
+            aria-label="Toggle theme"
+          >
+            <Moon size={18} />
+          </ActionIcon>
+
+          <ActionIcon
+            variant="default"
+            size="lg"
+            radius="xl"
+            aria-label="Notifications"
+          >
+            <Bell size={18} />
+          </ActionIcon>
+
+          <Menu shadow="md" width={200} position="bottom-end">
+            <Menu.Target>
+              <UnstyledButton className="flex items-center gap-2 rounded-full py-1 pl-1 pr-3 hover:bg-(--mantine-color-gray-1)">
+                <Avatar
+                  color="initials"
+                  radius="xl"
+                  size="md"
+                  name={user?.fullName}
+                />
+                <Text size="sm" fw={500} className="hidden lg:block">
+                  {user?.fullName ?? 'Admin User'}
+                </Text>
+                <ChevronDown
+                  size={14}
+                  className="text-(--mantine-color-gray-6)"
+                />
+              </UnstyledButton>
+            </Menu.Target>
+            <Menu.Dropdown>{userMenuItems}</Menu.Dropdown>
+          </Menu>
         </Group>
       </Group>
 
-      <Group gap="md">
-        <TextInput
-          placeholder="Global search..."
-          leftSection={<Search size={16} />}
-          w={250}
-          radius="md"
-          visibleFrom="sm"
-        />
-        <ActionIcon variant="subtle" color="gray" size="lg">
-          <Bell size={20} />
-        </ActionIcon>
-        <Group gap="sm">
-          <Stack gap={0} align="flex-end" visibleFrom="sm">
-            <Text size="sm" fw={500}>
-              {user?.fullName || 'Admin User'}
+      {/* Mobile Header */}
+      <div className="sm:hidden">
+        {/* Main Row */}
+        <Group h={76} px="md" justify="space-between">
+          <Burger
+            opened={opened}
+            onClick={toggle}
+            size="sm"
+            aria-label="Toggle navigation"
+          />
+
+          <Group gap="xs">
+            <Logo />
+            <Text fw={600} size="md">
+              Future Stars
             </Text>
-            <Text size="xs" c="dimmed">
-              {user?.role === 'admin' ? 'Manager' : user?.role || 'Manager'}
-            </Text>
-          </Stack>
-          <Avatar color="blue" radius="xl">
-            {user?.fullName ? getInitials(user.fullName) : 'AU'}
-          </Avatar>
+          </Group>
+
+          <ActionIcon
+            variant="default"
+            size="lg"
+            radius="md"
+            onClick={toggleMobileMenu}
+            aria-label="More options"
+          >
+            <MoreVertical size={20} />
+          </ActionIcon>
         </Group>
-      </Group>
-    </Group>
+
+        {/* Mobile Expanded Menu */}
+        {mobileMenuOpen && (
+          <Group
+            h={60}
+            px="md"
+            justify="space-between"
+            className="border-t border-(--mantine-color-gray-3) bg-(--mantine-color-gray-0)"
+          >
+            <Group gap="sm">
+              <ActionIcon
+                variant="default"
+                size="lg"
+                radius="xl"
+                aria-label="Toggle theme"
+              >
+                <Moon size={18} />
+              </ActionIcon>
+
+              <ActionIcon
+                variant="default"
+                size="lg"
+                radius="xl"
+                aria-label="Notifications"
+              >
+                <Bell size={18} />
+              </ActionIcon>
+            </Group>
+
+            <Menu shadow="md" width={200} position="bottom-end">
+              <Menu.Target>
+                <UnstyledButton className="flex items-center gap-3 rounded-full py-1 pl-1 pr-2 hover:bg-(--mantine-color-gray-2)">
+                  <Avatar
+                    color="initials"
+                    radius="xl"
+                    size="md"
+                    name={user?.fullName}
+                  />
+                  <Text size="sm" fw={500}>
+                    {user?.fullName ?? 'Admin User'}
+                  </Text>
+                  <ChevronDown
+                    size={16}
+                    className="text-(--mantine-color-gray-6)"
+                  />
+                </UnstyledButton>
+              </Menu.Target>
+              <Menu.Dropdown>{userMenuItems}</Menu.Dropdown>
+            </Menu>
+          </Group>
+        )}
+      </div>
+    </div>
   );
 }
