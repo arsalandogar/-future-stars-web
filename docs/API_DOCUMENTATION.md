@@ -12,6 +12,7 @@ Base URL: `/api/v1`
 - [Cart Items](#cart-items)
 - [Addresses](#addresses)
 - [Orders](#orders)
+- [Admin Orders](#admin-orders)
 - [Configs](#configs)
 - [Featured Items](#featured-items)
 - [Profile](#profile)
@@ -1158,6 +1159,127 @@ PATCH /api/v1/orders/:id/confirm-payment
 | `delivered`          | Order delivered                 |
 | `cancelled`          | Order cancelled                 |
 | `refunded`           | Order refunded                  |
+
+---
+
+## Admin Orders
+
+Admin-only endpoints for managing all orders. Requires admin authentication.
+
+### List All Orders
+
+Get paginated list of all orders with filtering options.
+
+```
+GET /api/v1/admin/orders
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Query Parameters:**
+
+| Param  | Type   | Default | Description                                      |
+| ------ | ------ | ------- | ------------------------------------------------ |
+| page   | number | 1       | Page number                                      |
+| limit  | number | 20      | Items per page                                   |
+| userId | number | -       | Filter by user ID                                |
+| status | string | -       | Filter by order status                           |
+| search | string | -       | Search by user name, email, or payment intent ID |
+
+**Response:** `200 OK`
+
+```json
+{
+  "meta": {
+    "total": 100,
+    "perPage": 20,
+    "currentPage": 1,
+    "lastPage": 5
+  },
+  "data": [
+    {
+      "id": 1,
+      "userId": 1,
+      "stripePaymentIntentId": "pi_xxxxx",
+      "totalAmount": 5997,
+      "status": "paid",
+      "shippingAddress": {...},
+      "user": {
+        "id": 1,
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "john@example.com"
+      },
+      "lineItems": [...]
+    }
+  ]
+}
+```
+
+### Get Order (Admin)
+
+Get a specific order by ID.
+
+```
+GET /api/v1/admin/orders/:id
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Response:** `200 OK`
+
+```json
+{
+  "id": 1,
+  "userId": 1,
+  "stripePaymentIntentId": "pi_xxxxx",
+  "totalAmount": 5997,
+  "status": "paid",
+  "shippingAddress": {...},
+  "user": {...},
+  "lineItems": [...]
+}
+```
+
+### Update Order Status
+
+Update the status of an order.
+
+```
+PUT /api/v1/admin/orders/:id
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Request Body:**
+
+| Field  | Type   | Required | Description                         |
+| ------ | ------ | -------- | ----------------------------------- |
+| status | string | Yes      | New order status (see values below) |
+
+**Order Status Values:**
+
+| Status               | Description                     |
+| -------------------- | ------------------------------- |
+| `created`            | Order created, awaiting payment |
+| `payment_failed`     | Payment attempt failed          |
+| `paid`               | Payment successful              |
+| `processing`         | Order being processed           |
+| `sent_to_production` | Sent to card production         |
+| `shipped`            | Order shipped                   |
+| `delivered`          | Order delivered                 |
+| `cancelled`          | Order cancelled                 |
+| `refunded`           | Order refunded                  |
+
+**Response:** `200 OK`
+
+```json
+{
+  "id": 1,
+  "status": "processing",
+  ...
+}
+```
 
 ---
 
