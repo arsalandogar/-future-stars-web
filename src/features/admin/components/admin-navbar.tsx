@@ -9,14 +9,7 @@ import {
   UnstyledButton,
 } from '@mantine/core';
 import { Link } from '@tanstack/react-router';
-import {
-  LayoutGrid,
-  ClipboardList,
-  Users,
-  FileText,
-  ChevronLeft,
-  X,
-} from 'lucide-react';
+import { LayoutGrid, Users, Layers2, ChevronLeft, X, Box } from 'lucide-react';
 
 import { Logo } from './logo';
 
@@ -28,9 +21,9 @@ interface NavItem {
 
 const menuItems: NavItem[] = [
   { label: 'Dashboard', icon: LayoutGrid, href: '/admin' },
-  { label: 'Orders', icon: ClipboardList, href: '/admin/orders' },
-  { label: 'Customers', icon: Users, href: '/admin/customers' },
-  { label: 'Templates', icon: FileText, href: '/admin/templates' },
+  { label: 'Orders', icon: Box, href: '/admin/orders' },
+  { label: 'Users', icon: Users, href: '/admin/users' },
+  { label: 'Templates', icon: Layers2, href: '/admin/templates' },
 ];
 
 interface NavSectionProps {

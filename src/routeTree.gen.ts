@@ -18,10 +18,8 @@ import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
 import { Route as AuthenticatedAdminTemplatesRouteImport } from './routes/_authenticated/admin/templates'
-import { Route as AuthenticatedAdminTasksRouteImport } from './routes/_authenticated/admin/tasks'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin/orders'
-import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authenticated/admin/customers'
 
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
@@ -68,11 +66,6 @@ const AuthenticatedAdminTemplatesRoute =
     path: '/templates',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
-const AuthenticatedAdminTasksRoute = AuthenticatedAdminTasksRouteImport.update({
-  id: '/tasks',
-  path: '/tasks',
-  getParentRoute: () => AuthenticatedAdminRouteRoute,
-} as any)
 const AuthenticatedAdminSettingsRoute =
   AuthenticatedAdminSettingsRouteImport.update({
     id: '/settings',
@@ -85,12 +78,6 @@ const AuthenticatedAdminOrdersRoute =
     path: '/orders',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
-const AuthenticatedAdminCustomersRoute =
-  AuthenticatedAdminCustomersRouteImport.update({
-    id: '/customers',
-    path: '/customers',
-    getParentRoute: () => AuthenticatedAdminRouteRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/auth': typeof AuthRouteRouteWithChildren
@@ -98,10 +85,8 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/': typeof AuthenticatedIndexRoute
-  '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
-  '/admin/tasks': typeof AuthenticatedAdminTasksRoute
   '/admin/templates': typeof AuthenticatedAdminTemplatesRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -111,10 +96,8 @@ export interface FileRoutesByTo {
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/': typeof AuthenticatedIndexRoute
-  '/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
-  '/admin/tasks': typeof AuthenticatedAdminTasksRoute
   '/admin/templates': typeof AuthenticatedAdminTemplatesRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -127,10 +110,8 @@ export interface FileRoutesById {
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
-  '/_authenticated/admin/customers': typeof AuthenticatedAdminCustomersRoute
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
-  '/_authenticated/admin/tasks': typeof AuthenticatedAdminTasksRoute
   '/_authenticated/admin/templates': typeof AuthenticatedAdminTemplatesRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -143,10 +124,8 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/register'
     | '/'
-    | '/admin/customers'
     | '/admin/orders'
     | '/admin/settings'
-    | '/admin/tasks'
     | '/admin/templates'
     | '/admin/users'
     | '/admin/'
@@ -156,10 +135,8 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/register'
     | '/'
-    | '/admin/customers'
     | '/admin/orders'
     | '/admin/settings'
-    | '/admin/tasks'
     | '/admin/templates'
     | '/admin/users'
     | '/admin'
@@ -171,10 +148,8 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/register'
     | '/_authenticated/'
-    | '/_authenticated/admin/customers'
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/settings'
-    | '/_authenticated/admin/tasks'
     | '/_authenticated/admin/templates'
     | '/_authenticated/admin/users'
     | '/_authenticated/admin/'
@@ -250,13 +225,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTemplatesRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
-    '/_authenticated/admin/tasks': {
-      id: '/_authenticated/admin/tasks'
-      path: '/tasks'
-      fullPath: '/admin/tasks'
-      preLoaderRoute: typeof AuthenticatedAdminTasksRouteImport
-      parentRoute: typeof AuthenticatedAdminRouteRoute
-    }
     '/_authenticated/admin/settings': {
       id: '/_authenticated/admin/settings'
       path: '/settings'
@@ -269,13 +237,6 @@ declare module '@tanstack/react-router' {
       path: '/orders'
       fullPath: '/admin/orders'
       preLoaderRoute: typeof AuthenticatedAdminOrdersRouteImport
-      parentRoute: typeof AuthenticatedAdminRouteRoute
-    }
-    '/_authenticated/admin/customers': {
-      id: '/_authenticated/admin/customers'
-      path: '/customers'
-      fullPath: '/admin/customers'
-      preLoaderRoute: typeof AuthenticatedAdminCustomersRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
   }
@@ -296,10 +257,8 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 )
 
 interface AuthenticatedAdminRouteRouteChildren {
-  AuthenticatedAdminCustomersRoute: typeof AuthenticatedAdminCustomersRoute
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
-  AuthenticatedAdminTasksRoute: typeof AuthenticatedAdminTasksRoute
   AuthenticatedAdminTemplatesRoute: typeof AuthenticatedAdminTemplatesRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -307,10 +266,8 @@ interface AuthenticatedAdminRouteRouteChildren {
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
   {
-    AuthenticatedAdminCustomersRoute: AuthenticatedAdminCustomersRoute,
     AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
     AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
-    AuthenticatedAdminTasksRoute: AuthenticatedAdminTasksRoute,
     AuthenticatedAdminTemplatesRoute: AuthenticatedAdminTemplatesRoute,
     AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
