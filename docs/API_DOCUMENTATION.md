@@ -49,7 +49,7 @@ POST /api/v1/auth/register
 
 ```json
 {
-  "token": "string",
+  "token": { <Token Object> },
   "user": {
     "id": 1,
     "firstName": "John",
@@ -62,6 +62,8 @@ POST /api/v1/auth/register
   }
 }
 ```
+
+See [Token Object](#token-object) for the token structure.
 
 ### Login
 
@@ -82,7 +84,7 @@ POST /api/v1/auth/login
 
 ```json
 {
-  "token": "string",
+  "token": { <Token Object> },
   "user": { ... }
 }
 ```
@@ -105,7 +107,7 @@ POST /api/v1/auth/guest
 
 ```json
 {
-  "token": "string",
+  "token": { <Token Object> },
   "user": { ... },
   "isNewUser": true
 }
@@ -129,7 +131,7 @@ POST /api/v1/auth/google
 
 ```json
 {
-  "token": "string",
+  "token": { <Token Object> },
   "user": { ... },
   "isNewUser": false
 }
@@ -168,7 +170,7 @@ POST /api/v1/auth/apple
 
 ```json
 {
-  "token": "string",
+  "token": { <Token Object> },
   "user": { ... },
   "isNewUser": false
 }
@@ -216,7 +218,7 @@ POST /api/v1/auth/phone/verify-otp
 
 ```json
 {
-  "token": "string",
+  "token": { <Token Object> },
   "user": { ... }
 }
 ```
@@ -242,7 +244,7 @@ POST /api/v1/auth/merge-guest
 
 ```json
 {
-  "token": "string",
+  "token": { <Token Object> },
   "user": { ... },
   "message": "Guest data merged successfully"
 }
@@ -1504,6 +1506,34 @@ All endpoints return consistent error responses:
 ---
 
 ## Data Types
+
+### Token Object
+
+The authentication token returned by login/register endpoints:
+
+```json
+{
+  "type": "bearer",
+  "name": "auth",
+  "token": "oat_xxxxxxxxxxxxxxxx",
+  "abilities": ["*"],
+  "expiresAt": "2025-01-28T00:00:00.000Z"
+}
+```
+
+| Field     | Type     | Description                         |
+| --------- | -------- | ----------------------------------- |
+| type      | string   | Token type (always `bearer`)        |
+| name      | string   | Token name (`auth` or `guest-auth`) |
+| token     | string   | The actual token to use in requests |
+| abilities | string[] | Token abilities/permissions         |
+| expiresAt | string   | ISO 8601 expiration timestamp       |
+
+**Usage:** Include the `token` value in the Authorization header:
+
+```
+Authorization: Bearer oat_xxxxxxxxxxxxxxxx
+```
 
 ### User Object
 

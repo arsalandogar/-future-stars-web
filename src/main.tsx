@@ -11,7 +11,7 @@ import { setAuthTokenGetter } from '@/lib/api-client';
 import { useAuthStore } from '@/features/auth';
 
 // Initialize auth token getter for API client
-setAuthTokenGetter(() => useAuthStore.getState().token);
+setAuthTokenGetter(() => useAuthStore.getState().token?.token ?? null);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

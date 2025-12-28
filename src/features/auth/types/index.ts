@@ -12,8 +12,16 @@ export interface User {
   fullName: string;
 }
 
-export interface AuthResponse {
+export interface Token {
+  type: string;
+  name: string;
   token: string;
+  abilities: string[];
+  expiresAt: string;
+}
+
+export interface AuthResponse {
+  token: Token;
   user: User;
 }
 
