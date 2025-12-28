@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
 
-import { Center, Paper, Stack, Text, Title } from '@mantine/core';
+import { Box, Center, Paper, Stack, Text, Title } from '@mantine/core';
 
 import { Head } from '@/components/seo/head';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 type AuthLayoutProps = {
   title: string;
@@ -14,7 +15,10 @@ export function AuthLayout({ title, description, children }: AuthLayoutProps) {
   return (
     <>
       <Head title={title} description={description} />
-      <Center h="100vh" w="100vw" p="md" bg="var(--mantine-color-gray-0)">
+      <Box pos="absolute" top={16} right={16}>
+        <ThemeToggle />
+      </Box>
+      <Center h="100vh" w="100vw" p="md">
         <Paper
           shadow="xl"
           p={{ base: 'lg', sm: 'xl' }}

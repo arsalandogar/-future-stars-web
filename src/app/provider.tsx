@@ -10,6 +10,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { MainErrorFallback } from '@/components/errors/main';
 import { theme } from '@/config/theme';
 import { queryConfig } from '@/lib/react-query';
+import { useThemeStore } from '@/stores/theme-store';
 
 type AppProviderProps = {
   children: ReactNode;
@@ -19,6 +20,7 @@ export function AppProvider({ children }: AppProviderProps) {
   const [queryClient] = useState(
     () => new QueryClient({ defaultOptions: queryConfig })
   );
+  const colorScheme = useThemeStore((state) => state.colorScheme);
 
   return (
     <Suspense
@@ -31,7 +33,7 @@ export function AppProvider({ children }: AppProviderProps) {
       <ErrorBoundary FallbackComponent={MainErrorFallback}>
         <HelmetProvider>
           <QueryClientProvider client={queryClient}>
-            <MantineProvider theme={theme}>
+            <MantineProvider theme={theme} forceColorScheme={colorScheme}>
               <ModalsProvider>
                 <Notifications />
                 {children}

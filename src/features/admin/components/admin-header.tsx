@@ -11,7 +11,6 @@ import {
 } from '@mantine/core';
 import {
   Search,
-  Moon,
   Bell,
   ChevronDown,
   MoreVertical,
@@ -19,6 +18,7 @@ import {
   LogOut,
 } from 'lucide-react';
 
+import { ThemeToggle } from '@/components/theme-toggle';
 import { useAuth, useAuthStore } from '@/features/auth';
 
 import { Logo } from './logo';
@@ -68,14 +68,7 @@ export function AdminHeader({ opened, toggle }: AdminHeaderProps) {
           rightSectionWidth={60}
         />
         <Group gap="sm">
-          <ActionIcon
-            variant="default"
-            size="lg"
-            radius="xl"
-            aria-label="Toggle theme"
-          >
-            <Moon size={18} />
-          </ActionIcon>
+          <ThemeToggle />
 
           <ActionIcon
             variant="default"
@@ -147,14 +140,7 @@ export function AdminHeader({ opened, toggle }: AdminHeaderProps) {
             className="border-t border-(--mantine-color-gray-3) bg-(--mantine-color-gray-0)"
           >
             <Group gap="sm">
-              <ActionIcon
-                variant="default"
-                size="lg"
-                radius="xl"
-                aria-label="Toggle theme"
-              >
-                <Moon size={18} />
-              </ActionIcon>
+              <ThemeToggle />
 
               <ActionIcon
                 variant="default"
