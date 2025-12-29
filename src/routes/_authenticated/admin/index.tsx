@@ -1,20 +1,30 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { Title, Text } from '@mantine/core';
+import { createFileRoute, stripSearchParams } from '@tanstack/react-router';
+import * as v from 'valibot';
 
 import { Head } from '@/components/seo/head';
+import { DashboardContent, type DashboardPeriod } from '@/features/dashboard';
+
+const defaultValues: { period: DashboardPeriod } = {
+  period: 'month',
+};
+
+const dashboardSearchSchema = v.object({
+  period: v.fallback(v.picklist(['month', 'year']), 'month'),
+});
 
 export const Route = createFileRoute('/_authenticated/admin/')({
   component: AdminDashboard,
+  validateSearch: dashboardSearchSchema,
+  search: {
+    middlewares: [stripSearchParams(defaultValues)],
+  },
 });
 
 function AdminDashboard() {
   return (
     <>
-      <Head title="Admin Dashboard" description="Admin dashboard" />
-      <Title order={2} mb="md">
-        Dashboard
-      </Title>
-      <Text c="dimmed">Welcome to the admin area</Text>
+      <Head description="Admin dashboard" title="Admin Dashboard" />
+      <DashboardContent />
     </>
   );
 }
