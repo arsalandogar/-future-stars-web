@@ -5,6 +5,7 @@ Base URL: `/api/v1`
 ## Table of Contents
 
 - [Authentication](#authentication)
+- [Profile](#profile)
 - [Templates](#templates)
 - [Tags](#tags)
 - [Cards](#cards)
@@ -12,14 +13,16 @@ Base URL: `/api/v1`
 - [Cart Items](#cart-items)
 - [Addresses](#addresses)
 - [Orders](#orders)
-- [Admin Orders](#admin-orders)
-- [Admin Users](#admin-users)
-- [Admin Dashboard](#admin-dashboard)
-- [Configs](#configs)
 - [Featured Items](#featured-items)
 - [Color Leagues](#color-leagues)
 - [Color Presets](#color-presets)
-- [Profile](#profile)
+- [Admin Orders](#admin-orders)
+- [Admin Users](#admin-users)
+- [Admin Dashboard](#admin-dashboard)
+- [Admin Templates](#admin-templates)
+- [Admin Tags](#admin-tags)
+- [Admin Configs](#admin-configs)
+- [Admin Featured Items](#admin-featured-items)
 
 ---
 
@@ -383,54 +386,6 @@ GET /api/v1/templates/:id
 }
 ```
 
-### Create Template (Admin Only)
-
-```
-POST /api/v1/templates
-```
-
-**Headers:** `Authorization: Bearer <admin_token>`
-
-**Request Body:**
-
-| Field                     | Type   | Required | Description                   |
-| ------------------------- | ------ | -------- | ----------------------------- |
-| side                      | string | Yes      | `front` or `back`             |
-| name                      | string | Yes      | Template name (1-255 chars)   |
-| label                     | string | No       | Display label (1-255 chars)   |
-| description               | string | No       | Description (max 1000 chars)  |
-| svgString                 | string | No       | SVG template string           |
-| templateTypeId            | number | Yes      | Template type ID              |
-| frontendComponentName     | string | No       | React component name          |
-| frontendComponentFileName | string | No       | Component file name           |
-| backTemplateId            | number | No       | ID of back template           |
-| attributes                | array  | No       | Array of template attributes  |
-| tagIds                    | array  | No       | Array of tag IDs to associate |
-
-**attributes array item:**
-
-| Field        | Type   | Required | Description                    |
-| ------------ | ------ | -------- | ------------------------------ |
-| type         | string | Yes      | `color`, `image`, or `string`  |
-| name         | string | Yes      | Attribute name (1-255 chars)   |
-| label        | string | Yes      | Display label (1-255 chars)    |
-| defaultValue | string | No       | Default value (max 1000 chars) |
-| defaultColor | string | No       | Default color (max 1000 chars) |
-
-**Response:** `201 Created`
-
-### Update Template (Admin Only)
-
-```
-PUT /api/v1/templates/:id
-```
-
-**Headers:** `Authorization: Bearer <admin_token>`
-
-**Request Body:** Same as create, all fields optional.
-
-**Response:** `200 OK`
-
 ---
 
 ## Tags
@@ -472,46 +427,6 @@ GET /api/v1/tags/:id
   "description": "Basketball related templates"
 }
 ```
-
-### Create Tag (Admin Only)
-
-```
-POST /api/v1/tags
-```
-
-**Headers:** `Authorization: Bearer <admin_token>`
-
-**Request Body:**
-
-| Field       | Type   | Required | Description                    |
-| ----------- | ------ | -------- | ------------------------------ |
-| name        | string | Yes      | Tag name (1-255 chars, unique) |
-| label       | string | No       | Display label (1-255 chars)    |
-| description | string | No       | Description (max 1000 chars)   |
-
-**Response:** `201 Created`
-
-### Update Tag (Admin Only)
-
-```
-PUT /api/v1/tags/:id
-```
-
-**Headers:** `Authorization: Bearer <admin_token>`
-
-**Request Body:** Same as create, all fields optional.
-
-**Response:** `200 OK`
-
-### Delete Tag (Admin Only)
-
-```
-DELETE /api/v1/tags/:id
-```
-
-**Headers:** `Authorization: Bearer <admin_token>`
-
-**Response:** `204 No Content`
 
 ---
 
@@ -1458,17 +1373,151 @@ GET /api/v1/admin/dashboard/orders-graph
 
 ---
 
-## Configs
+## Admin Templates
 
-All config endpoints require authentication.
+Admin-only endpoints for managing templates. Requires admin authentication.
+
+### Create Template
+
+```
+POST /api/v1/admin/templates
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Request Body:**
+
+| Field                     | Type   | Required | Description                   |
+| ------------------------- | ------ | -------- | ----------------------------- |
+| side                      | string | Yes      | `front` or `back`             |
+| name                      | string | Yes      | Template name (1-255 chars)   |
+| label                     | string | No       | Display label (1-255 chars)   |
+| description               | string | No       | Description (max 1000 chars)  |
+| svgString                 | string | No       | SVG template string           |
+| templateTypeId            | number | Yes      | Template type ID              |
+| frontendComponentName     | string | No       | React component name          |
+| frontendComponentFileName | string | No       | Component file name           |
+| backTemplateId            | number | No       | ID of back template           |
+| attributes                | array  | No       | Array of template attributes  |
+| tagIds                    | array  | No       | Array of tag IDs to associate |
+
+**attributes array item:**
+
+| Field        | Type   | Required | Description                    |
+| ------------ | ------ | -------- | ------------------------------ |
+| type         | string | Yes      | `color`, `image`, or `string`  |
+| name         | string | Yes      | Attribute name (1-255 chars)   |
+| label        | string | Yes      | Display label (1-255 chars)    |
+| defaultValue | string | No       | Default value (max 1000 chars) |
+| defaultColor | string | No       | Default color (max 1000 chars) |
+
+**Response:** `201 Created`
+
+### Update Template
+
+```
+PUT /api/v1/admin/templates/:id
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Request Body:** Same as create, all fields optional.
+
+**Response:** `200 OK`
+
+### Regenerate Template Snapshots
+
+Regenerate PNG snapshots for all templates or a specific template.
+
+```
+POST /api/v1/admin/templates/regenerate-snapshots
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Query Parameters:**
+
+| Param      | Type    | Default | Description                              |
+| ---------- | ------- | ------- | ---------------------------------------- |
+| templateId | number  | -       | Optional template ID to regenerate       |
+| force      | boolean | false   | Force regenerate even if snapshots exist |
+
+**Response:** `200 OK`
+
+```json
+{
+  "summary": {
+    "processed": 5,
+    "skipped": 2,
+    "failed": 0,
+    "total": 7
+  },
+  "results": [
+    { "id": 1, "name": "basketball-card", "status": "processed" },
+    { "id": 2, "name": "football-card", "status": "skipped" }
+  ]
+}
+```
+
+---
+
+## Admin Tags
+
+Admin-only endpoints for managing tags. Requires admin authentication.
+
+### Create Tag
+
+```
+POST /api/v1/admin/tags
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Request Body:**
+
+| Field       | Type   | Required | Description                    |
+| ----------- | ------ | -------- | ------------------------------ |
+| name        | string | Yes      | Tag name (1-255 chars, unique) |
+| label       | string | No       | Display label (1-255 chars)    |
+| description | string | No       | Description (max 1000 chars)   |
+
+**Response:** `201 Created`
+
+### Update Tag
+
+```
+PUT /api/v1/admin/tags/:id
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Request Body:** Same as create, all fields optional.
+
+**Response:** `200 OK`
+
+### Delete Tag
+
+```
+DELETE /api/v1/admin/tags/:id
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Response:** `204 No Content`
+
+---
+
+## Admin Configs
+
+Admin-only endpoints for managing system configuration. Requires admin authentication.
 
 ### List Configs
 
 ```
-GET /api/v1/configs
+GET /api/v1/admin/configs
 ```
 
-**Headers:** `Authorization: Bearer <token>`
+**Headers:** `Authorization: Bearer <admin_token>`
 
 **Response:** `200 OK`
 
@@ -1485,17 +1534,17 @@ GET /api/v1/configs
 ### Get Config
 
 ```
-GET /api/v1/configs/:name
+GET /api/v1/admin/configs/:name
 ```
 
-**Headers:** `Authorization: Bearer <token>`
+**Headers:** `Authorization: Bearer <admin_token>`
 
 **Response:** `200 OK`
 
-### Create Config (Admin Only)
+### Create Config
 
 ```
-POST /api/v1/configs
+POST /api/v1/admin/configs
 ```
 
 **Headers:** `Authorization: Bearer <admin_token>`
@@ -1514,10 +1563,10 @@ POST /api/v1/configs
 
 **Response:** `201 Created`
 
-### Update Config (Admin Only)
+### Update Config
 
 ```
-PUT /api/v1/configs/:name
+PUT /api/v1/admin/configs/:name
 ```
 
 **Headers:** `Authorization: Bearer <admin_token>`
@@ -1530,6 +1579,60 @@ PUT /api/v1/configs/:name
 | description | string | No       | Config description (max 500 chars) |
 
 **Response:** `200 OK`
+
+---
+
+## Admin Featured Items
+
+Admin-only endpoints for managing featured items. Requires admin authentication.
+
+### Create Featured Item
+
+```
+POST /api/v1/admin/featured-items
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Content-Type:** `multipart/form-data`
+
+**Request Body:**
+
+| Field        | Type    | Required | Description                           |
+| ------------ | ------- | -------- | ------------------------------------- |
+| title        | string  | Yes      | Title (1-255 chars)                   |
+| description  | string  | No       | Description                           |
+| ctaText      | string  | No       | Call-to-action text (max 100 chars)   |
+| image        | file    | No       | Image file (jpg, jpeg, png, max 10MB) |
+| templateId   | number  | No       | Associated template ID                |
+| displayOrder | number  | No       | Display order (min: 0)                |
+| isActive     | boolean | No       | Active status                         |
+
+**Response:** `201 Created`
+
+### Update Featured Item
+
+```
+PUT /api/v1/admin/featured-items/:id
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Content-Type:** `multipart/form-data`
+
+**Request Body:** Same as create, all fields optional.
+
+**Response:** `200 OK`
+
+### Delete Featured Item
+
+```
+DELETE /api/v1/admin/featured-items/:id
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Response:** `204 No Content`
 
 ---
 
@@ -1570,54 +1673,6 @@ GET /api/v1/featured-items/:id
 ```
 
 **Response:** `200 OK`
-
-### Create Featured Item (Admin Only)
-
-```
-POST /api/v1/featured-items
-```
-
-**Headers:** `Authorization: Bearer <admin_token>`
-
-**Content-Type:** `multipart/form-data`
-
-**Request Body:**
-
-| Field        | Type    | Required | Description                           |
-| ------------ | ------- | -------- | ------------------------------------- |
-| title        | string  | Yes      | Title (1-255 chars)                   |
-| description  | string  | No       | Description                           |
-| ctaText      | string  | No       | Call-to-action text (max 100 chars)   |
-| image        | file    | No       | Image file (jpg, jpeg, png, max 10MB) |
-| templateId   | number  | No       | Associated template ID                |
-| displayOrder | number  | No       | Display order (min: 0)                |
-| isActive     | boolean | No       | Active status                         |
-
-**Response:** `201 Created`
-
-### Update Featured Item (Admin Only)
-
-```
-PUT /api/v1/featured-items/:id
-```
-
-**Headers:** `Authorization: Bearer <admin_token>`
-
-**Content-Type:** `multipart/form-data`
-
-**Request Body:** Same as create, all fields optional.
-
-**Response:** `200 OK`
-
-### Delete Featured Item (Admin Only)
-
-```
-DELETE /api/v1/featured-items/:id
-```
-
-**Headers:** `Authorization: Bearer <admin_token>`
-
-**Response:** `204 No Content`
 
 ---
 

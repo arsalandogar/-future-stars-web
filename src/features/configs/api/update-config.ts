@@ -12,7 +12,7 @@ const useUpdateConfigMutation = createMutation({
     value,
     description,
   }: UpdateConfigParams): Promise<Config> =>
-    api.put(`configs/${name}`, { value, description }),
+    api.put(`admin/configs/${name}`, { value, description }),
 });
 
 const useCreateConfigMutation = createMutation({
@@ -21,7 +21,7 @@ const useCreateConfigMutation = createMutation({
     value,
     description,
   }: CreateConfigParams): Promise<Config> =>
-    api.post('configs', { name, value, description }),
+    api.post('admin/configs', { name, value, description }),
 });
 
 export function useUpdateConfig() {
