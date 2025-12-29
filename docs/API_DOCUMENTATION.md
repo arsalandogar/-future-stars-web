@@ -13,8 +13,12 @@ Base URL: `/api/v1`
 - [Addresses](#addresses)
 - [Orders](#orders)
 - [Admin Orders](#admin-orders)
+- [Admin Users](#admin-users)
+- [Admin Dashboard](#admin-dashboard)
 - [Configs](#configs)
 - [Featured Items](#featured-items)
+- [Color Leagues](#color-leagues)
+- [Color Presets](#color-presets)
 - [Profile](#profile)
 
 ---
@@ -1285,6 +1289,175 @@ PUT /api/v1/admin/orders/:id
 
 ---
 
+## Admin Users
+
+Admin-only endpoints for managing users. Requires admin authentication.
+
+### List All Users
+
+Get paginated list of all users with filtering options.
+
+```
+GET /api/v1/admin/users
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Query Parameters:**
+
+| Param  | Type   | Default | Description                                      |
+| ------ | ------ | ------- | ------------------------------------------------ |
+| page   | number | 1       | Page number                                      |
+| limit  | number | 20      | Items per page                                   |
+| search | string | -       | Search by first name, last name, email, or phone |
+| role   | string | -       | Filter by user role (`admin`, `user`, `guest`)   |
+
+**Response:** `200 OK`
+
+```json
+{
+  "meta": {
+    "total": 100,
+    "perPage": 20,
+    "currentPage": 1,
+    "lastPage": 5
+  },
+  "data": [
+    {
+      "id": 1,
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john@example.com",
+      "phone": "+1234567890",
+      "role": "user",
+      "isAdmin": false,
+      "isGuest": false,
+      "fullName": "John Doe",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+## Admin Dashboard
+
+Admin-only endpoints for dashboard statistics. Requires admin authentication.
+
+### Get Dashboard Stats
+
+Get dashboard statistics (total revenue, orders, average order value) with comparison to previous period.
+
+```
+GET /api/v1/admin/dashboard/stats
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Query Parameters:**
+
+| Param  | Type   | Default | Description                                                                      |
+| ------ | ------ | ------- | -------------------------------------------------------------------------------- |
+| period | string | month   | Time period: `month` (current vs previous month) or `year` (YTD vs previous YTD) |
+
+**Response:** `200 OK`
+
+```json
+{
+  "totalRevenue": {
+    "current": 50000,
+    "previous": 45000,
+    "change": 11.11
+  },
+  "totalOrders": {
+    "current": 150,
+    "previous": 120,
+    "change": 25.0
+  },
+  "avgOrderValue": {
+    "current": 333.33,
+    "previous": 375.0,
+    "change": -11.11
+  }
+}
+```
+
+**Note:** Revenue values are in cents. The `change` field represents percentage change from the previous period.
+
+### Get Revenue Graph
+
+Get 12-month revenue graph data.
+
+```
+GET /api/v1/admin/dashboard/revenue-graph
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Query Parameters:**
+
+| Param  | Type   | Default | Description                                               |
+| ------ | ------ | ------- | --------------------------------------------------------- |
+| period | string | month   | Time period (currently ignored, always returns 12 months) |
+
+**Response:** `200 OK`
+
+```json
+{
+  "data": [
+    {
+      "month": "2024-01-01",
+      "value": 45000
+    },
+    {
+      "month": "2024-02-01",
+      "value": 52000
+    }
+  ]
+}
+```
+
+**Note:** Returns data for the past 12 months. The `month` field is an ISO date string (YYYY-MM-01). The `value` field is total revenue in cents.
+
+### Get Orders Graph
+
+Get 12-month orders graph data.
+
+```
+GET /api/v1/admin/dashboard/orders-graph
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Query Parameters:**
+
+| Param  | Type   | Default | Description                                               |
+| ------ | ------ | ------- | --------------------------------------------------------- |
+| period | string | month   | Time period (currently ignored, always returns 12 months) |
+
+**Response:** `200 OK`
+
+```json
+{
+  "data": [
+    {
+      "month": "2024-01-01",
+      "value": 120
+    },
+    {
+      "month": "2024-02-01",
+      "value": 145
+    }
+  ]
+}
+```
+
+**Note:** Returns data for the past 12 months. The `month` field is an ISO date string (YYYY-MM-01). The `value` field is the number of orders.
+
+---
+
 ## Configs
 
 All config endpoints require authentication.
@@ -1440,6 +1613,230 @@ DELETE /api/v1/featured-items/:id
 ```
 
 **Headers:** `Authorization: Bearer <admin_token>`
+
+**Response:** `204 No Content`
+
+---
+
+## Color Leagues
+
+Color leagues are sport/league categories for organizing color presets (team colors).
+
+### List Color Leagues
+
+Get all active color leagues ordered by rank.
+
+```
+GET /api/v1/color-leagues
+```
+
+**Response:** `200 OK`
+
+```json
+[
+  {
+    "id": 1,
+    "name": "nfl",
+    "label": "NFL",
+    "rank": 1
+  },
+  {
+    "id": 2,
+    "name": "nba",
+    "label": "NBA",
+    "rank": 2
+  }
+]
+```
+
+### Get Color League
+
+Get a single league with its presets.
+
+```
+GET /api/v1/color-leagues/:id
+```
+
+**Parameters:**
+
+| Param | Type          | Description       |
+| ----- | ------------- | ----------------- |
+| id    | number/string | League ID or name |
+
+**Response:** `200 OK`
+
+```json
+{
+  "id": 1,
+  "name": "nfl",
+  "label": "NFL",
+  "rank": 1,
+  "isActive": true,
+  "presets": [
+    {
+      "id": 1,
+      "colorLeagueId": 1,
+      "name": "Arizona Cardinals",
+      "abbreviation": "ARI",
+      "colors": ["#97233F", "#000000", "#FFB612"],
+      "rank": 1,
+      "isFeatured": false,
+      "isActive": true
+    }
+  ]
+}
+```
+
+---
+
+## Color Presets
+
+Color presets are predefined team color schemes that users can apply to their cards.
+
+### List Color Presets
+
+Get color presets with optional filtering.
+
+```
+GET /api/v1/color-presets
+```
+
+**Query Parameters:**
+
+| Param    | Type   | Default | Description                                                   |
+| -------- | ------ | ------- | ------------------------------------------------------------- |
+| league   | string | -       | Filter by league name (nfl, nba, mlb, nhl, epl, mls, country) |
+| featured | string | -       | Only return featured presets (`true`)                         |
+| search   | string | -       | Search by team name or abbreviation                           |
+
+**Response:** `200 OK`
+
+```json
+[
+  {
+    "id": 1,
+    "colorLeagueId": 1,
+    "name": "Arizona Cardinals",
+    "abbreviation": "ARI",
+    "colors": ["#97233F", "#000000", "#FFB612"],
+    "isFeatured": true,
+    "rank": 1,
+    "league": {
+      "id": 1,
+      "name": "nfl",
+      "label": "NFL"
+    }
+  }
+]
+```
+
+### Get Color Preset
+
+Get a single color preset.
+
+```
+GET /api/v1/color-presets/:id
+```
+
+**Response:** `200 OK`
+
+```json
+{
+  "id": 1,
+  "colorLeagueId": 1,
+  "name": "Arizona Cardinals",
+  "abbreviation": "ARI",
+  "colors": ["#97233F", "#000000", "#FFB612"],
+  "rank": 1,
+  "isFeatured": false,
+  "isActive": true,
+  "league": {
+    "id": 1,
+    "name": "nfl",
+    "label": "NFL"
+  }
+}
+```
+
+### Get User Favorites
+
+Get current user's favorite color presets.
+
+```
+GET /api/v1/color-presets/favorites
+```
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Response:** `200 OK`
+
+```json
+[
+  {
+    "id": 1,
+    "colorLeagueId": 1,
+    "name": "Arizona Cardinals",
+    "abbreviation": "ARI",
+    "colors": ["#97233F", "#000000", "#FFB612"],
+    "rank": 1,
+    "isFeatured": false,
+    "isActive": true,
+    "league": {
+      "id": 1,
+      "name": "nfl",
+      "label": "NFL"
+    }
+  }
+]
+```
+
+### Add to Favorites
+
+Add a color preset to user's favorites.
+
+```
+POST /api/v1/color-presets/favorites
+```
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request Body:**
+
+| Field         | Type   | Required | Description     |
+| ------------- | ------ | -------- | --------------- |
+| colorPresetId | number | Yes      | Color preset ID |
+
+**Response:** `201 Created`
+
+```json
+{
+  "message": "Added to favorites"
+}
+```
+
+**Error Response:** `409 Conflict`
+
+```json
+{
+  "message": "Already in favorites"
+}
+```
+
+### Remove from Favorites
+
+Remove a color preset from user's favorites.
+
+```
+DELETE /api/v1/color-presets/favorites/:id
+```
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Parameters:**
+
+| Param | Type   | Description     |
+| ----- | ------ | --------------- |
+| id    | number | Color preset ID |
 
 **Response:** `204 No Content`
 
