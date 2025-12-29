@@ -19,7 +19,8 @@ import {
 } from 'lucide-react';
 
 import { ThemeToggle } from '@/components/theme-toggle';
-import { useAuth, useAuthStore } from '@/features/auth';
+import { useLogout } from '@/hooks/use-logout';
+import { useAuthStore } from '@/stores/auth-store';
 
 import { Logo } from './logo';
 import { useHeaderStore } from '../stores/header-store';
@@ -31,7 +32,7 @@ interface AdminHeaderProps {
 
 export function AdminHeader({ opened, toggle }: AdminHeaderProps) {
   const { mobileMenuOpen, toggleMobileMenu } = useHeaderStore();
-  const { logout } = useAuth();
+  const logout = useLogout();
   const user = useAuthStore((state) => state.user);
 
   const userMenuItems = (

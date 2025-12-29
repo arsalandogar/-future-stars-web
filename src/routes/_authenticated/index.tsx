@@ -1,14 +1,16 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { Button, Center, Stack, Text, Title } from '@mantine/core';
 import { Head } from '@/components/seo/head';
-import { useAuth } from '@/features/auth';
+import { useAuthStore } from '@/stores/auth-store';
+import { useLogout } from '@/hooks/use-logout';
 
 export const Route = createFileRoute('/_authenticated/')({
   component: HomeComponent,
 });
 
 function HomeComponent() {
-  const { user, logout } = useAuth();
+  const { user } = useAuthStore();
+  const logout = useLogout();
 
   return (
     <>

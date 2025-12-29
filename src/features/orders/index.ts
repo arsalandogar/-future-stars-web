@@ -22,6 +22,5 @@ export type {
   OrdersListResponse,
   OrderStatus,
   OrderUser,
-  PaginationMeta,
   ShippingAddress,
 } from './types';

@@ -1,7 +1,7 @@
 import { api } from '@/lib/api-client';
 import { createMutation } from '@/lib/react-query';
+import { useAuthStore } from '@/stores/auth-store';
 
-import { useAuthStore } from '../stores/auth-store';
 import type { AuthResponse, LoginCredentials } from '../types';
 
 export const useLogin = createMutation({

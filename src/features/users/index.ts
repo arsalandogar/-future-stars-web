@@ -10,10 +10,4 @@ export { useUsers } from './api/get-users';
 export { USER_ROLE_COLORS, USER_ROLE_LABELS } from './constants';
 
 // Types
-export type {
-  PaginationMeta,
-  User,
-  UserRole,
-  UsersListParams,
-  UsersListResponse,
-} from './types';
+export type { UsersListParams, UsersListResponse } from './types';

@@ -1,3 +1,5 @@
+import type { PaginationMeta } from '@/types';
+
 export type OrderStatus =
   | 'created'
   | 'payment_failed'
@@ -51,13 +53,6 @@ export interface OrdersListParams {
   userId?: number;
   status?: OrderStatus;
   search?: string;
-}
-
-export interface PaginationMeta {
-  total: number;
-  perPage: number;
-  currentPage: number;
-  lastPage: number;
 }
 
 export interface OrdersListResponse {

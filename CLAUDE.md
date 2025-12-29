@@ -24,6 +24,7 @@ This is a React 19 + TypeScript + Vite application with the React Compiler enabl
 - ESLint configured with TypeScript, React Hooks, and React Refresh plugins
 - Path alias `@/*` maps to `src/*` for clean imports
 - UI components use [Mantine](https://mantine.dev) - reference https://mantine.dev/llms.txt for documentation
+- Icons use [Lucide React](https://lucide.dev/icons/) - import from `lucide-react`
 - Backend API documentation is in [API_DOCUMENTATION.md](./docs/API_DOCUMENTATION.md) - reference this for all API endpoints, request/response formats, and authentication
 
 **Entry point:** `src/main.tsx` renders `<AppProvider>` and `<AppRouter>` inside `<StrictMode>`
@@ -39,11 +40,19 @@ Uses **TanStack Router** with file-based routing:
 
 ### Data Fetching
 
-Uses **TanStack Query** with preconfigured defaults in `src/lib/react-query.ts`:
+Uses **TanStack Query** with **react-query-kit** for type-safe API hooks:
 
-- Queries don't refetch on window focus, don't retry on failure, and have 1-minute stale time
-- Use `QueryConfig` and `MutationConfig` types from `@/lib/react-query` for type-safe query/mutation options
-- API requests use the Axios client from `@/lib/api-client` which handles auth tokens and error notifications
+- Create queries with `createQuery` and mutations with `createMutation` from `@/lib/react-query`
+- API hooks are defined in `src/features/<feature>/api/` using this pattern:
+  ```typescript
+  export const useOrders = createQuery({
+    queryKey: ['admin', 'orders'],
+    fetcher: (params: OrdersListParams): Promise<OrdersListResponse> =>
+      api.get('admin/orders'),
+  });
+  ```
+- The Axios client in `@/lib/api-client` automatically unwraps `response.data`, so fetchers receive data directly
+- Default query config: no refetch on window focus, no retry on failure, 1-minute stale time
 
 ### Forms
 
@@ -53,9 +62,24 @@ Uses **TanStack Form** with **Valibot** for schema validation
 
 Uses **Zustand** with persist middleware for global state:
 
+- Global/shared stores go in `src/stores/`
 - Feature stores go in `src/features/<feature>/stores/`
-- Shared stores go in `src/stores/`
-- Use `persist` middleware with `localStorage` for state that should survive page reloads (see `src/features/auth/stores/auth-store.ts` for example)
+- Layout-specific stores go in `src/app/layouts/<layout>/stores/`
+- Use `persist` middleware with `localStorage` for state that should survive page reloads (see `src/stores/auth-store.ts` for example)
+
+**URL Search Params** for shareable UI state - [Search Params are State](https://tanstack.com/blog/search-params-are-state):
+
+- Use for filters, pagination, search queries, sorting, and any state that should be bookmarkable/shareable
+- Define search params schema with `validateSearch` using Valibot on the route
+- Read with `Route.useSearch()`, write with `<Link search={...}>` or `useNavigate({ search: ... })`
+
+### Types
+
+- **Shared types** (`User`, `UserRole`, `Token`, `PaginationMeta`) live in `src/types/` - import directly from `@/types`
+- **Feature types** live in `src/features/<feature>/types/` - only for types specific to that feature
+- **Never re-export shared types** from features - always import from `@/types`
+- Before creating a new type, check `src/types/` to see if it already exists
+- If a type is used by multiple features, move it to `src/types/`
 
 ### Styling
 
@@ -113,6 +137,8 @@ src/features/example-feature/
 ```
 
 Only include folders that are needed for each feature.
+
+Each feature must have an `index.ts` barrel file that exports its public API (components, hooks, types). Other parts of the app should only import from the feature's index, not from internal files.
 
 ### Import Rules
 

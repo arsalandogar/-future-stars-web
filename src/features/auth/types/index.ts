@@ -1,24 +1,4 @@
-export type UserRole = 'admin' | 'user' | 'guest';
-
-export interface User {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-  role: UserRole;
-  isAdmin: boolean;
-  isGuest: boolean;
-  fullName: string;
-}
-
-export interface Token {
-  type: string;
-  name: string;
-  token: string;
-  abilities: string[];
-  expiresAt: string;
-}
+import type { Token, User } from '@/types';
 
 export interface AuthResponse {
   token: Token;

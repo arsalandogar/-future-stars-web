@@ -1,7 +1,8 @@
 import { Badge } from '@mantine/core';
 
+import type { UserRole } from '@/types';
+
 import { USER_ROLE_COLORS, USER_ROLE_LABELS } from '../constants';
-import type { UserRole } from '../types';
 
 interface UserRoleBadgeProps {
   role: UserRole;

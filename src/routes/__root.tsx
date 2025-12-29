@@ -5,7 +5,7 @@ import {
 } from '@tanstack/react-router';
 import { Center, Loader, Button, Stack, Text, Title } from '@mantine/core';
 
-import type { User } from '@/features/auth';
+import type { User } from '@/types';
 
 function RootComponent() {
   return <Outlet />;

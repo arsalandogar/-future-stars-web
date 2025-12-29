@@ -1,9 +1,8 @@
 import { ActionIcon, Menu, Table, Text } from '@mantine/core';
 import { Eye, MoreHorizontal } from 'lucide-react';
 
+import type { User } from '@/types';
 import { formatDate } from '@/utils/date';
-
-import type { User } from '../types';
 
 import { UserRoleBadge } from './user-role-badge';
 

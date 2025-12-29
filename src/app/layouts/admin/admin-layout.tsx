@@ -2,10 +2,10 @@ import { AppShell, useMantineTheme } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { Outlet } from '@tanstack/react-router';
 
-import { AdminHeader } from './admin-header';
-import { AdminNavbar } from './admin-navbar';
-import { useHeaderStore } from '../stores/header-store';
-import { useSidebarStore } from '../stores/sidebar-store';
+import { AdminHeader } from './components/admin-header';
+import { AdminNavbar } from './components/admin-navbar';
+import { useHeaderStore } from './stores/header-store';
+import { useSidebarStore } from './stores/sidebar-store';
 
 const NAVBAR_WIDTH = 260;
 const NAVBAR_COLLAPSED_WIDTH = 72;
