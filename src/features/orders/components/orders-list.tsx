@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { getRouteApi } from '@tanstack/react-router';
 import { Button, Card, Group, Text, TextInput, Title } from '@mantine/core';
-import { useDebouncedValue } from '@mantine/hooks';
+import { useDebouncedCallback } from '@mantine/hooks';
 import { Download, Search, SlidersHorizontal } from 'lucide-react';
 
 import { DataTable, type Column } from '@/components/ui/data-table';
@@ -8,6 +8,8 @@ import { DataTable, type Column } from '@/components/ui/data-table';
 import { useOrders } from '../api/get-orders';
 
 import { OrderRow } from './order-row';
+
+const routeApi = getRouteApi('/_authenticated/admin/orders');
 
 const COLUMNS: Column[] = [
   { label: 'ID', width: 80 },
@@ -19,15 +21,22 @@ const COLUMNS: Column[] = [
 ];
 
 export function OrdersList() {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
-  const [debouncedSearch] = useDebouncedValue(search, 300);
+  const { page, search } = routeApi.useSearch();
+  const navigate = routeApi.useNavigate();
+
+  const handleSearchChange = useDebouncedCallback((newSearch: string) => {
+    void navigate({ search: { page: 1, search: newSearch }, replace: true });
+  }, 300);
+
+  const handlePageChange = (newPage: number) => {
+    void navigate({ search: () => ({ page: newPage }) });
+  };
 
   const { data, isLoading } = useOrders({
     variables: {
       page,
       limit: 10,
-      search: debouncedSearch || undefined,
+      search: search || undefined,
     },
   });
 
@@ -60,11 +69,8 @@ export function OrdersList() {
             <TextInput
               placeholder="Search..."
               leftSection={<Search size={16} />}
-              value={search}
-              onChange={(e) => {
-                setSearch(e.currentTarget.value);
-                setPage(1);
-              }}
+              defaultValue={search}
+              onChange={(e) => handleSearchChange(e.currentTarget.value)}
               className="w-80"
             />
             <Button
@@ -85,7 +91,7 @@ export function OrdersList() {
             renderRow={(order) => <OrderRow order={order} />}
             pagination={
               meta && meta.lastPage > 1
-                ? { page, total: meta.lastPage, onChange: setPage }
+                ? { page, total: meta.lastPage, onChange: handlePageChange }
                 : undefined
             }
           />
