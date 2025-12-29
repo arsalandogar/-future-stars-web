@@ -2,21 +2,10 @@ import { useState } from 'react';
 import { ActionIcon, Group, Table, Text, TextInput } from '@mantine/core';
 import { revalidateLogic, useForm } from '@tanstack/react-form';
 import { Check, Pencil, X } from 'lucide-react';
-import * as v from 'valibot';
 
 import { useUpdateConfig } from '../api/update-config';
 import type { Config } from '../types';
-
-const configSchema = v.object({
-  value: v.pipe(
-    v.string(),
-    v.maxLength(255, 'Value must be at most 255 characters')
-  ),
-  description: v.pipe(
-    v.string(),
-    v.maxLength(500, 'Description must be at most 500 characters')
-  ),
-});
+import { updateConfigSchema } from '../utils/validation';
 
 interface ConfigRowProps {
   config: Config;
@@ -32,7 +21,7 @@ export function ConfigRow({ config }: ConfigRowProps) {
       description: config.description,
     },
     validators: {
-      onDynamic: configSchema,
+      onDynamic: updateConfigSchema,
     },
     validationLogic: revalidateLogic(),
     onSubmit: ({ value }) => {
@@ -77,16 +66,21 @@ export function ConfigRow({ config }: ConfigRowProps) {
       <Table.Td>
         {isEditing ? (
           <form.Field name="value">
-            {(field) => (
-              <TextInput
-                size="sm"
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                onKeyDown={handleKeyDown}
-                error={field.state.meta.errors[0]?.message}
-                autoFocus
-              />
-            )}
+            {(field) => {
+              const error = field.state.meta.errors[0];
+              const errorMessage =
+                typeof error === 'string' ? error : error?.message;
+              return (
+                <TextInput
+                  size="sm"
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  error={errorMessage}
+                  autoFocus
+                />
+              );
+            }}
           </form.Field>
         ) : (
           <Text size="sm">{config.value}</Text>
@@ -95,15 +89,20 @@ export function ConfigRow({ config }: ConfigRowProps) {
       <Table.Td>
         {isEditing ? (
           <form.Field name="description">
-            {(field) => (
-              <TextInput
-                size="sm"
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                onKeyDown={handleKeyDown}
-                error={field.state.meta.errors[0]?.message}
-              />
-            )}
+            {(field) => {
+              const error = field.state.meta.errors[0];
+              const errorMessage =
+                typeof error === 'string' ? error : error?.message;
+              return (
+                <TextInput
+                  size="sm"
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  error={errorMessage}
+                />
+              );
+            }}
           </form.Field>
         ) : (
           <Text size="sm" c="dimmed">

@@ -5,6 +5,7 @@ import { DataTable, type Column } from '@/components/ui/data-table';
 import { useConfigs } from '../api/get-configs';
 
 import { ConfigRow } from './config-row';
+import { CreateConfigButton } from './create-config-button';
 
 const COLUMNS: Column[] = [
   { label: 'Name', width: 250 },
@@ -27,6 +28,7 @@ export function ConfigsList() {
                 Manage application configuration values.
               </Text>
             </div>
+            <CreateConfigButton />
           </Group>
 
           <DataTable
