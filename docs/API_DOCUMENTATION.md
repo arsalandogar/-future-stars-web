@@ -1476,7 +1476,8 @@ GET /api/v1/configs
 [
   {
     "name": "BASE_PRICE_PER_PACK",
-    "value": "1999"
+    "value": "1999",
+    "description": "Base price per pack in cents"
   }
 ]
 ```
@@ -1501,10 +1502,11 @@ POST /api/v1/configs
 
 **Request Body:**
 
-| Field | Type   | Required | Description                  |
-| ----- | ------ | -------- | ---------------------------- |
-| name  | string | Yes      | Config name (enum value)     |
-| value | string | No       | Config value (max 255 chars) |
+| Field       | Type   | Required | Description                        |
+| ----------- | ------ | -------- | ---------------------------------- |
+| name        | string | Yes      | Config name (enum value)           |
+| value       | string | No       | Config value (max 255 chars)       |
+| description | string | No       | Config description (max 500 chars) |
 
 **Available Config Names:**
 
@@ -1522,9 +1524,10 @@ PUT /api/v1/configs/:name
 
 **Request Body:**
 
-| Field | Type   | Required | Description                  |
-| ----- | ------ | -------- | ---------------------------- |
-| value | string | No       | Config value (max 255 chars) |
+| Field       | Type   | Required | Description                        |
+| ----------- | ------ | -------- | ---------------------------------- |
+| value       | string | No       | Config value (max 255 chars)       |
+| description | string | No       | Config description (max 500 chars) |
 
 **Response:** `200 OK`
 
