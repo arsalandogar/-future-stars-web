@@ -1,10 +1,11 @@
 import { ActionIcon, Menu, Table, Text } from '@mantine/core';
 import { Eye, MoreHorizontal } from 'lucide-react';
 
+import { MappedBadge } from '@/components/ui/mapped-badge';
 import type { User } from '@/types';
 import { formatDate } from '@/utils/date';
 
-import { UserRoleBadge } from './user-role-badge';
+import { USER_ROLE_COLORS } from '../constants';
 
 interface UserRowProps {
   user: User;
@@ -28,7 +29,7 @@ export function UserRow({ user }: UserRowProps) {
         <Text size="sm">{user.phone || '-'}</Text>
       </Table.Td>
       <Table.Td>
-        <UserRoleBadge role={user.role} />
+        <MappedBadge value={user.role} colorMap={USER_ROLE_COLORS} />
       </Table.Td>
       <Table.Td>
         <Text size="sm">{formatDate(user.createdAt)}</Text>
