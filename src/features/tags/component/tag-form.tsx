@@ -2,10 +2,12 @@ import { Button, Stack, Textarea, TextInput } from '@mantine/core';
 import { revalidateLogic, useForm } from '@tanstack/react-form';
 import type { Tag } from '../types';
 import * as v from 'valibot';
-import { useTagsMutations } from '../api/tag';
 import { notifications } from '@mantine/notifications';
 
-export const tagSchema = v.object({
+import { useCreateTagWithInvalidation } from '../api/create-tag';
+import { useUpdateTagWithInvalidation } from '../api/update-tag';
+
+const tagSchema = v.object({
   name: v.pipe(v.string(), v.nonEmpty('Name is required')),
   label: v.pipe(
     v.string(),
@@ -20,8 +22,9 @@ type Props = {
   modalClose: () => void;
 };
 
-export default function TagForm({ tag, modalClose }: Props) {
-  const { createTag, updateTag } = useTagsMutations();
+export function TagForm({ tag, modalClose }: Props) {
+  const createTag = useCreateTagWithInvalidation();
+  const updateTag = useUpdateTagWithInvalidation();
 
   const form = useForm({
     defaultValues: {
@@ -52,6 +55,7 @@ export default function TagForm({ tag, modalClose }: Props) {
         });
         modalClose();
       } catch (error) {
+        console.log(error);
         notifications.show({
           color: 'red',
           title: 'Error',

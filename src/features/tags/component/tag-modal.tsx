@@ -1,6 +1,6 @@
 import { Modal } from '@mantine/core';
 import type { Tag } from '../types';
-import TagForm from './TagForm';
+import { TagForm } from './tag-form';
 
 type TagModalProps = {
   tag: Tag | undefined;
@@ -8,7 +8,7 @@ type TagModalProps = {
   onClose: () => void;
 };
 
-export default function TagModal({ tag, opened, onClose }: TagModalProps) {
+export function TagModal({ tag, opened, onClose }: TagModalProps) {
   const modalTitle = tag?.id ? (
     <h2 className=" font-bold">Edit Tag</h2>
   ) : (
