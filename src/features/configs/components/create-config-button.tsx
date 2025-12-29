@@ -1,7 +1,9 @@
-import { Button, Modal, Stack, TextInput } from '@mantine/core';
+import { Button, Modal, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { revalidateLogic, useForm } from '@tanstack/react-form';
+import { revalidateLogic } from '@tanstack/react-form';
 import { Plus } from 'lucide-react';
+
+import { useAppForm } from '@/lib/form';
 
 import { useCreateConfig } from '../api/update-config';
 import { createConfigSchema } from '../utils/validation';
@@ -16,7 +18,7 @@ export function CreateConfigButton() {
   const [opened, { open, close }] = useDisclosure(false);
   const createConfig = useCreateConfig();
 
-  const form = useForm({
+  const form = useAppForm({
     defaultValues,
     validators: {
       onDynamic: createConfigSchema,
@@ -51,55 +53,38 @@ export function CreateConfigButton() {
       </Button>
 
       <Modal opened={opened} onClose={handleClose} title="Create Config">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            void form.handleSubmit();
-          }}
-        >
-          <Stack gap="md">
-            <form.Field name="name">
-              {(field) => (
-                <TextInput
-                  label="Name"
-                  placeholder="CONFIG_NAME"
-                  required
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  error={field.state.meta.errors[0]?.message}
-                />
-              )}
-            </form.Field>
+        <form.AppForm>
+          <form.Form>
+            <Stack gap="md">
+              <form.AppField name="name">
+                {(field) => (
+                  <field.TextField
+                    label="Name"
+                    placeholder="CONFIG_NAME"
+                    required
+                  />
+                )}
+              </form.AppField>
 
-            <form.Field name="value">
-              {(field) => (
-                <TextInput
-                  label="Value"
-                  placeholder="Config value"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  error={field.state.meta.errors[0]?.message}
-                />
-              )}
-            </form.Field>
+              <form.AppField name="value">
+                {(field) => (
+                  <field.TextField label="Value" placeholder="Config value" />
+                )}
+              </form.AppField>
 
-            <form.Field name="description">
-              {(field) => (
-                <TextInput
-                  label="Description"
-                  placeholder="Describe what this config does"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  error={field.state.meta.errors[0]?.message}
-                />
-              )}
-            </form.Field>
+              <form.AppField name="description">
+                {(field) => (
+                  <field.TextField
+                    label="Description"
+                    placeholder="Describe what this config does"
+                  />
+                )}
+              </form.AppField>
 
-            <Button type="submit" loading={createConfig.isPending} fullWidth>
-              Create Config
-            </Button>
-          </Stack>
-        </form>
+              <form.SubmitButton fullWidth>Create Config</form.SubmitButton>
+            </Stack>
+          </form.Form>
+        </form.AppForm>
       </Modal>
     </>
   );
