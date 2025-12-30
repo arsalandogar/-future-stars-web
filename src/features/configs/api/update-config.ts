@@ -36,13 +36,6 @@ export function useUpdateConfig() {
         color: 'green',
       });
     },
-    onError: () => {
-      notifications.show({
-        title: 'Update failed',
-        message: 'Failed to save configuration. Please try again.',
-        color: 'red',
-      });
-    },
   });
 }
 
@@ -56,13 +49,6 @@ export function useCreateConfig() {
         title: 'Config created',
         message: 'Configuration has been created successfully.',
         color: 'green',
-      });
-    },
-    onError: () => {
-      notifications.show({
-        title: 'Creation failed',
-        message: 'Failed to create configuration. Please try again.',
-        color: 'red',
       });
     },
   });
