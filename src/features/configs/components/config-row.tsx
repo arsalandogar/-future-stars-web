@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { ActionIcon, Group, Table, Text, TextInput } from '@mantine/core';
-import { revalidateLogic, useForm } from '@tanstack/react-form';
+import { ActionIcon, Group, Table, Text } from '@mantine/core';
+import { revalidateLogic } from '@tanstack/react-form';
 import { Check, Pencil, X } from 'lucide-react';
+
+import { useAppForm } from '@/lib/form';
 
 import { useUpdateConfig } from '../api/update-config';
 import type { Config } from '../types';
@@ -15,7 +17,7 @@ export function ConfigRow({ config }: ConfigRowProps) {
   const [isEditing, setIsEditing] = useState(false);
   const updateConfig = useUpdateConfig();
 
-  const form = useForm({
+  const form = useAppForm({
     defaultValues: {
       value: config.value,
       description: config.description,
@@ -65,45 +67,20 @@ export function ConfigRow({ config }: ConfigRowProps) {
       </Table.Td>
       <Table.Td>
         {isEditing ? (
-          <form.Field name="value">
-            {(field) => {
-              const error = field.state.meta.errors[0];
-              const errorMessage =
-                typeof error === 'string' ? error : error?.message;
-              return (
-                <TextInput
-                  size="sm"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  error={errorMessage}
-                  autoFocus
-                />
-              );
-            }}
-          </form.Field>
+          <form.AppField name="value">
+            {(field) => (
+              <field.TextField size="sm" onKeyDown={handleKeyDown} autoFocus />
+            )}
+          </form.AppField>
         ) : (
           <Text size="sm">{config.value}</Text>
         )}
       </Table.Td>
       <Table.Td>
         {isEditing ? (
-          <form.Field name="description">
-            {(field) => {
-              const error = field.state.meta.errors[0];
-              const errorMessage =
-                typeof error === 'string' ? error : error?.message;
-              return (
-                <TextInput
-                  size="sm"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  error={errorMessage}
-                />
-              );
-            }}
-          </form.Field>
+          <form.AppField name="description">
+            {(field) => <field.TextField size="sm" onKeyDown={handleKeyDown} />}
+          </form.AppField>
         ) : (
           <Text size="sm" c="dimmed">
             {config.description}
