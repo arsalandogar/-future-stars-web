@@ -13,10 +13,6 @@ const defaultValues = {
 };
 
 const tagsSearchSchema = v.object({
-  page: v.optional(
-    v.fallback(v.pipe(v.number(), v.integer(), v.minValue(1)), 1),
-    1
-  ),
   search: v.optional(v.fallback(v.string(), ''), ''),
 });
 

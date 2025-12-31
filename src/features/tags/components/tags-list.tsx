@@ -26,21 +26,17 @@ const COLUMNS: Column[] = [
 ];
 
 export function TagsList() {
-  const { page, search } = routeApi.useSearch();
+  const { search } = routeApi.useSearch();
   const navigate = routeApi.useNavigate();
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedTag, setSelectedTag] = useState<Tag | undefined>();
 
   const handleSearchChange = useDebouncedCallback((newSearch: string) => {
-    void navigate({ search: { page: 1, search: newSearch }, replace: true });
+    void navigate({ search: { search: newSearch }, replace: true });
   }, 300);
 
-  const handlePageChange = (newPage: number) => {
-    void navigate({ search: () => ({ page: newPage }) });
-  };
-
   const handleCreate = () => {
-    setSelectedTag(undefined); // Clear selection
+    setSelectedTag(undefined);
     open();
   };
 
@@ -49,16 +45,11 @@ export function TagsList() {
     open();
   };
 
-  const { data, isLoading } = useTags({
+  const { data: tags, isLoading } = useTags({
     variables: {
-      page,
-      limit: 10,
       search: search || undefined,
     },
   });
-
-  const tags = data?.data ?? [];
-  const meta = data?.meta;
 
   return (
     <div className="flex flex-col gap-6">
@@ -108,17 +99,12 @@ export function TagsList() {
           </Group>
 
           <DataTable
-            data={tags}
+            data={tags ?? []}
             columns={COLUMNS}
             isLoading={isLoading}
             emptyMessage="No tags found"
             keyExtractor={(tag) => tag.id}
             renderRow={(tag) => <TagRow tag={tag} onEdit={handleEdit} />}
-            pagination={
-              meta && meta.lastPage > 1
-                ? { page, total: meta.lastPage, onChange: handlePageChange }
-                : undefined
-            }
           />
         </div>
       </Card>

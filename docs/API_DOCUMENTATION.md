@@ -398,6 +398,12 @@ Get all tags.
 GET /api/v1/tags
 ```
 
+**Query Parameters:**
+
+| Param  | Type   | Default | Description           |
+| ------ | ------ | ------- | --------------------- |
+| search | string | -       | Search by name, label |
+
 **Response:** `200 OK`
 
 ```json
