@@ -54,6 +54,24 @@ Uses **TanStack Query** with **react-query-kit** for type-safe API hooks:
 - The Axios client in `@/lib/api-client` automatically unwraps `response.data`, so fetchers receive data directly
 - Default query config: no refetch on window focus, no retry on failure, 1-minute stale time
 
+**Query Invalidation:** Use the `invalidateQueries` middleware to automatically invalidate queries after mutations:
+
+```typescript
+import { createMutation, invalidateQueries } from '@/lib/react-query';
+import { useOrders } from './get-orders';
+
+export const useUpdateOrder = createMutation({
+  mutationFn: (data: UpdateOrderParams): Promise<Order> =>
+    api.put(`admin/orders/${data.id}`, data),
+  use: [invalidateQueries([useOrders.getKey()])],
+});
+```
+
+The middleware supports:
+
+- Multiple query keys: `invalidateQueries([useOrders.getKey(), useOrder.getKey()])`
+- Conditional invalidation with guards: `{ queryKey: [...], guard: (data) => data.status === 'completed' }`
+
 ### Forms
 
 Uses **TanStack Form** with **Valibot** for schema validation and form composition via `createFormHook`:
