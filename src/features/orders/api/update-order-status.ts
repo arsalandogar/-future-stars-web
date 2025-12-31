@@ -1,8 +1,8 @@
-import { useQueryClient } from '@tanstack/react-query';
-
 import { api } from '@/lib/api-client';
-import { createMutation } from '@/lib/react-query';
+import { createMutation, invalidateQueries } from '@/lib/react-query';
 
+import { useOrder } from './get-order';
+import { useOrders } from './get-orders';
 import type { Order, OrderStatus } from '../types';
 
 interface UpdateOrderStatusParams {
@@ -13,15 +13,5 @@ interface UpdateOrderStatusParams {
 export const useUpdateOrderStatus = createMutation({
   mutationFn: ({ orderId, status }: UpdateOrderStatusParams): Promise<Order> =>
     api.put(`admin/orders/${orderId}`, { status }),
+  use: [invalidateQueries([useOrders.getKey(), useOrder.getKey()])],
 });
-
-export function useUpdateOrderStatusWithInvalidation() {
-  const queryClient = useQueryClient();
-
-  return useUpdateOrderStatus({
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['admin', 'orders'] });
-      void queryClient.invalidateQueries({ queryKey: ['admin', 'order'] });
-    },
-  });
-}

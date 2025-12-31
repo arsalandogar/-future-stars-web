@@ -5,10 +5,7 @@ export { OrdersList } from './components/orders-list';
 // API
 export { useOrder } from './api/get-order';
 export { useOrders } from './api/get-orders';
-export {
-  useUpdateOrderStatus,
-  useUpdateOrderStatusWithInvalidation,
-} from './api/update-order-status';
+export { useUpdateOrderStatus } from './api/update-order-status';
 
 // Constants
 export { ORDER_STATUS_COLORS } from './constants';

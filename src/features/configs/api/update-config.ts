@@ -1,55 +1,41 @@
-import { useQueryClient } from '@tanstack/react-query';
 import { notifications } from '@mantine/notifications';
 
 import { api } from '@/lib/api-client';
-import { createMutation } from '@/lib/react-query';
+import { createMutation, invalidateQueries } from '@/lib/react-query';
 
+import { useConfigs } from './get-configs';
 import type { Config, UpdateConfigParams, CreateConfigParams } from '../types';
 
-const useUpdateConfigMutation = createMutation({
+export const useUpdateConfig = createMutation({
   mutationFn: ({
     name,
     value,
     description,
   }: UpdateConfigParams): Promise<Config> =>
     api.put(`admin/configs/${name}`, { value, description }),
+  use: [invalidateQueries([useConfigs.getKey()])],
+  onSuccess: () => {
+    notifications.show({
+      title: 'Config updated',
+      message: 'Configuration has been saved successfully.',
+      color: 'green',
+    });
+  },
 });
 
-const useCreateConfigMutation = createMutation({
+export const useCreateConfig = createMutation({
   mutationFn: ({
     name,
     value,
     description,
   }: CreateConfigParams): Promise<Config> =>
     api.post('admin/configs', { name, value, description }),
+  use: [invalidateQueries([useConfigs.getKey()])],
+  onSuccess: () => {
+    notifications.show({
+      title: 'Config created',
+      message: 'Configuration has been created successfully.',
+      color: 'green',
+    });
+  },
 });
-
-export function useUpdateConfig() {
-  const queryClient = useQueryClient();
-
-  return useUpdateConfigMutation({
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['admin', 'configs'] });
-      notifications.show({
-        title: 'Config updated',
-        message: 'Configuration has been saved successfully.',
-        color: 'green',
-      });
-    },
-  });
-}
-
-export function useCreateConfig() {
-  const queryClient = useQueryClient();
-
-  return useCreateConfigMutation({
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['admin', 'configs'] });
-      notifications.show({
-        title: 'Config created',
-        message: 'Configuration has been created successfully.',
-        color: 'green',
-      });
-    },
-  });
-}
