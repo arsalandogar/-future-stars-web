@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   X,
   Box,
+  Tags,
   Settings,
 } from 'lucide-react';
 
@@ -32,6 +33,7 @@ const menuItems: NavItem[] = [
   { label: 'Orders', icon: Box, href: '/admin/orders' },
   { label: 'Users', icon: Users, href: '/admin/users' },
   { label: 'Templates', icon: Layers2, href: '/admin/templates' },
+  { label: 'Tags', icon: Tags, href: '/admin/tags' },
   { label: 'Configs', icon: Settings, href: '/admin/configs' },
 ];
 
