@@ -1,5 +1,5 @@
 import { Head } from '@/components/seo/head';
-import { TagsList } from '@/features/tags/component/tags-list';
+import { TagsList } from '@/features/tags';
 import { Anchor, Breadcrumbs, Title } from '@mantine/core';
 import {
   createFileRoute,

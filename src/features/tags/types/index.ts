@@ -22,7 +22,8 @@ export type TagListResponse = {
   data: Tag[];
 };
 
-export type TagInput = Omit<
-  Tag,
-  'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'
->;
+export type CreateTagParam = {
+  name: string;
+  label: string;
+  description?: string;
+};

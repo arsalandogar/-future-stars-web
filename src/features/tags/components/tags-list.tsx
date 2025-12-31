@@ -78,7 +78,7 @@ export function TagsList() {
                 leftSection={<PlusIcon size={18} />}
                 onClick={handleCreate}
               >
-                Create
+                Add Tag
               </Button>
               <Button
                 variant="default"
@@ -92,7 +92,7 @@ export function TagsList() {
 
           <Group justify="space-between">
             <TextInput
-              placeholder="Search by name or email..."
+              placeholder="Search..."
               leftSection={<Search size={16} />}
               defaultValue={search}
               onChange={(e) => handleSearchChange(e.currentTarget.value)}

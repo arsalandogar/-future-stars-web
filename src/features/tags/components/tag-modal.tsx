@@ -17,7 +17,7 @@ export function TagModal({ tag, opened, onClose }: TagModalProps) {
 
   return (
     <>
-      <Modal opened={opened} onClose={onClose} title={modalTitle} centered>
+      <Modal opened={opened} onClose={onClose} title={modalTitle}>
         <TagForm tag={tag} modalClose={onClose} />
       </Modal>
     </>

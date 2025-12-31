@@ -1,19 +1,19 @@
 import { createMutation } from 'react-query-kit';
-import type { Tag, TagInput } from '../types';
 import { api } from '@/lib/api-client';
-import { useQueryClient } from '@tanstack/react-query';
-import { tagKeys } from './get-tags';
+import { useTags } from './get-tags';
+import { invalidateQueries } from '@/lib/react-query';
+import type { Tag, CreateTagParam } from '../types';
+import { notifications } from '@mantine/notifications';
 
 export const useCreateTag = createMutation({
-  mutationFn: (newTag: TagInput): Promise<Tag> => api.post('tags', newTag),
+  mutationFn: (newTag: CreateTagParam): Promise<Tag> =>
+    api.post('admin/tags', newTag),
+  use: [invalidateQueries([useTags.getKey()])],
+  onSuccess: () => {
+    notifications.show({
+      title: 'Tag created',
+      message: 'Tag has been created successfully.',
+      color: 'green',
+    });
+  },
 });
-
-export function useCreateTagWithInvalidation() {
-  const queryClient = useQueryClient();
-
-  return useCreateTag({
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: tagKeys.all });
-    },
-  });
-}

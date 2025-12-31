@@ -3,8 +3,7 @@ import { Edit, Eye, MoreHorizontal, Trash2 } from 'lucide-react';
 import dayjs from 'dayjs';
 import type { Tag } from '../types';
 import { modals } from '@mantine/modals';
-import { useDeleteTagWithInvalidation } from '../api/delete-tag';
-import { notifications } from '@mantine/notifications';
+import { useDeleteTag } from '../api/delete-tag';
 
 type TagRowProps = {
   tag: Tag;
@@ -12,7 +11,7 @@ type TagRowProps = {
 };
 
 export function TagRow({ tag, onEdit }: TagRowProps) {
-  const deleteTag = useDeleteTagWithInvalidation();
+  const deleteTag = useDeleteTag();
 
   const handleDelete = (tag: Tag) => {
     modals.openConfirmModal({
@@ -28,25 +27,12 @@ export function TagRow({ tag, onEdit }: TagRowProps) {
       confirmProps: { color: 'red', loading: deleteTag.isPending },
       onConfirm: () => {
         void (async () => {
-          try {
-            await deleteTag.mutateAsync(tag.id);
-            notifications.show({
-              title: 'Deleted',
-              message: 'Tag removed successfully',
-              color: 'green',
-            });
-          } catch (error) {
-            console.error(error);
-            notifications.show({
-              title: 'Error',
-              message: 'Failed to delete tag',
-              color: 'red',
-            });
-          }
+          await deleteTag.mutateAsync(tag.id);
         })();
       },
     });
   };
+
   return (
     <>
       <Table.Td>

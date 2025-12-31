@@ -3,12 +3,8 @@ import { createQuery } from '@/lib/react-query';
 import { api } from '@/lib/api-client';
 import type { TagListResponse, TagsListParams } from '../types';
 
-export const tagKeys = {
-  all: ['tags'] as const,
-};
-
 export const useTags = createQuery({
-  queryKey: tagKeys.all,
+  queryKey: ['tags'],
   fetcher: (params: TagsListParams): Promise<TagListResponse> => {
     const searchParams = new URLSearchParams();
 
