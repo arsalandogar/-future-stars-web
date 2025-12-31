@@ -58,7 +58,7 @@ export function AdminHeader({ opened, toggle }: AdminHeaderProps) {
         <TextInput
           placeholder="Global search..."
           leftSection={
-            <Search size={16} className="text-(--mantine-color-gray-5)" />
+            <Search size={16} className="text-(--mantine-color-dimmed)" />
           }
           rightSection={
             <Group gap={4}>
@@ -82,7 +82,7 @@ export function AdminHeader({ opened, toggle }: AdminHeaderProps) {
 
           <Menu shadow="md" width={200} position="bottom-end">
             <Menu.Target>
-              <UnstyledButton className="flex items-center gap-2 rounded-full py-1 pl-1 pr-3 hover:bg-(--mantine-color-gray-1)">
+              <UnstyledButton className="flex items-center gap-2 rounded-full py-1 pl-1 pr-3 hover:bg-(--mantine-color-default-hover)">
                 <Avatar
                   color="initials"
                   radius="xl"
@@ -94,7 +94,7 @@ export function AdminHeader({ opened, toggle }: AdminHeaderProps) {
                 </Text>
                 <ChevronDown
                   size={14}
-                  className="text-(--mantine-color-gray-6)"
+                  className="text-(--mantine-color-dimmed)"
                 />
               </UnstyledButton>
             </Menu.Target>
@@ -131,7 +131,7 @@ export function AdminHeader({ opened, toggle }: AdminHeaderProps) {
             h={60}
             px="md"
             justify="space-between"
-            className="border-t border-(--mantine-color-gray-3) bg-(--mantine-color-gray-0)"
+            className="border-y border-(--mantine-color-default-border) bg-(--mantine-color-gray-0) dark:bg-(--mantine-color-dark-6)"
           >
             <Group gap="sm">
               <ThemeToggle />
@@ -148,7 +148,7 @@ export function AdminHeader({ opened, toggle }: AdminHeaderProps) {
 
             <Menu shadow="md" width={200} position="bottom-end">
               <Menu.Target>
-                <UnstyledButton className="flex items-center gap-3 rounded-full py-1 pl-1 pr-2 hover:bg-(--mantine-color-gray-2)">
+                <UnstyledButton className="flex items-center gap-3 rounded-full py-1 pl-1 pr-2 hover:bg-(--mantine-color-default-hover)">
                   <Avatar
                     color="initials"
                     radius="xl"
@@ -160,7 +160,7 @@ export function AdminHeader({ opened, toggle }: AdminHeaderProps) {
                   </Text>
                   <ChevronDown
                     size={16}
-                    className="text-(--mantine-color-gray-6)"
+                    className="text-(--mantine-color-dimmed)"
                   />
                 </UnstyledButton>
               </Menu.Target>
