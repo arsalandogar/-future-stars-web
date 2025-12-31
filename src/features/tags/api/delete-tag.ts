@@ -1,7 +1,6 @@
+import { createMutation, invalidateQueries } from '@/lib/react-query';
 import { api } from '@/lib/api-client';
-import { createMutation } from 'react-query-kit';
 import { useTags } from './get-tags';
-import { invalidateQueries } from '@/lib/react-query';
 import { notifications } from '@mantine/notifications';
 
 export const useDeleteTag = createMutation({
@@ -11,7 +10,7 @@ export const useDeleteTag = createMutation({
   onSuccess: () => {
     notifications.show({
       title: 'Tag Deleted',
-      message: 'Tag has been saved successfully.',
+      message: 'Tag has been deleted successfully.',
       color: 'green',
     });
   },

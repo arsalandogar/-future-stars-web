@@ -10,9 +10,9 @@ type TagModalProps = {
 
 export function TagModal({ tag, opened, onClose }: TagModalProps) {
   const modalTitle = tag?.id ? (
-    <h2 className=" font-bold">Edit Tag</h2>
+    <h2 className="font-bold">Edit Tag</h2>
   ) : (
-    <h2 className=" font-bold">Create Tag</h2>
+    <h2 className="font-bold">Create Tag</h2>
   );
 
   return (

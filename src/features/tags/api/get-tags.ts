@@ -1,10 +1,9 @@
-// features/tags/api/use-tags-crud.ts
 import { createQuery } from '@/lib/react-query';
 import { api } from '@/lib/api-client';
 import type { TagListResponse, TagsListParams } from '../types';
 
 export const useTags = createQuery({
-  queryKey: [['admin', 'tags']],
+  queryKey: ['admin', 'tags'],
   fetcher: (params: TagsListParams): Promise<TagListResponse> => {
     const searchParams = new URLSearchParams();
 
@@ -13,7 +12,7 @@ export const useTags = createQuery({
     if (params.search) searchParams.set('search', params.search);
 
     const queryString = searchParams.toString();
-    const url = queryString ? `tags?${queryString}` : 'tags';
+    const url = queryString ? `admin/tags?${queryString}` : 'admin/tags';
 
     return api.get(url);
   },

@@ -1,7 +1,6 @@
-import { createMutation } from 'react-query-kit';
+import { createMutation, invalidateQueries } from '@/lib/react-query';
 import { api } from '@/lib/api-client';
 import { useTags } from './get-tags';
-import { invalidateQueries } from '@/lib/react-query';
 import type { Tag, CreateTagParam } from '../types';
 import { notifications } from '@mantine/notifications';
 
