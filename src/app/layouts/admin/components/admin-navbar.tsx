@@ -2,7 +2,6 @@ import {
   NavLink,
   ScrollArea,
   Stack,
-  Text,
   Group,
   ActionIcon,
   Tooltip,
@@ -111,12 +110,7 @@ export function AdminNavbar({
           </Tooltip>
         ) : (
           <>
-            <Group gap="sm">
-              <Logo />
-              <Text fw={600} size="lg">
-                Future Stars
-              </Text>
-            </Group>
+            <Logo />
             <ActionIcon
               variant="subtle"
               color="gray"

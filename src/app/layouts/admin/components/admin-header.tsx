@@ -113,14 +113,7 @@ export function AdminHeader({ opened, toggle }: AdminHeaderProps) {
             size="sm"
             aria-label="Toggle navigation"
           />
-
-          <Group gap="xs">
-            <Logo />
-            <Text fw={600} size="md">
-              Future Stars
-            </Text>
-          </Group>
-
+          <Logo />
           <ActionIcon
             variant="default"
             size="lg"
