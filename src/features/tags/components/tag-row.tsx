@@ -1,5 +1,5 @@
 import { Table, Text, Badge, ActionIcon, Menu } from '@mantine/core';
-import { Edit, Eye, MoreHorizontal, Trash2 } from 'lucide-react';
+import { Edit, MoreHorizontal, Trash2 } from 'lucide-react';
 import dayjs from 'dayjs';
 import type { Tag } from '../types';
 import { modals } from '@mantine/modals';
@@ -24,11 +24,9 @@ export function TagRow({ tag, onEdit }: TagRowProps) {
         </Text>
       ),
       labels: { confirm: 'Delete Tag', cancel: 'Cancel' },
-      confirmProps: { color: 'red', loading: deleteTag.isPending },
+      confirmProps: { color: 'red' },
       onConfirm: () => {
-        void (async () => {
-          await deleteTag.mutateAsync(tag.id);
-        })();
+        deleteTag.mutate(tag.id);
       },
     });
   };
@@ -68,7 +66,6 @@ export function TagRow({ tag, onEdit }: TagRowProps) {
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item leftSection={<Eye size={14} />}>View Details</Menu.Item>
             <Menu.Item
               leftSection={<Edit size={14} />}
               onClick={() => onEdit(tag)}

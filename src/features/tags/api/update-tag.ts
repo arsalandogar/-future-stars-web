@@ -15,7 +15,7 @@ export const useUpdateTag = createMutation({
   use: [invalidateQueries([useTags.getKey()])],
   onSuccess: () => {
     notifications.show({
-      title: 'Tag update',
+      title: 'Tag updated',
       message: 'Tag has been saved successfully.',
       color: 'green',
     });
