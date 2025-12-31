@@ -1,10 +1,30 @@
-import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
+import {
+  createFileRoute,
+  Outlet,
+  redirect,
+  stripSearchParams,
+} from '@tanstack/react-router';
+import * as v from 'valibot';
+
+const defaultValues = {
+  redirectTo: '/',
+};
 
 export const Route = createFileRoute('/auth')({
-  beforeLoad: ({ context }) => {
+  validateSearch: v.object({
+    redirectTo: v.optional(v.string()),
+  }),
+  search: {
+    middlewares: [stripSearchParams(defaultValues)],
+  },
+  beforeLoad: ({ context, search }) => {
     if (context.auth.isAuthenticated) {
+      const redirectTo = search?.redirectTo;
+      const destination =
+        redirectTo ?? (context.auth.user?.isAdmin ? '/admin' : '/');
+
       // eslint-disable-next-line @typescript-eslint/only-throw-error
-      throw redirect({ to: '/' });
+      throw redirect({ to: destination });
     }
   },
   component: AuthLayout,
