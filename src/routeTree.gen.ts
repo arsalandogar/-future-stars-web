@@ -19,8 +19,8 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
 import { Route as AuthenticatedAdminTemplatesRouteImport } from './routes/_authenticated/admin/templates'
 import { Route as AuthenticatedAdminTagsRouteImport } from './routes/_authenticated/admin/tags'
-import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin/orders'
+import { Route as AuthenticatedAdminConfigsRouteImport } from './routes/_authenticated/admin/configs'
 
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
@@ -72,16 +72,16 @@ const AuthenticatedAdminTagsRoute = AuthenticatedAdminTagsRouteImport.update({
   path: '/tags',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
-const AuthenticatedAdminSettingsRoute =
-  AuthenticatedAdminSettingsRouteImport.update({
-    id: '/settings',
-    path: '/settings',
-    getParentRoute: () => AuthenticatedAdminRouteRoute,
-  } as any)
 const AuthenticatedAdminOrdersRoute =
   AuthenticatedAdminOrdersRouteImport.update({
     id: '/orders',
     path: '/orders',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminConfigsRoute =
+  AuthenticatedAdminConfigsRouteImport.update({
+    id: '/configs',
+    path: '/configs',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 
@@ -91,8 +91,8 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/': typeof AuthenticatedIndexRoute
+  '/admin/configs': typeof AuthenticatedAdminConfigsRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
-  '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/tags': typeof AuthenticatedAdminTagsRoute
   '/admin/templates': typeof AuthenticatedAdminTemplatesRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -103,8 +103,8 @@ export interface FileRoutesByTo {
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/': typeof AuthenticatedIndexRoute
+  '/admin/configs': typeof AuthenticatedAdminConfigsRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
-  '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/tags': typeof AuthenticatedAdminTagsRoute
   '/admin/templates': typeof AuthenticatedAdminTemplatesRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -118,8 +118,8 @@ export interface FileRoutesById {
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/admin/configs': typeof AuthenticatedAdminConfigsRoute
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
-  '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/tags': typeof AuthenticatedAdminTagsRoute
   '/_authenticated/admin/templates': typeof AuthenticatedAdminTemplatesRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -133,8 +133,8 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/register'
     | '/'
+    | '/admin/configs'
     | '/admin/orders'
-    | '/admin/settings'
     | '/admin/tags'
     | '/admin/templates'
     | '/admin/users'
@@ -145,8 +145,8 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/register'
     | '/'
+    | '/admin/configs'
     | '/admin/orders'
-    | '/admin/settings'
     | '/admin/tags'
     | '/admin/templates'
     | '/admin/users'
@@ -159,8 +159,8 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/register'
     | '/_authenticated/'
+    | '/_authenticated/admin/configs'
     | '/_authenticated/admin/orders'
-    | '/_authenticated/admin/settings'
     | '/_authenticated/admin/tags'
     | '/_authenticated/admin/templates'
     | '/_authenticated/admin/users'
@@ -244,18 +244,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTagsRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
-    '/_authenticated/admin/settings': {
-      id: '/_authenticated/admin/settings'
-      path: '/settings'
-      fullPath: '/admin/settings'
-      preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
-      parentRoute: typeof AuthenticatedAdminRouteRoute
-    }
     '/_authenticated/admin/orders': {
       id: '/_authenticated/admin/orders'
       path: '/orders'
       fullPath: '/admin/orders'
       preLoaderRoute: typeof AuthenticatedAdminOrdersRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/configs': {
+      id: '/_authenticated/admin/configs'
+      path: '/configs'
+      fullPath: '/admin/configs'
+      preLoaderRoute: typeof AuthenticatedAdminConfigsRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
   }
@@ -276,8 +276,8 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 )
 
 interface AuthenticatedAdminRouteRouteChildren {
+  AuthenticatedAdminConfigsRoute: typeof AuthenticatedAdminConfigsRoute
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
-  AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
   AuthenticatedAdminTagsRoute: typeof AuthenticatedAdminTagsRoute
   AuthenticatedAdminTemplatesRoute: typeof AuthenticatedAdminTemplatesRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
@@ -286,8 +286,8 @@ interface AuthenticatedAdminRouteRouteChildren {
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
   {
+    AuthenticatedAdminConfigsRoute: AuthenticatedAdminConfigsRoute,
     AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
-    AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
     AuthenticatedAdminTagsRoute: AuthenticatedAdminTagsRoute,
     AuthenticatedAdminTemplatesRoute: AuthenticatedAdminTemplatesRoute,
     AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,

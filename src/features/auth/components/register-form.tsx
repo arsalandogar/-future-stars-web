@@ -1,10 +1,7 @@
-import { Anchor, Button, Divider, Group, Stack, Text } from '@mantine/core';
+import { Anchor, Divider, Group, Stack, Text } from '@mantine/core';
 
-import {
-  FloatingLabelInput,
-  FloatingPasswordInput,
-} from '@/components/form/floating-label-input';
-import { revalidateLogic, useForm } from '@tanstack/react-form';
+import { useAppForm } from '@/lib/form';
+import { revalidateLogic } from '@tanstack/react-form';
 import { Link } from '@tanstack/react-router';
 import * as v from 'valibot';
 
@@ -43,9 +40,9 @@ const defaultValues: RegisterCredentials = {
 };
 
 export function RegisterForm() {
-  const { register, isRegistering } = useAuth();
+  const { register } = useAuth();
 
-  const form = useForm({
+  const form = useAppForm({
     defaultValues,
     validators: {
       onDynamic: registerSchema,
@@ -57,80 +54,65 @@ export function RegisterForm() {
   });
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        void form.handleSubmit();
-      }}
-    >
-      <Stack gap="lg">
+    <form.AppForm>
+      <form.Form>
         <Stack gap="lg">
-          <Group grow>
-            <form.Field name="firstName">
+          <Stack gap="lg">
+            <Group grow>
+              <form.AppField name="firstName">
+                {(field) => (
+                  <field.FloatingTextField
+                    label="First name"
+                    size="md"
+                    required
+                  />
+                )}
+              </form.AppField>
+              <form.AppField name="lastName">
+                {(field) => (
+                  <field.FloatingTextField
+                    label="Last name"
+                    size="md"
+                    required
+                  />
+                )}
+              </form.AppField>
+            </Group>
+            <form.AppField name="email">
               {(field) => (
-                <FloatingLabelInput
-                  label="First name"
+                <field.FloatingTextField
+                  label="Email address"
+                  type="email"
                   size="md"
                   required
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  error={field.state.meta.errors[0]?.message}
                 />
               )}
-            </form.Field>
-            <form.Field name="lastName">
+            </form.AppField>
+            <form.AppField name="password">
               {(field) => (
-                <FloatingLabelInput
-                  label="Last name"
+                <field.FloatingPasswordField
+                  label="Password"
                   size="md"
                   required
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  error={field.state.meta.errors[0]?.message}
                 />
               )}
-            </form.Field>
-          </Group>
-          <form.Field name="email">
-            {(field) => (
-              <FloatingLabelInput
-                label="Email address"
-                type="email"
-                size="md"
-                required
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                error={field.state.meta.errors[0]?.message}
-              />
-            )}
-          </form.Field>
-          <form.Field name="password">
-            {(field) => (
-              <FloatingPasswordInput
-                label="Password"
-                size="md"
-                required
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                error={field.state.meta.errors[0]?.message}
-              />
-            )}
-          </form.Field>
+            </form.AppField>
+          </Stack>
+
+          <form.SubmitButton fullWidth size="md">
+            Create account
+          </form.SubmitButton>
+
+          <Divider label="or" labelPosition="center" />
+
+          <Text size="sm" ta="center" c="dimmed">
+            Already have an account?{' '}
+            <Anchor component={Link} to="/auth/login" fw={500}>
+              Sign in
+            </Anchor>
+          </Text>
         </Stack>
-
-        <Button type="submit" fullWidth size="md" loading={isRegistering}>
-          Create account
-        </Button>
-
-        <Divider label="or" labelPosition="center" />
-
-        <Text size="sm" ta="center" c="dimmed">
-          Already have an account?{' '}
-          <Anchor component={Link} to="/auth/login" fw={500}>
-            Sign in
-          </Anchor>
-        </Text>
-      </Stack>
-    </form>
+      </form.Form>
+    </form.AppForm>
   );
 }

@@ -1,32 +1,30 @@
-import { useRouter, useSearch } from '@tanstack/react-router';
+import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from '@tanstack/react-router';
 
 import { useLogin } from '../api/login';
 import { useRegister } from '../api/register';
 import type { LoginCredentials, RegisterCredentials } from '../types';
 
 export function useAuth() {
-  const { invalidate, navigate } = useRouter();
-  const loginSearch = useSearch({
-    from: '/auth/login',
-    shouldThrow: false,
-  });
+  const { invalidate } = useRouter();
+  const queryClient = useQueryClient();
 
   const loginMutation = useLogin();
   const registerMutation = useRegister();
 
-  const login = async (credentials: LoginCredentials) => {
-    const redirectTo = loginSearch?.redirectTo;
-    const result = await loginMutation.mutateAsync(credentials);
-    const destination = redirectTo ?? (result.user.isAdmin ? '/admin' : '/');
-
+  const resetAppState = async () => {
+    queryClient.clear();
     await invalidate();
-    await navigate({ to: destination });
+  };
+
+  const login = async (credentials: LoginCredentials) => {
+    await loginMutation.mutateAsync(credentials);
+    await resetAppState();
   };
 
   const register = async (credentials: RegisterCredentials) => {
     await registerMutation.mutateAsync(credentials);
-    await invalidate();
-    await navigate({ to: '/' });
+    await resetAppState();
   };
 
   return {

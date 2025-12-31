@@ -1,12 +1,12 @@
 import { ActionIcon, Menu, Table, Text } from '@mantine/core';
 import { Eye, MoreHorizontal } from 'lucide-react';
 
+import { MappedBadge } from '@/components/ui/mapped-badge';
 import { formatCurrency } from '@/utils/currency';
 import { formatDate } from '@/utils/date';
 
+import { ORDER_STATUS_COLORS } from '../constants';
 import type { Order } from '../types';
-
-import { OrderStatusBadge } from './order-status-badge';
 
 interface OrderRowProps {
   order: Order;
@@ -37,7 +37,7 @@ export function OrderRow({ order }: OrderRowProps) {
         </Text>
       </Table.Td>
       <Table.Td>
-        <OrderStatusBadge status={order.status} />
+        <MappedBadge value={order.status} colorMap={ORDER_STATUS_COLORS} />
       </Table.Td>
       <Table.Td>
         <Menu shadow="md" width={160} position="bottom-end">

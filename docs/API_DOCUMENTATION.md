@@ -5,6 +5,7 @@ Base URL: `/api/v1`
 ## Table of Contents
 
 - [Authentication](#authentication)
+- [Profile](#profile)
 - [Templates](#templates)
 - [Tags](#tags)
 - [Cards](#cards)
@@ -12,10 +13,16 @@ Base URL: `/api/v1`
 - [Cart Items](#cart-items)
 - [Addresses](#addresses)
 - [Orders](#orders)
-- [Admin Orders](#admin-orders)
-- [Configs](#configs)
 - [Featured Items](#featured-items)
-- [Profile](#profile)
+- [Color Leagues](#color-leagues)
+- [Color Presets](#color-presets)
+- [Admin Orders](#admin-orders)
+- [Admin Users](#admin-users)
+- [Admin Dashboard](#admin-dashboard)
+- [Admin Templates](#admin-templates)
+- [Admin Tags](#admin-tags)
+- [Admin Configs](#admin-configs)
+- [Admin Featured Items](#admin-featured-items)
 
 ---
 
@@ -379,54 +386,6 @@ GET /api/v1/templates/:id
 }
 ```
 
-### Create Template (Admin Only)
-
-```
-POST /api/v1/templates
-```
-
-**Headers:** `Authorization: Bearer <admin_token>`
-
-**Request Body:**
-
-| Field                     | Type   | Required | Description                   |
-| ------------------------- | ------ | -------- | ----------------------------- |
-| side                      | string | Yes      | `front` or `back`             |
-| name                      | string | Yes      | Template name (1-255 chars)   |
-| label                     | string | No       | Display label (1-255 chars)   |
-| description               | string | No       | Description (max 1000 chars)  |
-| svgString                 | string | No       | SVG template string           |
-| templateTypeId            | number | Yes      | Template type ID              |
-| frontendComponentName     | string | No       | React component name          |
-| frontendComponentFileName | string | No       | Component file name           |
-| backTemplateId            | number | No       | ID of back template           |
-| attributes                | array  | No       | Array of template attributes  |
-| tagIds                    | array  | No       | Array of tag IDs to associate |
-
-**attributes array item:**
-
-| Field        | Type   | Required | Description                    |
-| ------------ | ------ | -------- | ------------------------------ |
-| type         | string | Yes      | `color`, `image`, or `string`  |
-| name         | string | Yes      | Attribute name (1-255 chars)   |
-| label        | string | Yes      | Display label (1-255 chars)    |
-| defaultValue | string | No       | Default value (max 1000 chars) |
-| defaultColor | string | No       | Default color (max 1000 chars) |
-
-**Response:** `201 Created`
-
-### Update Template (Admin Only)
-
-```
-PUT /api/v1/templates/:id
-```
-
-**Headers:** `Authorization: Bearer <admin_token>`
-
-**Request Body:** Same as create, all fields optional.
-
-**Response:** `200 OK`
-
 ---
 
 ## Tags
@@ -468,46 +427,6 @@ GET /api/v1/tags/:id
   "description": "Basketball related templates"
 }
 ```
-
-### Create Tag (Admin Only)
-
-```
-POST /api/v1/tags
-```
-
-**Headers:** `Authorization: Bearer <admin_token>`
-
-**Request Body:**
-
-| Field       | Type   | Required | Description                    |
-| ----------- | ------ | -------- | ------------------------------ |
-| name        | string | Yes      | Tag name (1-255 chars, unique) |
-| label       | string | No       | Display label (1-255 chars)    |
-| description | string | No       | Description (max 1000 chars)   |
-
-**Response:** `201 Created`
-
-### Update Tag (Admin Only)
-
-```
-PUT /api/v1/tags/:id
-```
-
-**Headers:** `Authorization: Bearer <admin_token>`
-
-**Request Body:** Same as create, all fields optional.
-
-**Response:** `200 OK`
-
-### Delete Tag (Admin Only)
-
-```
-DELETE /api/v1/tags/:id
-```
-
-**Headers:** `Authorization: Bearer <admin_token>`
-
-**Response:** `204 No Content`
 
 ---
 
@@ -1285,17 +1204,320 @@ PUT /api/v1/admin/orders/:id
 
 ---
 
-## Configs
+## Admin Users
 
-All config endpoints require authentication.
+Admin-only endpoints for managing users. Requires admin authentication.
+
+### List All Users
+
+Get paginated list of all users with filtering options.
+
+```
+GET /api/v1/admin/users
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Query Parameters:**
+
+| Param  | Type   | Default | Description                                      |
+| ------ | ------ | ------- | ------------------------------------------------ |
+| page   | number | 1       | Page number                                      |
+| limit  | number | 20      | Items per page                                   |
+| search | string | -       | Search by first name, last name, email, or phone |
+| role   | string | -       | Filter by user role (`admin`, `user`, `guest`)   |
+
+**Response:** `200 OK`
+
+```json
+{
+  "meta": {
+    "total": 100,
+    "perPage": 20,
+    "currentPage": 1,
+    "lastPage": 5
+  },
+  "data": [
+    {
+      "id": 1,
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john@example.com",
+      "phone": "+1234567890",
+      "role": "user",
+      "isAdmin": false,
+      "isGuest": false,
+      "fullName": "John Doe",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+## Admin Dashboard
+
+Admin-only endpoints for dashboard statistics. Requires admin authentication.
+
+### Get Dashboard Stats
+
+Get dashboard statistics (total revenue, orders, average order value) with comparison to previous period.
+
+```
+GET /api/v1/admin/dashboard/stats
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Query Parameters:**
+
+| Param  | Type   | Default | Description                                                                      |
+| ------ | ------ | ------- | -------------------------------------------------------------------------------- |
+| period | string | month   | Time period: `month` (current vs previous month) or `year` (YTD vs previous YTD) |
+
+**Response:** `200 OK`
+
+```json
+{
+  "totalRevenue": {
+    "current": 50000,
+    "previous": 45000,
+    "change": 11.11
+  },
+  "totalOrders": {
+    "current": 150,
+    "previous": 120,
+    "change": 25.0
+  },
+  "avgOrderValue": {
+    "current": 333.33,
+    "previous": 375.0,
+    "change": -11.11
+  }
+}
+```
+
+**Note:** Revenue values are in cents. The `change` field represents percentage change from the previous period.
+
+### Get Revenue Graph
+
+Get 12-month revenue graph data.
+
+```
+GET /api/v1/admin/dashboard/revenue-graph
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Query Parameters:**
+
+| Param  | Type   | Default | Description                                               |
+| ------ | ------ | ------- | --------------------------------------------------------- |
+| period | string | month   | Time period (currently ignored, always returns 12 months) |
+
+**Response:** `200 OK`
+
+```json
+{
+  "data": [
+    {
+      "month": "2024-01-01",
+      "value": 45000
+    },
+    {
+      "month": "2024-02-01",
+      "value": 52000
+    }
+  ]
+}
+```
+
+**Note:** Returns data for the past 12 months. The `month` field is an ISO date string (YYYY-MM-01). The `value` field is total revenue in cents.
+
+### Get Orders Graph
+
+Get 12-month orders graph data.
+
+```
+GET /api/v1/admin/dashboard/orders-graph
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Query Parameters:**
+
+| Param  | Type   | Default | Description                                               |
+| ------ | ------ | ------- | --------------------------------------------------------- |
+| period | string | month   | Time period (currently ignored, always returns 12 months) |
+
+**Response:** `200 OK`
+
+```json
+{
+  "data": [
+    {
+      "month": "2024-01-01",
+      "value": 120
+    },
+    {
+      "month": "2024-02-01",
+      "value": 145
+    }
+  ]
+}
+```
+
+**Note:** Returns data for the past 12 months. The `month` field is an ISO date string (YYYY-MM-01). The `value` field is the number of orders.
+
+---
+
+## Admin Templates
+
+Admin-only endpoints for managing templates. Requires admin authentication.
+
+### Create Template
+
+```
+POST /api/v1/admin/templates
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Request Body:**
+
+| Field                     | Type   | Required | Description                   |
+| ------------------------- | ------ | -------- | ----------------------------- |
+| side                      | string | Yes      | `front` or `back`             |
+| name                      | string | Yes      | Template name (1-255 chars)   |
+| label                     | string | No       | Display label (1-255 chars)   |
+| description               | string | No       | Description (max 1000 chars)  |
+| svgString                 | string | No       | SVG template string           |
+| templateTypeId            | number | Yes      | Template type ID              |
+| frontendComponentName     | string | No       | React component name          |
+| frontendComponentFileName | string | No       | Component file name           |
+| backTemplateId            | number | No       | ID of back template           |
+| attributes                | array  | No       | Array of template attributes  |
+| tagIds                    | array  | No       | Array of tag IDs to associate |
+
+**attributes array item:**
+
+| Field        | Type   | Required | Description                    |
+| ------------ | ------ | -------- | ------------------------------ |
+| type         | string | Yes      | `color`, `image`, or `string`  |
+| name         | string | Yes      | Attribute name (1-255 chars)   |
+| label        | string | Yes      | Display label (1-255 chars)    |
+| defaultValue | string | No       | Default value (max 1000 chars) |
+| defaultColor | string | No       | Default color (max 1000 chars) |
+
+**Response:** `201 Created`
+
+### Update Template
+
+```
+PUT /api/v1/admin/templates/:id
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Request Body:** Same as create, all fields optional.
+
+**Response:** `200 OK`
+
+### Regenerate Template Snapshots
+
+Regenerate PNG snapshots for all templates or a specific template.
+
+```
+POST /api/v1/admin/templates/regenerate-snapshots
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Query Parameters:**
+
+| Param      | Type    | Default | Description                              |
+| ---------- | ------- | ------- | ---------------------------------------- |
+| templateId | number  | -       | Optional template ID to regenerate       |
+| force      | boolean | false   | Force regenerate even if snapshots exist |
+
+**Response:** `200 OK`
+
+```json
+{
+  "summary": {
+    "processed": 5,
+    "skipped": 2,
+    "failed": 0,
+    "total": 7
+  },
+  "results": [
+    { "id": 1, "name": "basketball-card", "status": "processed" },
+    { "id": 2, "name": "football-card", "status": "skipped" }
+  ]
+}
+```
+
+---
+
+## Admin Tags
+
+Admin-only endpoints for managing tags. Requires admin authentication.
+
+### Create Tag
+
+```
+POST /api/v1/admin/tags
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Request Body:**
+
+| Field       | Type   | Required | Description                    |
+| ----------- | ------ | -------- | ------------------------------ |
+| name        | string | Yes      | Tag name (1-255 chars, unique) |
+| label       | string | No       | Display label (1-255 chars)    |
+| description | string | No       | Description (max 1000 chars)   |
+
+**Response:** `201 Created`
+
+### Update Tag
+
+```
+PUT /api/v1/admin/tags/:id
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Request Body:** Same as create, all fields optional.
+
+**Response:** `200 OK`
+
+### Delete Tag
+
+```
+DELETE /api/v1/admin/tags/:id
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Response:** `204 No Content`
+
+---
+
+## Admin Configs
+
+Admin-only endpoints for managing system configuration. Requires admin authentication.
 
 ### List Configs
 
 ```
-GET /api/v1/configs
+GET /api/v1/admin/configs
 ```
 
-**Headers:** `Authorization: Bearer <token>`
+**Headers:** `Authorization: Bearer <admin_token>`
 
 **Response:** `200 OK`
 
@@ -1303,7 +1525,8 @@ GET /api/v1/configs
 [
   {
     "name": "BASE_PRICE_PER_PACK",
-    "value": "1999"
+    "value": "1999",
+    "description": "Base price per pack in cents"
   }
 ]
 ```
@@ -1311,27 +1534,28 @@ GET /api/v1/configs
 ### Get Config
 
 ```
-GET /api/v1/configs/:name
+GET /api/v1/admin/configs/:name
 ```
 
-**Headers:** `Authorization: Bearer <token>`
+**Headers:** `Authorization: Bearer <admin_token>`
 
 **Response:** `200 OK`
 
-### Create Config (Admin Only)
+### Create Config
 
 ```
-POST /api/v1/configs
+POST /api/v1/admin/configs
 ```
 
 **Headers:** `Authorization: Bearer <admin_token>`
 
 **Request Body:**
 
-| Field | Type   | Required | Description                  |
-| ----- | ------ | -------- | ---------------------------- |
-| name  | string | Yes      | Config name (enum value)     |
-| value | string | No       | Config value (max 255 chars) |
+| Field       | Type   | Required | Description                        |
+| ----------- | ------ | -------- | ---------------------------------- |
+| name        | string | Yes      | Config name (enum value)           |
+| value       | string | No       | Config value (max 255 chars)       |
+| description | string | No       | Config description (max 500 chars) |
 
 **Available Config Names:**
 
@@ -1339,21 +1563,76 @@ POST /api/v1/configs
 
 **Response:** `201 Created`
 
-### Update Config (Admin Only)
+### Update Config
 
 ```
-PUT /api/v1/configs/:name
+PUT /api/v1/admin/configs/:name
 ```
 
 **Headers:** `Authorization: Bearer <admin_token>`
 
 **Request Body:**
 
-| Field | Type   | Required | Description                  |
-| ----- | ------ | -------- | ---------------------------- |
-| value | string | No       | Config value (max 255 chars) |
+| Field       | Type   | Required | Description                        |
+| ----------- | ------ | -------- | ---------------------------------- |
+| value       | string | No       | Config value (max 255 chars)       |
+| description | string | No       | Config description (max 500 chars) |
 
 **Response:** `200 OK`
+
+---
+
+## Admin Featured Items
+
+Admin-only endpoints for managing featured items. Requires admin authentication.
+
+### Create Featured Item
+
+```
+POST /api/v1/admin/featured-items
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Content-Type:** `multipart/form-data`
+
+**Request Body:**
+
+| Field        | Type    | Required | Description                           |
+| ------------ | ------- | -------- | ------------------------------------- |
+| title        | string  | Yes      | Title (1-255 chars)                   |
+| description  | string  | No       | Description                           |
+| ctaText      | string  | No       | Call-to-action text (max 100 chars)   |
+| image        | file    | No       | Image file (jpg, jpeg, png, max 10MB) |
+| templateId   | number  | No       | Associated template ID                |
+| displayOrder | number  | No       | Display order (min: 0)                |
+| isActive     | boolean | No       | Active status                         |
+
+**Response:** `201 Created`
+
+### Update Featured Item
+
+```
+PUT /api/v1/admin/featured-items/:id
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Content-Type:** `multipart/form-data`
+
+**Request Body:** Same as create, all fields optional.
+
+**Response:** `200 OK`
+
+### Delete Featured Item
+
+```
+DELETE /api/v1/admin/featured-items/:id
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Response:** `204 No Content`
 
 ---
 
@@ -1395,51 +1674,227 @@ GET /api/v1/featured-items/:id
 
 **Response:** `200 OK`
 
-### Create Featured Item (Admin Only)
+---
+
+## Color Leagues
+
+Color leagues are sport/league categories for organizing color presets (team colors).
+
+### List Color Leagues
+
+Get all active color leagues ordered by rank.
 
 ```
-POST /api/v1/featured-items
+GET /api/v1/color-leagues
 ```
-
-**Headers:** `Authorization: Bearer <admin_token>`
-
-**Content-Type:** `multipart/form-data`
-
-**Request Body:**
-
-| Field        | Type    | Required | Description                           |
-| ------------ | ------- | -------- | ------------------------------------- |
-| title        | string  | Yes      | Title (1-255 chars)                   |
-| description  | string  | No       | Description                           |
-| ctaText      | string  | No       | Call-to-action text (max 100 chars)   |
-| image        | file    | No       | Image file (jpg, jpeg, png, max 10MB) |
-| templateId   | number  | No       | Associated template ID                |
-| displayOrder | number  | No       | Display order (min: 0)                |
-| isActive     | boolean | No       | Active status                         |
-
-**Response:** `201 Created`
-
-### Update Featured Item (Admin Only)
-
-```
-PUT /api/v1/featured-items/:id
-```
-
-**Headers:** `Authorization: Bearer <admin_token>`
-
-**Content-Type:** `multipart/form-data`
-
-**Request Body:** Same as create, all fields optional.
 
 **Response:** `200 OK`
 
-### Delete Featured Item (Admin Only)
+```json
+[
+  {
+    "id": 1,
+    "name": "nfl",
+    "label": "NFL",
+    "rank": 1
+  },
+  {
+    "id": 2,
+    "name": "nba",
+    "label": "NBA",
+    "rank": 2
+  }
+]
+```
+
+### Get Color League
+
+Get a single league with its presets.
 
 ```
-DELETE /api/v1/featured-items/:id
+GET /api/v1/color-leagues/:id
 ```
 
-**Headers:** `Authorization: Bearer <admin_token>`
+**Parameters:**
+
+| Param | Type          | Description       |
+| ----- | ------------- | ----------------- |
+| id    | number/string | League ID or name |
+
+**Response:** `200 OK`
+
+```json
+{
+  "id": 1,
+  "name": "nfl",
+  "label": "NFL",
+  "rank": 1,
+  "isActive": true,
+  "presets": [
+    {
+      "id": 1,
+      "colorLeagueId": 1,
+      "name": "Arizona Cardinals",
+      "abbreviation": "ARI",
+      "colors": ["#97233F", "#000000", "#FFB612"],
+      "rank": 1,
+      "isFeatured": false,
+      "isActive": true
+    }
+  ]
+}
+```
+
+---
+
+## Color Presets
+
+Color presets are predefined team color schemes that users can apply to their cards.
+
+### List Color Presets
+
+Get color presets with optional filtering.
+
+```
+GET /api/v1/color-presets
+```
+
+**Query Parameters:**
+
+| Param    | Type   | Default | Description                                                   |
+| -------- | ------ | ------- | ------------------------------------------------------------- |
+| league   | string | -       | Filter by league name (nfl, nba, mlb, nhl, epl, mls, country) |
+| featured | string | -       | Only return featured presets (`true`)                         |
+| search   | string | -       | Search by team name or abbreviation                           |
+
+**Response:** `200 OK`
+
+```json
+[
+  {
+    "id": 1,
+    "colorLeagueId": 1,
+    "name": "Arizona Cardinals",
+    "abbreviation": "ARI",
+    "colors": ["#97233F", "#000000", "#FFB612"],
+    "isFeatured": true,
+    "rank": 1,
+    "league": {
+      "id": 1,
+      "name": "nfl",
+      "label": "NFL"
+    }
+  }
+]
+```
+
+### Get Color Preset
+
+Get a single color preset.
+
+```
+GET /api/v1/color-presets/:id
+```
+
+**Response:** `200 OK`
+
+```json
+{
+  "id": 1,
+  "colorLeagueId": 1,
+  "name": "Arizona Cardinals",
+  "abbreviation": "ARI",
+  "colors": ["#97233F", "#000000", "#FFB612"],
+  "rank": 1,
+  "isFeatured": false,
+  "isActive": true,
+  "league": {
+    "id": 1,
+    "name": "nfl",
+    "label": "NFL"
+  }
+}
+```
+
+### Get User Favorites
+
+Get current user's favorite color presets.
+
+```
+GET /api/v1/color-presets/favorites
+```
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Response:** `200 OK`
+
+```json
+[
+  {
+    "id": 1,
+    "colorLeagueId": 1,
+    "name": "Arizona Cardinals",
+    "abbreviation": "ARI",
+    "colors": ["#97233F", "#000000", "#FFB612"],
+    "rank": 1,
+    "isFeatured": false,
+    "isActive": true,
+    "league": {
+      "id": 1,
+      "name": "nfl",
+      "label": "NFL"
+    }
+  }
+]
+```
+
+### Add to Favorites
+
+Add a color preset to user's favorites.
+
+```
+POST /api/v1/color-presets/favorites
+```
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request Body:**
+
+| Field         | Type   | Required | Description     |
+| ------------- | ------ | -------- | --------------- |
+| colorPresetId | number | Yes      | Color preset ID |
+
+**Response:** `201 Created`
+
+```json
+{
+  "message": "Added to favorites"
+}
+```
+
+**Error Response:** `409 Conflict`
+
+```json
+{
+  "message": "Already in favorites"
+}
+```
+
+### Remove from Favorites
+
+Remove a color preset from user's favorites.
+
+```
+DELETE /api/v1/color-presets/favorites/:id
+```
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Parameters:**
+
+| Param | Type   | Description     |
+| ----- | ------ | --------------- |
+| id    | number | Color preset ID |
 
 **Response:** `204 No Content`
 

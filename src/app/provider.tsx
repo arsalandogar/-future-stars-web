@@ -5,9 +5,7 @@ import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { ErrorBoundary } from 'react-error-boundary';
 
-import { MainErrorFallback } from '@/components/errors/main';
 import { theme } from '@/config/theme';
 import { queryConfig } from '@/lib/react-query';
 import { useThemeStore } from '@/stores/theme-store';
@@ -30,19 +28,17 @@ export function AppProvider({ children }: AppProviderProps) {
         </Center>
       }
     >
-      <ErrorBoundary FallbackComponent={MainErrorFallback}>
-        <HelmetProvider>
-          <QueryClientProvider client={queryClient}>
-            <MantineProvider theme={theme} forceColorScheme={colorScheme}>
-              <ModalsProvider>
-                <Notifications />
-                {children}
-              </ModalsProvider>
-            </MantineProvider>
-            {import.meta.env.DEV && <ReactQueryDevtools />}
-          </QueryClientProvider>
-        </HelmetProvider>
-      </ErrorBoundary>
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <MantineProvider theme={theme} forceColorScheme={colorScheme}>
+            <ModalsProvider>
+              <Notifications />
+              {children}
+            </ModalsProvider>
+          </MantineProvider>
+          {import.meta.env.DEV && <ReactQueryDevtools />}
+        </QueryClientProvider>
+      </HelmetProvider>
     </Suspense>
   );
 }
