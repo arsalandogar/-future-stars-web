@@ -4,7 +4,7 @@ import { api } from '@/lib/api-client';
 import type { TagListResponse, TagsListParams } from '../types';
 
 export const useTags = createQuery({
-  queryKey: ['tags'],
+  queryKey: [['admin', 'tags']],
   fetcher: (params: TagsListParams): Promise<TagListResponse> => {
     const searchParams = new URLSearchParams();
 
