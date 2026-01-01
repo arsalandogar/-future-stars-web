@@ -1,5 +1,13 @@
 import type { ReactNode } from 'react';
-import { Group, Pagination, Paper, Skeleton, Table, Text } from '@mantine/core';
+import {
+  Group,
+  Pagination,
+  Paper,
+  Select,
+  Skeleton,
+  Table,
+  Text,
+} from '@mantine/core';
 
 export interface Column {
   label: string;
@@ -10,6 +18,12 @@ export interface DataTablePagination {
   page: number;
   total: number;
   onChange: (page: number) => void;
+}
+
+export interface DataTablePageSize {
+  value: number;
+  options: number[];
+  onChange: (size: number) => void;
 }
 
 export interface DataTableProps<T> {
@@ -23,6 +37,7 @@ export interface DataTableProps<T> {
    */
   renderRow: (item: T, index: number) => ReactNode;
   pagination?: DataTablePagination;
+  pageSize?: DataTablePageSize;
   keyExtractor: (item: T) => string | number;
   skeletonCount?: number;
 }
@@ -77,6 +92,7 @@ export function DataTable<T>({
   emptyMessage = 'No data found',
   renderRow,
   pagination,
+  pageSize,
   keyExtractor,
   skeletonCount = 5,
 }: DataTableProps<T>) {
@@ -109,13 +125,37 @@ export function DataTable<T>({
         </Table>
       </Paper>
 
-      {pagination && pagination.total > 1 && (
-        <Group justify="center">
-          <Pagination
-            value={pagination.page}
-            onChange={pagination.onChange}
-            total={pagination.total}
-          />
+      {(pagination || pageSize) && (
+        <Group justify="center" gap="lg">
+          {pageSize && (
+            <Group gap="xs">
+              <Text size="sm" c="dimmed">
+                Show
+              </Text>
+              <Select
+                data={pageSize.options.map((opt) => ({
+                  value: String(opt),
+                  label: String(opt),
+                }))}
+                value={String(pageSize.value)}
+                onChange={(value) => {
+                  if (value) pageSize.onChange(Number(value));
+                }}
+                size="xs"
+                w={70}
+              />
+              <Text size="sm" c="dimmed">
+                per page
+              </Text>
+            </Group>
+          )}
+          {pagination && pagination.total > 1 && (
+            <Pagination
+              value={pagination.page}
+              onChange={pagination.onChange}
+              total={pagination.total}
+            />
+          )}
         </Group>
       )}
     </div>
