@@ -66,6 +66,7 @@ function NavSection({ items, collapsed, onItemClick }: NavSectionProps) {
 
   const renderNavLink = (item: NavItem) => {
     const key = item.href ?? item.label;
+    const hasChildren = !!item.children;
     const hasActiveChild = item.children?.some(
       (child) => child.href && pathname.startsWith(child.href)
     );
@@ -84,8 +85,9 @@ function NavSection({ items, collapsed, onItemClick }: NavSectionProps) {
         key={key}
         label={collapsed ? undefined : item.label}
         leftSection={<item.icon size={20} />}
-        defaultOpened={!!item.children}
-        bg={hasActiveChild ? 'var(--mantine-primary-color-light)' : undefined}
+        active={hasActiveChild ? true : undefined}
+        variant={hasChildren ? 'subtle' : undefined}
+        defaultOpened={hasActiveChild}
         {...linkProps}
       >
         {!collapsed &&
