@@ -12,7 +12,7 @@ import { TemplateRow } from './template-row';
 const routeApi = getRouteApi('/_authenticated/admin/templates');
 
 const COLUMNS: Column[] = [
-  { label: 'Preview', width: 80 },
+  { label: 'Front', width: 80 },
   { label: 'Back', width: 80 },
   { label: 'Label' },
   { label: 'Description' },
