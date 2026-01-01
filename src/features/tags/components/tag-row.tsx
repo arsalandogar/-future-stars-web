@@ -1,7 +1,7 @@
 import { Table, Text, Badge, ActionIcon, Menu } from '@mantine/core';
 import { Edit, MoreHorizontal, Trash2 } from 'lucide-react';
 import dayjs from 'dayjs';
-import type { Tag } from '../types';
+import type { Tag } from '@/types';
 import { modals } from '@mantine/modals';
 import { useDeleteTag } from '../api/delete-tag';
 

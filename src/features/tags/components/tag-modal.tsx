@@ -1,5 +1,5 @@
 import { Modal } from '@mantine/core';
-import type { Tag } from '../types';
+import type { Tag } from '@/types';
 import { TagForm } from './tag-form';
 
 type TagModalProps = {

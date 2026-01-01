@@ -1,7 +1,7 @@
 import { Link, getRouteApi } from '@tanstack/react-router';
 import { Button, Card, Group, Text, TextInput, Title } from '@mantine/core';
 import { useDebouncedCallback } from '@mantine/hooks';
-import { Download, Plus, Search, SlidersHorizontal } from 'lucide-react';
+import { Plus, Search, SlidersHorizontal } from 'lucide-react';
 
 import { DataTable, type Column } from '@/components/ui/data-table';
 
@@ -12,10 +12,12 @@ import { TemplateRow } from './template-row';
 const routeApi = getRouteApi('/_authenticated/admin/templates');
 
 const COLUMNS: Column[] = [
-  { label: 'Name' },
+  { label: 'Preview', width: 80 },
+  { label: 'Back', width: 80 },
+  { label: 'Label' },
   { label: 'Description' },
+  { label: 'Tags' },
   { label: 'Created', width: 150 },
-  { label: 'Back Template', width: 150 },
 ];
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
@@ -64,13 +66,6 @@ export function TemplatesList() {
               leftSection={<Plus size={16} />}
             >
               Create Template
-            </Button>
-            <Button
-              variant="default"
-              leftSection={<Download size={16} />}
-              disabled
-            >
-              Export
             </Button>
             <Button
               variant="default"

@@ -8,7 +8,7 @@ import { DataTable, type Column } from '@/components/ui/data-table';
 
 import { useTags } from '../api/get-tags';
 
-import type { Tag } from '../types';
+import type { Tag } from '@/types';
 
 import { TagRow } from './tag-row';
 import { TagModal } from './tag-modal';

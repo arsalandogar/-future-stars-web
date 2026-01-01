@@ -1,6 +1,7 @@
 import { createQuery } from '@/lib/react-query';
 import { api } from '@/lib/api-client';
-import type { Tag, TagsListParams } from '../types';
+import type { TagsListParams } from '../types';
+import type { Tag } from '@/types';
 
 export const useTags = createQuery({
   queryKey: ['admin', 'tags'],

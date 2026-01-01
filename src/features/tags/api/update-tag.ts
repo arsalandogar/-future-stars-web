@@ -1,7 +1,8 @@
 import { createMutation, invalidateQueries } from '@/lib/react-query';
 import { api } from '@/lib/api-client';
 import { useTags } from './get-tags';
-import type { Tag, CreateTagParam } from '../types';
+import type { CreateTagParam } from '../types';
+import type { Tag } from '@/types';
 import { notifications } from '@mantine/notifications';
 
 export const useUpdateTag = createMutation({

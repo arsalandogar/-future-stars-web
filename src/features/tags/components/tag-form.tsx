@@ -1,6 +1,6 @@
 import { Stack } from '@mantine/core';
 import { revalidateLogic } from '@tanstack/react-form';
-import type { Tag } from '../types';
+import type { Tag } from '@/types';
 import * as v from 'valibot';
 
 import { useCreateTag } from '../api/create-tag';
