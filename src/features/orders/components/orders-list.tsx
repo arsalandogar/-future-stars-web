@@ -1,7 +1,7 @@
 import { getRouteApi } from '@tanstack/react-router';
 import { Button, Card, Group, Text, TextInput, Title } from '@mantine/core';
 import { useDebouncedCallback } from '@mantine/hooks';
-import { Download, Search, SlidersHorizontal } from 'lucide-react';
+import { Search, SlidersHorizontal } from 'lucide-react';
 
 import { DataTable, type Column } from '@/components/ui/data-table';
 
@@ -54,15 +54,6 @@ export function OrdersList() {
                 Manage and fulfill your custom card pack orders.
               </Text>
             </div>
-            <Group>
-              <Button
-                variant="default"
-                leftSection={<Download size={16} />}
-                disabled
-              >
-                Export
-              </Button>
-            </Group>
           </Group>
 
           <Group justify="space-between">

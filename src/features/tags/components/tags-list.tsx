@@ -3,7 +3,7 @@ import { Text, Group, Card, Title, Button, TextInput } from '@mantine/core';
 import { useDebouncedCallback, useDisclosure } from '@mantine/hooks';
 import { useState } from 'react';
 
-import { Download, PlusIcon, Search, SlidersHorizontal } from 'lucide-react';
+import { PlusIcon, Search, SlidersHorizontal } from 'lucide-react';
 import { DataTable, type Column } from '@/components/ui/data-table';
 
 import { useTags } from '../api/get-tags';
@@ -70,13 +70,6 @@ export function TagsList() {
                 onClick={handleCreate}
               >
                 Add Tag
-              </Button>
-              <Button
-                variant="default"
-                leftSection={<Download size={16} />}
-                disabled
-              >
-                Export
               </Button>
             </Group>
           </Group>
