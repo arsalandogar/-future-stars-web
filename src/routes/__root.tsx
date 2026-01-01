@@ -1,12 +1,9 @@
-import {
-  createRootRouteWithContext,
-  Outlet,
-  useRouter,
-} from '@tanstack/react-router';
-import { Center, Loader, Button, Stack, Text, Title } from '@mantine/core';
+import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
+import { Center, Loader } from '@mantine/core';
 
 import type { User } from '@/types';
 import { MainErrorFallback } from '@/components/errors/main';
+import { NotFound } from '@/components/errors/not-found';
 
 function RootComponent() {
   return <Outlet />;
@@ -21,18 +18,9 @@ function PendingComponent() {
 }
 
 function NotFoundComponent() {
-  const router = useRouter();
-
   return (
     <Center h="100vh" w="100vw">
-      <Stack align="center" gap="md">
-        <Title order={1}>404</Title>
-        <Text size="xl">Page Not Found</Text>
-        <Text c="dimmed">The page you are looking for does not exist.</Text>
-        <Button onClick={() => void router.navigate({ to: '/' })}>
-          Go Home
-        </Button>
-      </Stack>
+      <NotFound />
     </Center>
   );
 }
