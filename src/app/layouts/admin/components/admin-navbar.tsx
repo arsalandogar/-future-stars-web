@@ -6,8 +6,9 @@ import {
   ActionIcon,
   Tooltip,
   UnstyledButton,
+  Menu,
 } from '@mantine/core';
-import { Link } from '@tanstack/react-router';
+import { Link, useLocation } from '@tanstack/react-router';
 import {
   LayoutGrid,
   Users,
@@ -15,27 +16,43 @@ import {
   ChevronLeft,
   X,
   Box,
-  Tags,
   Settings,
-  Star,
 } from 'lucide-react';
 
 import { Logo } from './logo';
 
+interface NavChildItem {
+  label: string;
+  href: string;
+}
+
 interface NavItem {
   label: string;
   icon: React.ComponentType<{ size?: number }>;
-  href: string;
+  href?: string;
+  children?: NavChildItem[];
 }
 
 const menuItems: NavItem[] = [
   { label: 'Dashboard', icon: LayoutGrid, href: '/admin' },
-  { label: 'Orders', icon: Box, href: '/admin/orders' },
   { label: 'Users', icon: Users, href: '/admin/users' },
-  { label: 'Templates', icon: Layers2, href: '/admin/templates' },
-  { label: 'Tags', icon: Tags, href: '/admin/tags' },
-  { label: 'Featured Items', icon: Star, href: '/admin/featured-items' },
-  { label: 'Configs', icon: Settings, href: '/admin/configs' },
+  { label: 'Orders', icon: Box, href: '/admin/orders' },
+  {
+    label: 'Templates',
+    icon: Layers2,
+    children: [
+      { label: 'Tags', href: '/admin/tags' },
+      { label: 'Templates', href: '/admin/templates' },
+    ],
+  },
+  {
+    label: 'Settings',
+    icon: Settings,
+    children: [
+      { label: 'Configs', href: '/admin/configs' },
+      { label: 'Featured Items', href: '/admin/featured-items' },
+    ],
+  },
 ];
 
 interface NavSectionProps {
@@ -45,41 +62,94 @@ interface NavSectionProps {
 }
 
 function NavSection({ items, collapsed, onItemClick }: NavSectionProps) {
-  return (
-    <Stack gap={2}>
-      {items.map((item) => {
-        const isExact = item.href === '/admin';
+  const { pathname } = useLocation();
 
-        const navLink = (
-          <NavLink
-            key={item.href}
-            component={Link}
-            to={item.href}
-            activeOptions={{ exact: isExact }}
-            activeProps={{ 'aria-current': 'page' }}
-            label={collapsed ? undefined : item.label}
-            leftSection={<item.icon size={20} />}
-            onClick={onItemClick}
-          />
-        );
-
-        if (collapsed) {
-          return (
-            <Tooltip
-              key={item.href}
-              label={item.label}
-              position="right"
-              withArrow
-            >
-              {navLink}
-            </Tooltip>
-          );
+  const renderNavLink = (item: NavItem) => {
+    const key = item.href ?? item.label;
+    const hasActiveChild = item.children?.some(
+      (child) => child.href && pathname.startsWith(child.href)
+    );
+    const linkProps = item.href
+      ? {
+          component: Link,
+          to: item.href,
+          activeOptions: { exact: item.href === '/admin' },
+          activeProps: { 'aria-current': 'page' as const },
+          onClick: onItemClick,
         }
+      : {};
 
-        return navLink;
-      })}
-    </Stack>
-  );
+    const navLink = (
+      <NavLink
+        key={key}
+        label={collapsed ? undefined : item.label}
+        leftSection={<item.icon size={20} />}
+        defaultOpened={!!item.children}
+        bg={hasActiveChild ? 'var(--mantine-primary-color-light)' : undefined}
+        {...linkProps}
+      >
+        {!collapsed &&
+          item.children?.map((child) => (
+            <NavLink
+              key={child.href}
+              component={Link}
+              to={child.href}
+              activeOptions={{ exact: false }}
+              activeProps={{ 'aria-current': 'page' }}
+              label={child.label}
+              onClick={onItemClick}
+            />
+          ))}
+      </NavLink>
+    );
+
+    // Collapsed with children: show hover menu
+    if (collapsed && item.children) {
+      return (
+        <Menu
+          key={key}
+          trigger="hover"
+          position="right-start"
+          withArrow
+          offset={12}
+        >
+          <Menu.Target>{navLink}</Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Label>{item.label}</Menu.Label>
+            {item.children.map((child) => {
+              const isActive = child.href && pathname.startsWith(child.href);
+              return (
+                <Menu.Item
+                  key={child.href ?? child.label}
+                  component={Link}
+                  to={child.href}
+                  onClick={onItemClick}
+                  bg={
+                    isActive ? 'var(--mantine-primary-color-light)' : undefined
+                  }
+                >
+                  {child.label}
+                </Menu.Item>
+              );
+            })}
+          </Menu.Dropdown>
+        </Menu>
+      );
+    }
+
+    // Collapsed without children: show tooltip
+    if (collapsed) {
+      return (
+        <Tooltip key={key} label={item.label} position="right" withArrow>
+          {navLink}
+        </Tooltip>
+      );
+    }
+
+    return navLink;
+  };
+
+  return <Stack gap={2}>{items.map(renderNavLink)}</Stack>;
 }
 
 interface AdminNavbarProps {
