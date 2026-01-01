@@ -3,7 +3,9 @@ import { createFormHook } from '@tanstack/react-form';
 import {
   FloatingPasswordField,
   FloatingTextField,
+  NumberInputField,
   Form,
+  ImageUploadCardField,
   PasswordField,
   SelectField,
   SubmitButton,
@@ -25,6 +27,8 @@ export const { useAppForm, withForm } = createFormHook({
     TextareaField,
     FloatingTextField,
     FloatingPasswordField,
+    ImageUploadCardField,
+    NumberInputField,
   },
   formComponents: {
     Form,

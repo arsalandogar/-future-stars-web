@@ -17,6 +17,7 @@ import {
   Box,
   Tags,
   Settings,
+  Star,
 } from 'lucide-react';
 
 import { Logo } from './logo';
@@ -33,6 +34,7 @@ const menuItems: NavItem[] = [
   { label: 'Users', icon: Users, href: '/admin/users' },
   { label: 'Templates', icon: Layers2, href: '/admin/templates' },
   { label: 'Tags', icon: Tags, href: '/admin/tags' },
+  { label: 'Featured Items', icon: Star, href: '/admin/featured-items' },
   { label: 'Configs', icon: Settings, href: '/admin/configs' },
 ];
 
