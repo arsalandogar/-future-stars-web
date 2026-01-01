@@ -1,6 +1,16 @@
 /* eslint-disable react-dom/no-dangerously-set-innerhtml */
 import { Link } from '@tanstack/react-router';
-import { Anchor, Badge, Group, Table, Text, Tooltip } from '@mantine/core';
+import {
+  ActionIcon,
+  Anchor,
+  Badge,
+  Group,
+  Menu,
+  Table,
+  Text,
+  Tooltip,
+} from '@mantine/core';
+import { MoreHorizontal, Tags } from 'lucide-react';
 
 import { formatDate } from '@/utils/date';
 
@@ -8,9 +18,10 @@ import type { Template } from '../types';
 
 interface TemplateRowProps {
   template: Template;
+  onSetTags: (template: Template) => void;
 }
 
-export function TemplateRow({ template }: TemplateRowProps) {
+export function TemplateRow({ template, onSetTags }: TemplateRowProps) {
   return (
     <>
       <Table.Td>
@@ -77,6 +88,23 @@ export function TemplateRow({ template }: TemplateRowProps) {
       </Table.Td>
       <Table.Td>
         <Text size="sm">{formatDate(template.createdAt)}</Text>
+      </Table.Td>
+      <Table.Td>
+        <Menu shadow="md" width={160} position="bottom-end">
+          <Menu.Target>
+            <ActionIcon variant="subtle" color="gray">
+              <MoreHorizontal size={16} />
+            </ActionIcon>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Item
+              leftSection={<Tags size={14} />}
+              onClick={() => onSetTags(template)}
+            >
+              Set Tags
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
       </Table.Td>
     </>
   );

@@ -1431,6 +1431,38 @@ PUT /api/v1/admin/templates/:id
 
 **Response:** `200 OK`
 
+### Set Tags for Templates
+
+Set tags for multiple templates (replaces existing tags).
+
+```
+POST /api/v1/admin/templates/set-tags
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Request Body:**
+
+| Field       | Type     | Required | Description                |
+| ----------- | -------- | -------- | -------------------------- |
+| templateIds | number[] | Yes      | Array of template IDs      |
+| tagIds      | number[] | Yes      | Array of tag IDs to attach |
+
+**Response:** `200 OK`
+
+```json
+[
+  {
+    "id": 1,
+    "name": "basketball-card",
+    "tags": [
+      { "id": 1, "name": "basketball", "label": "Basketball" },
+      { "id": 2, "name": "sports", "label": "Sports" }
+    ]
+  }
+]
+```
+
 ### Regenerate Template Snapshots
 
 Regenerate PNG snapshots for all templates or a specific template.

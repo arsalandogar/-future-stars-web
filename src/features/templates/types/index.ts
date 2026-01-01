@@ -27,3 +27,14 @@ export interface Template {
   backTemplate: TemplateBackTemplate | null;
   tags: Tag[];
 }
+
+export interface SetTagsParams {
+  templateIds: number[];
+  tagIds: number[];
+}
+
+export interface SetTagsResponse {
+  id: number;
+  name: string;
+  tags: Tag[];
+}
