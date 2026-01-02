@@ -105,13 +105,11 @@ export function TemplateTypeRow({ templateType }: TemplateTypeRowProps) {
                 size="sm"
                 onKeyDown={handleKeyDown}
                 min={0}
-                decimalScale={2}
-                prefix="$"
               />
             )}
           </form.AppField>
         ) : (
-          <Text size="sm">${templateType.extraPrice.toFixed(2)}</Text>
+          <Text size="sm">{templateType.extraPrice}</Text>
         )}
       </Table.Td>
       <Table.Td>

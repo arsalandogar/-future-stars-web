@@ -10,7 +10,7 @@ import { CreateTemplateTypeButton } from './create-template-type-button';
 const COLUMNS: Column[] = [
   { label: 'ID', width: 80 },
   { label: 'Name', width: 250 },
-  { label: 'Extra Price', width: 150 },
+  { label: 'Extra Price (cents)', width: 150 },
   { label: 'Actions', width: 120 },
 ];
 

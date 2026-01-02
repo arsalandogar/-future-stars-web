@@ -71,11 +71,9 @@ export function CreateTemplateTypeButton() {
               <form.AppField name="extraPrice">
                 {(field) => (
                   <field.NumberInputField
-                    label="Extra Price"
-                    placeholder="0.00"
+                    label="Extra Price (cents)"
+                    placeholder="0"
                     min={0}
-                    decimalScale={2}
-                    prefix="$"
                     required
                   />
                 )}
