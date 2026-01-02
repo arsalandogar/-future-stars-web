@@ -1,13 +1,7 @@
-import {
-  createFileRoute,
-  Link,
-  stripSearchParams,
-} from '@tanstack/react-router';
-import { Anchor, Breadcrumbs, Title } from '@mantine/core';
+import { createFileRoute, stripSearchParams } from '@tanstack/react-router';
 import * as v from 'valibot';
 
-import { Head } from '@/components/seo/head';
-import { TemplatesList } from '@/features/templates';
+import { TemplatesListPage } from '@/features/templates';
 
 const defaultValues = {
   search: '',
@@ -29,41 +23,9 @@ const templatesSearchSchema = v.object({
 });
 
 export const Route = createFileRoute('/_authenticated/admin/templates')({
-  component: TemplatesPage,
+  component: TemplatesListPage,
   validateSearch: templatesSearchSchema,
   search: {
     middlewares: [stripSearchParams(defaultValues)],
   },
 });
-
-function TemplatesPage() {
-  const breadcrumbItems = [
-    { title: 'Home', href: '/admin' },
-    { title: 'Templates', href: '/admin/templates' },
-  ];
-
-  return (
-    <>
-      <Head title="Templates" description="Manage templates" />
-      <div className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <Title order={2}>Templates</Title>
-          <Breadcrumbs>
-            {breadcrumbItems.map((item, index) => (
-              <Anchor
-                key={item.href}
-                component={Link}
-                to={item.href}
-                c={index === breadcrumbItems.length - 1 ? undefined : 'dimmed'}
-                size="sm"
-              >
-                {item.title}
-              </Anchor>
-            ))}
-          </Breadcrumbs>
-        </div>
-        <TemplatesList />
-      </div>
-    </>
-  );
-}

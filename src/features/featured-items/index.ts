@@ -1,3 +1,6 @@
+// Pages
+export { FeaturedItemsListPage } from './pages/featured-items-list-page';
+
 // Components
 export { FeaturedItemRow } from './components/featured-item-row';
 export { FeaturedItemsList } from './components/featured-items-list';

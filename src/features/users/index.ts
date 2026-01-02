@@ -1,3 +1,6 @@
+// Pages
+export { UsersListPage } from './pages/users-list-page';
+
 // Components
 export { UserRow } from './components/user-row';
 export { UsersList } from './components/users-list';

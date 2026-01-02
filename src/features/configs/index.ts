@@ -1,3 +1,6 @@
+// Pages
+export { ConfigsListPage } from './pages/configs-list-page';
+
 // Components
 export { ConfigsList } from './components/configs-list';
 

@@ -1,3 +1,6 @@
+// Pages
+export { TagsListPage } from './pages/tags-list-page';
+
 // Components
 export { TagRow } from './components/tag-row';
 export { TagsList } from './components/tags-list';

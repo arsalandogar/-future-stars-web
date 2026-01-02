@@ -1,0 +1,38 @@
+import { Anchor, Breadcrumbs, Title } from '@mantine/core';
+import { Link } from '@tanstack/react-router';
+
+import { Head } from '@/components/seo/head';
+
+import { TemplatesList } from '../components/templates-list';
+
+const breadcrumbItems = [
+  { title: 'Home', href: '/admin' },
+  { title: 'Templates', href: '/admin/templates' },
+];
+
+export function TemplatesListPage() {
+  return (
+    <>
+      <Head title="Templates" description="Manage templates" />
+      <div className="flex flex-col gap-6">
+        <div className="flex items-center justify-between">
+          <Title order={2}>Templates</Title>
+          <Breadcrumbs>
+            {breadcrumbItems.map((item, index) => (
+              <Anchor
+                key={item.href}
+                component={Link}
+                to={item.href}
+                c={index === breadcrumbItems.length - 1 ? undefined : 'dimmed'}
+                size="sm"
+              >
+                {item.title}
+              </Anchor>
+            ))}
+          </Breadcrumbs>
+        </div>
+        <TemplatesList />
+      </div>
+    </>
+  );
+}

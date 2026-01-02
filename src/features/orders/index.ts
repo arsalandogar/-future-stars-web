@@ -1,3 +1,6 @@
+// Pages
+export { OrdersListPage } from './pages/orders-list-page';
+
 // Components
 export { OrderRow } from './components/order-row';
 export { OrdersList } from './components/orders-list';

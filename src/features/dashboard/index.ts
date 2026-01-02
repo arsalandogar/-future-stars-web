@@ -1,3 +1,7 @@
+// Pages
+export { DashboardPage } from './pages/dashboard-page';
+export { HomePage } from './pages/home-page';
+
 // Components
 export { DashboardContent } from './components/dashboard-content';
 

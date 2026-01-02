@@ -1,3 +1,6 @@
+// Pages
+export { TemplatesListPage } from './pages/templates-list-page';
+
 // Components
 export { TemplateRow } from './components/template-row';
 export { TemplatesList } from './components/templates-list';

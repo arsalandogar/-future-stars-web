@@ -1,3 +1,6 @@
+// Pages
+export { TemplateTypesListPage } from './pages/template-types-list-page';
+
 // Components
 export { TemplateTypesList } from './components/template-types-list';
 
