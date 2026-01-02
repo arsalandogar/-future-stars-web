@@ -42,6 +42,7 @@ const menuItems: NavItem[] = [
     icon: Layers2,
     children: [
       { label: 'Tags', href: '/admin/tags' },
+      { label: 'Template Types', href: '/admin/template-types' },
       { label: 'Templates', href: '/admin/templates' },
     ],
   },

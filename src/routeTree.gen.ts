@@ -18,6 +18,7 @@ import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
 import { Route as AuthenticatedAdminTemplatesRouteImport } from './routes/_authenticated/admin/templates'
+import { Route as AuthenticatedAdminTemplateTypesRouteImport } from './routes/_authenticated/admin/template-types'
 import { Route as AuthenticatedAdminTagsRouteImport } from './routes/_authenticated/admin/tags'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin/orders'
 import { Route as AuthenticatedAdminFeaturedItemsRouteImport } from './routes/_authenticated/admin/featured-items'
@@ -68,6 +69,12 @@ const AuthenticatedAdminTemplatesRoute =
     path: '/templates',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminTemplateTypesRoute =
+  AuthenticatedAdminTemplateTypesRouteImport.update({
+    id: '/template-types',
+    path: '/template-types',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminTagsRoute = AuthenticatedAdminTagsRouteImport.update({
   id: '/tags',
   path: '/tags',
@@ -102,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/admin/featured-items': typeof AuthenticatedAdminFeaturedItemsRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/tags': typeof AuthenticatedAdminTagsRoute
+  '/admin/template-types': typeof AuthenticatedAdminTemplateTypesRoute
   '/admin/templates': typeof AuthenticatedAdminTemplatesRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -115,6 +123,7 @@ export interface FileRoutesByTo {
   '/admin/featured-items': typeof AuthenticatedAdminFeaturedItemsRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/tags': typeof AuthenticatedAdminTagsRoute
+  '/admin/template-types': typeof AuthenticatedAdminTemplateTypesRoute
   '/admin/templates': typeof AuthenticatedAdminTemplatesRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -131,6 +140,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/featured-items': typeof AuthenticatedAdminFeaturedItemsRoute
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/tags': typeof AuthenticatedAdminTagsRoute
+  '/_authenticated/admin/template-types': typeof AuthenticatedAdminTemplateTypesRoute
   '/_authenticated/admin/templates': typeof AuthenticatedAdminTemplatesRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/admin/featured-items'
     | '/admin/orders'
     | '/admin/tags'
+    | '/admin/template-types'
     | '/admin/templates'
     | '/admin/users'
     | '/admin/'
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '/admin/featured-items'
     | '/admin/orders'
     | '/admin/tags'
+    | '/admin/template-types'
     | '/admin/templates'
     | '/admin/users'
     | '/admin'
@@ -175,6 +187,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/featured-items'
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/tags'
+    | '/_authenticated/admin/template-types'
     | '/_authenticated/admin/templates'
     | '/_authenticated/admin/users'
     | '/_authenticated/admin/'
@@ -250,6 +263,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTemplatesRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/template-types': {
+      id: '/_authenticated/admin/template-types'
+      path: '/template-types'
+      fullPath: '/admin/template-types'
+      preLoaderRoute: typeof AuthenticatedAdminTemplateTypesRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/tags': {
       id: '/_authenticated/admin/tags'
       path: '/tags'
@@ -300,6 +320,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminFeaturedItemsRoute: typeof AuthenticatedAdminFeaturedItemsRoute
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAdminTagsRoute: typeof AuthenticatedAdminTagsRoute
+  AuthenticatedAdminTemplateTypesRoute: typeof AuthenticatedAdminTemplateTypesRoute
   AuthenticatedAdminTemplatesRoute: typeof AuthenticatedAdminTemplatesRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -311,6 +332,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminFeaturedItemsRoute: AuthenticatedAdminFeaturedItemsRoute,
     AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
     AuthenticatedAdminTagsRoute: AuthenticatedAdminTagsRoute,
+    AuthenticatedAdminTemplateTypesRoute: AuthenticatedAdminTemplateTypesRoute,
     AuthenticatedAdminTemplatesRoute: AuthenticatedAdminTemplatesRoute,
     AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
