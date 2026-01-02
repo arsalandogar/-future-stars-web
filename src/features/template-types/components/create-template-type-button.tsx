@@ -1,4 +1,4 @@
-import { Button, Modal, Stack, NumberInput } from '@mantine/core';
+import { Button, Modal, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { revalidateLogic } from '@tanstack/react-form';
 import { Plus } from 'lucide-react';
@@ -70,17 +70,9 @@ export function CreateTemplateTypeButton() {
 
               <form.AppField name="extraPrice">
                 {(field) => (
-                  <NumberInput
+                  <field.NumberInputField
                     label="Extra Price"
                     placeholder="0.00"
-                    value={field.state.value}
-                    onChange={(val) => {
-                      const numVal =
-                        typeof val === 'string'
-                          ? parseFloat(val) || 0
-                          : (val ?? 0);
-                      field.handleChange(numVal);
-                    }}
                     min={0}
                     decimalScale={2}
                     prefix="$"

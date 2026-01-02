@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActionIcon, Group, Table, Text, NumberInput } from '@mantine/core';
+import { ActionIcon, Group, Table, Text } from '@mantine/core';
 import { revalidateLogic } from '@tanstack/react-form';
 import { Check, Pencil, Trash2, X } from 'lucide-react';
 import { modals } from '@mantine/modals';
@@ -101,14 +101,8 @@ export function TemplateTypeRow({ templateType }: TemplateTypeRowProps) {
         {isEditing ? (
           <form.AppField name="extraPrice">
             {(field) => (
-              <NumberInput
+              <field.NumberInputField
                 size="sm"
-                value={field.state.value}
-                onChange={(val) => {
-                  const numVal =
-                    typeof val === 'string' ? parseFloat(val) || 0 : (val ?? 0);
-                  field.handleChange(numVal);
-                }}
                 onKeyDown={handleKeyDown}
                 min={0}
                 decimalScale={2}
