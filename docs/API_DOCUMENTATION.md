@@ -6,6 +6,7 @@ Base URL: `/api/v1`
 
 - [Authentication](#authentication)
 - [Profile](#profile)
+- [Legal](#legal)
 - [Templates](#templates)
 - [Tags](#tags)
 - [Cards](#cards)
@@ -23,6 +24,7 @@ Base URL: `/api/v1`
 - [Admin Tags](#admin-tags)
 - [Admin Configs](#admin-configs)
 - [Admin Featured Items](#admin-featured-items)
+- [Admin Legal](#admin-legal)
 
 ---
 
@@ -44,13 +46,22 @@ POST /api/v1/auth/register
 
 **Request Body:**
 
-| Field     | Type   | Required | Description                  |
-| --------- | ------ | -------- | ---------------------------- |
-| firstName | string | Yes      | First name (1-64 chars)      |
-| lastName  | string | Yes      | Last name (1-64 chars)       |
-| email     | string | Yes      | Valid email (must be unique) |
-| password  | string | Yes      | Password (8-64 chars)        |
-| userId    | number | No       | Guest user ID to upgrade     |
+| Field          | Type    | Required | Description                       |
+| -------------- | ------- | -------- | --------------------------------- |
+| firstName      | string  | Yes      | First name (1-64 chars)           |
+| lastName       | string  | Yes      | Last name (1-64 chars)            |
+| email          | string  | Yes      | Valid email (must be unique)      |
+| password       | string  | Yes      | Password (8-64 chars)             |
+| userId         | number  | No       | Guest user ID to upgrade          |
+| acceptPolicies | boolean | Yes      | Must be `true` to accept policies |
+| policyVersions | object  | Yes      | Policy versions being accepted    |
+
+**policyVersions object:**
+
+| Field         | Type   | Required | Description                            |
+| ------------- | ------ | -------- | -------------------------------------- |
+| privacyPolicy | string | Yes      | Privacy policy version (e.g., `1.0.0`) |
+| terms         | string | Yes      | Terms version (e.g., `1.0.0`)          |
 
 **Response:** `200 OK`
 
@@ -69,6 +80,8 @@ POST /api/v1/auth/register
   }
 }
 ```
+
+**Note:** Registration creates acceptance records for both privacy policy and terms. Invalid policy versions will result in a 400 error.
 
 See [Token Object](#token-object) for the token structure.
 
@@ -281,9 +294,130 @@ GET /api/v1/profile
   "role": "user",
   "isAdmin": false,
   "isGuest": false,
-  "fullName": "John Doe"
+  "fullName": "John Doe",
+  "policyStatus": {
+    "privacyPolicy": {
+      "accepted": true,
+      "acceptedVersion": "1.0.0",
+      "currentVersion": "1.0.0",
+      "requiresAction": false
+    },
+    "terms": {
+      "accepted": true,
+      "acceptedVersion": "1.0.0",
+      "currentVersion": "1.1.0",
+      "requiresAction": true
+    }
+  }
 }
 ```
+
+**policyStatus object:**
+
+| Field         | Type   | Description                      |
+| ------------- | ------ | -------------------------------- |
+| privacyPolicy | object | Privacy policy acceptance status |
+| terms         | object | Terms acceptance status          |
+
+**Status item fields:**
+
+| Field           | Type    | Description                                        |
+| --------------- | ------- | -------------------------------------------------- |
+| accepted        | boolean | Whether user has accepted the current version      |
+| acceptedVersion | string  | Version the user accepted (null if never accepted) |
+| currentVersion  | string  | Current published version (null if none exists)    |
+| requiresAction  | boolean | Whether user needs to accept current version       |
+
+---
+
+## Legal
+
+Legal document management for privacy policy and terms & conditions.
+
+### Get Current Legal Document
+
+Get the current (published) legal document for a given type.
+
+```
+GET /api/v1/legal/:type
+```
+
+**Parameters:**
+
+| Param | Type   | Description                 |
+| ----- | ------ | --------------------------- |
+| type  | string | `privacy-policy` or `terms` |
+
+**Response:** `200 OK`
+
+```json
+{
+  "id": 1,
+  "type": "privacy-policy",
+  "version": "1.0.0",
+  "content": "<html content>",
+  "requiresAcceptance": true,
+  "publishedAt": "2025-01-15T00:00:00.000Z",
+  "isDraft": false,
+  "isPublished": true
+}
+```
+
+### Accept Legal Documents
+
+Accept legal documents (bulk) for authenticated user.
+
+```
+POST /api/v1/legal/accept
+```
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request Body:**
+
+```json
+{
+  "acceptances": [
+    { "type": "privacy-policy", "version": "1.0.0" },
+    { "type": "terms", "version": "1.0.0" }
+  ]
+}
+```
+
+**acceptances array item:**
+
+| Field   | Type   | Required | Description                      |
+| ------- | ------ | -------- | -------------------------------- |
+| type    | string | Yes      | `privacy-policy` or `terms`      |
+| version | string | Yes      | Semantic version (e.g., `1.0.0`) |
+
+**Response:** `200 OK`
+
+```json
+{
+  "message": "Documents accepted successfully",
+  "data": {
+    "acceptances": [
+      {
+        "type": "privacy-policy",
+        "version": "1.0.0",
+        "acceptedAt": "2025-01-15T10:00:00Z"
+      },
+      {
+        "type": "terms",
+        "version": "1.0.0",
+        "acceptedAt": "2025-01-15T10:00:00Z"
+      }
+    ]
+  }
+}
+```
+
+**Notes:**
+
+- Accepts specific versions as provided (for legal audit trail)
+- Creates separate acceptance records for each document
+- Records IP address and acceptance method (`explicit`)
 
 ---
 
@@ -1671,6 +1805,216 @@ DELETE /api/v1/admin/featured-items/:id
 **Headers:** `Authorization: Bearer <admin_token>`
 
 **Response:** `204 No Content`
+
+---
+
+## Admin Legal
+
+Admin-only endpoints for managing legal documents (privacy policy and terms). Requires admin authentication.
+
+### List All Legal Documents
+
+Get paginated list of all legal documents (drafts and published).
+
+```
+GET /api/v1/admin/legal
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Query Parameters:**
+
+| Param  | Type   | Default | Description                                |
+| ------ | ------ | ------- | ------------------------------------------ |
+| page   | number | 1       | Page number                                |
+| limit  | number | 20      | Items per page (max 100)                   |
+| type   | string | -       | Filter by type (`privacy-policy`, `terms`) |
+| status | string | -       | Filter by status (`draft`, `published`)    |
+| search | string | -       | Search by content                          |
+
+**Response:** `200 OK`
+
+```json
+{
+  "meta": {
+    "total": 10,
+    "perPage": 20,
+    "currentPage": 1,
+    "lastPage": 1
+  },
+  "data": [
+    {
+      "id": 1,
+      "type": "privacy-policy",
+      "version": "1.0.0",
+      "content": "<html content>",
+      "requiresAcceptance": true,
+      "publishedAt": "2025-01-15T00:00:00.000Z",
+      "isDraft": false,
+      "isPublished": true,
+      "creator": {
+        "id": 1,
+        "firstName": "Admin",
+        "lastName": "User"
+      }
+    }
+  ]
+}
+```
+
+### Get Legal Document
+
+Get a specific legal document by ID.
+
+```
+GET /api/v1/admin/legal/:id
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Response:** `200 OK`
+
+```json
+{
+  "id": 1,
+  "type": "privacy-policy",
+  "version": "1.0.0",
+  "content": "<html content>",
+  "requiresAcceptance": true,
+  "publishedAt": "2025-01-15T00:00:00.000Z",
+  "publishedBy": 1,
+  "isDraft": false,
+  "isPublished": true,
+  "creator": {...},
+  "publisher": {...}
+}
+```
+
+### Create Draft
+
+Create a new draft legal document.
+
+```
+POST /api/v1/admin/legal
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Request Body:**
+
+| Field   | Type   | Required | Description                                    |
+| ------- | ------ | -------- | ---------------------------------------------- |
+| type    | string | Yes      | `privacy-policy` or `terms`                    |
+| version | string | Yes      | Semantic version (e.g., `1.0.0`, max 20 chars) |
+| content | string | Yes      | HTML content (min 1 char)                      |
+
+**Response:** `201 Created`
+
+### Update Draft
+
+Update a draft legal document. Only drafts can be updated.
+
+```
+PUT /api/v1/admin/legal/:id
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Request Body:**
+
+| Field   | Type   | Required | Description                                    |
+| ------- | ------ | -------- | ---------------------------------------------- |
+| version | string | No       | Semantic version (e.g., `1.0.0`, max 20 chars) |
+| content | string | No       | HTML content (min 1 char)                      |
+
+**Response:** `200 OK`
+
+**Error:** `403 Forbidden` if document is published (immutable)
+
+### Delete Draft
+
+Delete a draft legal document (soft delete). Only drafts can be deleted.
+
+```
+DELETE /api/v1/admin/legal/:id
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Response:** `204 No Content`
+
+**Error:** `403 Forbidden` if document is published (immutable)
+
+### Publish Draft
+
+Publish a draft legal document. Once published, the document becomes immutable.
+
+```
+POST /api/v1/admin/legal/:id/publish
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Request Body:**
+
+| Field              | Type    | Required | Description                                      |
+| ------------------ | ------- | -------- | ------------------------------------------------ |
+| requiresAcceptance | boolean | Yes      | Whether this version requires user re-acceptance |
+
+**Response:** `200 OK`
+
+```json
+{
+  "id": 1,
+  "type": "privacy-policy",
+  "version": "1.0.0",
+  "content": "<html content>",
+  "requiresAcceptance": true,
+  "publishedAt": "2025-01-15T00:00:00.000Z",
+  "publishedBy": 1,
+  "isDraft": false,
+  "isPublished": true
+}
+```
+
+**Notes:**
+
+- Sets `publishedAt` timestamp immediately
+- If `requiresAcceptance: true`, users will see `requiresAction: true` in their policy status
+
+### Get Version History
+
+Get all published versions for a document type.
+
+```
+GET /api/v1/admin/legal/versions/:type
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Parameters:**
+
+| Param | Type   | Description                 |
+| ----- | ------ | --------------------------- |
+| type  | string | `privacy-policy` or `terms` |
+
+**Response:** `200 OK`
+
+```json
+[
+  {
+    "id": 1,
+    "version": "1.0.0",
+    "publishedAt": "2025-01-15T00:00:00.000Z",
+    "requiresAcceptance": true,
+    "creator": {
+      "id": 1,
+      "firstName": "Admin",
+      "lastName": "User"
+    }
+  }
+]
+```
 
 ---
 
