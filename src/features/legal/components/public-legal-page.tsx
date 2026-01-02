@@ -40,14 +40,9 @@ export function PublicLegalPage({ type, title }: PublicLegalPageProps) {
       )}
 
       {document && (
-        <>
-          <Title order={1} mb="xl">
-            {title}
-          </Title>
-          <TypographyStylesProvider>
-            <div dangerouslySetInnerHTML={{ __html: document.content }} />
-          </TypographyStylesProvider>
-        </>
+        <TypographyStylesProvider>
+          <div dangerouslySetInnerHTML={{ __html: document.content }} />
+        </TypographyStylesProvider>
       )}
     </LegalLayout>
   );

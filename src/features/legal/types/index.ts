@@ -5,15 +5,17 @@ export type LegalDocumentStatus = 'draft' | 'published';
 
 export const LEGAL_DOCUMENT_CONFIG: Record<
   LegalDocumentType,
-  { title: string; description: string }
+  { title: string; description: string; publicUrl: string }
 > = {
   'privacy-policy': {
     title: 'Privacy Policy',
     description: 'Manage privacy policy document versions.',
+    publicUrl: '/privacy-policy',
   },
   terms: {
     title: 'Terms & Conditions',
     description: 'Manage terms and conditions document versions.',
+    publicUrl: '/terms-and-conditions',
   },
 };
 

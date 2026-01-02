@@ -1,5 +1,6 @@
-import { Anchor, Breadcrumbs, Title } from '@mantine/core';
-import { Link, useNavigate } from '@tanstack/react-router';
+import { Anchor, Title } from '@mantine/core';
+import { useNavigate } from '@tanstack/react-router';
+import { ExternalLink } from 'lucide-react';
 
 import { Head } from '@/components/seo/head';
 
@@ -25,11 +26,6 @@ export function LegalListPage({ type, searchParams }: LegalListPageProps) {
 
   const config = getLegalDocumentConfig(type);
   const basePath = `/admin/legal/${type}`;
-
-  const breadcrumbItems = [
-    { title: 'Home', href: '/admin' },
-    { title: config.title, href: basePath },
-  ];
 
   const handleSearchChange = (newSearch: string) => {
     void navigate({
@@ -63,19 +59,11 @@ export function LegalListPage({ type, searchParams }: LegalListPageProps) {
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <Title order={2}>{config.title}</Title>
-          <Breadcrumbs>
-            {breadcrumbItems.map((item, index) => (
-              <Anchor
-                key={item.href}
-                component={Link}
-                to={item.href}
-                c={index === breadcrumbItems.length - 1 ? undefined : 'dimmed'}
-                size="sm"
-              >
-                {item.title}
-              </Anchor>
-            ))}
-          </Breadcrumbs>
+          <Anchor href={config.publicUrl} target="_blank" size="sm">
+            <span className="flex items-center gap-1">
+              View Public Page <ExternalLink size={14} />
+            </span>
+          </Anchor>
         </div>
         <LegalDocumentList
           type={type}
