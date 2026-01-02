@@ -1,6 +1,6 @@
-import { ActionIcon, Menu, Table, Text } from '@mantine/core';
+import { ActionIcon, Anchor, Menu, Table, Text } from '@mantine/core';
 import { Link } from '@tanstack/react-router';
-import { Eye, Edit, Send, Trash2, MoreHorizontal } from 'lucide-react';
+import { Edit, Send, Trash2, MoreHorizontal } from 'lucide-react';
 
 import { MappedBadge } from '@/components/ui/mapped-badge';
 import { formatDate } from '@/utils/date';
@@ -31,9 +31,14 @@ export function LegalDocumentRow({
   return (
     <>
       <Table.Td>
-        <Text size="sm" fw={500}>
+        <Anchor
+          component={Link}
+          to={`${basePath}/${document.id}`}
+          size="sm"
+          fw={500}
+        >
           {document.version}
-        </Text>
+        </Anchor>
       </Table.Td>
       <Table.Td>
         <MappedBadge value={status} colorMap={STATUS_COLORS} />
@@ -55,13 +60,6 @@ export function LegalDocumentRow({
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item
-              component={Link}
-              to={`${basePath}/${document.id}`}
-              leftSection={<Eye size={14} />}
-            >
-              View
-            </Menu.Item>
             <Menu.Item
               component={Link}
               to={`${basePath}/${document.id}/edit`}

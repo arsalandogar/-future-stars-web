@@ -50,12 +50,13 @@ export function LegalVersionHistory({
     <Card withBorder radius="md" p="lg">
       <Stack gap="md">
         <Title order={4}>Version History</Title>
-        <Table highlightOnHover>
+        <Table>
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Version</Table.Th>
               <Table.Th>Published At</Table.Th>
               <Table.Th>Requires Acceptance</Table.Th>
+              <Table.Th>Created By</Table.Th>
               <Table.Th>Published By</Table.Th>
             </Table.Tr>
           </Table.Thead>
@@ -85,7 +86,14 @@ export function LegalVersionHistory({
                 </Table.Td>
                 <Table.Td>
                   <Text size="sm">
-                    {version.publisher.firstName} {version.publisher.lastName}
+                    {version.creator.firstName} {version.creator.lastName}
+                  </Text>
+                </Table.Td>
+                <Table.Td>
+                  <Text size="sm">
+                    {version.publisher
+                      ? `${version.publisher.firstName} ${version.publisher.lastName}`
+                      : '-'}
                   </Text>
                 </Table.Td>
               </Table.Tr>

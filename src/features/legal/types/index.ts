@@ -57,7 +57,7 @@ export interface LegalVersionHistoryItem {
   publishedAt: string;
   requiresAcceptance: boolean;
   creator: LegalDocumentCreator;
-  publisher: LegalDocumentCreator;
+  publisher: LegalDocumentCreator | null;
 }
 
 export interface LegalDocumentsListParams {
