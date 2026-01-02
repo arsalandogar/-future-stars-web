@@ -63,10 +63,16 @@ src/features/example-feature/
 ├── assets/           # Feature-specific static files
 ├── components/       # Feature-scoped components
 ├── hooks/            # Feature-specific hooks
+├── pages/            # Page components rendered by routes
 ├── stores/           # Feature state management
 ├── types/            # TypeScript types for this feature
 └── utils/            # Feature utility functions
 ```
+
+**Pages vs Components:**
+
+- `pages/` - Full page components rendered by route files. Contain page-level logic and data fetching.
+- `components/` - Reusable UI pieces used within pages or other components.
 
 ## Architecture
 

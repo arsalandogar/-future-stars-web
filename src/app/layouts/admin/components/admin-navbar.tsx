@@ -17,6 +17,7 @@ import {
   X,
   Box,
   Settings,
+  Scale,
 } from 'lucide-react';
 
 import { Logo } from './logo';
@@ -44,6 +45,14 @@ const menuItems: NavItem[] = [
       { label: 'Tags', href: '/admin/tags' },
       { label: 'Template Types', href: '/admin/template-types' },
       { label: 'Templates', href: '/admin/templates' },
+    ],
+  },
+  {
+    label: 'Legal',
+    icon: Scale,
+    children: [
+      { label: 'Privacy Policy', href: '/admin/legal/privacy-policy' },
+      { label: 'Terms & Conditions', href: '/admin/legal/terms' },
     ],
   },
   {

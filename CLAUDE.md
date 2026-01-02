@@ -38,6 +38,29 @@ Uses **TanStack Router** with file-based routing:
 - Layout routes use `route.tsx` files (e.g., `src/routes/auth/route.tsx` wraps `/auth/*`)
 - Root route at `src/routes/__root.tsx` defines global error, pending, and 404 components
 
+**Route files should be thin wrappers** that only handle routing concerns:
+
+```typescript
+// src/routes/_authenticated/admin/legal/$type/$id.tsx
+import { createFileRoute } from '@tanstack/react-router';
+import { LegalViewPage, type LegalDocumentType } from '@/features/legal';
+
+export const Route = createFileRoute('/_authenticated/admin/legal/$type/$id')({
+  component: RouteComponent,
+});
+
+function RouteComponent() {
+  const { type, id } = Route.useParams();
+  return <LegalViewPage type={type as LegalDocumentType} id={Number(id)} />;
+}
+```
+
+Page components live in `src/features/<feature>/pages/` and contain the actual UI/business logic. This separation keeps route files focused on:
+
+- Route configuration
+- Params/search validation
+- Loaders and beforeLoad hooks
+
 ### Data Fetching
 
 Uses **TanStack Query** with **react-query-kit** for type-safe API hooks:
@@ -177,12 +200,18 @@ src/features/example-feature/
 ├── assets/           # Feature-specific static files
 ├── components/       # Feature-scoped components
 ├── hooks/            # Feature-specific hooks
+├── pages/            # Page components rendered by routes
 ├── stores/           # Feature state management
 ├── types/            # TypeScript types for this feature
 └── utils/            # Feature utility functions
 ```
 
 Only include folders that are needed for each feature.
+
+**Pages vs Components:**
+
+- `pages/` - Full page components that are rendered by route files. Contain page-level logic, data fetching, and compose other components.
+- `components/` - Reusable UI pieces used within pages or other components. Should not contain page-level concerns.
 
 Each feature must have an `index.ts` barrel file that exports its public API (components, hooks, types). Other parts of the app should only import from the feature's index, not from internal files.
 

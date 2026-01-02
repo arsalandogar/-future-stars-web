@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsAndConditionsRouteImport } from './routes/terms-and-conditions'
+import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
@@ -23,7 +25,23 @@ import { Route as AuthenticatedAdminTagsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin/orders'
 import { Route as AuthenticatedAdminFeaturedItemsRouteImport } from './routes/_authenticated/admin/featured-items'
 import { Route as AuthenticatedAdminConfigsRouteImport } from './routes/_authenticated/admin/configs'
+import { Route as AuthenticatedAdminLegalTypeRouteRouteImport } from './routes/_authenticated/admin/legal/$type/route'
+import { Route as AuthenticatedAdminLegalTypeIndexRouteImport } from './routes/_authenticated/admin/legal/$type/index'
+import { Route as AuthenticatedAdminLegalTypeVersionsRouteImport } from './routes/_authenticated/admin/legal/$type/versions'
+import { Route as AuthenticatedAdminLegalTypeCreateRouteImport } from './routes/_authenticated/admin/legal/$type/create'
+import { Route as AuthenticatedAdminLegalTypeIdRouteImport } from './routes/_authenticated/admin/legal/$type/$id'
+import { Route as AuthenticatedAdminLegalTypeIdEditRouteImport } from './routes/_authenticated/admin/legal/$type/$id.edit'
 
+const TermsAndConditionsRoute = TermsAndConditionsRouteImport.update({
+  id: '/terms-and-conditions',
+  path: '/terms-and-conditions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
@@ -98,9 +116,47 @@ const AuthenticatedAdminConfigsRoute =
     path: '/configs',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminLegalTypeRouteRoute =
+  AuthenticatedAdminLegalTypeRouteRouteImport.update({
+    id: '/legal/$type',
+    path: '/legal/$type',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminLegalTypeIndexRoute =
+  AuthenticatedAdminLegalTypeIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminLegalTypeRouteRoute,
+  } as any)
+const AuthenticatedAdminLegalTypeVersionsRoute =
+  AuthenticatedAdminLegalTypeVersionsRouteImport.update({
+    id: '/versions',
+    path: '/versions',
+    getParentRoute: () => AuthenticatedAdminLegalTypeRouteRoute,
+  } as any)
+const AuthenticatedAdminLegalTypeCreateRoute =
+  AuthenticatedAdminLegalTypeCreateRouteImport.update({
+    id: '/create',
+    path: '/create',
+    getParentRoute: () => AuthenticatedAdminLegalTypeRouteRoute,
+  } as any)
+const AuthenticatedAdminLegalTypeIdRoute =
+  AuthenticatedAdminLegalTypeIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAdminLegalTypeRouteRoute,
+  } as any)
+const AuthenticatedAdminLegalTypeIdEditRoute =
+  AuthenticatedAdminLegalTypeIdEditRouteImport.update({
+    id: '/edit',
+    path: '/edit',
+    getParentRoute: () => AuthenticatedAdminLegalTypeIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/auth': typeof AuthRouteRouteWithChildren
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
@@ -113,9 +169,17 @@ export interface FileRoutesByFullPath {
   '/admin/templates': typeof AuthenticatedAdminTemplatesRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/admin/legal/$type': typeof AuthenticatedAdminLegalTypeRouteRouteWithChildren
+  '/admin/legal/$type/$id': typeof AuthenticatedAdminLegalTypeIdRouteWithChildren
+  '/admin/legal/$type/create': typeof AuthenticatedAdminLegalTypeCreateRoute
+  '/admin/legal/$type/versions': typeof AuthenticatedAdminLegalTypeVersionsRoute
+  '/admin/legal/$type/': typeof AuthenticatedAdminLegalTypeIndexRoute
+  '/admin/legal/$type/$id/edit': typeof AuthenticatedAdminLegalTypeIdEditRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRouteRouteWithChildren
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/': typeof AuthenticatedIndexRoute
@@ -127,11 +191,18 @@ export interface FileRoutesByTo {
   '/admin/templates': typeof AuthenticatedAdminTemplatesRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/admin/legal/$type/$id': typeof AuthenticatedAdminLegalTypeIdRouteWithChildren
+  '/admin/legal/$type/create': typeof AuthenticatedAdminLegalTypeCreateRoute
+  '/admin/legal/$type/versions': typeof AuthenticatedAdminLegalTypeVersionsRoute
+  '/admin/legal/$type': typeof AuthenticatedAdminLegalTypeIndexRoute
+  '/admin/legal/$type/$id/edit': typeof AuthenticatedAdminLegalTypeIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/auth': typeof AuthRouteRouteWithChildren
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
@@ -144,11 +215,19 @@ export interface FileRoutesById {
   '/_authenticated/admin/templates': typeof AuthenticatedAdminTemplatesRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/admin/legal/$type': typeof AuthenticatedAdminLegalTypeRouteRouteWithChildren
+  '/_authenticated/admin/legal/$type/$id': typeof AuthenticatedAdminLegalTypeIdRouteWithChildren
+  '/_authenticated/admin/legal/$type/create': typeof AuthenticatedAdminLegalTypeCreateRoute
+  '/_authenticated/admin/legal/$type/versions': typeof AuthenticatedAdminLegalTypeVersionsRoute
+  '/_authenticated/admin/legal/$type/': typeof AuthenticatedAdminLegalTypeIndexRoute
+  '/_authenticated/admin/legal/$type/$id/edit': typeof AuthenticatedAdminLegalTypeIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/auth'
+    | '/privacy-policy'
+    | '/terms-and-conditions'
     | '/admin'
     | '/auth/login'
     | '/auth/register'
@@ -161,9 +240,17 @@ export interface FileRouteTypes {
     | '/admin/templates'
     | '/admin/users'
     | '/admin/'
+    | '/admin/legal/$type'
+    | '/admin/legal/$type/$id'
+    | '/admin/legal/$type/create'
+    | '/admin/legal/$type/versions'
+    | '/admin/legal/$type/'
+    | '/admin/legal/$type/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
+    | '/privacy-policy'
+    | '/terms-and-conditions'
     | '/auth/login'
     | '/auth/register'
     | '/'
@@ -175,10 +262,17 @@ export interface FileRouteTypes {
     | '/admin/templates'
     | '/admin/users'
     | '/admin'
+    | '/admin/legal/$type/$id'
+    | '/admin/legal/$type/create'
+    | '/admin/legal/$type/versions'
+    | '/admin/legal/$type'
+    | '/admin/legal/$type/$id/edit'
   id:
     | '__root__'
     | '/auth'
     | '/_authenticated'
+    | '/privacy-policy'
+    | '/terms-and-conditions'
     | '/_authenticated/admin'
     | '/auth/login'
     | '/auth/register'
@@ -191,15 +285,37 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/templates'
     | '/_authenticated/admin/users'
     | '/_authenticated/admin/'
+    | '/_authenticated/admin/legal/$type'
+    | '/_authenticated/admin/legal/$type/$id'
+    | '/_authenticated/admin/legal/$type/create'
+    | '/_authenticated/admin/legal/$type/versions'
+    | '/_authenticated/admin/legal/$type/'
+    | '/_authenticated/admin/legal/$type/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  PrivacyPolicyRoute: typeof PrivacyPolicyRoute
+  TermsAndConditionsRoute: typeof TermsAndConditionsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms-and-conditions': {
+      id: '/terms-and-conditions'
+      path: '/terms-and-conditions'
+      fullPath: '/terms-and-conditions'
+      preLoaderRoute: typeof TermsAndConditionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy-policy': {
+      id: '/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof PrivacyPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
@@ -298,6 +414,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminConfigsRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/legal/$type': {
+      id: '/_authenticated/admin/legal/$type'
+      path: '/legal/$type'
+      fullPath: '/admin/legal/$type'
+      preLoaderRoute: typeof AuthenticatedAdminLegalTypeRouteRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/legal/$type/': {
+      id: '/_authenticated/admin/legal/$type/'
+      path: '/'
+      fullPath: '/admin/legal/$type/'
+      preLoaderRoute: typeof AuthenticatedAdminLegalTypeIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminLegalTypeRouteRoute
+    }
+    '/_authenticated/admin/legal/$type/versions': {
+      id: '/_authenticated/admin/legal/$type/versions'
+      path: '/versions'
+      fullPath: '/admin/legal/$type/versions'
+      preLoaderRoute: typeof AuthenticatedAdminLegalTypeVersionsRouteImport
+      parentRoute: typeof AuthenticatedAdminLegalTypeRouteRoute
+    }
+    '/_authenticated/admin/legal/$type/create': {
+      id: '/_authenticated/admin/legal/$type/create'
+      path: '/create'
+      fullPath: '/admin/legal/$type/create'
+      preLoaderRoute: typeof AuthenticatedAdminLegalTypeCreateRouteImport
+      parentRoute: typeof AuthenticatedAdminLegalTypeRouteRoute
+    }
+    '/_authenticated/admin/legal/$type/$id': {
+      id: '/_authenticated/admin/legal/$type/$id'
+      path: '/$id'
+      fullPath: '/admin/legal/$type/$id'
+      preLoaderRoute: typeof AuthenticatedAdminLegalTypeIdRouteImport
+      parentRoute: typeof AuthenticatedAdminLegalTypeRouteRoute
+    }
+    '/_authenticated/admin/legal/$type/$id/edit': {
+      id: '/_authenticated/admin/legal/$type/$id/edit'
+      path: '/edit'
+      fullPath: '/admin/legal/$type/$id/edit'
+      preLoaderRoute: typeof AuthenticatedAdminLegalTypeIdEditRouteImport
+      parentRoute: typeof AuthenticatedAdminLegalTypeIdRoute
+    }
   }
 }
 
@@ -315,6 +473,45 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
   AuthRouteRouteChildren,
 )
 
+interface AuthenticatedAdminLegalTypeIdRouteChildren {
+  AuthenticatedAdminLegalTypeIdEditRoute: typeof AuthenticatedAdminLegalTypeIdEditRoute
+}
+
+const AuthenticatedAdminLegalTypeIdRouteChildren: AuthenticatedAdminLegalTypeIdRouteChildren =
+  {
+    AuthenticatedAdminLegalTypeIdEditRoute:
+      AuthenticatedAdminLegalTypeIdEditRoute,
+  }
+
+const AuthenticatedAdminLegalTypeIdRouteWithChildren =
+  AuthenticatedAdminLegalTypeIdRoute._addFileChildren(
+    AuthenticatedAdminLegalTypeIdRouteChildren,
+  )
+
+interface AuthenticatedAdminLegalTypeRouteRouteChildren {
+  AuthenticatedAdminLegalTypeIdRoute: typeof AuthenticatedAdminLegalTypeIdRouteWithChildren
+  AuthenticatedAdminLegalTypeCreateRoute: typeof AuthenticatedAdminLegalTypeCreateRoute
+  AuthenticatedAdminLegalTypeVersionsRoute: typeof AuthenticatedAdminLegalTypeVersionsRoute
+  AuthenticatedAdminLegalTypeIndexRoute: typeof AuthenticatedAdminLegalTypeIndexRoute
+}
+
+const AuthenticatedAdminLegalTypeRouteRouteChildren: AuthenticatedAdminLegalTypeRouteRouteChildren =
+  {
+    AuthenticatedAdminLegalTypeIdRoute:
+      AuthenticatedAdminLegalTypeIdRouteWithChildren,
+    AuthenticatedAdminLegalTypeCreateRoute:
+      AuthenticatedAdminLegalTypeCreateRoute,
+    AuthenticatedAdminLegalTypeVersionsRoute:
+      AuthenticatedAdminLegalTypeVersionsRoute,
+    AuthenticatedAdminLegalTypeIndexRoute:
+      AuthenticatedAdminLegalTypeIndexRoute,
+  }
+
+const AuthenticatedAdminLegalTypeRouteRouteWithChildren =
+  AuthenticatedAdminLegalTypeRouteRoute._addFileChildren(
+    AuthenticatedAdminLegalTypeRouteRouteChildren,
+  )
+
 interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminConfigsRoute: typeof AuthenticatedAdminConfigsRoute
   AuthenticatedAdminFeaturedItemsRoute: typeof AuthenticatedAdminFeaturedItemsRoute
@@ -324,6 +521,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminTemplatesRoute: typeof AuthenticatedAdminTemplatesRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedAdminLegalTypeRouteRoute: typeof AuthenticatedAdminLegalTypeRouteRouteWithChildren
 }
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
@@ -336,6 +534,8 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminTemplatesRoute: AuthenticatedAdminTemplatesRoute,
     AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+    AuthenticatedAdminLegalTypeRouteRoute:
+      AuthenticatedAdminLegalTypeRouteRouteWithChildren,
   }
 
 const AuthenticatedAdminRouteRouteWithChildren =
@@ -360,6 +560,8 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   AuthRouteRoute: AuthRouteRouteWithChildren,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  PrivacyPolicyRoute: PrivacyPolicyRoute,
+  TermsAndConditionsRoute: TermsAndConditionsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

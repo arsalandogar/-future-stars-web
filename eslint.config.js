@@ -55,7 +55,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['**/routes/_*.tsx'],
+    files: ['**/routes/_*.tsx', '**/routes/**/$*.tsx'],
     rules: {
       'check-file/filename-naming-convention': 'off',
     },
