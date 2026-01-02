@@ -29,8 +29,9 @@ import { Route as AuthenticatedAdminLegalTypeRouteRouteImport } from './routes/_
 import { Route as AuthenticatedAdminLegalTypeIndexRouteImport } from './routes/_authenticated/admin/legal/$type/index'
 import { Route as AuthenticatedAdminLegalTypeVersionsRouteImport } from './routes/_authenticated/admin/legal/$type/versions'
 import { Route as AuthenticatedAdminLegalTypeCreateRouteImport } from './routes/_authenticated/admin/legal/$type/create'
-import { Route as AuthenticatedAdminLegalTypeIdRouteImport } from './routes/_authenticated/admin/legal/$type/$id'
-import { Route as AuthenticatedAdminLegalTypeIdEditRouteImport } from './routes/_authenticated/admin/legal/$type/$id.edit'
+import { Route as AuthenticatedAdminLegalTypeIdRouteRouteImport } from './routes/_authenticated/admin/legal/$type/$id/route'
+import { Route as AuthenticatedAdminLegalTypeIdIndexRouteImport } from './routes/_authenticated/admin/legal/$type/$id/index'
+import { Route as AuthenticatedAdminLegalTypeIdEditRouteImport } from './routes/_authenticated/admin/legal/$type/$id/edit'
 
 const TermsAndConditionsRoute = TermsAndConditionsRouteImport.update({
   id: '/terms-and-conditions',
@@ -140,17 +141,23 @@ const AuthenticatedAdminLegalTypeCreateRoute =
     path: '/create',
     getParentRoute: () => AuthenticatedAdminLegalTypeRouteRoute,
   } as any)
-const AuthenticatedAdminLegalTypeIdRoute =
-  AuthenticatedAdminLegalTypeIdRouteImport.update({
+const AuthenticatedAdminLegalTypeIdRouteRoute =
+  AuthenticatedAdminLegalTypeIdRouteRouteImport.update({
     id: '/$id',
     path: '/$id',
     getParentRoute: () => AuthenticatedAdminLegalTypeRouteRoute,
+  } as any)
+const AuthenticatedAdminLegalTypeIdIndexRoute =
+  AuthenticatedAdminLegalTypeIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminLegalTypeIdRouteRoute,
   } as any)
 const AuthenticatedAdminLegalTypeIdEditRoute =
   AuthenticatedAdminLegalTypeIdEditRouteImport.update({
     id: '/edit',
     path: '/edit',
-    getParentRoute: () => AuthenticatedAdminLegalTypeIdRoute,
+    getParentRoute: () => AuthenticatedAdminLegalTypeIdRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -170,11 +177,12 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/legal/$type': typeof AuthenticatedAdminLegalTypeRouteRouteWithChildren
-  '/admin/legal/$type/$id': typeof AuthenticatedAdminLegalTypeIdRouteWithChildren
+  '/admin/legal/$type/$id': typeof AuthenticatedAdminLegalTypeIdRouteRouteWithChildren
   '/admin/legal/$type/create': typeof AuthenticatedAdminLegalTypeCreateRoute
   '/admin/legal/$type/versions': typeof AuthenticatedAdminLegalTypeVersionsRoute
   '/admin/legal/$type/': typeof AuthenticatedAdminLegalTypeIndexRoute
   '/admin/legal/$type/$id/edit': typeof AuthenticatedAdminLegalTypeIdEditRoute
+  '/admin/legal/$type/$id/': typeof AuthenticatedAdminLegalTypeIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRouteRouteWithChildren
@@ -191,11 +199,11 @@ export interface FileRoutesByTo {
   '/admin/templates': typeof AuthenticatedAdminTemplatesRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
-  '/admin/legal/$type/$id': typeof AuthenticatedAdminLegalTypeIdRouteWithChildren
   '/admin/legal/$type/create': typeof AuthenticatedAdminLegalTypeCreateRoute
   '/admin/legal/$type/versions': typeof AuthenticatedAdminLegalTypeVersionsRoute
   '/admin/legal/$type': typeof AuthenticatedAdminLegalTypeIndexRoute
   '/admin/legal/$type/$id/edit': typeof AuthenticatedAdminLegalTypeIdEditRoute
+  '/admin/legal/$type/$id': typeof AuthenticatedAdminLegalTypeIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -216,11 +224,12 @@ export interface FileRoutesById {
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/legal/$type': typeof AuthenticatedAdminLegalTypeRouteRouteWithChildren
-  '/_authenticated/admin/legal/$type/$id': typeof AuthenticatedAdminLegalTypeIdRouteWithChildren
+  '/_authenticated/admin/legal/$type/$id': typeof AuthenticatedAdminLegalTypeIdRouteRouteWithChildren
   '/_authenticated/admin/legal/$type/create': typeof AuthenticatedAdminLegalTypeCreateRoute
   '/_authenticated/admin/legal/$type/versions': typeof AuthenticatedAdminLegalTypeVersionsRoute
   '/_authenticated/admin/legal/$type/': typeof AuthenticatedAdminLegalTypeIndexRoute
   '/_authenticated/admin/legal/$type/$id/edit': typeof AuthenticatedAdminLegalTypeIdEditRoute
+  '/_authenticated/admin/legal/$type/$id/': typeof AuthenticatedAdminLegalTypeIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -246,6 +255,7 @@ export interface FileRouteTypes {
     | '/admin/legal/$type/versions'
     | '/admin/legal/$type/'
     | '/admin/legal/$type/$id/edit'
+    | '/admin/legal/$type/$id/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -262,11 +272,11 @@ export interface FileRouteTypes {
     | '/admin/templates'
     | '/admin/users'
     | '/admin'
-    | '/admin/legal/$type/$id'
     | '/admin/legal/$type/create'
     | '/admin/legal/$type/versions'
     | '/admin/legal/$type'
     | '/admin/legal/$type/$id/edit'
+    | '/admin/legal/$type/$id'
   id:
     | '__root__'
     | '/auth'
@@ -291,6 +301,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/legal/$type/versions'
     | '/_authenticated/admin/legal/$type/'
     | '/_authenticated/admin/legal/$type/$id/edit'
+    | '/_authenticated/admin/legal/$type/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -446,15 +457,22 @@ declare module '@tanstack/react-router' {
       id: '/_authenticated/admin/legal/$type/$id'
       path: '/$id'
       fullPath: '/admin/legal/$type/$id'
-      preLoaderRoute: typeof AuthenticatedAdminLegalTypeIdRouteImport
+      preLoaderRoute: typeof AuthenticatedAdminLegalTypeIdRouteRouteImport
       parentRoute: typeof AuthenticatedAdminLegalTypeRouteRoute
+    }
+    '/_authenticated/admin/legal/$type/$id/': {
+      id: '/_authenticated/admin/legal/$type/$id/'
+      path: '/'
+      fullPath: '/admin/legal/$type/$id/'
+      preLoaderRoute: typeof AuthenticatedAdminLegalTypeIdIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminLegalTypeIdRouteRoute
     }
     '/_authenticated/admin/legal/$type/$id/edit': {
       id: '/_authenticated/admin/legal/$type/$id/edit'
       path: '/edit'
       fullPath: '/admin/legal/$type/$id/edit'
       preLoaderRoute: typeof AuthenticatedAdminLegalTypeIdEditRouteImport
-      parentRoute: typeof AuthenticatedAdminLegalTypeIdRoute
+      parentRoute: typeof AuthenticatedAdminLegalTypeIdRouteRoute
     }
   }
 }
@@ -473,23 +491,26 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
   AuthRouteRouteChildren,
 )
 
-interface AuthenticatedAdminLegalTypeIdRouteChildren {
+interface AuthenticatedAdminLegalTypeIdRouteRouteChildren {
   AuthenticatedAdminLegalTypeIdEditRoute: typeof AuthenticatedAdminLegalTypeIdEditRoute
+  AuthenticatedAdminLegalTypeIdIndexRoute: typeof AuthenticatedAdminLegalTypeIdIndexRoute
 }
 
-const AuthenticatedAdminLegalTypeIdRouteChildren: AuthenticatedAdminLegalTypeIdRouteChildren =
+const AuthenticatedAdminLegalTypeIdRouteRouteChildren: AuthenticatedAdminLegalTypeIdRouteRouteChildren =
   {
     AuthenticatedAdminLegalTypeIdEditRoute:
       AuthenticatedAdminLegalTypeIdEditRoute,
+    AuthenticatedAdminLegalTypeIdIndexRoute:
+      AuthenticatedAdminLegalTypeIdIndexRoute,
   }
 
-const AuthenticatedAdminLegalTypeIdRouteWithChildren =
-  AuthenticatedAdminLegalTypeIdRoute._addFileChildren(
-    AuthenticatedAdminLegalTypeIdRouteChildren,
+const AuthenticatedAdminLegalTypeIdRouteRouteWithChildren =
+  AuthenticatedAdminLegalTypeIdRouteRoute._addFileChildren(
+    AuthenticatedAdminLegalTypeIdRouteRouteChildren,
   )
 
 interface AuthenticatedAdminLegalTypeRouteRouteChildren {
-  AuthenticatedAdminLegalTypeIdRoute: typeof AuthenticatedAdminLegalTypeIdRouteWithChildren
+  AuthenticatedAdminLegalTypeIdRouteRoute: typeof AuthenticatedAdminLegalTypeIdRouteRouteWithChildren
   AuthenticatedAdminLegalTypeCreateRoute: typeof AuthenticatedAdminLegalTypeCreateRoute
   AuthenticatedAdminLegalTypeVersionsRoute: typeof AuthenticatedAdminLegalTypeVersionsRoute
   AuthenticatedAdminLegalTypeIndexRoute: typeof AuthenticatedAdminLegalTypeIndexRoute
@@ -497,8 +518,8 @@ interface AuthenticatedAdminLegalTypeRouteRouteChildren {
 
 const AuthenticatedAdminLegalTypeRouteRouteChildren: AuthenticatedAdminLegalTypeRouteRouteChildren =
   {
-    AuthenticatedAdminLegalTypeIdRoute:
-      AuthenticatedAdminLegalTypeIdRouteWithChildren,
+    AuthenticatedAdminLegalTypeIdRouteRoute:
+      AuthenticatedAdminLegalTypeIdRouteRouteWithChildren,
     AuthenticatedAdminLegalTypeCreateRoute:
       AuthenticatedAdminLegalTypeCreateRoute,
     AuthenticatedAdminLegalTypeVersionsRoute:

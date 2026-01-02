@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { LegalViewPage } from '@/features/legal';
 
-export const Route = createFileRoute('/_authenticated/admin/legal/$type/$id')({
+export const Route = createFileRoute('/_authenticated/admin/legal/$type/$id/')({
   component: RouteComponent,
 });
 
