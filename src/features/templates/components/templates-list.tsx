@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { getRouteApi, Link, useNavigate } from '@tanstack/react-router';
-import { Button, Select } from '@mantine/core';
+import { Button } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Plus } from 'lucide-react';
 
 import { DataTable, type Column } from '@/components/ui/data-table';
-import { ListingShell, useListingContext } from '@/components/ui/listing';
+import {
+  ListingShell,
+  useListingContext,
+  type ListingTab,
+} from '@/components/ui/listing';
 
 import { useTemplates } from '../api/get-templates';
 import type { Template, TemplateSide } from '../types';
@@ -15,14 +19,23 @@ import { SetTagsModal } from './set-tags-modal';
 
 const routeApi = getRouteApi('/_authenticated/admin/_listing/templates');
 
-const SIDE_OPTIONS = [
-  { value: 'front', label: 'Front' },
-  { value: 'back', label: 'Back' },
+const TABS: ListingTab[] = [
+  { value: 'front', label: 'Front Sides' },
+  { value: 'back', label: 'Back Sides' },
 ];
 
-const COLUMNS: Column[] = [
+const FRONT_COLUMNS: Column[] = [
   { label: 'Front', width: 80 },
   { label: 'Back', width: 80 },
+  { label: 'Label' },
+  { label: 'Description' },
+  { label: 'Tags' },
+  { label: 'Created', width: 150 },
+  { label: 'Actions', width: 60 },
+];
+
+const BACK_COLUMNS: Column[] = [
+  { label: 'Preview', width: 80 },
   { label: 'Label' },
   { label: 'Description' },
   { label: 'Tags' },
@@ -44,13 +57,17 @@ export function TemplatesList() {
     open();
   };
 
-  const handleSideChange = (value: string | null) => {
-    void navigate({
-      to: '.',
-      search: (prev) => ({ ...prev, side: value as TemplateSide, page: 1 }),
-      replace: true,
-    });
+  const handleTabChange = (value: string | null) => {
+    if (value) {
+      void navigate({
+        to: '.',
+        search: (prev) => ({ ...prev, side: value as TemplateSide, page: 1 }),
+        replace: true,
+      });
+    }
   };
+
+  const columns = side === 'front' ? FRONT_COLUMNS : BACK_COLUMNS;
 
   const queryResult = useTemplates({
     variables: {
@@ -81,23 +98,22 @@ export function TemplatesList() {
             Create Template
           </Button>
         }
+        tabs={TABS}
+        activeTab={side}
+        onTabChange={handleTabChange}
         showFilter={false}
-        filterComponent={
-          <Select
-            data={SIDE_OPTIONS}
-            value={side}
-            onChange={handleSideChange}
-            className="w-32"
-          />
-        }
       >
         <DataTable
           queryResult={queryResult}
-          columns={COLUMNS}
+          columns={columns}
           emptyMessage="No templates found"
           keyExtractor={(template) => template.id}
           renderRow={(template) => (
-            <TemplateRow template={template} onSetTags={handleSetTags} />
+            <TemplateRow
+              template={template}
+              side={side}
+              onSetTags={handleSetTags}
+            />
           )}
         />
       </ListingShell>

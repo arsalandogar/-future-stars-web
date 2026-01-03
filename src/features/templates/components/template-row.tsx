@@ -14,10 +14,11 @@ import { Edit, Eye, MoreHorizontal, Tags } from 'lucide-react';
 import { SvgPreview } from '@/components/svg-preview';
 import { formatDate } from '@/utils/date';
 
-import type { Template } from '../types';
+import type { Template, TemplateSide } from '../types';
 
 interface TemplateRowProps {
   template: Template;
+  side: TemplateSide;
   onSetTags: (template: Template) => void;
 }
 
@@ -27,29 +28,31 @@ const SVG_PREVIEW_PROPS = {
   hideErrors: true,
 } as const;
 
-export function TemplateRow({ template, onSetTags }: TemplateRowProps) {
+export function TemplateRow({ template, side, onSetTags }: TemplateRowProps) {
   return (
     <>
       <Table.Td>
         <SvgPreview svgString={template.svgString} {...SVG_PREVIEW_PROPS} />
       </Table.Td>
-      <Table.Td>
-        {template.backTemplate ? (
-          <Anchor
-            component={Link}
-            to={`/admin/templates/${template.backTemplate.id}`}
-          >
-            <SvgPreview
-              svgString={template.backTemplate.svgString ?? ''}
-              {...SVG_PREVIEW_PROPS}
-            />
-          </Anchor>
-        ) : (
-          <Text size="sm" c="dimmed">
-            —
-          </Text>
-        )}
-      </Table.Td>
+      {side === 'front' && (
+        <Table.Td>
+          {template.backTemplate ? (
+            <Anchor
+              component={Link}
+              to={`/admin/templates/${template.backTemplate.id}`}
+            >
+              <SvgPreview
+                svgString={template.backTemplate.svgString ?? ''}
+                {...SVG_PREVIEW_PROPS}
+              />
+            </Anchor>
+          ) : (
+            <Text size="sm" c="dimmed">
+              —
+            </Text>
+          )}
+        </Table.Td>
+      )}
       <Table.Td>
         <Anchor
           component={Link}
