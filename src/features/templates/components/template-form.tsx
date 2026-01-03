@@ -227,7 +227,7 @@ export function TemplateForm({
                     <SvgPreview
                       svgString={svgString}
                       height={250}
-                      className="rounded-md border p-2"
+                      className="w-full rounded-md border p-2"
                       emptyMessage="Paste SVG to see preview"
                     />
                   )}
