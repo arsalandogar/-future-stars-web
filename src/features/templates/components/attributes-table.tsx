@@ -1,31 +1,48 @@
-import {
-  ActionIcon,
-  Badge,
-  ColorInput,
-  ColorSwatch,
-  Group,
-  Select,
-  Table,
-  Text,
-  TextInput,
-} from '@mantine/core';
-import { Trash2 } from 'lucide-react';
+import { ActionIcon, ColorSwatch, Group, Table, Text } from '@mantine/core';
+import { Image, Palette, Trash2, Type } from 'lucide-react';
 
 import type {
   TemplateAttribute,
   TemplateAttributeFormValues,
   TemplateAttributeType,
 } from '../types';
+
 import { useTemplateFormContext } from './template-form-context';
 
-const ATTRIBUTE_TYPE_OPTIONS: {
-  value: TemplateAttributeType;
-  label: string;
-}[] = [
-  { value: 'string', label: 'String' },
-  { value: 'color', label: 'Color' },
-  { value: 'image', label: 'Image' },
-];
+const ATTRIBUTE_TYPES: Record<
+  TemplateAttributeType,
+  { icon: typeof Type; label: string }
+> = {
+  string: { icon: Type, label: 'String' },
+  color: { icon: Palette, label: 'Color' },
+  image: { icon: Image, label: 'Image' },
+};
+
+const ATTRIBUTE_TYPE_OPTIONS = Object.entries(ATTRIBUTE_TYPES).map(
+  ([value, { label }]) => ({
+    value: value as TemplateAttributeType,
+    label,
+  })
+);
+
+function TypeIcon({ type }: { type: TemplateAttributeType }) {
+  const Icon = ATTRIBUTE_TYPES[type].icon;
+  return <Icon size={16} />;
+}
+
+function TypeDisplay({ type }: { type: TemplateAttributeType }) {
+  const { label } = ATTRIBUTE_TYPES[type];
+  return (
+    <Group gap={6} wrap="nowrap">
+      <TypeIcon type={type} />
+      <Text size="sm">{label}</Text>
+    </Group>
+  );
+}
+
+function renderTypeOption({ option }: { option: { value: string } }) {
+  return <TypeDisplay type={option.value as TemplateAttributeType} />;
+}
 
 const COLOR_SWATCHES = [
   '#000000',
@@ -93,9 +110,7 @@ function ViewRows({ attributes }: { attributes: TemplateAttribute[] }) {
       {attributes.map((attr) => (
         <Table.Tr key={attr.id}>
           <Table.Td>
-            <Badge variant="outline" size="sm" tt="capitalize">
-              {attr.type}
-            </Badge>
+            <TypeDisplay type={attr.type} />
           </Table.Td>
           <Table.Td>
             <Text size="sm">{attr.name}</Text>
@@ -149,47 +164,43 @@ function EditRows({
       {attributes.map((_, index) => (
         <Table.Tr key={index}>
           <Table.Td>
-            <form.Field name={`attributes[${index}].type`}>
+            <form.AppField name={`attributes[${index}].type`}>
               {(field) => (
-                <Select
+                <field.SelectField
                   variant="filled"
                   data={ATTRIBUTE_TYPE_OPTIONS}
-                  value={field.state.value}
-                  onChange={(value) =>
-                    field.handleChange(value as TemplateAttributeType)
-                  }
                   size="sm"
+                  renderOption={renderTypeOption}
+                  leftSection={
+                    field.state.value && <TypeIcon type={field.state.value} />
+                  }
                 />
               )}
-            </form.Field>
+            </form.AppField>
           </Table.Td>
 
           <Table.Td>
-            <form.Field name={`attributes[${index}].name`}>
+            <form.AppField name={`attributes[${index}].name`}>
               {(field) => (
-                <TextInput
+                <field.TextField
                   variant="filled"
                   size="sm"
-                  placeholder="name"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
+                  placeholder="Name"
                 />
               )}
-            </form.Field>
+            </form.AppField>
           </Table.Td>
 
           <Table.Td>
-            <form.Field name={`attributes[${index}].label`}>
+            <form.AppField name={`attributes[${index}].label`}>
               {(field) => (
-                <TextInput
+                <field.TextField
                   variant="filled"
                   size="sm"
                   placeholder="Label"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
                 />
               )}
-            </form.Field>
+            </form.AppField>
           </Table.Td>
 
           <Table.Td>
@@ -198,30 +209,26 @@ function EditRows({
             >
               {(type) =>
                 type === 'color' ? (
-                  <form.Field name={`attributes[${index}].defaultValue`}>
+                  <form.AppField name={`attributes[${index}].defaultValue`}>
                     {(field) => (
-                      <ColorInput
+                      <field.ColorInputField
                         variant="filled"
                         size="sm"
                         format="hex"
                         swatches={COLOR_SWATCHES}
-                        value={field.state.value}
-                        onChange={(value) => field.handleChange(value)}
                       />
                     )}
-                  </form.Field>
+                  </form.AppField>
                 ) : (
-                  <form.Field name={`attributes[${index}].defaultValue`}>
+                  <form.AppField name={`attributes[${index}].defaultValue`}>
                     {(field) => (
-                      <TextInput
+                      <field.TextField
                         variant="filled"
                         size="sm"
                         placeholder="Default"
-                        value={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.value)}
                       />
                     )}
-                  </form.Field>
+                  </form.AppField>
                 )
               }
             </form.Subscribe>
@@ -233,18 +240,16 @@ function EditRows({
             >
               {(type) =>
                 type === 'string' ? (
-                  <form.Field name={`attributes[${index}].defaultColor`}>
+                  <form.AppField name={`attributes[${index}].defaultColor`}>
                     {(field) => (
-                      <ColorInput
+                      <field.ColorInputField
                         variant="filled"
                         size="sm"
                         format="hex"
                         swatches={COLOR_SWATCHES}
-                        value={field.state.value}
-                        onChange={(value) => field.handleChange(value)}
                       />
                     )}
-                  </form.Field>
+                  </form.AppField>
                 ) : null
               }
             </form.Subscribe>
