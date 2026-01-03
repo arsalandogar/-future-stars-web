@@ -11,11 +11,11 @@ export { useCreateFeaturedItem } from './api/create-featured-item';
 export { useUpdateFeaturedItem } from './api/update-featured-item';
 export { useDeleteFeaturedItem } from './api/delete-featured-item';
 
-//Types
+// Types
 export type {
   FeaturedItem,
-  FeaturedItemListResponse,
   FeaturedItemsListParams,
+  FeaturedItemsListResponse,
   CreateFeaturedItemParam,
   UpdateFeaturedItemParam,
 } from './types';

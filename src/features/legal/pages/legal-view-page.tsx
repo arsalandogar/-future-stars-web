@@ -23,9 +23,10 @@ export function LegalViewPage({ type, id }: LegalViewPageProps) {
   const config = getLegalDocumentConfig(type);
   const basePath = `/admin/legal/${type}`;
 
-  const { data: document, isLoading } = useLegalDocument({
+  const { data: documentResponse, isLoading } = useLegalDocument({
     variables: id,
   });
+  const document = documentResponse?.data;
 
   const publishDocument = usePublishLegalDocument();
   const deleteDocument = useDeleteLegalDocument();

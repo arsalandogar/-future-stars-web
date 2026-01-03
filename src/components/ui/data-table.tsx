@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { type ReactNode, use } from 'react';
 import {
   Group,
   Pagination,
@@ -8,36 +8,34 @@ import {
   Table,
   Text,
 } from '@mantine/core';
+import type { PaginationMeta } from '@/types';
+
+import { ListingContext } from './listing/listing-context';
 
 export interface Column {
   label: string;
   width?: number | string;
 }
 
-export interface DataTablePagination {
-  page: number;
-  total: number;
-  onChange: (page: number) => void;
-}
-
-export interface DataTablePageSize {
-  value: number;
-  options: number[];
-  onChange: (size: number) => void;
-}
+const PAGE_SIZE_OPTIONS = [
+  { value: '10', label: '10' },
+  { value: '25', label: '25' },
+  { value: '50', label: '50' },
+  { value: '100', label: '100' },
+];
 
 export interface DataTableProps<T> {
-  data: T[];
+  queryResult: {
+    data: { data: T[]; meta?: PaginationMeta } | undefined;
+    isLoading: boolean;
+  };
   columns: Column[];
-  isLoading?: boolean;
   emptyMessage?: string;
   /**
    * Renders the content of a table row. Must return `Table.Td` elements only,
    * as the `Table.Tr` wrapper is provided by the DataTable component.
    */
   renderRow: (item: T, index: number) => ReactNode;
-  pagination?: DataTablePagination;
-  pageSize?: DataTablePageSize;
   keyExtractor: (item: T) => string | number;
   skeletonCount?: number;
 }
@@ -86,16 +84,17 @@ function EmptyState({
 }
 
 export function DataTable<T>({
-  data,
+  queryResult,
   columns,
-  isLoading = false,
   emptyMessage = 'No data found',
   renderRow,
-  pagination,
-  pageSize,
   keyExtractor,
   skeletonCount = 5,
 }: DataTableProps<T>) {
+  const listingContext = use(ListingContext);
+  const items = queryResult.data?.data ?? [];
+  const meta = queryResult.data?.meta;
+
   return (
     <div className="flex flex-col gap-4">
       <Paper withBorder radius="md">
@@ -109,13 +108,13 @@ export function DataTable<T>({
               ))}
             </Table.Tr>
           </Table.Thead>
-          {isLoading ? (
+          {queryResult.isLoading ? (
             <TableSkeleton columns={columns} rowCount={skeletonCount} />
-          ) : data.length === 0 ? (
+          ) : items.length === 0 ? (
             <EmptyState message={emptyMessage} colSpan={columns.length} />
           ) : (
             <Table.Tbody>
-              {data.map((item, index) => (
+              {items.map((item, index) => (
                 <Table.Tr key={keyExtractor(item)}>
                   {renderRow(item, index)}
                 </Table.Tr>
@@ -125,35 +124,30 @@ export function DataTable<T>({
         </Table>
       </Paper>
 
-      {(pagination || pageSize) && (
+      {meta && listingContext && (
         <Group justify="center" gap="lg">
-          {pageSize && (
-            <Group gap="xs">
-              <Text size="sm" c="dimmed">
-                Show
-              </Text>
-              <Select
-                data={pageSize.options.map((opt) => ({
-                  value: String(opt),
-                  label: String(opt),
-                }))}
-                value={String(pageSize.value)}
-                onChange={(value) => {
-                  if (value) pageSize.onChange(Number(value));
-                }}
-                size="xs"
-                w={70}
-              />
-              <Text size="sm" c="dimmed">
-                per page
-              </Text>
-            </Group>
-          )}
-          {pagination && pagination.total > 1 && (
+          <Group gap="xs">
+            <Text size="sm" c="dimmed">
+              Show
+            </Text>
+            <Select
+              data={PAGE_SIZE_OPTIONS}
+              value={String(listingContext.limit)}
+              onChange={(value) => {
+                if (value) listingContext.setLimit(Number(value));
+              }}
+              size="xs"
+              w={70}
+            />
+            <Text size="sm" c="dimmed">
+              per page
+            </Text>
+          </Group>
+          {meta.lastPage > 1 && (
             <Pagination
-              value={pagination.page}
-              onChange={pagination.onChange}
-              total={pagination.total}
+              value={meta.currentPage}
+              onChange={listingContext.setPage}
+              total={meta.lastPage}
             />
           )}
         </Group>

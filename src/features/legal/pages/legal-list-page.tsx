@@ -43,13 +43,6 @@ export function LegalListPage({ type, searchParams }: LegalListPageProps) {
     });
   };
 
-  const handlePageChange = (newPage: number) => {
-    void navigate({
-      to: basePath,
-      search: (prev) => ({ ...prev, page: newPage }),
-    });
-  };
-
   return (
     <>
       <Head
@@ -72,7 +65,6 @@ export function LegalListPage({ type, searchParams }: LegalListPageProps) {
           searchParams={{ page, status, search }}
           onSearchChange={handleSearchChange}
           onStatusChange={handleStatusChange}
-          onPageChange={handlePageChange}
           createPath={`${basePath}/create`}
         />
       </div>

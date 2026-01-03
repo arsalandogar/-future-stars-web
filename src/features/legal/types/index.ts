@@ -101,4 +101,14 @@ export interface PublicLegalDocument {
   isPublished: boolean;
 }
 
-export type LegalVersionsListResponse = LegalVersionHistoryItem[];
+export interface LegalVersionsListResponse {
+  data: LegalVersionHistoryItem[];
+}
+
+export interface LegalDocumentResponse {
+  data: LegalDocument;
+}
+
+export interface PublicLegalDocumentResponse {
+  data: PublicLegalDocument;
+}

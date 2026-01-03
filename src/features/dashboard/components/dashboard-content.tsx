@@ -29,10 +29,11 @@ export function DashboardContent() {
   };
 
   const {
-    data: stats,
+    data: statsResponse,
     isLoading: statsLoading,
     isError: statsError,
   } = useDashboardStats({ variables: { period } });
+  const stats = statsResponse?.data;
 
   const {
     data: revenueData,

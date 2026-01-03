@@ -19,19 +19,35 @@ export interface OrderUser {
 }
 
 export interface ShippingAddress {
-  line1: string;
-  line2?: string;
+  firstName: string;
+  lastName: string;
+  addressLine1: string;
+  addressLine2?: string;
   city: string;
   state: string;
   postalCode: string;
   country: string;
 }
 
+export interface PackCardSnapshot {
+  cardId: number;
+  quantity: number;
+  svgString: string;
+}
+
+export interface PackSnapshot {
+  id: number;
+  name: string;
+  cardSnapshots: PackCardSnapshot[];
+}
+
 export interface OrderLineItem {
   id: number;
-  productId: number;
+  orderId: number;
   quantity: number;
-  price: number;
+  unitPrice: number;
+  totalPrice: number;
+  packSnapshot: PackSnapshot;
 }
 
 export interface Order {
@@ -58,4 +74,8 @@ export interface OrdersListParams {
 export interface OrdersListResponse {
   meta: PaginationMeta;
   data: Order[];
+}
+
+export interface OrderResponse {
+  data: Order;
 }

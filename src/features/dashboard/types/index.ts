@@ -6,10 +6,14 @@ export interface StatMetric {
   change: number;
 }
 
-export interface DashboardStatsResponse {
+export interface DashboardStats {
   totalRevenue: StatMetric;
   totalOrders: StatMetric;
   avgOrderValue: StatMetric;
+}
+
+export interface DashboardStatsResponse {
+  data: DashboardStats;
 }
 
 export interface DashboardStatsParams {

@@ -1,5 +1,5 @@
 export type FeaturedItem = {
-  id: string;
+  id: number;
   title: string;
   description?: string;
   ctaText?: string;
@@ -7,8 +7,6 @@ export type FeaturedItem = {
   templateId?: number;
   displayOrder: number;
   isActive: boolean;
-  createdBy: string;
-  updatedBy?: string;
   createdAt: string;
   updatedAt?: string;
   template?: {
@@ -18,7 +16,9 @@ export type FeaturedItem = {
   };
 };
 
-export type FeaturedItemListResponse = { data: FeaturedItem[] };
+export interface FeaturedItemsListResponse {
+  data: FeaturedItem[];
+}
 
 export interface FeaturedItemsListParams {
   search?: string;
@@ -35,7 +35,7 @@ export type CreateFeaturedItemParam = {
 };
 
 export type UpdateFeaturedItemParam = {
-  id: string;
+  id: number;
   title?: string;
   description?: string;
   ctaText?: string;

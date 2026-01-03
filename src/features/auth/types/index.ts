@@ -10,9 +10,17 @@ export interface LoginCredentials {
   password: string;
 }
 
+export interface PolicyVersions {
+  privacyPolicy: string;
+  terms: string;
+}
+
 export interface RegisterCredentials {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
+  userId?: number;
+  acceptPolicies: boolean;
+  policyVersions: PolicyVersions;
 }

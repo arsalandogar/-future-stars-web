@@ -15,9 +15,9 @@ const COLUMNS: Column[] = [
 ];
 
 export function OrdersList() {
-  const { page, limit, search, setPage } = useListingContext();
+  const { page, limit, search } = useListingContext();
 
-  const { data, isLoading } = useOrders({
+  const queryResult = useOrders({
     variables: {
       page,
       limit,
@@ -25,26 +25,17 @@ export function OrdersList() {
     },
   });
 
-  const orders = data?.data ?? [];
-  const meta = data?.meta;
-
   return (
     <ListingShell
       title="Orders List"
       description="Manage and fulfill your custom card pack orders."
     >
       <DataTable
-        data={orders}
+        queryResult={queryResult}
         columns={COLUMNS}
-        isLoading={isLoading}
         emptyMessage="No orders found"
         keyExtractor={(order) => order.id}
         renderRow={(order) => <OrderRow order={order} />}
-        pagination={
-          meta && meta.lastPage > 1
-            ? { page, total: meta.lastPage, onChange: setPage }
-            : undefined
-        }
       />
     </ListingShell>
   );

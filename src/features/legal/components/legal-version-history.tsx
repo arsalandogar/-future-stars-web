@@ -24,9 +24,10 @@ export function LegalVersionHistory({
   type,
   basePath,
 }: LegalVersionHistoryProps) {
-  const { data: versions, isLoading } = useLegalVersions({
+  const { data: versionsResponse, isLoading } = useLegalVersions({
     variables: type,
   });
+  const versions = versionsResponse?.data;
 
   if (isLoading) {
     return (

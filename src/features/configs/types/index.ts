@@ -4,7 +4,9 @@ export interface Config {
   description: string;
 }
 
-export type ConfigsListResponse = Config[];
+export interface ConfigsListResponse {
+  data: Config[];
+}
 
 export interface CreateConfigParams {
   name: string;

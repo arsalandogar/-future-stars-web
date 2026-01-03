@@ -15,7 +15,7 @@ const COLUMNS: Column[] = [
 ];
 
 export function TemplateTypesList() {
-  const { data: templateTypes, isLoading } = useTemplateTypes();
+  const queryResult = useTemplateTypes();
 
   return (
     <div className="flex flex-col gap-6">
@@ -32,9 +32,8 @@ export function TemplateTypesList() {
           </Group>
 
           <DataTable
-            data={templateTypes ?? []}
+            queryResult={queryResult}
             columns={COLUMNS}
-            isLoading={isLoading}
             emptyMessage="No template types found"
             keyExtractor={(templateType) => templateType.name}
             renderRow={(templateType) => (

@@ -16,18 +16,15 @@ const COLUMNS: Column[] = [
 ];
 
 export function UsersList() {
-  const { page, limit, search, setPage } = useListingContext();
+  const { page, limit, search } = useListingContext();
 
-  const { data, isLoading } = useUsers({
+  const queryResult = useUsers({
     variables: {
       page,
       limit,
       search: search || undefined,
     },
   });
-
-  const users = data?.data ?? [];
-  const meta = data?.meta;
 
   return (
     <ListingShell
@@ -36,17 +33,11 @@ export function UsersList() {
       searchPlaceholder="Search by name or email..."
     >
       <DataTable
-        data={users}
+        queryResult={queryResult}
         columns={COLUMNS}
-        isLoading={isLoading}
         emptyMessage="No users found"
         keyExtractor={(user) => user.id}
         renderRow={(user) => <UserRow user={user} />}
-        pagination={
-          meta && meta.lastPage > 1
-            ? { page, total: meta.lastPage, onChange: setPage }
-            : undefined
-        }
       />
     </ListingShell>
   );

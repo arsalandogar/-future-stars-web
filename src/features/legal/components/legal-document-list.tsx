@@ -51,7 +51,6 @@ interface LegalDocumentListProps {
   };
   onSearchChange: (search: string) => void;
   onStatusChange: (status: LegalDocumentStatus | undefined) => void;
-  onPageChange: (page: number) => void;
   createPath: string;
 }
 
@@ -62,7 +61,6 @@ export function LegalDocumentList({
   searchParams,
   onSearchChange,
   onStatusChange,
-  onPageChange,
   createPath,
 }: LegalDocumentListProps) {
   const { page, status, search } = searchParams;
@@ -85,7 +83,7 @@ export function LegalDocumentList({
     onStatusChange((newStatus || undefined) as LegalDocumentStatus | undefined);
   };
 
-  const { data, isLoading } = useLegalDocuments({
+  const queryResult = useLegalDocuments({
     variables: {
       page,
       limit: 20,
@@ -94,9 +92,6 @@ export function LegalDocumentList({
       search: search || undefined,
     },
   });
-
-  const documents = data?.data ?? [];
-  const meta = data?.meta;
 
   const handlePublishClick = (doc: LegalDocument) => {
     setDocumentToPublish(doc);
@@ -175,9 +170,8 @@ export function LegalDocumentList({
           </Group>
 
           <DataTable
-            data={documents}
+            queryResult={queryResult}
             columns={COLUMNS}
-            isLoading={isLoading}
             emptyMessage="No documents found"
             keyExtractor={(doc) => doc.id}
             renderRow={(doc) => (
@@ -188,11 +182,6 @@ export function LegalDocumentList({
                 onDelete={handleDeleteClick}
               />
             )}
-            pagination={
-              meta && meta.lastPage > 1
-                ? { page, total: meta.lastPage, onChange: onPageChange }
-                : undefined
-            }
           />
         </div>
       </Card>

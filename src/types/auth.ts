@@ -12,6 +12,7 @@ export interface User {
   fullName: string;
   createdAt: string;
   updatedAt: string;
+  deletedAt?: string | null;
 }
 
 export interface Token {

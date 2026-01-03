@@ -13,12 +13,13 @@ interface PublicLegalPageProps {
 
 export function PublicLegalPage({ type, title }: PublicLegalPageProps) {
   const {
-    data: document,
+    data: documentResponse,
     isLoading,
     error,
   } = usePublicLegalDocument({
     variables: type,
   });
+  const document = documentResponse?.data;
 
   return (
     <LegalLayout>

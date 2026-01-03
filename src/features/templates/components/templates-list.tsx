@@ -23,10 +23,8 @@ const COLUMNS: Column[] = [
   { label: 'Actions', width: 60 },
 ];
 
-const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
-
 export function TemplatesList() {
-  const { page, limit, search, setPage, setLimit } = useListingContext();
+  const { page, limit, search } = useListingContext();
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedTemplate, setSelectedTemplate] = useState<
     Template | undefined
@@ -37,16 +35,13 @@ export function TemplatesList() {
     open();
   };
 
-  const { data, isLoading } = useTemplates({
+  const queryResult = useTemplates({
     variables: {
       page,
       limit,
       search: search || undefined,
     },
   });
-
-  const templates = data?.data ?? [];
-  const meta = data?.meta;
 
   return (
     <>
@@ -71,22 +66,13 @@ export function TemplatesList() {
         showFilter={false}
       >
         <DataTable
-          data={templates}
+          queryResult={queryResult}
           columns={COLUMNS}
-          isLoading={isLoading}
           emptyMessage="No templates found"
           keyExtractor={(template) => template.id}
           renderRow={(template) => (
             <TemplateRow template={template} onSetTags={handleSetTags} />
           )}
-          pagination={
-            meta ? { page, total: meta.lastPage, onChange: setPage } : undefined
-          }
-          pageSize={{
-            value: limit,
-            options: PAGE_SIZE_OPTIONS,
-            onChange: setLimit,
-          }}
         />
       </ListingShell>
     </>

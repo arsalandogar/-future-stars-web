@@ -7,6 +7,7 @@ Base URL: `/api/v1`
 - [Authentication](#authentication)
 - [Profile](#profile)
 - [Legal](#legal)
+- [Users](#users)
 - [Templates](#templates)
 - [Tags](#tags)
 - [Cards](#cards)
@@ -20,6 +21,7 @@ Base URL: `/api/v1`
 - [Admin Orders](#admin-orders)
 - [Admin Users](#admin-users)
 - [Admin Dashboard](#admin-dashboard)
+- [Admin Template Types](#admin-template-types)
 - [Admin Templates](#admin-templates)
 - [Admin Tags](#admin-tags)
 - [Admin Configs](#admin-configs)
@@ -206,16 +208,36 @@ POST /api/v1/auth/phone/request-otp
 
 **Request Body:**
 
-| Field | Type   | Required | Description                |
-| ----- | ------ | -------- | -------------------------- |
-| phone | string | Yes      | Phone number (10-20 chars) |
+| Field | Type   | Required | Description                              |
+| ----- | ------ | -------- | ---------------------------------------- |
+| phone | string | Yes      | Phone number (10-20 chars)               |
+| type  | string | No       | `"new"` for adding/updating phone number |
 
-**Response:** `200 OK`
+**Response (default):** `200 OK`
 
 ```json
 {
   "message": "If this phone number is registered, you will receive an OTP",
   "expiresIn": 300
+}
+```
+
+**Response (type=new):** `200 OK`
+
+Requires authentication. Verifies that the phone number is not already in use.
+
+```json
+{
+  "message": "OTP sent successfully",
+  "expiresIn": 600
+}
+```
+
+**Error (type=new, phone exists):** `409 Conflict`
+
+```json
+{
+  "message": "A user with this phone number already exists"
 }
 ```
 
@@ -229,17 +251,30 @@ POST /api/v1/auth/phone/verify-otp
 
 **Request Body:**
 
-| Field | Type   | Required | Description                |
-| ----- | ------ | -------- | -------------------------- |
-| phone | string | Yes      | Phone number (10-20 chars) |
-| otp   | string | Yes      | 6-digit OTP code           |
+| Field | Type   | Required | Description                              |
+| ----- | ------ | -------- | ---------------------------------------- |
+| phone | string | Yes      | Phone number (10-20 chars)               |
+| otp   | string | Yes      | 6-digit OTP code                         |
+| type  | string | No       | `"new"` for adding/updating phone number |
 
-**Response:** `200 OK`
+**Response (default):** `200 OK`
 
 ```json
 {
   "token": { <Token Object> },
   "user": { ... }
+}
+```
+
+**Response (type=new):** `200 OK`
+
+Requires authentication. Updates the user's phone number. If the user is a guest, upgrades them to a regular user.
+
+```json
+{
+  "token": { <Token Object> },
+  "user": { ... },
+  "message": "Phone number updated successfully"
 }
 ```
 
@@ -286,27 +321,29 @@ GET /api/v1/profile
 
 ```json
 {
-  "id": 1,
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john@example.com",
-  "phone": "+1234567890",
-  "role": "user",
-  "isAdmin": false,
-  "isGuest": false,
-  "fullName": "John Doe",
-  "policyStatus": {
-    "privacyPolicy": {
-      "accepted": true,
-      "acceptedVersion": "1.0.0",
-      "currentVersion": "1.0.0",
-      "requiresAction": false
-    },
-    "terms": {
-      "accepted": true,
-      "acceptedVersion": "1.0.0",
-      "currentVersion": "1.1.0",
-      "requiresAction": true
+  "data": {
+    "id": 1,
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john@example.com",
+    "phone": "+1234567890",
+    "role": "user",
+    "isAdmin": false,
+    "isGuest": false,
+    "fullName": "John Doe",
+    "policyStatus": {
+      "privacyPolicy": {
+        "accepted": true,
+        "acceptedVersion": "1.0.0",
+        "currentVersion": "1.0.0",
+        "requiresAction": false
+      },
+      "terms": {
+        "accepted": true,
+        "acceptedVersion": "1.0.0",
+        "currentVersion": "1.1.0",
+        "requiresAction": true
+      }
     }
   }
 }
@@ -352,14 +389,16 @@ GET /api/v1/legal/:type
 
 ```json
 {
-  "id": 1,
-  "type": "privacy-policy",
-  "version": "1.0.0",
-  "content": "<html content>",
-  "requiresAcceptance": true,
-  "publishedAt": "2025-01-15T00:00:00.000Z",
-  "isDraft": false,
-  "isPublished": true
+  "data": {
+    "id": 1,
+    "type": "privacy-policy",
+    "version": "1.0.0",
+    "content": "<html content>",
+    "requiresAcceptance": true,
+    "publishedAt": "2025-01-15T00:00:00.000Z",
+    "isDraft": false,
+    "isPublished": true
+  }
 }
 ```
 
@@ -418,6 +457,270 @@ POST /api/v1/legal/accept
 - Accepts specific versions as provided (for legal audit trail)
 - Creates separate acceptance records for each document
 - Records IP address and acceptance method (`explicit`)
+
+---
+
+## Users
+
+All user endpoints require authentication.
+
+### Update Profile
+
+Update the current user's profile information. Phone number must be updated via OTP verification.
+
+```
+PATCH /api/v1/users/profile
+```
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request Body:**
+
+| Field     | Type   | Required | Description                    |
+| --------- | ------ | -------- | ------------------------------ |
+| firstName | string | No       | First name (min 1 char)        |
+| lastName  | string | No       | Last name (min 1 char)         |
+| email     | string | No       | Email address (must be unique) |
+
+**Note:** At least one field is required. To update phone number, use the OTP verification flow with `type=new`.
+
+**Response:** `200 OK`
+
+```json
+{
+  "id": 1,
+  "firstName": "John",
+  "lastName": "Smith",
+  "email": "john.smith@example.com",
+  "phone": "+1234567890",
+  "role": "user",
+  "isAdmin": false,
+  "isGuest": false,
+  "fullName": "John Smith"
+}
+```
+
+**Error Response:** `409 Conflict`
+
+```json
+{
+  "message": "Email is already in use"
+}
+```
+
+**Error Response:** `422 Unprocessable Entity`
+
+```json
+{
+  "message": "At least one field is required"
+}
+```
+
+### Create Setup Intent
+
+Create a Stripe SetupIntent for saving a card via Stripe's card input widget.
+
+```
+POST /api/v1/users/setup-intent
+```
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Response:** `200 OK`
+
+```json
+{
+  "setupIntentSecret": "seti_xxx_secret_xxx",
+  "ephemeralKey": "ek_xxx",
+  "stripeCustomerId": "cus_xxx"
+}
+```
+
+**Frontend Usage:** Use `setupIntentSecret` with Stripe's `confirmCardSetup()` to save the card.
+
+### Create Customer Session
+
+Create a Stripe CustomerSession for the Customer Sheet widget (React Native).
+
+```
+POST /api/v1/users/customer-session
+```
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Response:** `200 OK`
+
+```json
+{
+  "customerSessionClientSecret": "cuss_xxx",
+  "customer": "cus_xxx"
+}
+```
+
+**Frontend Usage:** Use `customerSessionClientSecret` with Stripe's Customer Sheet widget to manage saved payment methods.
+
+### Get Payment Methods
+
+Get user's saved payment methods from Stripe.
+
+```
+GET /api/v1/users/:id/payment-methods
+```
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Parameters:**
+
+| Param | Type   | Description |
+| ----- | ------ | ----------- |
+| id    | number | User ID     |
+
+**Response:** `200 OK`
+
+```json
+{
+  "paymentMethods": [
+    {
+      "id": "pm_xxx",
+      "type": "card",
+      "card": {
+        "brand": "visa",
+        "last4": "4242",
+        "exp_month": 12,
+        "exp_year": 2025
+      }
+    }
+  ]
+}
+```
+
+**Note:** Users can only view their own payment methods. Admins can view any user's payment methods.
+
+### Update Stripe ID
+
+Set Stripe customer ID for a user (only if not already set).
+
+```
+PATCH /api/v1/users/:id/stripe-id
+```
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Parameters:**
+
+| Param | Type   | Description |
+| ----- | ------ | ----------- |
+| id    | number | User ID     |
+
+**Request Body:**
+
+| Field    | Type   | Required | Description        |
+| -------- | ------ | -------- | ------------------ |
+| stripeId | string | Yes      | Stripe customer ID |
+
+**Response:** `200 OK`
+
+```json
+{
+  "id": 1,
+  "firstName": "John",
+  "lastName": "Doe",
+  "stripeId": "cus_xxx",
+  ...
+}
+```
+
+**Error Response:** `409 Conflict`
+
+```json
+{
+  "message": "Stripe ID already exists"
+}
+```
+
+**Note:** Users can only update their own Stripe ID. Admins can update any user's Stripe ID.
+
+### Delete Payment Method
+
+Delete a saved payment method from Stripe.
+
+```
+DELETE /api/v1/users/payment-methods/:paymentMethodId
+```
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Parameters:**
+
+| Param           | Type   | Description                       |
+| --------------- | ------ | --------------------------------- |
+| paymentMethodId | string | Stripe payment method ID (pm_xxx) |
+
+**Response:** `204 No Content`
+
+**Error Response:** `400 Bad Request`
+
+```json
+{
+  "message": "No Stripe customer found"
+}
+```
+
+### Set Default Payment Method
+
+Set a payment method as the default for future payments.
+
+```
+PATCH /api/v1/users/payment-methods/:paymentMethodId/default
+```
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Parameters:**
+
+| Param           | Type   | Description                       |
+| --------------- | ------ | --------------------------------- |
+| paymentMethodId | string | Stripe payment method ID (pm_xxx) |
+
+**Response:** `200 OK`
+
+```json
+{
+  "message": "Default payment method updated"
+}
+```
+
+**Error Response:** `400 Bad Request`
+
+```json
+{
+  "message": "No Stripe customer found"
+}
+```
+
+### Deactivate Account
+
+Deactivate the current user's account. Deactivated users cannot login via any method.
+
+```
+POST /api/v1/users/deactivate
+```
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Response:** `200 OK`
+
+```json
+{
+  "message": "Account deactivated successfully"
+}
+```
+
+**Note:** This soft-deletes the user account. After deactivation:
+
+- User cannot login via email/password, Google, Apple, or phone OTP
+- User data is preserved and can be restored by an admin
+- Admin can reactivate the account via `POST /api/v1/admin/users/:id/reactivate`
 
 ---
 
@@ -507,16 +810,18 @@ GET /api/v1/templates/:id
 
 ```json
 {
-  "id": 1,
-  "side": "front",
-  "name": "basketball-card",
-  "label": "Basketball Card",
-  "description": "Professional basketball card template",
-  "svgString": "<svg>...</svg>",
-  "templateTypeId": 1,
-  "attributes": [...],
-  "type": {...},
-  "tags": [...]
+  "data": {
+    "id": 1,
+    "side": "front",
+    "name": "basketball-card",
+    "label": "Basketball Card",
+    "description": "Professional basketball card template",
+    "svgString": "<svg>...</svg>",
+    "templateTypeId": 1,
+    "attributes": [...],
+    "type": {...},
+    "tags": [...]
+  }
 }
 ```
 
@@ -541,14 +846,16 @@ GET /api/v1/tags
 **Response:** `200 OK`
 
 ```json
-[
-  {
-    "id": 1,
-    "name": "basketball",
-    "label": "Basketball",
-    "description": "Basketball related templates"
-  }
-]
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "basketball",
+      "label": "Basketball",
+      "description": "Basketball related templates"
+    }
+  ]
+}
 ```
 
 ### Get Tag
@@ -561,10 +868,12 @@ GET /api/v1/tags/:id
 
 ```json
 {
-  "id": 1,
-  "name": "basketball",
-  "label": "Basketball",
-  "description": "Basketball related templates"
+  "data": {
+    "id": 1,
+    "name": "basketball",
+    "label": "Basketball",
+    "description": "Basketball related templates"
+  }
 }
 ```
 
@@ -923,21 +1232,23 @@ GET /api/v1/cart-items
 **Response:** `200 OK`
 
 ```json
-[
-  {
-    "id": 1,
-    "userId": 1,
-    "packId": 1,
-    "quantity": 2,
-    "unitPrice": 1999,
-    "totalPrice": 3998,
-    "pack": {
+{
+  "data": [
+    {
       "id": 1,
-      "name": "My Pack #1",
-      "packCards": [...]
+      "userId": 1,
+      "packId": 1,
+      "quantity": 2,
+      "unitPrice": 1999,
+      "totalPrice": 3998,
+      "pack": {
+        "id": 1,
+        "name": "My Pack #1",
+        "packCards": [...]
+      }
     }
-  }
-]
+  ]
+}
 ```
 
 ### Add to Cart
@@ -1006,22 +1317,24 @@ GET /api/v1/addresses
 **Response:** `200 OK`
 
 ```json
-[
-  {
-    "id": 1,
-    "userId": 1,
-    "firstName": "John",
-    "lastName": "Doe",
-    "addressLine1": "123 Main St",
-    "addressLine2": "Apt 4B",
-    "city": "New York",
-    "state": "NY",
-    "postalCode": "10001",
-    "country": "US",
-    "phone": "+1234567890",
-    "isDefault": true
-  }
-]
+{
+  "data": [
+    {
+      "id": 1,
+      "userId": 1,
+      "firstName": "John",
+      "lastName": "Doe",
+      "addressLine1": "123 Main St",
+      "addressLine2": "Apt 4B",
+      "city": "New York",
+      "state": "NY",
+      "postalCode": "10001",
+      "country": "US",
+      "phone": "+1234567890",
+      "isDefault": true
+    }
+  ]
+}
 ```
 
 ### Get Address
@@ -1112,38 +1425,40 @@ GET /api/v1/orders
 **Response:** `200 OK`
 
 ```json
-[
-  {
-    "id": 1,
-    "userId": 1,
-    "stripePaymentIntentId": "pi_xxxxx",
-    "totalAmount": 5997,
-    "status": "paid",
-    "shippingAddress": {
-      "firstName": "John",
-      "lastName": "Doe",
-      "addressLine1": "123 Main St",
-      "city": "New York",
-      "state": "NY",
-      "postalCode": "10001",
-      "country": "US"
-    },
-    "lineItems": [
-      {
-        "id": 1,
-        "orderId": 1,
-        "quantity": 2,
-        "unitPrice": 1999,
-        "totalPrice": 3998,
-        "packSnapshot": {
+{
+  "data": [
+    {
+      "id": 1,
+      "userId": 1,
+      "stripePaymentIntentId": "pi_xxxxx",
+      "totalAmount": 5997,
+      "status": "paid",
+      "shippingAddress": {
+        "firstName": "John",
+        "lastName": "Doe",
+        "addressLine1": "123 Main St",
+        "city": "New York",
+        "state": "NY",
+        "postalCode": "10001",
+        "country": "US"
+      },
+      "lineItems": [
+        {
           "id": 1,
-          "name": "My Pack #1",
-          "cardSnapshots": [...]
+          "orderId": 1,
+          "quantity": 2,
+          "unitPrice": 1999,
+          "totalPrice": 3998,
+          "packSnapshot": {
+            "id": 1,
+            "name": "My Pack #1",
+            "cardSnapshots": [...]
+          }
         }
-      }
-    ]
-  }
-]
+      ]
+    }
+  ]
+}
 ```
 
 ### Get Order
@@ -1177,13 +1492,15 @@ POST /api/v1/orders/checkout
 
 ```json
 {
-  "order": {
-    "id": 1,
-    "status": "created",
-    "totalAmount": 5997,
-    ...
-  },
-  "clientSecret": "pi_xxxxx_secret_xxxxx"
+  "data": {
+    "order": {
+      "id": 1,
+      "status": "created",
+      "totalAmount": 5997,
+      ...
+    },
+    "clientSecret": "pi_xxxxx_secret_xxxxx"
+  }
 }
 ```
 
@@ -1201,9 +1518,11 @@ PATCH /api/v1/orders/:id/confirm-payment
 
 ```json
 {
-  "id": 1,
-  "status": "paid",
-  ...
+  "data": {
+    "id": 1,
+    "status": "paid",
+    ...
+  }
 }
 ```
 
@@ -1291,14 +1610,16 @@ GET /api/v1/admin/orders/:id
 
 ```json
 {
-  "id": 1,
-  "userId": 1,
-  "stripePaymentIntentId": "pi_xxxxx",
-  "totalAmount": 5997,
-  "status": "paid",
-  "shippingAddress": {...},
-  "user": {...},
-  "lineItems": [...]
+  "data": {
+    "id": 1,
+    "userId": 1,
+    "stripePaymentIntentId": "pi_xxxxx",
+    "totalAmount": 5997,
+    "status": "paid",
+    "shippingAddress": {...},
+    "user": {...},
+    "lineItems": [...]
+  }
 }
 ```
 
@@ -1336,9 +1657,11 @@ PUT /api/v1/admin/orders/:id
 
 ```json
 {
-  "id": 1,
-  "status": "processing",
-  ...
+  "data": {
+    "id": 1,
+    "status": "processing",
+    ...
+  }
 }
 ```
 
@@ -1350,7 +1673,7 @@ Admin-only endpoints for managing users. Requires admin authentication.
 
 ### List All Users
 
-Get paginated list of all users with filtering options.
+Get paginated list of all users with filtering options. Includes deactivated (soft-deleted) users.
 
 ```
 GET /api/v1/admin/users
@@ -1389,9 +1712,56 @@ GET /api/v1/admin/users
       "isGuest": false,
       "fullName": "John Doe",
       "createdAt": "2025-01-01T00:00:00.000Z",
-      "updatedAt": "2025-01-01T00:00:00.000Z"
+      "updatedAt": "2025-01-01T00:00:00.000Z",
+      "deletedAt": null
     }
   ]
+}
+```
+
+**Note:** Users with a non-null `deletedAt` field are deactivated accounts.
+
+### Reactivate User
+
+Reactivate a deactivated user account.
+
+```
+POST /api/v1/admin/users/:id/reactivate
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Parameters:**
+
+| Param | Type   | Description |
+| ----- | ------ | ----------- |
+| id    | number | User ID     |
+
+**Response:** `200 OK`
+
+```json
+{
+  "message": "Account reactivated successfully",
+  "user": {
+    "id": 1,
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john@example.com",
+    "phone": "+1234567890",
+    "role": "user",
+    "isAdmin": false,
+    "isGuest": false,
+    "fullName": "John Doe",
+    "deletedAt": null
+  }
+}
+```
+
+**Error Response:** `404 Not Found`
+
+```json
+{
+  "message": "Row not found"
 }
 ```
 
@@ -1421,20 +1791,22 @@ GET /api/v1/admin/dashboard/stats
 
 ```json
 {
-  "totalRevenue": {
-    "current": 50000,
-    "previous": 45000,
-    "change": 11.11
-  },
-  "totalOrders": {
-    "current": 150,
-    "previous": 120,
-    "change": 25.0
-  },
-  "avgOrderValue": {
-    "current": 333.33,
-    "previous": 375.0,
-    "change": -11.11
+  "data": {
+    "totalRevenue": {
+      "current": 50000,
+      "previous": 45000,
+      "change": 11.11
+    },
+    "totalOrders": {
+      "current": 150,
+      "previous": 120,
+      "change": 25.0
+    },
+    "avgOrderValue": {
+      "current": 333.33,
+      "previous": 375.0,
+      "change": -11.11
+    }
   }
 }
 ```
@@ -1513,6 +1885,79 @@ GET /api/v1/admin/dashboard/orders-graph
 
 ---
 
+## Admin Template Types
+
+Admin-only endpoints for managing template types. Requires admin authentication.
+
+### List Template Types
+
+Get all template types.
+
+```
+GET /api/v1/admin/template-types
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Response:** `200 OK`
+
+```json
+[
+  {
+    "id": 1,
+    "name": "sports",
+    "extraPrice": 500,
+    "createdAt": "2025-01-01T00:00:00.000Z"
+  }
+]
+```
+
+### Create Template Type
+
+```
+POST /api/v1/admin/template-types
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Request Body:**
+
+| Field      | Type   | Required | Description          |
+| ---------- | ------ | -------- | -------------------- |
+| name       | string | Yes      | Template type name   |
+| extraPrice | number | Yes      | Extra price in cents |
+
+**Response:** `201 Created`
+
+### Update Template Type
+
+```
+PUT /api/v1/admin/template-types/:id
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Request Body:**
+
+| Field      | Type   | Required | Description          |
+| ---------- | ------ | -------- | -------------------- |
+| name       | string | No       | Template type name   |
+| extraPrice | number | No       | Extra price in cents |
+
+**Response:** `200 OK`
+
+### Delete Template Type
+
+```
+DELETE /api/v1/admin/template-types/:id
+```
+
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Response:** `204 No Content`
+
+---
+
 ## Admin Templates
 
 Admin-only endpoints for managing templates. Requires admin authentication.
@@ -1585,16 +2030,18 @@ POST /api/v1/admin/templates/set-tags
 **Response:** `200 OK`
 
 ```json
-[
-  {
-    "id": 1,
-    "name": "basketball-card",
-    "tags": [
-      { "id": 1, "name": "basketball", "label": "Basketball" },
-      { "id": 2, "name": "sports", "label": "Sports" }
-    ]
-  }
-]
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "basketball-card",
+      "tags": [
+        { "id": 1, "name": "basketball", "label": "Basketball" },
+        { "id": 2, "name": "sports", "label": "Sports" }
+      ]
+    }
+  ]
+}
 ```
 
 ### Regenerate Template Snapshots
@@ -1694,13 +2141,15 @@ GET /api/v1/admin/configs
 **Response:** `200 OK`
 
 ```json
-[
-  {
-    "name": "BASE_PRICE_PER_PACK",
-    "value": "1999",
-    "description": "Base price per pack in cents"
-  }
-]
+{
+  "data": [
+    {
+      "name": "BASE_PRICE_PER_PACK",
+      "value": "1999",
+      "description": "Base price per pack in cents"
+    }
+  ]
+}
 ```
 
 ### Get Config
@@ -1876,17 +2325,19 @@ GET /api/v1/admin/legal/:id
 
 ```json
 {
-  "id": 1,
-  "type": "privacy-policy",
-  "version": "1.0.0",
-  "content": "<html content>",
-  "requiresAcceptance": true,
-  "publishedAt": "2025-01-15T00:00:00.000Z",
-  "publishedBy": 1,
-  "isDraft": false,
-  "isPublished": true,
-  "creator": {...},
-  "publisher": {...}
+  "data": {
+    "id": 1,
+    "type": "privacy-policy",
+    "version": "1.0.0",
+    "content": "<html content>",
+    "requiresAcceptance": true,
+    "publishedAt": "2025-01-15T00:00:00.000Z",
+    "publishedBy": 1,
+    "isDraft": false,
+    "isPublished": true,
+    "creator": {...},
+    "publisher": {...}
+  }
 }
 ```
 
@@ -1965,15 +2416,17 @@ POST /api/v1/admin/legal/:id/publish
 
 ```json
 {
-  "id": 1,
-  "type": "privacy-policy",
-  "version": "1.0.0",
-  "content": "<html content>",
-  "requiresAcceptance": true,
-  "publishedAt": "2025-01-15T00:00:00.000Z",
-  "publishedBy": 1,
-  "isDraft": false,
-  "isPublished": true
+  "data": {
+    "id": 1,
+    "type": "privacy-policy",
+    "version": "1.0.0",
+    "content": "<html content>",
+    "requiresAcceptance": true,
+    "publishedAt": "2025-01-15T00:00:00.000Z",
+    "publishedBy": 1,
+    "isDraft": false,
+    "isPublished": true
+  }
 }
 ```
 
@@ -2001,19 +2454,21 @@ GET /api/v1/admin/legal/versions/:type
 **Response:** `200 OK`
 
 ```json
-[
-  {
-    "id": 1,
-    "version": "1.0.0",
-    "publishedAt": "2025-01-15T00:00:00.000Z",
-    "requiresAcceptance": true,
-    "creator": {
+{
+  "data": [
+    {
       "id": 1,
-      "firstName": "Admin",
-      "lastName": "User"
+      "version": "1.0.0",
+      "publishedAt": "2025-01-15T00:00:00.000Z",
+      "requiresAcceptance": true,
+      "creator": {
+        "id": 1,
+        "firstName": "Admin",
+        "lastName": "User"
+      }
     }
-  }
-]
+  ]
+}
 ```
 
 ---
@@ -2073,20 +2528,22 @@ GET /api/v1/color-leagues
 **Response:** `200 OK`
 
 ```json
-[
-  {
-    "id": 1,
-    "name": "nfl",
-    "label": "NFL",
-    "rank": 1
-  },
-  {
-    "id": 2,
-    "name": "nba",
-    "label": "NBA",
-    "rank": 2
-  }
-]
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "nfl",
+      "label": "NFL",
+      "rank": 1
+    },
+    {
+      "id": 2,
+      "name": "nba",
+      "label": "NBA",
+      "rank": 2
+    }
+  ]
+}
 ```
 
 ### Get Color League
@@ -2107,23 +2564,25 @@ GET /api/v1/color-leagues/:id
 
 ```json
 {
-  "id": 1,
-  "name": "nfl",
-  "label": "NFL",
-  "rank": 1,
-  "isActive": true,
-  "presets": [
-    {
-      "id": 1,
-      "colorLeagueId": 1,
-      "name": "Arizona Cardinals",
-      "abbreviation": "ARI",
-      "colors": ["#97233F", "#000000", "#FFB612"],
-      "rank": 1,
-      "isFeatured": false,
-      "isActive": true
-    }
-  ]
+  "data": {
+    "id": 1,
+    "name": "nfl",
+    "label": "NFL",
+    "rank": 1,
+    "isActive": true,
+    "presets": [
+      {
+        "id": 1,
+        "colorLeagueId": 1,
+        "name": "Arizona Cardinals",
+        "abbreviation": "ARI",
+        "colors": ["#97233F", "#000000", "#FFB612"],
+        "rank": 1,
+        "isFeatured": false,
+        "isActive": true
+      }
+    ]
+  }
 }
 ```
 
@@ -2152,22 +2611,24 @@ GET /api/v1/color-presets
 **Response:** `200 OK`
 
 ```json
-[
-  {
-    "id": 1,
-    "colorLeagueId": 1,
-    "name": "Arizona Cardinals",
-    "abbreviation": "ARI",
-    "colors": ["#97233F", "#000000", "#FFB612"],
-    "isFeatured": true,
-    "rank": 1,
-    "league": {
+{
+  "data": [
+    {
       "id": 1,
-      "name": "nfl",
-      "label": "NFL"
+      "colorLeagueId": 1,
+      "name": "Arizona Cardinals",
+      "abbreviation": "ARI",
+      "colors": ["#97233F", "#000000", "#FFB612"],
+      "isFeatured": true,
+      "rank": 1,
+      "league": {
+        "id": 1,
+        "name": "nfl",
+        "label": "NFL"
+      }
     }
-  }
-]
+  ]
+}
 ```
 
 ### Get Color Preset
@@ -2182,18 +2643,20 @@ GET /api/v1/color-presets/:id
 
 ```json
 {
-  "id": 1,
-  "colorLeagueId": 1,
-  "name": "Arizona Cardinals",
-  "abbreviation": "ARI",
-  "colors": ["#97233F", "#000000", "#FFB612"],
-  "rank": 1,
-  "isFeatured": false,
-  "isActive": true,
-  "league": {
+  "data": {
     "id": 1,
-    "name": "nfl",
-    "label": "NFL"
+    "colorLeagueId": 1,
+    "name": "Arizona Cardinals",
+    "abbreviation": "ARI",
+    "colors": ["#97233F", "#000000", "#FFB612"],
+    "rank": 1,
+    "isFeatured": false,
+    "isActive": true,
+    "league": {
+      "id": 1,
+      "name": "nfl",
+      "label": "NFL"
+    }
   }
 }
 ```
@@ -2211,23 +2674,25 @@ GET /api/v1/color-presets/favorites
 **Response:** `200 OK`
 
 ```json
-[
-  {
-    "id": 1,
-    "colorLeagueId": 1,
-    "name": "Arizona Cardinals",
-    "abbreviation": "ARI",
-    "colors": ["#97233F", "#000000", "#FFB612"],
-    "rank": 1,
-    "isFeatured": false,
-    "isActive": true,
-    "league": {
+{
+  "data": [
+    {
       "id": 1,
-      "name": "nfl",
-      "label": "NFL"
+      "colorLeagueId": 1,
+      "name": "Arizona Cardinals",
+      "abbreviation": "ARI",
+      "colors": ["#97233F", "#000000", "#FFB612"],
+      "rank": 1,
+      "isFeatured": false,
+      "isActive": true,
+      "league": {
+        "id": 1,
+        "name": "nfl",
+        "label": "NFL"
+      }
     }
-  }
-]
+  ]
+}
 ```
 
 ### Add to Favorites

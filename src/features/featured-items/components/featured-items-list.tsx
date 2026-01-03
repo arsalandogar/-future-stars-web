@@ -39,13 +39,11 @@ export function FeaturedItemsList() {
     open();
   };
 
-  const { data, isLoading } = useFeaturedItems({
+  const queryResult = useFeaturedItems({
     variables: {
       search: search || undefined,
     },
   });
-
-  const items = data?.data ?? [];
 
   return (
     <>
@@ -64,9 +62,8 @@ export function FeaturedItemsList() {
         }
       >
         <DataTable
-          data={items}
+          queryResult={queryResult}
           columns={COLUMNS}
-          isLoading={isLoading}
           emptyMessage="No featured items found"
           keyExtractor={(item) => item.id}
           renderRow={(item) => (

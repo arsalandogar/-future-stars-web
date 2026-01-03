@@ -5,7 +5,9 @@ export interface TemplateType {
   createdAt?: string;
 }
 
-export type TemplateTypesListResponse = TemplateType[];
+export interface TemplateTypesListResponse {
+  data: TemplateType[];
+}
 
 export interface CreateTemplateTypeParams {
   name: string;

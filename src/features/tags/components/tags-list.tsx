@@ -36,7 +36,7 @@ export function TagsList() {
     open();
   };
 
-  const { data: tags, isLoading } = useTags({
+  const queryResult = useTags({
     variables: {
       search: search || undefined,
     },
@@ -59,9 +59,8 @@ export function TagsList() {
         }
       >
         <DataTable
-          data={tags ?? []}
+          queryResult={queryResult}
           columns={COLUMNS}
-          isLoading={isLoading}
           emptyMessage="No tags found"
           keyExtractor={(tag) => tag.id}
           renderRow={(tag) => <TagRow tag={tag} onEdit={handleEdit} />}

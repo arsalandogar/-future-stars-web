@@ -15,7 +15,7 @@ const COLUMNS: Column[] = [
 ];
 
 export function ConfigsList() {
-  const { data: configs, isLoading } = useConfigs();
+  const queryResult = useConfigs();
 
   return (
     <div className="flex flex-col gap-6">
@@ -32,9 +32,8 @@ export function ConfigsList() {
           </Group>
 
           <DataTable
-            data={configs ?? []}
+            queryResult={queryResult}
             columns={COLUMNS}
-            isLoading={isLoading}
             emptyMessage="No configs found"
             keyExtractor={(config) => config.name}
             renderRow={(config) => <ConfigRow config={config} />}
