@@ -1,4 +1,3 @@
-/* eslint-disable react-dom/no-dangerously-set-innerhtml */
 import { Link } from '@tanstack/react-router';
 import {
   ActionIcon,
@@ -10,8 +9,9 @@ import {
   Text,
   Tooltip,
 } from '@mantine/core';
-import { MoreHorizontal, Tags } from 'lucide-react';
+import { Edit, Eye, MoreHorizontal, Tags } from 'lucide-react';
 
+import { SvgPreview } from '@/components/svg-preview';
 import { formatDate } from '@/utils/date';
 
 import type { Template } from '../types';
@@ -21,14 +21,17 @@ interface TemplateRowProps {
   onSetTags: (template: Template) => void;
 }
 
+const SVG_PREVIEW_PROPS = {
+  className: 'h-12 w-12 rounded border border-gray-200',
+  svgClassName: '[&>svg]:h-full [&>svg]:w-full',
+  hideErrors: true,
+} as const;
+
 export function TemplateRow({ template, onSetTags }: TemplateRowProps) {
   return (
     <>
       <Table.Td>
-        <div
-          className="h-12 w-12 overflow-hidden rounded border border-gray-200 [&>svg]:h-full [&>svg]:w-full"
-          dangerouslySetInnerHTML={{ __html: template.svgString }}
-        />
+        <SvgPreview svgString={template.svgString} {...SVG_PREVIEW_PROPS} />
       </Table.Td>
       <Table.Td>
         {template.backTemplate ? (
@@ -36,11 +39,9 @@ export function TemplateRow({ template, onSetTags }: TemplateRowProps) {
             component={Link}
             to={`/admin/templates/${template.backTemplate.id}`}
           >
-            <div
-              className="h-12 w-12 overflow-hidden rounded border border-gray-200 [&>svg]:h-full [&>svg]:w-full"
-              dangerouslySetInnerHTML={{
-                __html: template.backTemplate.svgString ?? '',
-              }}
+            <SvgPreview
+              svgString={template.backTemplate.svgString ?? ''}
+              {...SVG_PREVIEW_PROPS}
             />
           </Anchor>
         ) : (
@@ -97,6 +98,21 @@ export function TemplateRow({ template, onSetTags }: TemplateRowProps) {
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown>
+            <Menu.Item
+              component={Link}
+              to={`/admin/templates/${template.id}`}
+              leftSection={<Eye size={14} />}
+            >
+              View
+            </Menu.Item>
+            <Menu.Item
+              component={Link}
+              to={`/admin/templates/${template.id}/edit`}
+              leftSection={<Edit size={14} />}
+            >
+              Edit
+            </Menu.Item>
+            <Menu.Divider />
             <Menu.Item
               leftSection={<Tags size={14} />}
               onClick={() => onSetTags(template)}

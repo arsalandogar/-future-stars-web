@@ -21,13 +21,16 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminTemplateTypesRouteImport } from './routes/_authenticated/admin/template-types'
 import { Route as AuthenticatedAdminConfigsRouteImport } from './routes/_authenticated/admin/configs'
 import { Route as AuthenticatedAdminListingRouteImport } from './routes/_authenticated/admin/_listing'
+import { Route as AuthenticatedAdminTemplatesCreateRouteImport } from './routes/_authenticated/admin/templates/create'
 import { Route as AuthenticatedAdminListingUsersRouteImport } from './routes/_authenticated/admin/_listing/users'
 import { Route as AuthenticatedAdminListingTemplatesRouteImport } from './routes/_authenticated/admin/_listing/templates'
 import { Route as AuthenticatedAdminListingTagsRouteImport } from './routes/_authenticated/admin/_listing/tags'
 import { Route as AuthenticatedAdminListingOrdersRouteImport } from './routes/_authenticated/admin/_listing/orders'
 import { Route as AuthenticatedAdminListingFeaturedItemsRouteImport } from './routes/_authenticated/admin/_listing/featured-items'
 import { Route as AuthenticatedAdminLegalTypeRouteRouteImport } from './routes/_authenticated/admin/legal/$type/route'
+import { Route as AuthenticatedAdminTemplatesIdIndexRouteImport } from './routes/_authenticated/admin/templates/$id/index'
 import { Route as AuthenticatedAdminLegalTypeIndexRouteImport } from './routes/_authenticated/admin/legal/$type/index'
+import { Route as AuthenticatedAdminTemplatesIdEditRouteImport } from './routes/_authenticated/admin/templates/$id/edit'
 import { Route as AuthenticatedAdminLegalTypeVersionsRouteImport } from './routes/_authenticated/admin/legal/$type/versions'
 import { Route as AuthenticatedAdminLegalTypeCreateRouteImport } from './routes/_authenticated/admin/legal/$type/create'
 import { Route as AuthenticatedAdminLegalTypeIdRouteRouteImport } from './routes/_authenticated/admin/legal/$type/$id/route'
@@ -95,6 +98,12 @@ const AuthenticatedAdminListingRoute =
     id: '/_listing',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminTemplatesCreateRoute =
+  AuthenticatedAdminTemplatesCreateRouteImport.update({
+    id: '/templates/create',
+    path: '/templates/create',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminListingUsersRoute =
   AuthenticatedAdminListingUsersRouteImport.update({
     id: '/users',
@@ -131,11 +140,23 @@ const AuthenticatedAdminLegalTypeRouteRoute =
     path: '/legal/$type',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminTemplatesIdIndexRoute =
+  AuthenticatedAdminTemplatesIdIndexRouteImport.update({
+    id: '/templates/$id/',
+    path: '/templates/$id/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminLegalTypeIndexRoute =
   AuthenticatedAdminLegalTypeIndexRouteImport.update({
     id: '/',
     path: '/',
     getParentRoute: () => AuthenticatedAdminLegalTypeRouteRoute,
+  } as any)
+const AuthenticatedAdminTemplatesIdEditRoute =
+  AuthenticatedAdminTemplatesIdEditRouteImport.update({
+    id: '/templates/$id/edit',
+    path: '/templates/$id/edit',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminLegalTypeVersionsRoute =
   AuthenticatedAdminLegalTypeVersionsRouteImport.update({
@@ -185,10 +206,13 @@ export interface FileRoutesByFullPath {
   '/admin/tags': typeof AuthenticatedAdminListingTagsRoute
   '/admin/templates': typeof AuthenticatedAdminListingTemplatesRoute
   '/admin/users': typeof AuthenticatedAdminListingUsersRoute
+  '/admin/templates/create': typeof AuthenticatedAdminTemplatesCreateRoute
   '/admin/legal/$type/$id': typeof AuthenticatedAdminLegalTypeIdRouteRouteWithChildren
   '/admin/legal/$type/create': typeof AuthenticatedAdminLegalTypeCreateRoute
   '/admin/legal/$type/versions': typeof AuthenticatedAdminLegalTypeVersionsRoute
+  '/admin/templates/$id/edit': typeof AuthenticatedAdminTemplatesIdEditRoute
   '/admin/legal/$type/': typeof AuthenticatedAdminLegalTypeIndexRoute
+  '/admin/templates/$id': typeof AuthenticatedAdminTemplatesIdIndexRoute
   '/admin/legal/$type/$id/edit': typeof AuthenticatedAdminLegalTypeIdEditRoute
   '/admin/legal/$type/$id/': typeof AuthenticatedAdminLegalTypeIdIndexRoute
 }
@@ -207,9 +231,12 @@ export interface FileRoutesByTo {
   '/admin/tags': typeof AuthenticatedAdminListingTagsRoute
   '/admin/templates': typeof AuthenticatedAdminListingTemplatesRoute
   '/admin/users': typeof AuthenticatedAdminListingUsersRoute
+  '/admin/templates/create': typeof AuthenticatedAdminTemplatesCreateRoute
   '/admin/legal/$type/create': typeof AuthenticatedAdminLegalTypeCreateRoute
   '/admin/legal/$type/versions': typeof AuthenticatedAdminLegalTypeVersionsRoute
+  '/admin/templates/$id/edit': typeof AuthenticatedAdminTemplatesIdEditRoute
   '/admin/legal/$type': typeof AuthenticatedAdminLegalTypeIndexRoute
+  '/admin/templates/$id': typeof AuthenticatedAdminTemplatesIdIndexRoute
   '/admin/legal/$type/$id/edit': typeof AuthenticatedAdminLegalTypeIdEditRoute
   '/admin/legal/$type/$id': typeof AuthenticatedAdminLegalTypeIdIndexRoute
 }
@@ -233,10 +260,13 @@ export interface FileRoutesById {
   '/_authenticated/admin/_listing/tags': typeof AuthenticatedAdminListingTagsRoute
   '/_authenticated/admin/_listing/templates': typeof AuthenticatedAdminListingTemplatesRoute
   '/_authenticated/admin/_listing/users': typeof AuthenticatedAdminListingUsersRoute
+  '/_authenticated/admin/templates/create': typeof AuthenticatedAdminTemplatesCreateRoute
   '/_authenticated/admin/legal/$type/$id': typeof AuthenticatedAdminLegalTypeIdRouteRouteWithChildren
   '/_authenticated/admin/legal/$type/create': typeof AuthenticatedAdminLegalTypeCreateRoute
   '/_authenticated/admin/legal/$type/versions': typeof AuthenticatedAdminLegalTypeVersionsRoute
+  '/_authenticated/admin/templates/$id/edit': typeof AuthenticatedAdminTemplatesIdEditRoute
   '/_authenticated/admin/legal/$type/': typeof AuthenticatedAdminLegalTypeIndexRoute
+  '/_authenticated/admin/templates/$id/': typeof AuthenticatedAdminTemplatesIdIndexRoute
   '/_authenticated/admin/legal/$type/$id/edit': typeof AuthenticatedAdminLegalTypeIdEditRoute
   '/_authenticated/admin/legal/$type/$id/': typeof AuthenticatedAdminLegalTypeIdIndexRoute
 }
@@ -259,10 +289,13 @@ export interface FileRouteTypes {
     | '/admin/tags'
     | '/admin/templates'
     | '/admin/users'
+    | '/admin/templates/create'
     | '/admin/legal/$type/$id'
     | '/admin/legal/$type/create'
     | '/admin/legal/$type/versions'
+    | '/admin/templates/$id/edit'
     | '/admin/legal/$type/'
+    | '/admin/templates/$id'
     | '/admin/legal/$type/$id/edit'
     | '/admin/legal/$type/$id/'
   fileRoutesByTo: FileRoutesByTo
@@ -281,9 +314,12 @@ export interface FileRouteTypes {
     | '/admin/tags'
     | '/admin/templates'
     | '/admin/users'
+    | '/admin/templates/create'
     | '/admin/legal/$type/create'
     | '/admin/legal/$type/versions'
+    | '/admin/templates/$id/edit'
     | '/admin/legal/$type'
+    | '/admin/templates/$id'
     | '/admin/legal/$type/$id/edit'
     | '/admin/legal/$type/$id'
   id:
@@ -306,10 +342,13 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/_listing/tags'
     | '/_authenticated/admin/_listing/templates'
     | '/_authenticated/admin/_listing/users'
+    | '/_authenticated/admin/templates/create'
     | '/_authenticated/admin/legal/$type/$id'
     | '/_authenticated/admin/legal/$type/create'
     | '/_authenticated/admin/legal/$type/versions'
+    | '/_authenticated/admin/templates/$id/edit'
     | '/_authenticated/admin/legal/$type/'
+    | '/_authenticated/admin/templates/$id/'
     | '/_authenticated/admin/legal/$type/$id/edit'
     | '/_authenticated/admin/legal/$type/$id/'
   fileRoutesById: FileRoutesById
@@ -407,6 +446,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminListingRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/templates/create': {
+      id: '/_authenticated/admin/templates/create'
+      path: '/templates/create'
+      fullPath: '/admin/templates/create'
+      preLoaderRoute: typeof AuthenticatedAdminTemplatesCreateRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/_listing/users': {
       id: '/_authenticated/admin/_listing/users'
       path: '/users'
@@ -449,12 +495,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminLegalTypeRouteRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/templates/$id/': {
+      id: '/_authenticated/admin/templates/$id/'
+      path: '/templates/$id'
+      fullPath: '/admin/templates/$id'
+      preLoaderRoute: typeof AuthenticatedAdminTemplatesIdIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/legal/$type/': {
       id: '/_authenticated/admin/legal/$type/'
       path: '/'
       fullPath: '/admin/legal/$type/'
       preLoaderRoute: typeof AuthenticatedAdminLegalTypeIndexRouteImport
       parentRoute: typeof AuthenticatedAdminLegalTypeRouteRoute
+    }
+    '/_authenticated/admin/templates/$id/edit': {
+      id: '/_authenticated/admin/templates/$id/edit'
+      path: '/templates/$id/edit'
+      fullPath: '/admin/templates/$id/edit'
+      preLoaderRoute: typeof AuthenticatedAdminTemplatesIdEditRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/legal/$type/versions': {
       id: '/_authenticated/admin/legal/$type/versions'
@@ -580,6 +640,9 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminTemplateTypesRoute: typeof AuthenticatedAdminTemplateTypesRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminLegalTypeRouteRoute: typeof AuthenticatedAdminLegalTypeRouteRouteWithChildren
+  AuthenticatedAdminTemplatesCreateRoute: typeof AuthenticatedAdminTemplatesCreateRoute
+  AuthenticatedAdminTemplatesIdEditRoute: typeof AuthenticatedAdminTemplatesIdEditRoute
+  AuthenticatedAdminTemplatesIdIndexRoute: typeof AuthenticatedAdminTemplatesIdIndexRoute
 }
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
@@ -590,6 +653,12 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
     AuthenticatedAdminLegalTypeRouteRoute:
       AuthenticatedAdminLegalTypeRouteRouteWithChildren,
+    AuthenticatedAdminTemplatesCreateRoute:
+      AuthenticatedAdminTemplatesCreateRoute,
+    AuthenticatedAdminTemplatesIdEditRoute:
+      AuthenticatedAdminTemplatesIdEditRoute,
+    AuthenticatedAdminTemplatesIdIndexRoute:
+      AuthenticatedAdminTemplatesIdIndexRoute,
   }
 
 const AuthenticatedAdminRouteRouteWithChildren =

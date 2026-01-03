@@ -8,6 +8,7 @@ export interface TemplatesListParams {
   limit?: number;
   search?: string;
   tagIds?: string;
+  side?: TemplateSide;
 }
 
 export interface TemplatesListResponse {
@@ -65,4 +66,69 @@ export interface SetTagsResponse {
   id: number;
   name: string;
   tags: Tag[];
+}
+
+// Single template response
+export interface TemplateResponse {
+  data: Template;
+}
+
+// Create template params
+export interface CreateTemplateAttributeParams {
+  type: TemplateAttributeType;
+  name: string;
+  label: string;
+  defaultValue?: string;
+  defaultColor?: string;
+}
+
+export interface CreateTemplateParams {
+  side: TemplateSide;
+  name: string;
+  templateTypeId: number;
+  label?: string;
+  description?: string;
+  svgString?: string;
+  frontendComponentName?: string;
+  frontendComponentFileName?: string;
+  backTemplateId?: number;
+  attributes?: CreateTemplateAttributeParams[];
+  tagIds?: number[];
+}
+
+// Update template params
+export interface UpdateTemplateParams {
+  id: number;
+  side?: TemplateSide;
+  name?: string;
+  templateTypeId?: number;
+  label?: string;
+  description?: string;
+  svgString?: string;
+  frontendComponentName?: string;
+  frontendComponentFileName?: string;
+  backTemplateId?: number | null;
+  attributes?: CreateTemplateAttributeParams[];
+  tagIds?: number[];
+}
+
+// Form values
+export interface TemplateAttributeFormValues {
+  type: TemplateAttributeType;
+  name: string;
+  label: string;
+  defaultValue: string;
+  defaultColor: string;
+}
+
+export interface TemplateFormValues {
+  side: TemplateSide;
+  name: string;
+  label: string;
+  description: string;
+  svgString: string;
+  templateTypeId: number | null;
+  backTemplateId: number | null;
+  tagIds: string[];
+  attributes: TemplateAttributeFormValues[];
 }

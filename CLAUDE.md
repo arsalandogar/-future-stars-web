@@ -101,7 +101,7 @@ Uses **TanStack Form** with **Valibot** for schema validation and form compositi
 
 - Use `useAppForm` from `@/lib/form` instead of `useForm` for pre-bound field components
 - Use `form.AppField` with field components like `<field.TextField label="Name" />`
-- Available field components: `TextField`, `PasswordField`, `SelectField`, `TextareaField`, `FloatingTextField`, `FloatingPasswordField`, `NumberInputField`, `ImageUploadCardField`, `CheckboxField`
+- Available field components: `TextField`, `PasswordField`, `SelectField`, `TextareaField`, `FloatingTextField`, `FloatingPasswordField`, `NumberInputField`, `ImageUploadCardField`, `CheckboxField`, `ColorInputField`
 - Available form components: `Form`, `SubmitButton` (wrap with `<form.AppForm>` to use)
 
 ```typescript
@@ -140,7 +140,22 @@ Uses **Zustand** with persist middleware for global state:
 
 - Use for filters, pagination, search queries, sorting, and any state that should be bookmarkable/shareable
 - Define search params schema with `validateSearch` using Valibot on the route
-- Read with `Route.useSearch()`, write with `<Link search={...}>` or `useNavigate({ search: ... })`
+- Write with `<Link search={...}>` or `useNavigate({ search: ... })`
+- **Feature-specific params** (e.g., `side` filter for templates) belong in the feature's route file, not shared layout routes
+- **Accessing search params in components**: Use `getRouteApi` to read params directly, avoiding prop drilling:
+
+  ```typescript
+  // In a feature component (e.g., src/features/templates/components/templates-list.tsx)
+  import { getRouteApi } from '@tanstack/react-router';
+
+  const routeApi = getRouteApi('/_authenticated/admin/_listing/templates');
+
+  export function TemplatesList() {
+    const { side } = routeApi.useSearch(); // Typed, no prop drilling
+  }
+  ```
+
+- **Avoid `useSearch({ strict: false })`** - it loses type safety. Use `getRouteApi` instead
 
 ### Types
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link } from '@tanstack/react-router';
-import { Button } from '@mantine/core';
+import { getRouteApi, Link, useNavigate } from '@tanstack/react-router';
+import { Button, Select } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Plus } from 'lucide-react';
 
@@ -8,10 +8,17 @@ import { DataTable, type Column } from '@/components/ui/data-table';
 import { ListingShell, useListingContext } from '@/components/ui/listing';
 
 import { useTemplates } from '../api/get-templates';
-import type { Template } from '../types';
+import type { Template, TemplateSide } from '../types';
 
 import { TemplateRow } from './template-row';
 import { SetTagsModal } from './set-tags-modal';
+
+const routeApi = getRouteApi('/_authenticated/admin/_listing/templates');
+
+const SIDE_OPTIONS = [
+  { value: 'front', label: 'Front' },
+  { value: 'back', label: 'Back' },
+];
 
 const COLUMNS: Column[] = [
   { label: 'Front', width: 80 },
@@ -25,6 +32,8 @@ const COLUMNS: Column[] = [
 
 export function TemplatesList() {
   const { page, limit, search } = useListingContext();
+  const { side } = routeApi.useSearch();
+  const navigate = useNavigate();
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedTemplate, setSelectedTemplate] = useState<
     Template | undefined
@@ -35,11 +44,20 @@ export function TemplatesList() {
     open();
   };
 
+  const handleSideChange = (value: string | null) => {
+    void navigate({
+      to: '.',
+      search: (prev) => ({ ...prev, side: value as TemplateSide, page: 1 }),
+      replace: true,
+    });
+  };
+
   const queryResult = useTemplates({
     variables: {
       page,
       limit,
       search: search || undefined,
+      side,
     },
   });
 
@@ -64,6 +82,14 @@ export function TemplatesList() {
           </Button>
         }
         showFilter={false}
+        filterComponent={
+          <Select
+            data={SIDE_OPTIONS}
+            value={side}
+            onChange={handleSideChange}
+            className="w-32"
+          />
+        }
       >
         <DataTable
           queryResult={queryResult}

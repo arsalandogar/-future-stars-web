@@ -2,6 +2,7 @@ import { createFormHook } from '@tanstack/react-form';
 
 import {
   CheckboxField,
+  ColorInputField,
   FloatingPasswordField,
   FloatingTextField,
   NumberInputField,
@@ -31,6 +32,7 @@ export const { useAppForm, withForm } = createFormHook({
     ImageUploadCardField,
     NumberInputField,
     CheckboxField,
+    ColorInputField,
   },
   formComponents: {
     Form,

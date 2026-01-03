@@ -53,8 +53,9 @@ api.interceptors.response.use(
     });
 
     if (error.response?.status === 401 && !isAuthPage) {
-      const redirectTo = window.location.pathname + window.location.search;
-      window.location.href = `/auth/login?redirectTo=${encodeURIComponent(redirectTo)}`;
+      // TODO: Implement redirect to login
+      // const redirectTo = window.location.pathname + window.location.search;
+      // window.location.href = `/auth/login?redirectTo=${encodeURIComponent(redirectTo)}`;
     }
 
     return Promise.reject(error);

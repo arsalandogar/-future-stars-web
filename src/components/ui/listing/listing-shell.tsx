@@ -12,6 +12,7 @@ export interface ListingShellProps {
   showSearch?: boolean;
   showFilter?: boolean;
   onFilterClick?: () => void;
+  filterComponent?: ReactNode;
   children: ReactNode;
 }
 
@@ -23,6 +24,7 @@ export function ListingShell({
   showSearch = true,
   showFilter = true,
   onFilterClick,
+  filterComponent,
   children,
 }: ListingShellProps) {
   const { search, setSearch } = useListingContext();
@@ -40,7 +42,7 @@ export function ListingShell({
           {actions}
         </Group>
 
-        {(showSearch || showFilter) && (
+        {(showSearch || showFilter || filterComponent) && (
           <Group justify="space-between">
             {showSearch ? (
               <TextInput
@@ -53,16 +55,19 @@ export function ListingShell({
             ) : (
               <div />
             )}
-            {showFilter && (
-              <Button
-                variant="default"
-                leftSection={<SlidersHorizontal size={16} />}
-                onClick={onFilterClick}
-                disabled={!onFilterClick}
-              >
-                Filter
-              </Button>
-            )}
+            <Group gap="sm">
+              {filterComponent}
+              {showFilter && (
+                <Button
+                  variant="default"
+                  leftSection={<SlidersHorizontal size={16} />}
+                  onClick={onFilterClick}
+                  disabled={!onFilterClick}
+                >
+                  Filter
+                </Button>
+              )}
+            </Group>
           </Group>
         )}
 
