@@ -25,7 +25,7 @@ This is a React 19 + TypeScript + Vite application with the React Compiler enabl
 - Path alias `@/*` maps to `src/*` for clean imports
 - UI components use [Mantine](https://mantine.dev) - reference https://mantine.dev/llms.txt for documentation
 - Icons use [Lucide React](https://lucide.dev/icons/) - import from `lucide-react`
-- Backend API documentation is in [API_DOCUMENTATION.md](./docs/API_DOCUMENTATION.md) - reference this for all API endpoints, request/response formats, and authentication
+- **Backend API**: Fetch the OpenAPI spec at https://api.futurestarsapp.com/api.json when creating or modifying API hooks to get accurate endpoints, request/response schemas, and validation rules
 
 **Entry point:** `src/main.tsx` renders `<AppProvider>` and `<AppRouter>` inside `<StrictMode>`
 
@@ -101,7 +101,7 @@ Uses **TanStack Form** with **Valibot** for schema validation and form compositi
 
 - Use `useAppForm` from `@/lib/form` instead of `useForm` for pre-bound field components
 - Use `form.AppField` with field components like `<field.TextField label="Name" />`
-- Available field components: `TextField`, `PasswordField`, `SelectField`, `TextareaField`, `FloatingTextField`, `FloatingPasswordField`
+- Available field components: `TextField`, `PasswordField`, `SelectField`, `TextareaField`, `FloatingTextField`, `FloatingPasswordField`, `NumberInputField`, `ImageUploadCardField`, `CheckboxField`
 - Available form components: `Form`, `SubmitButton` (wrap with `<form.AppForm>` to use)
 
 ```typescript
