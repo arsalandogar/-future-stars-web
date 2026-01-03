@@ -6,7 +6,6 @@ import {
   Group,
   SimpleGrid,
   Stack,
-  Table,
   Text,
   Title,
 } from '@mantine/core';
@@ -17,6 +16,7 @@ import { SvgPreview } from '@/components/svg-preview';
 import { formatDate } from '@/utils/date';
 
 import type { Template } from '../types';
+import { AttributesTable } from './attributes-table';
 
 const SVG_PREVIEW_PROPS = {
   className: 'rounded border p-2',
@@ -149,50 +149,7 @@ export function TemplateView({ template, onDelete }: TemplateViewProps) {
           <Title order={5} mb="md">
             Attributes
           </Title>
-          <Table>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Type</Table.Th>
-                <Table.Th>Name</Table.Th>
-                <Table.Th>Label</Table.Th>
-                <Table.Th>Default Value</Table.Th>
-                <Table.Th>Default Color (Text)</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {template.attributes.map((attr) => (
-                <Table.Tr key={attr.id}>
-                  <Table.Td>
-                    <Badge variant="outline" size="sm">
-                      {attr.type}
-                    </Badge>
-                  </Table.Td>
-                  <Table.Td>{attr.name}</Table.Td>
-                  <Table.Td>{attr.label}</Table.Td>
-                  <Table.Td>
-                    {attr.defaultValue ? (
-                      <Text size="sm">{attr.defaultValue}</Text>
-                    ) : (
-                      <Text c="dimmed">---</Text>
-                    )}
-                  </Table.Td>
-                  <Table.Td>
-                    {attr.defaultColor ? (
-                      <Group gap="xs">
-                        <Box
-                          className="h-4 w-4 rounded border"
-                          style={{ backgroundColor: attr.defaultColor }}
-                        />
-                        <Text size="sm">{attr.defaultColor}</Text>
-                      </Group>
-                    ) : (
-                      <Text c="dimmed">---</Text>
-                    )}
-                  </Table.Td>
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
+          <AttributesTable mode="view" attributes={template.attributes} />
         </Card>
       )}
     </Stack>
