@@ -6,5 +6,6 @@ export { FloatingTextField } from './floating-text-field';
 export { FloatingPasswordField } from './floating-password-field';
 export { ImageUploadCardField } from './image-upload-card-field';
 export { NumberInputField } from './number-input-field';
+export { CheckboxField } from './checkbox-field';
 export { SubmitButton } from './submit-button';
 export { Form } from './form';

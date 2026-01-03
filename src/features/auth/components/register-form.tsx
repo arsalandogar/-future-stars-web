@@ -1,5 +1,6 @@
 import { Anchor, Divider, Group, Stack, Text } from '@mantine/core';
 
+import { usePublicLegalDocument } from '@/features/legal';
 import { useAppForm } from '@/lib/form';
 import { revalidateLogic } from '@tanstack/react-form';
 import { Link } from '@tanstack/react-router';
@@ -35,7 +36,10 @@ const registerSchema = v.object({
     v.minLength(8, 'Password must be at least 8 characters'),
     v.maxLength(64, 'Password must be at most 64 characters')
   ),
-  acceptPolicies: v.boolean(),
+  acceptPolicies: v.pipe(
+    v.boolean(),
+    v.literal(true, 'You must accept the terms and privacy policy')
+  ),
   policyVersions: policyVersionsSchema,
 });
 
@@ -53,6 +57,10 @@ const defaultValues: RegisterCredentials = {
 
 export function RegisterForm() {
   const { register } = useAuth();
+  const { data: privacyPolicy } = usePublicLegalDocument({
+    variables: 'privacy-policy',
+  });
+  const { data: terms } = usePublicLegalDocument({ variables: 'terms' });
 
   const form = useAppForm({
     defaultValues,
@@ -61,7 +69,13 @@ export function RegisterForm() {
     },
     validationLogic: revalidateLogic(),
     onSubmit: async ({ value }) => {
-      await register(value);
+      await register({
+        ...value,
+        policyVersions: {
+          privacyPolicy: privacyPolicy?.data.version ?? '',
+          terms: terms?.data.version ?? '',
+        },
+      });
     },
   });
 
@@ -106,6 +120,24 @@ export function RegisterForm() {
                   label="Password"
                   size="md"
                   required
+                />
+              )}
+            </form.AppField>
+            <form.AppField name="acceptPolicies">
+              {(field) => (
+                <field.CheckboxField
+                  label={
+                    <Text size="sm" component="span">
+                      I agree to the{' '}
+                      <Anchor href="/terms-and-conditions" target="_blank">
+                        Terms and Conditions
+                      </Anchor>{' '}
+                      and{' '}
+                      <Anchor href="/privacy-policy" target="_blank">
+                        Privacy Policy
+                      </Anchor>
+                    </Text>
+                  }
                 />
               )}
             </form.AppField>
