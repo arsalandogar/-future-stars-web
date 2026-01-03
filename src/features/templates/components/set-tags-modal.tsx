@@ -15,7 +15,8 @@ type SetTagsModalProps = {
 export function SetTagsModal({ template, opened, onClose }: SetTagsModalProps) {
   const initialTagIds = template?.tags.map((tag) => String(tag.id)) ?? [];
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>(initialTagIds);
-  const { data: tags = [], isLoading: isLoadingTags } = useTags({});
+  const { data: tagsResponse, isLoading: isLoadingTags } = useTags({});
+  const tags = tagsResponse?.data ?? [];
   const setTags = useSetTags();
 
   const handleSubmit = () => {

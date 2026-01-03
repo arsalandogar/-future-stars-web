@@ -8,6 +8,11 @@ import * as v from 'valibot';
 import { useAuth } from '../hooks/use-auth';
 import type { RegisterCredentials } from '../types';
 
+const policyVersionsSchema = v.object({
+  privacyPolicy: v.string(),
+  terms: v.string(),
+});
+
 const registerSchema = v.object({
   firstName: v.pipe(
     v.string(),
@@ -30,6 +35,8 @@ const registerSchema = v.object({
     v.minLength(8, 'Password must be at least 8 characters'),
     v.maxLength(64, 'Password must be at most 64 characters')
   ),
+  acceptPolicies: v.boolean(),
+  policyVersions: policyVersionsSchema,
 });
 
 const defaultValues: RegisterCredentials = {
@@ -37,6 +44,11 @@ const defaultValues: RegisterCredentials = {
   lastName: '',
   email: '',
   password: '',
+  acceptPolicies: false,
+  policyVersions: {
+    privacyPolicy: '',
+    terms: '',
+  },
 };
 
 export function RegisterForm() {

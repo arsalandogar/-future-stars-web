@@ -42,7 +42,7 @@ export function TagForm({ tag, modalClose }: Props) {
       const isEdit = !!tag?.id;
 
       if (isEdit) {
-        await updateTag.mutateAsync({ id: tag.id, updatedTag: value });
+        await updateTag.mutateAsync({ id: String(tag.id), updatedTag: value });
       } else {
         await createTag.mutateAsync(value);
       }

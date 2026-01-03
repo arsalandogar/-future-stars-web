@@ -39,7 +39,7 @@ export function TemplateRow({ template, onSetTags }: TemplateRowProps) {
             <div
               className="h-12 w-12 overflow-hidden rounded border border-gray-200 [&>svg]:h-full [&>svg]:w-full"
               dangerouslySetInnerHTML={{
-                __html: template.backTemplate.svgString,
+                __html: template.backTemplate.svgString ?? '',
               }}
             />
           </Anchor>
