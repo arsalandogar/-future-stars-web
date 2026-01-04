@@ -11,7 +11,7 @@ import { Edit, MoreHorizontal, Trash2 } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import dayjs from 'dayjs';
 import type { FeaturedItem } from '../types';
-import { modals } from '@mantine/modals';
+import { openDeleteModal } from '@/utils/open-delete-modal';
 import { useDeleteFeaturedItem } from '../api/delete-featured-item';
 
 type FeaturedItemRowProps = {
@@ -23,20 +23,10 @@ export function FeaturedItemRow({ item, onEdit }: FeaturedItemRowProps) {
   const deleteFeaturedItem = useDeleteFeaturedItem();
 
   const handleDelete = (item: FeaturedItem) => {
-    modals.openConfirmModal({
-      title: <Text fw={700}>Delete Featured Item</Text>,
-      centered: true,
-      children: (
-        <Text size="sm">
-          Are you sure you want to delete <b>{item.title}</b>? This action
-          cannot be undone.
-        </Text>
-      ),
-      labels: { confirm: 'Delete', cancel: 'Cancel' },
-      confirmProps: { color: 'red' },
-      onConfirm: () => {
-        deleteFeaturedItem.mutate(item.id);
-      },
+    openDeleteModal({
+      entityType: 'Featured Item',
+      itemName: item.title,
+      onConfirm: () => deleteFeaturedItem.mutate(item.id),
     });
   };
 

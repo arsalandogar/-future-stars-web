@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { ActionIcon, Group, Table, Text } from '@mantine/core';
 import { revalidateLogic } from '@tanstack/react-form';
 import { Check, Pencil, Trash2, X } from 'lucide-react';
-import { modals } from '@mantine/modals';
 
+import { openDeleteModal } from '@/utils/open-delete-modal';
 import { useAppForm } from '@/lib/form';
 
 import { useUpdateTemplateType } from '../api/update-template-type';
@@ -62,20 +62,10 @@ export function TemplateTypeRow({ templateType }: TemplateTypeRowProps) {
   };
 
   const handleDelete = () => {
-    modals.openConfirmModal({
-      title: <Text fw={700}>Delete Template Type</Text>,
-      centered: true,
-      children: (
-        <Text size="sm">
-          Are you sure you want to delete <b>{templateType.name}</b>? This
-          action cannot be undone.
-        </Text>
-      ),
-      labels: { confirm: 'Delete', cancel: 'Cancel' },
-      confirmProps: { color: 'red' },
-      onConfirm: () => {
-        deleteTemplateType.mutate(templateType.id);
-      },
+    openDeleteModal({
+      entityType: 'Template Type',
+      itemName: templateType.name,
+      onConfirm: () => deleteTemplateType.mutate(templateType.id),
     });
   };
 

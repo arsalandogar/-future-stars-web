@@ -5,10 +5,3 @@ export { RegisterForm } from './components/register-form';
 
 // Hooks
 export { useAuth } from './hooks/use-auth';
-
-// Types
-export type {
-  AuthResponse,
-  LoginCredentials,
-  RegisterCredentials,
-} from './types';

@@ -1,7 +1,7 @@
 import { TextInput } from '@mantine/core';
 import type { TextInputProps } from '@mantine/core';
 
-import { useFieldContext } from '@/lib/form-context';
+import { getFieldError, useFieldContext } from '@/lib/form-context';
 
 type TextFieldProps = Omit<TextInputProps, 'value' | 'onChange'>;
 
@@ -12,9 +12,7 @@ export function TextField(props: TextFieldProps) {
     <TextInput
       value={field.state.value}
       onChange={(e) => field.handleChange(e.target.value)}
-      error={
-        (field.state.meta.errors[0] as { message: string } | undefined)?.message
-      }
+      error={getFieldError(field.state.meta.errors)}
       {...props}
     />
   );

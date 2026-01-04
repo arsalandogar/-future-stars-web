@@ -1,4 +1,4 @@
-import { useFieldContext } from '@/lib/form-context';
+import { getFieldError, useFieldContext } from '@/lib/form-context';
 import {
   Card,
   Text,
@@ -35,8 +35,7 @@ export function ImageUploadCardField({
   const hasNewFile = !!value;
   const hasExistingImage = !!existingImageUrl;
   const previewUrl = hasNewFile ? URL.createObjectURL(value) : existingImageUrl;
-  const error = (field.state.meta.errors[0] as { message: string } | undefined)
-    ?.message;
+  const error = getFieldError(field.state.meta.errors);
 
   const handleFileChange = (file: File | null) => {
     if (maxSizeInBytes) {

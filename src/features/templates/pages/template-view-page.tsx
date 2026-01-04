@@ -1,8 +1,8 @@
 import { Loader, Text } from '@mantine/core';
-import { modals } from '@mantine/modals';
 import { useNavigate } from '@tanstack/react-router';
 
 import { Head } from '@/components/seo/head';
+import { openDeleteModal } from '@/utils/open-delete-modal';
 import { usePageHeader } from '@/hooks/use-page-header';
 
 import { useDeleteTemplate } from '../api/delete-template';
@@ -29,17 +29,9 @@ export function TemplateViewPage({ id }: TemplateViewPageProps) {
   });
 
   const handleDelete = () => {
-    modals.openConfirmModal({
-      title: <Text fw={700}>Delete Template</Text>,
-      centered: true,
-      children: (
-        <Text size="sm">
-          Are you sure you want to delete template{' '}
-          <strong>{template?.label}</strong>? This action cannot be undone.
-        </Text>
-      ),
-      labels: { confirm: 'Delete', cancel: 'Cancel' },
-      confirmProps: { color: 'red' },
+    openDeleteModal({
+      entityType: 'Template',
+      itemName: template?.label ?? 'this template',
       onConfirm: () => {
         deleteTemplate.mutate(id, {
           onSuccess: () => {

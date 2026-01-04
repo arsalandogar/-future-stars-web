@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Anchor, Button, Text } from '@mantine/core';
+import { Anchor, Button } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { modals } from '@mantine/modals';
 import { getRouteApi, Link, useNavigate } from '@tanstack/react-router';
 import { ExternalLink, Plus } from 'lucide-react';
 
@@ -11,6 +10,7 @@ import {
   useListingContext,
   type ListingTab,
 } from '@/components/ui/listing';
+import { openDeleteModal } from '@/utils/open-delete-modal';
 import { usePageHeader } from '@/hooks/use-page-header';
 
 import { useDeleteLegalDocument } from '../api/delete-legal-document';
@@ -108,20 +108,10 @@ export function LegalDocumentList() {
   };
 
   const handleDeleteClick = (doc: LegalDocument) => {
-    modals.openConfirmModal({
-      title: <Text fw={700}>Delete Document</Text>,
-      centered: true,
-      children: (
-        <Text size="sm">
-          Are you sure you want to delete version <strong>{doc.version}</strong>
-          ? This action cannot be undone.
-        </Text>
-      ),
-      labels: { confirm: 'Delete', cancel: 'Cancel' },
-      confirmProps: { color: 'red' },
-      onConfirm: () => {
-        deleteDocument.mutate(doc.id);
-      },
+    openDeleteModal({
+      entityType: 'Document',
+      itemName: `version ${doc.version}`,
+      onConfirm: () => deleteDocument.mutate(doc.id),
     });
   };
 

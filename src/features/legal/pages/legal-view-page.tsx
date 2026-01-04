@@ -1,9 +1,9 @@
 import { Loader, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { modals } from '@mantine/modals';
 import { useNavigate } from '@tanstack/react-router';
 
 import { Head } from '@/components/seo/head';
+import { openDeleteModal } from '@/utils/open-delete-modal';
 import { usePageHeader } from '@/hooks/use-page-header';
 
 import { useDeleteLegalDocument } from '../api/delete-legal-document';
@@ -54,17 +54,9 @@ export function LegalViewPage({ type, id }: LegalViewPageProps) {
   };
 
   const handleDelete = () => {
-    modals.openConfirmModal({
-      title: <Text fw={700}>Delete Document</Text>,
-      centered: true,
-      children: (
-        <Text size="sm">
-          Are you sure you want to delete version{' '}
-          <strong>{document?.version}</strong>? This action cannot be undone.
-        </Text>
-      ),
-      labels: { confirm: 'Delete', cancel: 'Cancel' },
-      confirmProps: { color: 'red' },
+    openDeleteModal({
+      entityType: 'Document',
+      itemName: `version ${document?.version ?? ''}`,
       onConfirm: () => {
         deleteDocument.mutate(id, {
           onSuccess: () => {

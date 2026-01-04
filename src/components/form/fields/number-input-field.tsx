@@ -1,4 +1,4 @@
-import { useFieldContext } from '@/lib/form-context';
+import { getFieldError, useFieldContext } from '@/lib/form-context';
 import { NumberInput } from '@mantine/core';
 import type { NumberInputProps } from '@mantine/core';
 
@@ -15,9 +15,7 @@ export function NumberInputField(props: NumberInputFieldProps) {
           typeof value === 'string' ? parseFloat(value) || 0 : (value ?? 0);
         field.handleChange(numValue);
       }}
-      error={
-        (field.state.meta.errors[0] as { message: string } | undefined)?.message
-      }
+      error={getFieldError(field.state.meta.errors)}
       {...props}
     />
   );

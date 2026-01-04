@@ -11,12 +11,11 @@ export const templateTypeExtraPriceSchema = v.pipe(
   v.minValue(0, 'Extra price must be 0 or greater')
 );
 
-export const createTemplateTypeSchema = v.object({
+export const templateTypeSchema = v.object({
   name: templateTypeNameSchema,
   extraPrice: templateTypeExtraPriceSchema,
 });
 
-export const updateTemplateTypeSchema = v.object({
-  name: templateTypeNameSchema,
-  extraPrice: templateTypeExtraPriceSchema,
-});
+// Aliases for create/update operations (same schema)
+export const createTemplateTypeSchema = templateTypeSchema;
+export const updateTemplateTypeSchema = templateTypeSchema;
