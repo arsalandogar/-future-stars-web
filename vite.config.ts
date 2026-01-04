@@ -23,4 +23,26 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+          mantine: [
+            '@mantine/core',
+            '@mantine/hooks',
+            '@mantine/dates',
+            '@mantine/notifications',
+            '@mantine/modals',
+          ],
+          'mantine-charts': ['@mantine/charts', 'recharts'],
+          tanstack: [
+            '@tanstack/react-router',
+            '@tanstack/react-query',
+            '@tanstack/react-form',
+          ],
+        },
+      },
+    },
+  },
 });
