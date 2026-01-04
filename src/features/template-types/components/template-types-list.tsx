@@ -1,6 +1,7 @@
-import { Card, Group, Text, Title } from '@mantine/core';
+import { Card, Group } from '@mantine/core';
 
 import { DataTable, type Column } from '@/components/ui/data-table';
+import { usePageHeader } from '@/hooks/use-page-header';
 
 import { useTemplateTypes } from '../api/get-template-types';
 
@@ -17,31 +18,27 @@ const COLUMNS: Column[] = [
 export function TemplateTypesList() {
   const queryResult = useTemplateTypes();
 
-  return (
-    <div className="flex flex-col gap-6">
-      <Card withBorder radius="md" p="lg">
-        <div className="flex flex-col gap-6">
-          <Group justify="space-between" align="flex-start">
-            <div>
-              <Title order={4}>Template Types</Title>
-              <Text size="sm" c="dimmed">
-                Manage template type categories.
-              </Text>
-            </div>
-            <CreateTemplateTypeButton />
-          </Group>
+  usePageHeader({
+    title: 'Template Types',
+    description: 'Manage template type categories.',
+  });
 
-          <DataTable
-            queryResult={queryResult}
-            columns={COLUMNS}
-            emptyMessage="No template types found"
-            keyExtractor={(templateType) => templateType.name}
-            renderRow={(templateType) => (
-              <TemplateTypeRow templateType={templateType} />
-            )}
-          />
-        </div>
+  return (
+    <>
+      <Group justify="flex-end" mb="md">
+        <CreateTemplateTypeButton />
+      </Group>
+      <Card withBorder radius="md" p="lg">
+        <DataTable
+          queryResult={queryResult}
+          columns={COLUMNS}
+          emptyMessage="No template types found"
+          keyExtractor={(templateType) => templateType.name}
+          renderRow={(templateType) => (
+            <TemplateTypeRow templateType={templateType} />
+          )}
+        />
       </Card>
-    </div>
+    </>
   );
 }

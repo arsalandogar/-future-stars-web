@@ -10,6 +10,7 @@ import {
   useListingContext,
   type ListingTab,
 } from '@/components/ui/listing';
+import { usePageHeader } from '@/hooks/use-page-header';
 
 import { useTemplates } from '../api/get-templates';
 import type { Template, TemplateSide } from '../types';
@@ -52,6 +53,11 @@ export function TemplatesList() {
     Template | undefined
   >();
 
+  usePageHeader({
+    title: 'Templates',
+    description: 'Manage your card templates.',
+  });
+
   const handleSetTags = (template: Template) => {
     setSelectedTemplate(template);
     open();
@@ -86,8 +92,6 @@ export function TemplatesList() {
         onClose={close}
       />
       <ListingShell
-        title="Templates List"
-        description="Manage your card templates."
         actions={
           <Button
             component={Link}

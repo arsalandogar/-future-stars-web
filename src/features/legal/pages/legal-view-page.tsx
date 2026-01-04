@@ -1,9 +1,10 @@
-import { Anchor, Breadcrumbs, Loader, Text, Title } from '@mantine/core';
+import { Loader, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
-import { Link, useNavigate } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 
 import { Head } from '@/components/seo/head';
+import { usePageHeader } from '@/hooks/use-page-header';
 
 import { useDeleteLegalDocument } from '../api/delete-legal-document';
 import { useLegalDocument } from '../api/get-legal-document';
@@ -36,11 +37,10 @@ export function LegalViewPage({ type, id }: LegalViewPageProps) {
     { open: openPublishModal, close: closePublishModal },
   ] = useDisclosure(false);
 
-  const breadcrumbItems = [
-    { title: 'Home', href: '/admin' },
-    { title: config.title, href: basePath },
-    { title: document?.version ?? 'View', href: `${basePath}/${id}` },
-  ];
+  usePageHeader({
+    title: config.title,
+    dynamicBreadcrumb: document?.version,
+  });
 
   const handlePublishConfirm = (requiresAcceptance: boolean) => {
     publishDocument.mutate(
@@ -97,29 +97,11 @@ export function LegalViewPage({ type, id }: LegalViewPageProps) {
         title={`${config.title} v${document.version}`}
         description={`View ${config.title.toLowerCase()} document`}
       />
-      <div className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <Title order={2}>{config.title}</Title>
-          <Breadcrumbs>
-            {breadcrumbItems.map((item, index) => (
-              <Anchor
-                key={item.href}
-                component={Link}
-                to={item.href}
-                c={index === breadcrumbItems.length - 1 ? undefined : 'dimmed'}
-                size="sm"
-              >
-                {item.title}
-              </Anchor>
-            ))}
-          </Breadcrumbs>
-        </div>
-        <LegalDocumentView
-          document={document}
-          onPublish={openPublishModal}
-          onDelete={handleDelete}
-        />
-      </div>
+      <LegalDocumentView
+        document={document}
+        onPublish={openPublishModal}
+        onDelete={handleDelete}
+      />
 
       <PublishModal
         opened={publishModalOpened}

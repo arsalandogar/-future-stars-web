@@ -5,6 +5,7 @@ import { PlusIcon } from 'lucide-react';
 
 import { DataTable, type Column } from '@/components/ui/data-table';
 import { ListingShell, useListingContext } from '@/components/ui/listing';
+import { usePageHeader } from '@/hooks/use-page-header';
 
 import { useFeaturedItems } from '../api/get-featured-items';
 import type { FeaturedItem } from '../types';
@@ -29,6 +30,11 @@ export function FeaturedItemsList() {
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedItem, setSelectedItem] = useState<FeaturedItem | undefined>();
 
+  usePageHeader({
+    title: 'Featured Items',
+    description: 'View and manage featured items.',
+  });
+
   const handleCreate = () => {
     setSelectedItem(undefined);
     open();
@@ -49,8 +55,6 @@ export function FeaturedItemsList() {
     <>
       <FeaturedItemModal item={selectedItem} opened={opened} onClose={close} />
       <ListingShell
-        title="Featured Items List"
-        description="View and manage featured items."
         actions={
           <Button
             variant="filled"

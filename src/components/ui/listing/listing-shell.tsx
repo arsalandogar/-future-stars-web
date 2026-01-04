@@ -1,13 +1,5 @@
 import type { ReactNode } from 'react';
-import {
-  Button,
-  Card,
-  Group,
-  Tabs,
-  Text,
-  TextInput,
-  Title,
-} from '@mantine/core';
+import { Button, Card, Group, Tabs, TextInput } from '@mantine/core';
 import { Search, SlidersHorizontal } from 'lucide-react';
 
 import { useListingContext } from './use-listing-context';
@@ -18,8 +10,6 @@ export interface ListingTab {
 }
 
 export interface ListingShellProps {
-  title: string;
-  description: string;
   searchPlaceholder?: string;
   actions?: ReactNode;
   showSearch?: boolean;
@@ -32,8 +22,6 @@ export interface ListingShellProps {
 }
 
 export function ListingShell({
-  title,
-  description,
   searchPlaceholder = 'Search...',
   actions,
   showSearch = true,
@@ -47,58 +35,55 @@ export function ListingShell({
   const { search, setSearch } = useListingContext();
 
   return (
-    <Card withBorder radius="md" p="lg">
-      <div className="flex flex-col gap-6">
-        <Group justify="space-between" align="flex-start">
-          <div>
-            <Title order={4}>{title}</Title>
-            <Text size="sm" c="dimmed">
-              {description}
-            </Text>
-          </div>
+    <>
+      {actions && (
+        <Group justify="flex-end" mb="md">
           {actions}
         </Group>
+      )}
+      <Card withBorder radius="md" p="lg">
+        <div className="flex flex-col gap-6">
+          {tabs && tabs.length > 0 && (
+            <Tabs value={activeTab} onChange={onTabChange}>
+              <Tabs.List>
+                {tabs.map((tab) => (
+                  <Tabs.Tab key={tab.value} value={tab.value}>
+                    {tab.label}
+                  </Tabs.Tab>
+                ))}
+              </Tabs.List>
+            </Tabs>
+          )}
 
-        {tabs && tabs.length > 0 && (
-          <Tabs value={activeTab} onChange={onTabChange}>
-            <Tabs.List>
-              {tabs.map((tab) => (
-                <Tabs.Tab key={tab.value} value={tab.value}>
-                  {tab.label}
-                </Tabs.Tab>
-              ))}
-            </Tabs.List>
-          </Tabs>
-        )}
+          {(showSearch || showFilter) && (
+            <Group justify="space-between">
+              {showSearch ? (
+                <TextInput
+                  placeholder={searchPlaceholder}
+                  leftSection={<Search size={16} />}
+                  defaultValue={search}
+                  onChange={(e) => setSearch(e.currentTarget.value)}
+                  className="w-80"
+                />
+              ) : (
+                <div />
+              )}
+              {showFilter && (
+                <Button
+                  variant="default"
+                  leftSection={<SlidersHorizontal size={16} />}
+                  onClick={onFilterClick}
+                  disabled={!onFilterClick}
+                >
+                  Filter
+                </Button>
+              )}
+            </Group>
+          )}
 
-        {(showSearch || showFilter) && (
-          <Group justify="space-between">
-            {showSearch ? (
-              <TextInput
-                placeholder={searchPlaceholder}
-                leftSection={<Search size={16} />}
-                defaultValue={search}
-                onChange={(e) => setSearch(e.currentTarget.value)}
-                className="w-80"
-              />
-            ) : (
-              <div />
-            )}
-            {showFilter && (
-              <Button
-                variant="default"
-                leftSection={<SlidersHorizontal size={16} />}
-                onClick={onFilterClick}
-                disabled={!onFilterClick}
-              >
-                Filter
-              </Button>
-            )}
-          </Group>
-        )}
-
-        {children}
-      </div>
-    </Card>
+          {children}
+        </div>
+      </Card>
+    </>
   );
 }

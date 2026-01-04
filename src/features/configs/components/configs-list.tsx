@@ -1,6 +1,7 @@
-import { Card, Group, Text, Title } from '@mantine/core';
+import { Card, Group } from '@mantine/core';
 
 import { DataTable, type Column } from '@/components/ui/data-table';
+import { usePageHeader } from '@/hooks/use-page-header';
 
 import { useConfigs } from '../api/get-configs';
 
@@ -17,29 +18,25 @@ const COLUMNS: Column[] = [
 export function ConfigsList() {
   const queryResult = useConfigs();
 
-  return (
-    <div className="flex flex-col gap-6">
-      <Card withBorder radius="md" p="lg">
-        <div className="flex flex-col gap-6">
-          <Group justify="space-between" align="flex-start">
-            <div>
-              <Title order={4}>Application Configs</Title>
-              <Text size="sm" c="dimmed">
-                Manage application configuration values.
-              </Text>
-            </div>
-            <CreateConfigButton />
-          </Group>
+  usePageHeader({
+    title: 'Configs',
+    description: 'Manage application configuration values.',
+  });
 
-          <DataTable
-            queryResult={queryResult}
-            columns={COLUMNS}
-            emptyMessage="No configs found"
-            keyExtractor={(config) => config.name}
-            renderRow={(config) => <ConfigRow config={config} />}
-          />
-        </div>
+  return (
+    <>
+      <Group justify="flex-end" mb="md">
+        <CreateConfigButton />
+      </Group>
+      <Card withBorder radius="md" p="lg">
+        <DataTable
+          queryResult={queryResult}
+          columns={COLUMNS}
+          emptyMessage="No configs found"
+          keyExtractor={(config) => config.name}
+          renderRow={(config) => <ConfigRow config={config} />}
+        />
       </Card>
-    </div>
+    </>
   );
 }

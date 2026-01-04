@@ -1,4 +1,4 @@
-import { SegmentedControl, Skeleton, Text, Title } from '@mantine/core';
+import { SegmentedControl, Skeleton, Text } from '@mantine/core';
 import { getRouteApi } from '@tanstack/react-router';
 import { Clock, DollarSign, ShoppingCart, TrendingUp } from 'lucide-react';
 
@@ -49,11 +49,7 @@ export function DashboardContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <Title order={2}>Dashboard</Title>
-          <Text c="dimmed">Overview of your store's performance.</Text>
-        </div>
+      <div className="flex flex-1 justify-end">
         <SegmentedControl
           data={PERIOD_OPTIONS}
           onChange={handlePeriodChange}

@@ -4,6 +4,7 @@ import { Outlet } from '@tanstack/react-router';
 
 import { AdminHeader } from './components/admin-header';
 import { AdminNavbar } from './components/admin-navbar';
+import { PageHeader } from './components/page-header';
 import { useHeaderStore } from './stores/header-store';
 import { useSidebarStore } from './stores/sidebar-store';
 
@@ -59,6 +60,7 @@ export function AdminLayout() {
       </AppShell.Navbar>
 
       <AppShell.Main>
+        <PageHeader />
         <Outlet />
       </AppShell.Main>
     </AppShell>

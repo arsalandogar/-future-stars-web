@@ -5,6 +5,7 @@ import { PlusIcon } from 'lucide-react';
 
 import { DataTable, type Column } from '@/components/ui/data-table';
 import { ListingShell, useListingContext } from '@/components/ui/listing';
+import { usePageHeader } from '@/hooks/use-page-header';
 import type { Tag } from '@/types';
 
 import { useTags } from '../api/get-tags';
@@ -26,6 +27,11 @@ export function TagsList() {
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedTag, setSelectedTag] = useState<Tag | undefined>();
 
+  usePageHeader({
+    title: 'Tags',
+    description: 'View and manage tags.',
+  });
+
   const handleCreate = () => {
     setSelectedTag(undefined);
     open();
@@ -46,8 +52,6 @@ export function TagsList() {
     <>
       <TagModal tag={selectedTag} opened={opened} onClose={close} />
       <ListingShell
-        title="Tags List"
-        description="View and manage tags."
         actions={
           <Button
             variant="filled"

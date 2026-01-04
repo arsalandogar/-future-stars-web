@@ -1,5 +1,6 @@
 import { DataTable, type Column } from '@/components/ui/data-table';
 import { ListingShell, useListingContext } from '@/components/ui/listing';
+import { usePageHeader } from '@/hooks/use-page-header';
 
 import { useOrders } from '../api/get-orders';
 
@@ -17,6 +18,11 @@ const COLUMNS: Column[] = [
 export function OrdersList() {
   const { page, limit, search } = useListingContext();
 
+  usePageHeader({
+    title: 'Orders',
+    description: 'Manage and fulfill your custom card pack orders.',
+  });
+
   const queryResult = useOrders({
     variables: {
       page,
@@ -26,10 +32,7 @@ export function OrdersList() {
   });
 
   return (
-    <ListingShell
-      title="Orders List"
-      description="Manage and fulfill your custom card pack orders."
-    >
+    <ListingShell>
       <DataTable
         queryResult={queryResult}
         columns={COLUMNS}

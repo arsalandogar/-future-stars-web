@@ -1,7 +1,8 @@
-import { Anchor, Breadcrumbs, Card, Loader, Text, Title } from '@mantine/core';
-import { Link, useNavigate } from '@tanstack/react-router';
+import { Card, Loader, Text } from '@mantine/core';
+import { useNavigate } from '@tanstack/react-router';
 
 import { Head } from '@/components/seo/head';
+import { usePageHeader } from '@/hooks/use-page-header';
 
 import { useTemplate } from '../api/get-template';
 import { useUpdateTemplate } from '../api/update-template';
@@ -22,12 +23,10 @@ export function TemplateEditPage({ id }: TemplateEditPageProps) {
 
   const updateTemplate = useUpdateTemplate();
 
-  const breadcrumbItems = [
-    { title: 'Home', href: '/admin' },
-    { title: 'Templates', href: '/admin/templates' },
-    { title: template?.label ?? 'Edit', href: `/admin/templates/${id}` },
-    { title: 'Edit', href: `/admin/templates/${id}/edit` },
-  ];
+  usePageHeader({
+    title: 'Edit Template',
+    dynamicBreadcrumb: template?.label,
+  });
 
   const handleSubmit = (values: TemplateFormValues) => {
     updateTemplate.mutate(
@@ -97,31 +96,13 @@ export function TemplateEditPage({ id }: TemplateEditPageProps) {
         title={`Edit ${template.label}`}
         description={`Edit template: ${template.label}`}
       />
-      <div className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <Title order={2}>Edit Template</Title>
-          <Breadcrumbs>
-            {breadcrumbItems.map((item, index) => (
-              <Anchor
-                key={item.href}
-                component={Link}
-                to={item.href}
-                c={index === breadcrumbItems.length - 1 ? undefined : 'dimmed'}
-                size="sm"
-              >
-                {item.title}
-              </Anchor>
-            ))}
-          </Breadcrumbs>
-        </div>
-        <Card withBorder radius="md" p="lg">
-          <TemplateForm
-            initialValues={initialValues}
-            onSubmit={handleSubmit}
-            submitLabel="Save Changes"
-          />
-        </Card>
-      </div>
+      <Card withBorder radius="md" p="lg">
+        <TemplateForm
+          initialValues={initialValues}
+          onSubmit={handleSubmit}
+          submitLabel="Save Changes"
+        />
+      </Card>
     </>
   );
 }

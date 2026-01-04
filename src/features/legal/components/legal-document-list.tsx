@@ -11,6 +11,7 @@ import {
   useListingContext,
   type ListingTab,
 } from '@/components/ui/listing';
+import { usePageHeader } from '@/hooks/use-page-header';
 
 import { useDeleteLegalDocument } from '../api/delete-legal-document';
 import { useLegalDocuments } from '../api/get-legal-documents';
@@ -58,6 +59,11 @@ export function LegalDocumentList() {
 
   const validType = isLegalDocumentType(type) ? type : 'terms';
   const config = getLegalDocumentConfig(validType);
+
+  usePageHeader({
+    title: `${config.title} Documents`,
+    description: config.description,
+  });
 
   const queryResult = useLegalDocuments({
     variables: {
@@ -122,8 +128,6 @@ export function LegalDocumentList() {
   return (
     <>
       <ListingShell
-        title={`${config.title} Documents`}
-        description={config.description}
         tabs={STATUS_TABS}
         activeTab={status ?? 'all'}
         onTabChange={handleStatusChange}

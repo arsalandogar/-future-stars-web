@@ -1,5 +1,6 @@
 import { DataTable, type Column } from '@/components/ui/data-table';
 import { ListingShell, useListingContext } from '@/components/ui/listing';
+import { usePageHeader } from '@/hooks/use-page-header';
 
 import { useUsers } from '../api/get-users';
 
@@ -18,6 +19,11 @@ const COLUMNS: Column[] = [
 export function UsersList() {
   const { page, limit, search } = useListingContext();
 
+  usePageHeader({
+    title: 'Users',
+    description: 'View and manage registered users.',
+  });
+
   const queryResult = useUsers({
     variables: {
       page,
@@ -27,11 +33,7 @@ export function UsersList() {
   });
 
   return (
-    <ListingShell
-      title="Users List"
-      description="View and manage registered users."
-      searchPlaceholder="Search by name or email..."
-    >
+    <ListingShell searchPlaceholder="Search by name or email...">
       <DataTable
         queryResult={queryResult}
         columns={COLUMNS}

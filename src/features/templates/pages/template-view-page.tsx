@@ -1,8 +1,9 @@
-import { Anchor, Breadcrumbs, Loader, Text, Title } from '@mantine/core';
+import { Loader, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
-import { Link, useNavigate } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 
 import { Head } from '@/components/seo/head';
+import { usePageHeader } from '@/hooks/use-page-header';
 
 import { useDeleteTemplate } from '../api/delete-template';
 import { useTemplate } from '../api/get-template';
@@ -22,11 +23,10 @@ export function TemplateViewPage({ id }: TemplateViewPageProps) {
 
   const deleteTemplate = useDeleteTemplate();
 
-  const breadcrumbItems = [
-    { title: 'Home', href: '/admin' },
-    { title: 'Templates', href: '/admin/templates' },
-    { title: template?.label ?? 'View', href: `/admin/templates/${id}` },
-  ];
+  usePageHeader({
+    title: template?.label ?? 'Template',
+    dynamicBreadcrumb: template?.label,
+  });
 
   const handleDelete = () => {
     modals.openConfirmModal({
@@ -72,25 +72,7 @@ export function TemplateViewPage({ id }: TemplateViewPageProps) {
         title={template.label}
         description={`View template: ${template.label}`}
       />
-      <div className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <Title order={2}>{template.label}</Title>
-          <Breadcrumbs>
-            {breadcrumbItems.map((item, index) => (
-              <Anchor
-                key={item.href}
-                component={Link}
-                to={item.href}
-                c={index === breadcrumbItems.length - 1 ? undefined : 'dimmed'}
-                size="sm"
-              >
-                {item.title}
-              </Anchor>
-            ))}
-          </Breadcrumbs>
-        </div>
-        <TemplateView template={template} onDelete={handleDelete} />
-      </div>
+      <TemplateView template={template} onDelete={handleDelete} />
     </>
   );
 }
