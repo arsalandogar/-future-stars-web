@@ -13,9 +13,16 @@ interface ApiErrorResponse {
 }
 
 let getAuthToken: () => string | null = () => null;
+let clearAuth: () => void = () => {};
 
-export function setAuthTokenGetter(getter: () => string | null) {
-  getAuthToken = getter;
+interface ApiClientConfig {
+  getAuthToken: () => string | null;
+  clearAuth: () => void;
+}
+
+export function configureApiClient(config: ApiClientConfig) {
+  getAuthToken = config.getAuthToken;
+  clearAuth = config.clearAuth;
 }
 
 function authRequestInterceptor(config: InternalAxiosRequestConfig) {
@@ -53,9 +60,9 @@ api.interceptors.response.use(
     });
 
     if (error.response?.status === 401 && !isAuthPage) {
-      // TODO: Implement redirect to login
-      // const redirectTo = window.location.pathname + window.location.search;
-      // window.location.href = `/auth/login?redirectTo=${encodeURIComponent(redirectTo)}`;
+      clearAuth();
+      const redirectTo = window.location.pathname + window.location.search;
+      window.location.href = `/auth/login?redirectTo=${encodeURIComponent(redirectTo)}`;
     }
 
     return Promise.reject(error);
