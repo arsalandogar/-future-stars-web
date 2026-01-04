@@ -74,7 +74,7 @@ export function TagForm({ tag, modalClose }: Props) {
           </form.AppField>
 
           <form.SubmitButton size="md">
-            {tag ? 'Update Tag' : 'Create Tag'}
+            {tag ? 'Save Changes' : 'Create Tag'}
           </form.SubmitButton>
         </Stack>
       </form.Form>

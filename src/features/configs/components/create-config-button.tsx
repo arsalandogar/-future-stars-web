@@ -49,7 +49,7 @@ export function CreateConfigButton() {
   return (
     <>
       <Button leftSection={<Plus size={16} />} onClick={open}>
-        Add Config
+        Create Config
       </Button>
 
       <Modal opened={opened} onClose={handleClose} title="Create Config">

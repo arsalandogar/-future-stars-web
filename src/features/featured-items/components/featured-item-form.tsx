@@ -125,8 +125,8 @@ export function FeaturedItemForm({ item, modalClose }: Props) {
             )}
           </form.AppField>
 
-          <form.SubmitButton className=" fixed">
-            {item ? 'Update Featured Item' : 'Create Featured Item'}
+          <form.SubmitButton>
+            {item ? 'Save Changes' : 'Create Featured Item'}
           </form.SubmitButton>
         </Stack>
       </form.Form>

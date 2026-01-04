@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { PlusIcon } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 import { DataTable, type Column } from '@/components/ui/data-table';
 import { ListingShell, useListingContext } from '@/components/ui/listing';
@@ -58,10 +58,10 @@ export function FeaturedItemsList() {
         actions={
           <Button
             variant="filled"
-            leftSection={<PlusIcon size={18} />}
+            leftSection={<Plus size={16} />}
             onClick={handleCreate}
           >
-            Add Featured Item
+            Create Featured Item
           </Button>
         }
       >
