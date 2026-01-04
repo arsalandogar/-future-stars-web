@@ -127,6 +127,49 @@ const form = useAppForm({
 
 To add new field components, create them in `src/components/form/fields/` using `useFieldContext` from `@/lib/form-context`, then register in `src/lib/form.ts`
 
+### Page Headers
+
+Pages set their title, description, and breadcrumbs using the `usePageHeader` hook:
+
+```typescript
+import { usePageHeader } from '@/hooks/use-page-header';
+
+function UsersListPage() {
+  usePageHeader({ title: 'Users', description: 'Manage all users' });
+  // ...
+}
+```
+
+The `PageHeader` component in the admin layout reads from this store and renders the title with breadcrumbs.
+
+### Listing Pages
+
+For admin listing pages, use `ListingShell`, `DataTable`, and `useListingContext`:
+
+```typescript
+import { DataTable } from '@/components/ui/data-table';
+import { ListingShell, useListingContext } from '@/components/ui/listing';
+
+export function UsersList() {
+  const { page, limit, search } = useListingContext();
+
+  const queryResult = useUsers({ variables: { page, limit, search: search || undefined } });
+
+  return (
+    <ListingShell searchPlaceholder="Search by name or email...">
+      <DataTable
+        queryResult={queryResult}
+        columns={[{ label: 'Name' }, { label: 'Email' }]}
+        keyExtractor={(user) => user.id}
+        renderRow={(user) => <UserRow user={user} />}
+      />
+    </ListingShell>
+  );
+}
+```
+
+The `ListingProvider` is set up at the route level via layout routes.
+
 ### State Management
 
 Uses **Zustand** with persist middleware for global state:
@@ -159,7 +202,7 @@ Uses **Zustand** with persist middleware for global state:
 
 ### Types
 
-- **Shared types** (`User`, `UserRole`, `Token`, `PaginationMeta`) live in `src/types/` - import directly from `@/types`
+- **Shared types** (`User`, `UserRole`, `Token`, `PaginationMeta`, `Tag`) live in `src/types/` - import directly from `@/types`
 - **Feature types** live in `src/features/<feature>/types/` - only for types specific to that feature
 - **Never re-export shared types** from features - always import from `@/types`
 - Before creating a new type, check `src/types/` to see if it already exists
