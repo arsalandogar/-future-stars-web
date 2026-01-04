@@ -1,3 +1,5 @@
+import { lazy, Suspense } from 'react';
+
 import { SegmentedControl, Skeleton, Text } from '@mantine/core';
 import { getRouteApi } from '@tanstack/react-router';
 import { Clock, DollarSign, ShoppingCart, TrendingUp } from 'lucide-react';
@@ -11,9 +13,14 @@ import { useRevenueGraph } from '../api/get-revenue-graph';
 import { PERIOD_OPTIONS, STAT_COLORS } from '../constants';
 import type { DashboardPeriod } from '../types';
 
-import { OrdersChart } from './orders-chart';
-import { RevenueChart } from './revenue-chart';
 import { StatCard } from './stat-card';
+
+const RevenueChart = lazy(() =>
+  import('./revenue-chart').then((m) => ({ default: m.RevenueChart }))
+);
+const OrdersChart = lazy(() =>
+  import('./orders-chart').then((m) => ({ default: m.OrdersChart }))
+);
 
 const routeApi = getRouteApi('/_authenticated/admin/');
 
@@ -109,18 +116,22 @@ export function DashboardContent() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <RevenueChart
-          change={stats?.totalRevenue.change}
-          data={revenueData?.data ?? []}
-          isError={revenueError}
-          isLoading={revenueLoading}
-        />
-        <OrdersChart
-          change={stats?.totalOrders.change}
-          data={ordersData?.data ?? []}
-          isError={ordersError}
-          isLoading={ordersLoading}
-        />
+        <Suspense fallback={<Skeleton height={350} radius="md" />}>
+          <RevenueChart
+            change={stats?.totalRevenue.change}
+            data={revenueData?.data ?? []}
+            isError={revenueError}
+            isLoading={revenueLoading}
+          />
+        </Suspense>
+        <Suspense fallback={<Skeleton height={350} radius="md" />}>
+          <OrdersChart
+            change={stats?.totalOrders.change}
+            data={ordersData?.data ?? []}
+            isError={ordersError}
+            isLoading={ordersLoading}
+          />
+        </Suspense>
       </div>
     </div>
   );
