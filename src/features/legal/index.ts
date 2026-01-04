@@ -1,5 +1,4 @@
 // Pages
-export { LegalListPage } from './pages/legal-list-page';
 export { LegalViewPage } from './pages/legal-view-page';
 export { LegalEditPage } from './pages/legal-edit-page';
 export { LegalCreatePage } from './pages/legal-create-page';

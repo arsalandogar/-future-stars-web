@@ -62,7 +62,6 @@ export function TemplatesList() {
       void navigate({
         to: '.',
         search: (prev) => ({ ...prev, side: value as TemplateSide, page: 1 }),
-        replace: true,
       });
     }
   };
