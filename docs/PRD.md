@@ -248,10 +248,10 @@ Redirects to Card Editor with template applied
 
 | Element                   | Color                                               |
 | ------------------------- | --------------------------------------------------- |
-| Background gradient start | `#1e1b4b` (dark purple)                             |
-| Background gradient mid   | `#0f0a1e`                                           |
+| Background gradient start | `#282373` (dark purple)                             |
 | Background gradient end   | `#000000` (black)                                   |
-| Primary accent            | `#6366f1` (indigo/purple)                           |
+| Primary accent            | `#5046FF` (indigo/purple)                           |
+| Primary accent (alt)      | `#4F46E5` (indigo - header borders)                 |
 | Secondary accent          | `#f97316` (orange - for highlights like "MEMORIES") |
 | Text primary              | `#ffffff`                                           |
 | Text secondary            | `#9ca3af` (gray)                                    |
@@ -264,13 +264,13 @@ Redirects to Card Editor with template applied
 
 ### Components
 
-| Component        | Style                          |
-| ---------------- | ------------------------------ |
-| Primary Button   | Purple filled, rounded         |
-| Secondary Button | Outlined or ghost              |
-| Cards            | Rounded corners, subtle shadow |
-| Modals           | Dark background, centered      |
-| Inputs           | Dark background, light border  |
+| Component        | Style                               |
+| ---------------- | ----------------------------------- |
+| Primary Button   | Purple filled, fully rounded (pill) |
+| Secondary Button | Outlined or ghost, fully rounded    |
+| Cards            | Rounded corners, subtle shadow      |
+| Modals           | Dark background, centered           |
+| Inputs           | Dark background, light border       |
 
 ### Spacing
 
