@@ -1,5 +1,34 @@
 @import 'tailwind-preset-mantine';
 
+/* Future Stars Customer Theme - CSS Custom Properties */
+:root {
+  /* Background Gradient */
+  --fs-gradient-start: #282373;
+  --fs-gradient-end: #000000;
+  --fs-bg-gradient: linear-gradient(
+    180deg,
+    var(--fs-gradient-start) 0%,
+    var(--fs-gradient-end) 100%
+  );
+
+  /* Primary Colors */
+  --fs-primary: #5046ff;
+  --fs-primary-alt: #4f46e5;
+
+  /* Text Colors */
+  --fs-text-primary: #ffffff;
+  --fs-text-secondary: #9ca3af;
+  --fs-text-secondary-light: #e5e7eb;
+
+  /* Border */
+  --fs-border: rgba(255, 255, 255, 0.1);
+  --fs-border-accent: rgba(129, 121, 255, 0.44);
+
+  /* Effects */
+  --fs-header-shadow: 0px 0px 32px 0px rgba(42, 110, 235, 0.32);
+  --fs-button-bg-subtle: rgba(129, 121, 255, 0.1);
+}
+
 @font-face {
   font-family: 'Poppins';
   src: url('./assets/fonts/Poppins-Regular.ttf') format('truetype');
