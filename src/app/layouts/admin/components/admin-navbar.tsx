@@ -18,6 +18,7 @@ import {
   Box,
   Settings,
   Scale,
+  Palette,
 } from 'lucide-react';
 
 import { Logo } from './logo';
@@ -56,13 +57,19 @@ const menuItems: NavItem[] = [
     ],
   },
   {
+    label: 'Colors',
+    icon: Palette,
+    children: [
+      { label: 'Color Leagues', href: '/admin/color-leagues' },
+      { label: 'Color Presets', href: '/admin/color-presets' },
+    ],
+  },
+  {
     label: 'Settings',
     icon: Settings,
     children: [
       { label: 'Configs', href: '/admin/configs' },
       { label: 'Featured Items', href: '/admin/featured-items' },
-      { label: 'Color Leagues', href: '/admin/color-leagues' },
-      { label: 'Color Presets', href: '/admin/color-presets' },
     ],
   },
 ];

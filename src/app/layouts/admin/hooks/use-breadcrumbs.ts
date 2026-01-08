@@ -20,6 +20,8 @@ const PATH_LABELS: Record<string, string> = {
   legal: 'Legal',
   terms: 'Terms & Conditions',
   'privacy-policy': 'Privacy Policy',
+  'color-leagues': 'Color Leagues',
+  'color-presets': 'Color Presets',
   create: 'Create',
   edit: 'Edit',
   versions: 'Versions',
