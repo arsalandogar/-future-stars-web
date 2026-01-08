@@ -29,15 +29,15 @@ import { Route as AuthenticatedAdminListingOrdersRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminListingFeaturedItemsRouteImport } from './routes/_authenticated/admin/_listing/featured-items'
 import { Route as AuthenticatedAdminListingColorPresetsRouteImport } from './routes/_authenticated/admin/_listing/color-presets'
 import { Route as AuthenticatedAdminListingColorLeaguesRouteImport } from './routes/_authenticated/admin/_listing/color-leagues'
-import { Route as AuthenticatedAdminLegalTypeRouteRouteImport } from './routes/_authenticated/admin/legal/$type/route'
+import { Route as AuthenticatedAdmin_legalTypeRouteRouteImport } from './routes/_authenticated/admin/__legal/$type/route'
 import { Route as AuthenticatedAdminTemplatesIdIndexRouteImport } from './routes/_authenticated/admin/templates/$id/index'
 import { Route as AuthenticatedAdminTemplatesIdEditRouteImport } from './routes/_authenticated/admin/templates/$id/edit'
-import { Route as AuthenticatedAdminLegalTypeVersionsRouteImport } from './routes/_authenticated/admin/legal/$type/versions'
-import { Route as AuthenticatedAdminLegalTypeCreateRouteImport } from './routes/_authenticated/admin/legal/$type/create'
-import { Route as AuthenticatedAdminListingLegalTypeRouteImport } from './routes/_authenticated/admin/_listing/legal.$type'
-import { Route as AuthenticatedAdminLegalTypeIdRouteRouteImport } from './routes/_authenticated/admin/legal/$type/$id/route'
-import { Route as AuthenticatedAdminLegalTypeIdIndexRouteImport } from './routes/_authenticated/admin/legal/$type/$id/index'
-import { Route as AuthenticatedAdminLegalTypeIdEditRouteImport } from './routes/_authenticated/admin/legal/$type/$id/edit'
+import { Route as AuthenticatedAdminListing_legalTypeRouteImport } from './routes/_authenticated/admin/_listing/__legal.$type'
+import { Route as AuthenticatedAdmin_legalTypeVersionsRouteImport } from './routes/_authenticated/admin/__legal/$type/versions'
+import { Route as AuthenticatedAdmin_legalTypeCreateRouteImport } from './routes/_authenticated/admin/__legal/$type/create'
+import { Route as AuthenticatedAdmin_legalTypeIdRouteRouteImport } from './routes/_authenticated/admin/__legal/$type/$id/route'
+import { Route as AuthenticatedAdmin_legalTypeIdIndexRouteImport } from './routes/_authenticated/admin/__legal/$type/$id/index'
+import { Route as AuthenticatedAdmin_legalTypeIdEditRouteImport } from './routes/_authenticated/admin/__legal/$type/$id/edit'
 
 const TermsAndConditionsRoute = TermsAndConditionsRouteImport.update({
   id: '/terms-and-conditions',
@@ -148,10 +148,10 @@ const AuthenticatedAdminListingColorLeaguesRoute =
     path: '/color-leagues',
     getParentRoute: () => AuthenticatedAdminListingRoute,
   } as any)
-const AuthenticatedAdminLegalTypeRouteRoute =
-  AuthenticatedAdminLegalTypeRouteRouteImport.update({
-    id: '/legal/$type',
-    path: '/legal/$type',
+const AuthenticatedAdmin_legalTypeRouteRoute =
+  AuthenticatedAdmin_legalTypeRouteRouteImport.update({
+    id: '/__legal/$type',
+    path: '/$type',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminTemplatesIdIndexRoute =
@@ -166,41 +166,41 @@ const AuthenticatedAdminTemplatesIdEditRoute =
     path: '/templates/$id/edit',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
-const AuthenticatedAdminLegalTypeVersionsRoute =
-  AuthenticatedAdminLegalTypeVersionsRouteImport.update({
-    id: '/versions',
-    path: '/versions',
-    getParentRoute: () => AuthenticatedAdminLegalTypeRouteRoute,
-  } as any)
-const AuthenticatedAdminLegalTypeCreateRoute =
-  AuthenticatedAdminLegalTypeCreateRouteImport.update({
-    id: '/create',
-    path: '/create',
-    getParentRoute: () => AuthenticatedAdminLegalTypeRouteRoute,
-  } as any)
-const AuthenticatedAdminListingLegalTypeRoute =
-  AuthenticatedAdminListingLegalTypeRouteImport.update({
-    id: '/legal/$type',
-    path: '/legal/$type',
+const AuthenticatedAdminListing_legalTypeRoute =
+  AuthenticatedAdminListing_legalTypeRouteImport.update({
+    id: '/__legal/$type',
+    path: '/$type',
     getParentRoute: () => AuthenticatedAdminListingRoute,
   } as any)
-const AuthenticatedAdminLegalTypeIdRouteRoute =
-  AuthenticatedAdminLegalTypeIdRouteRouteImport.update({
+const AuthenticatedAdmin_legalTypeVersionsRoute =
+  AuthenticatedAdmin_legalTypeVersionsRouteImport.update({
+    id: '/versions',
+    path: '/versions',
+    getParentRoute: () => AuthenticatedAdmin_legalTypeRouteRoute,
+  } as any)
+const AuthenticatedAdmin_legalTypeCreateRoute =
+  AuthenticatedAdmin_legalTypeCreateRouteImport.update({
+    id: '/create',
+    path: '/create',
+    getParentRoute: () => AuthenticatedAdmin_legalTypeRouteRoute,
+  } as any)
+const AuthenticatedAdmin_legalTypeIdRouteRoute =
+  AuthenticatedAdmin_legalTypeIdRouteRouteImport.update({
     id: '/$id',
     path: '/$id',
-    getParentRoute: () => AuthenticatedAdminLegalTypeRouteRoute,
+    getParentRoute: () => AuthenticatedAdmin_legalTypeRouteRoute,
   } as any)
-const AuthenticatedAdminLegalTypeIdIndexRoute =
-  AuthenticatedAdminLegalTypeIdIndexRouteImport.update({
+const AuthenticatedAdmin_legalTypeIdIndexRoute =
+  AuthenticatedAdmin_legalTypeIdIndexRouteImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => AuthenticatedAdminLegalTypeIdRouteRoute,
+    getParentRoute: () => AuthenticatedAdmin_legalTypeIdRouteRoute,
   } as any)
-const AuthenticatedAdminLegalTypeIdEditRoute =
-  AuthenticatedAdminLegalTypeIdEditRouteImport.update({
+const AuthenticatedAdmin_legalTypeIdEditRoute =
+  AuthenticatedAdmin_legalTypeIdEditRouteImport.update({
     id: '/edit',
     path: '/edit',
-    getParentRoute: () => AuthenticatedAdminLegalTypeIdRouteRoute,
+    getParentRoute: () => AuthenticatedAdmin_legalTypeIdRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -214,7 +214,7 @@ export interface FileRoutesByFullPath {
   '/admin/configs': typeof AuthenticatedAdminConfigsRoute
   '/admin/template-types': typeof AuthenticatedAdminTemplateTypesRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
-  '/admin/legal/$type': typeof AuthenticatedAdminListingLegalTypeRoute
+  '/admin/$type': typeof AuthenticatedAdminListing_legalTypeRoute
   '/admin/color-leagues': typeof AuthenticatedAdminListingColorLeaguesRoute
   '/admin/color-presets': typeof AuthenticatedAdminListingColorPresetsRoute
   '/admin/featured-items': typeof AuthenticatedAdminListingFeaturedItemsRoute
@@ -223,13 +223,13 @@ export interface FileRoutesByFullPath {
   '/admin/templates': typeof AuthenticatedAdminListingTemplatesRoute
   '/admin/users': typeof AuthenticatedAdminListingUsersRoute
   '/admin/templates/create': typeof AuthenticatedAdminTemplatesCreateRoute
-  '/admin/legal/$type/$id': typeof AuthenticatedAdminLegalTypeIdRouteRouteWithChildren
-  '/admin/legal/$type/create': typeof AuthenticatedAdminLegalTypeCreateRoute
-  '/admin/legal/$type/versions': typeof AuthenticatedAdminLegalTypeVersionsRoute
+  '/admin/$type/$id': typeof AuthenticatedAdmin_legalTypeIdRouteRouteWithChildren
+  '/admin/$type/create': typeof AuthenticatedAdmin_legalTypeCreateRoute
+  '/admin/$type/versions': typeof AuthenticatedAdmin_legalTypeVersionsRoute
   '/admin/templates/$id/edit': typeof AuthenticatedAdminTemplatesIdEditRoute
   '/admin/templates/$id': typeof AuthenticatedAdminTemplatesIdIndexRoute
-  '/admin/legal/$type/$id/edit': typeof AuthenticatedAdminLegalTypeIdEditRoute
-  '/admin/legal/$type/$id/': typeof AuthenticatedAdminLegalTypeIdIndexRoute
+  '/admin/$type/$id/edit': typeof AuthenticatedAdmin_legalTypeIdEditRoute
+  '/admin/$type/$id/': typeof AuthenticatedAdmin_legalTypeIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRouteRouteWithChildren
@@ -241,7 +241,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/configs': typeof AuthenticatedAdminConfigsRoute
   '/admin/template-types': typeof AuthenticatedAdminTemplateTypesRoute
-  '/admin/legal/$type': typeof AuthenticatedAdminListingLegalTypeRoute
+  '/admin/$type': typeof AuthenticatedAdminListing_legalTypeRoute
   '/admin/color-leagues': typeof AuthenticatedAdminListingColorLeaguesRoute
   '/admin/color-presets': typeof AuthenticatedAdminListingColorPresetsRoute
   '/admin/featured-items': typeof AuthenticatedAdminListingFeaturedItemsRoute
@@ -250,12 +250,12 @@ export interface FileRoutesByTo {
   '/admin/templates': typeof AuthenticatedAdminListingTemplatesRoute
   '/admin/users': typeof AuthenticatedAdminListingUsersRoute
   '/admin/templates/create': typeof AuthenticatedAdminTemplatesCreateRoute
-  '/admin/legal/$type/create': typeof AuthenticatedAdminLegalTypeCreateRoute
-  '/admin/legal/$type/versions': typeof AuthenticatedAdminLegalTypeVersionsRoute
+  '/admin/$type/create': typeof AuthenticatedAdmin_legalTypeCreateRoute
+  '/admin/$type/versions': typeof AuthenticatedAdmin_legalTypeVersionsRoute
   '/admin/templates/$id/edit': typeof AuthenticatedAdminTemplatesIdEditRoute
   '/admin/templates/$id': typeof AuthenticatedAdminTemplatesIdIndexRoute
-  '/admin/legal/$type/$id/edit': typeof AuthenticatedAdminLegalTypeIdEditRoute
-  '/admin/legal/$type/$id': typeof AuthenticatedAdminLegalTypeIdIndexRoute
+  '/admin/$type/$id/edit': typeof AuthenticatedAdmin_legalTypeIdEditRoute
+  '/admin/$type/$id': typeof AuthenticatedAdmin_legalTypeIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -271,7 +271,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/configs': typeof AuthenticatedAdminConfigsRoute
   '/_authenticated/admin/template-types': typeof AuthenticatedAdminTemplateTypesRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
-  '/_authenticated/admin/legal/$type': typeof AuthenticatedAdminLegalTypeRouteRouteWithChildren
+  '/_authenticated/admin/__legal/$type': typeof AuthenticatedAdmin_legalTypeRouteRouteWithChildren
   '/_authenticated/admin/_listing/color-leagues': typeof AuthenticatedAdminListingColorLeaguesRoute
   '/_authenticated/admin/_listing/color-presets': typeof AuthenticatedAdminListingColorPresetsRoute
   '/_authenticated/admin/_listing/featured-items': typeof AuthenticatedAdminListingFeaturedItemsRoute
@@ -280,14 +280,14 @@ export interface FileRoutesById {
   '/_authenticated/admin/_listing/templates': typeof AuthenticatedAdminListingTemplatesRoute
   '/_authenticated/admin/_listing/users': typeof AuthenticatedAdminListingUsersRoute
   '/_authenticated/admin/templates/create': typeof AuthenticatedAdminTemplatesCreateRoute
-  '/_authenticated/admin/legal/$type/$id': typeof AuthenticatedAdminLegalTypeIdRouteRouteWithChildren
-  '/_authenticated/admin/_listing/legal/$type': typeof AuthenticatedAdminListingLegalTypeRoute
-  '/_authenticated/admin/legal/$type/create': typeof AuthenticatedAdminLegalTypeCreateRoute
-  '/_authenticated/admin/legal/$type/versions': typeof AuthenticatedAdminLegalTypeVersionsRoute
+  '/_authenticated/admin/__legal/$type/$id': typeof AuthenticatedAdmin_legalTypeIdRouteRouteWithChildren
+  '/_authenticated/admin/__legal/$type/create': typeof AuthenticatedAdmin_legalTypeCreateRoute
+  '/_authenticated/admin/__legal/$type/versions': typeof AuthenticatedAdmin_legalTypeVersionsRoute
+  '/_authenticated/admin/_listing/__legal/$type': typeof AuthenticatedAdminListing_legalTypeRoute
   '/_authenticated/admin/templates/$id/edit': typeof AuthenticatedAdminTemplatesIdEditRoute
   '/_authenticated/admin/templates/$id/': typeof AuthenticatedAdminTemplatesIdIndexRoute
-  '/_authenticated/admin/legal/$type/$id/edit': typeof AuthenticatedAdminLegalTypeIdEditRoute
-  '/_authenticated/admin/legal/$type/$id/': typeof AuthenticatedAdminLegalTypeIdIndexRoute
+  '/_authenticated/admin/__legal/$type/$id/edit': typeof AuthenticatedAdmin_legalTypeIdEditRoute
+  '/_authenticated/admin/__legal/$type/$id/': typeof AuthenticatedAdmin_legalTypeIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -302,7 +302,7 @@ export interface FileRouteTypes {
     | '/admin/configs'
     | '/admin/template-types'
     | '/admin/'
-    | '/admin/legal/$type'
+    | '/admin/$type'
     | '/admin/color-leagues'
     | '/admin/color-presets'
     | '/admin/featured-items'
@@ -311,13 +311,13 @@ export interface FileRouteTypes {
     | '/admin/templates'
     | '/admin/users'
     | '/admin/templates/create'
-    | '/admin/legal/$type/$id'
-    | '/admin/legal/$type/create'
-    | '/admin/legal/$type/versions'
+    | '/admin/$type/$id'
+    | '/admin/$type/create'
+    | '/admin/$type/versions'
     | '/admin/templates/$id/edit'
     | '/admin/templates/$id'
-    | '/admin/legal/$type/$id/edit'
-    | '/admin/legal/$type/$id/'
+    | '/admin/$type/$id/edit'
+    | '/admin/$type/$id/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -329,7 +329,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/configs'
     | '/admin/template-types'
-    | '/admin/legal/$type'
+    | '/admin/$type'
     | '/admin/color-leagues'
     | '/admin/color-presets'
     | '/admin/featured-items'
@@ -338,12 +338,12 @@ export interface FileRouteTypes {
     | '/admin/templates'
     | '/admin/users'
     | '/admin/templates/create'
-    | '/admin/legal/$type/create'
-    | '/admin/legal/$type/versions'
+    | '/admin/$type/create'
+    | '/admin/$type/versions'
     | '/admin/templates/$id/edit'
     | '/admin/templates/$id'
-    | '/admin/legal/$type/$id/edit'
-    | '/admin/legal/$type/$id'
+    | '/admin/$type/$id/edit'
+    | '/admin/$type/$id'
   id:
     | '__root__'
     | '/auth'
@@ -358,7 +358,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/configs'
     | '/_authenticated/admin/template-types'
     | '/_authenticated/admin/'
-    | '/_authenticated/admin/legal/$type'
+    | '/_authenticated/admin/__legal/$type'
     | '/_authenticated/admin/_listing/color-leagues'
     | '/_authenticated/admin/_listing/color-presets'
     | '/_authenticated/admin/_listing/featured-items'
@@ -367,14 +367,14 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/_listing/templates'
     | '/_authenticated/admin/_listing/users'
     | '/_authenticated/admin/templates/create'
-    | '/_authenticated/admin/legal/$type/$id'
-    | '/_authenticated/admin/_listing/legal/$type'
-    | '/_authenticated/admin/legal/$type/create'
-    | '/_authenticated/admin/legal/$type/versions'
+    | '/_authenticated/admin/__legal/$type/$id'
+    | '/_authenticated/admin/__legal/$type/create'
+    | '/_authenticated/admin/__legal/$type/versions'
+    | '/_authenticated/admin/_listing/__legal/$type'
     | '/_authenticated/admin/templates/$id/edit'
     | '/_authenticated/admin/templates/$id/'
-    | '/_authenticated/admin/legal/$type/$id/edit'
-    | '/_authenticated/admin/legal/$type/$id/'
+    | '/_authenticated/admin/__legal/$type/$id/edit'
+    | '/_authenticated/admin/__legal/$type/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -526,11 +526,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminListingColorLeaguesRouteImport
       parentRoute: typeof AuthenticatedAdminListingRoute
     }
-    '/_authenticated/admin/legal/$type': {
-      id: '/_authenticated/admin/legal/$type'
-      path: '/legal/$type'
-      fullPath: '/admin/legal/$type'
-      preLoaderRoute: typeof AuthenticatedAdminLegalTypeRouteRouteImport
+    '/_authenticated/admin/__legal/$type': {
+      id: '/_authenticated/admin/__legal/$type'
+      path: '/$type'
+      fullPath: '/admin/$type'
+      preLoaderRoute: typeof AuthenticatedAdmin_legalTypeRouteRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/templates/$id/': {
@@ -547,47 +547,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTemplatesIdEditRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
-    '/_authenticated/admin/legal/$type/versions': {
-      id: '/_authenticated/admin/legal/$type/versions'
-      path: '/versions'
-      fullPath: '/admin/legal/$type/versions'
-      preLoaderRoute: typeof AuthenticatedAdminLegalTypeVersionsRouteImport
-      parentRoute: typeof AuthenticatedAdminLegalTypeRouteRoute
-    }
-    '/_authenticated/admin/legal/$type/create': {
-      id: '/_authenticated/admin/legal/$type/create'
-      path: '/create'
-      fullPath: '/admin/legal/$type/create'
-      preLoaderRoute: typeof AuthenticatedAdminLegalTypeCreateRouteImport
-      parentRoute: typeof AuthenticatedAdminLegalTypeRouteRoute
-    }
-    '/_authenticated/admin/_listing/legal/$type': {
-      id: '/_authenticated/admin/_listing/legal/$type'
-      path: '/legal/$type'
-      fullPath: '/admin/legal/$type'
-      preLoaderRoute: typeof AuthenticatedAdminListingLegalTypeRouteImport
+    '/_authenticated/admin/_listing/__legal/$type': {
+      id: '/_authenticated/admin/_listing/__legal/$type'
+      path: '/$type'
+      fullPath: '/admin/$type'
+      preLoaderRoute: typeof AuthenticatedAdminListing_legalTypeRouteImport
       parentRoute: typeof AuthenticatedAdminListingRoute
     }
-    '/_authenticated/admin/legal/$type/$id': {
-      id: '/_authenticated/admin/legal/$type/$id'
+    '/_authenticated/admin/__legal/$type/versions': {
+      id: '/_authenticated/admin/__legal/$type/versions'
+      path: '/versions'
+      fullPath: '/admin/$type/versions'
+      preLoaderRoute: typeof AuthenticatedAdmin_legalTypeVersionsRouteImport
+      parentRoute: typeof AuthenticatedAdmin_legalTypeRouteRoute
+    }
+    '/_authenticated/admin/__legal/$type/create': {
+      id: '/_authenticated/admin/__legal/$type/create'
+      path: '/create'
+      fullPath: '/admin/$type/create'
+      preLoaderRoute: typeof AuthenticatedAdmin_legalTypeCreateRouteImport
+      parentRoute: typeof AuthenticatedAdmin_legalTypeRouteRoute
+    }
+    '/_authenticated/admin/__legal/$type/$id': {
+      id: '/_authenticated/admin/__legal/$type/$id'
       path: '/$id'
-      fullPath: '/admin/legal/$type/$id'
-      preLoaderRoute: typeof AuthenticatedAdminLegalTypeIdRouteRouteImport
-      parentRoute: typeof AuthenticatedAdminLegalTypeRouteRoute
+      fullPath: '/admin/$type/$id'
+      preLoaderRoute: typeof AuthenticatedAdmin_legalTypeIdRouteRouteImport
+      parentRoute: typeof AuthenticatedAdmin_legalTypeRouteRoute
     }
-    '/_authenticated/admin/legal/$type/$id/': {
-      id: '/_authenticated/admin/legal/$type/$id/'
+    '/_authenticated/admin/__legal/$type/$id/': {
+      id: '/_authenticated/admin/__legal/$type/$id/'
       path: '/'
-      fullPath: '/admin/legal/$type/$id/'
-      preLoaderRoute: typeof AuthenticatedAdminLegalTypeIdIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminLegalTypeIdRouteRoute
+      fullPath: '/admin/$type/$id/'
+      preLoaderRoute: typeof AuthenticatedAdmin_legalTypeIdIndexRouteImport
+      parentRoute: typeof AuthenticatedAdmin_legalTypeIdRouteRoute
     }
-    '/_authenticated/admin/legal/$type/$id/edit': {
-      id: '/_authenticated/admin/legal/$type/$id/edit'
+    '/_authenticated/admin/__legal/$type/$id/edit': {
+      id: '/_authenticated/admin/__legal/$type/$id/edit'
       path: '/edit'
-      fullPath: '/admin/legal/$type/$id/edit'
-      preLoaderRoute: typeof AuthenticatedAdminLegalTypeIdEditRouteImport
-      parentRoute: typeof AuthenticatedAdminLegalTypeIdRouteRoute
+      fullPath: '/admin/$type/$id/edit'
+      preLoaderRoute: typeof AuthenticatedAdmin_legalTypeIdEditRouteImport
+      parentRoute: typeof AuthenticatedAdmin_legalTypeIdRouteRoute
     }
   }
 }
@@ -614,7 +614,7 @@ interface AuthenticatedAdminListingRouteChildren {
   AuthenticatedAdminListingTagsRoute: typeof AuthenticatedAdminListingTagsRoute
   AuthenticatedAdminListingTemplatesRoute: typeof AuthenticatedAdminListingTemplatesRoute
   AuthenticatedAdminListingUsersRoute: typeof AuthenticatedAdminListingUsersRoute
-  AuthenticatedAdminListingLegalTypeRoute: typeof AuthenticatedAdminListingLegalTypeRoute
+  AuthenticatedAdminListing_legalTypeRoute: typeof AuthenticatedAdminListing_legalTypeRoute
 }
 
 const AuthenticatedAdminListingRouteChildren: AuthenticatedAdminListingRouteChildren =
@@ -630,8 +630,8 @@ const AuthenticatedAdminListingRouteChildren: AuthenticatedAdminListingRouteChil
     AuthenticatedAdminListingTemplatesRoute:
       AuthenticatedAdminListingTemplatesRoute,
     AuthenticatedAdminListingUsersRoute: AuthenticatedAdminListingUsersRoute,
-    AuthenticatedAdminListingLegalTypeRoute:
-      AuthenticatedAdminListingLegalTypeRoute,
+    AuthenticatedAdminListing_legalTypeRoute:
+      AuthenticatedAdminListing_legalTypeRoute,
   }
 
 const AuthenticatedAdminListingRouteWithChildren =
@@ -639,43 +639,43 @@ const AuthenticatedAdminListingRouteWithChildren =
     AuthenticatedAdminListingRouteChildren,
   )
 
-interface AuthenticatedAdminLegalTypeIdRouteRouteChildren {
-  AuthenticatedAdminLegalTypeIdEditRoute: typeof AuthenticatedAdminLegalTypeIdEditRoute
-  AuthenticatedAdminLegalTypeIdIndexRoute: typeof AuthenticatedAdminLegalTypeIdIndexRoute
+interface AuthenticatedAdmin_legalTypeIdRouteRouteChildren {
+  AuthenticatedAdmin_legalTypeIdEditRoute: typeof AuthenticatedAdmin_legalTypeIdEditRoute
+  AuthenticatedAdmin_legalTypeIdIndexRoute: typeof AuthenticatedAdmin_legalTypeIdIndexRoute
 }
 
-const AuthenticatedAdminLegalTypeIdRouteRouteChildren: AuthenticatedAdminLegalTypeIdRouteRouteChildren =
+const AuthenticatedAdmin_legalTypeIdRouteRouteChildren: AuthenticatedAdmin_legalTypeIdRouteRouteChildren =
   {
-    AuthenticatedAdminLegalTypeIdEditRoute:
-      AuthenticatedAdminLegalTypeIdEditRoute,
-    AuthenticatedAdminLegalTypeIdIndexRoute:
-      AuthenticatedAdminLegalTypeIdIndexRoute,
+    AuthenticatedAdmin_legalTypeIdEditRoute:
+      AuthenticatedAdmin_legalTypeIdEditRoute,
+    AuthenticatedAdmin_legalTypeIdIndexRoute:
+      AuthenticatedAdmin_legalTypeIdIndexRoute,
   }
 
-const AuthenticatedAdminLegalTypeIdRouteRouteWithChildren =
-  AuthenticatedAdminLegalTypeIdRouteRoute._addFileChildren(
-    AuthenticatedAdminLegalTypeIdRouteRouteChildren,
+const AuthenticatedAdmin_legalTypeIdRouteRouteWithChildren =
+  AuthenticatedAdmin_legalTypeIdRouteRoute._addFileChildren(
+    AuthenticatedAdmin_legalTypeIdRouteRouteChildren,
   )
 
-interface AuthenticatedAdminLegalTypeRouteRouteChildren {
-  AuthenticatedAdminLegalTypeIdRouteRoute: typeof AuthenticatedAdminLegalTypeIdRouteRouteWithChildren
-  AuthenticatedAdminLegalTypeCreateRoute: typeof AuthenticatedAdminLegalTypeCreateRoute
-  AuthenticatedAdminLegalTypeVersionsRoute: typeof AuthenticatedAdminLegalTypeVersionsRoute
+interface AuthenticatedAdmin_legalTypeRouteRouteChildren {
+  AuthenticatedAdmin_legalTypeIdRouteRoute: typeof AuthenticatedAdmin_legalTypeIdRouteRouteWithChildren
+  AuthenticatedAdmin_legalTypeCreateRoute: typeof AuthenticatedAdmin_legalTypeCreateRoute
+  AuthenticatedAdmin_legalTypeVersionsRoute: typeof AuthenticatedAdmin_legalTypeVersionsRoute
 }
 
-const AuthenticatedAdminLegalTypeRouteRouteChildren: AuthenticatedAdminLegalTypeRouteRouteChildren =
+const AuthenticatedAdmin_legalTypeRouteRouteChildren: AuthenticatedAdmin_legalTypeRouteRouteChildren =
   {
-    AuthenticatedAdminLegalTypeIdRouteRoute:
-      AuthenticatedAdminLegalTypeIdRouteRouteWithChildren,
-    AuthenticatedAdminLegalTypeCreateRoute:
-      AuthenticatedAdminLegalTypeCreateRoute,
-    AuthenticatedAdminLegalTypeVersionsRoute:
-      AuthenticatedAdminLegalTypeVersionsRoute,
+    AuthenticatedAdmin_legalTypeIdRouteRoute:
+      AuthenticatedAdmin_legalTypeIdRouteRouteWithChildren,
+    AuthenticatedAdmin_legalTypeCreateRoute:
+      AuthenticatedAdmin_legalTypeCreateRoute,
+    AuthenticatedAdmin_legalTypeVersionsRoute:
+      AuthenticatedAdmin_legalTypeVersionsRoute,
   }
 
-const AuthenticatedAdminLegalTypeRouteRouteWithChildren =
-  AuthenticatedAdminLegalTypeRouteRoute._addFileChildren(
-    AuthenticatedAdminLegalTypeRouteRouteChildren,
+const AuthenticatedAdmin_legalTypeRouteRouteWithChildren =
+  AuthenticatedAdmin_legalTypeRouteRoute._addFileChildren(
+    AuthenticatedAdmin_legalTypeRouteRouteChildren,
   )
 
 interface AuthenticatedAdminRouteRouteChildren {
@@ -683,7 +683,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminConfigsRoute: typeof AuthenticatedAdminConfigsRoute
   AuthenticatedAdminTemplateTypesRoute: typeof AuthenticatedAdminTemplateTypesRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
-  AuthenticatedAdminLegalTypeRouteRoute: typeof AuthenticatedAdminLegalTypeRouteRouteWithChildren
+  AuthenticatedAdmin_legalTypeRouteRoute: typeof AuthenticatedAdmin_legalTypeRouteRouteWithChildren
   AuthenticatedAdminTemplatesCreateRoute: typeof AuthenticatedAdminTemplatesCreateRoute
   AuthenticatedAdminTemplatesIdEditRoute: typeof AuthenticatedAdminTemplatesIdEditRoute
   AuthenticatedAdminTemplatesIdIndexRoute: typeof AuthenticatedAdminTemplatesIdIndexRoute
@@ -695,8 +695,8 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminConfigsRoute: AuthenticatedAdminConfigsRoute,
     AuthenticatedAdminTemplateTypesRoute: AuthenticatedAdminTemplateTypesRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
-    AuthenticatedAdminLegalTypeRouteRoute:
-      AuthenticatedAdminLegalTypeRouteRouteWithChildren,
+    AuthenticatedAdmin_legalTypeRouteRoute:
+      AuthenticatedAdmin_legalTypeRouteRouteWithChildren,
     AuthenticatedAdminTemplatesCreateRoute:
       AuthenticatedAdminTemplatesCreateRoute,
     AuthenticatedAdminTemplatesIdEditRoute:

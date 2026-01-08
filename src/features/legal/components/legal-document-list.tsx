@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Anchor, Button } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { getRouteApi, Link, useNavigate } from '@tanstack/react-router';
-import { ExternalLink, Plus } from 'lucide-react';
+import { ExternalLink, History, Plus } from 'lucide-react';
 
 import { DataTable, type Column } from '@/components/ui/data-table';
 import {
@@ -26,7 +26,7 @@ import {
 import { LegalDocumentRow } from './legal-document-row';
 import { PublishModal } from './publish-modal';
 
-const routeApi = getRouteApi('/_authenticated/admin/_listing/legal/$type');
+const routeApi = getRouteApi('/_authenticated/admin/_listing/__legal/$type');
 
 const COLUMNS: Column[] = [
   { label: 'Version', width: 120 },
@@ -129,6 +129,14 @@ export function LegalDocumentList() {
                 View Public Page <ExternalLink size={14} />
               </span>
             </Anchor>
+            <Button
+              component={Link}
+              to={`./versions`}
+              variant="default"
+              leftSection={<History size={16} />}
+            >
+              Version History
+            </Button>
             <Button
               component={Link}
               to={`./create`}

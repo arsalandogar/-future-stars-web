@@ -52,8 +52,8 @@ const menuItems: NavItem[] = [
     label: 'Legal',
     icon: Scale,
     children: [
-      { label: 'Privacy Policy', href: '/admin/legal/privacy-policy' },
-      { label: 'Terms & Conditions', href: '/admin/legal/terms' },
+      { label: 'Privacy Policy', href: '/admin/privacy-policy' },
+      { label: 'Terms & Conditions', href: '/admin/terms' },
     ],
   },
   {

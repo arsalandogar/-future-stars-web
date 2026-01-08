@@ -10,7 +10,7 @@ export interface LegalVersionsPageProps {
 
 export function LegalVersionsPage({ type }: LegalVersionsPageProps) {
   const config = getLegalDocumentConfig(type);
-  const basePath = `/admin/legal/${type}`;
+  const basePath = `/admin/${type}`;
 
   usePageHeader({
     title: `${config.title} Version History`,

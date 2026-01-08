@@ -12,7 +12,7 @@ const legalSearchSchema = v.object({
 });
 
 export const Route = createFileRoute(
-  '/_authenticated/admin/_listing/legal/$type'
+  '/_authenticated/admin/_listing/__legal/$type'
 )({
   validateSearch: legalSearchSchema,
   search: {

@@ -17,7 +17,7 @@ export function LegalCreatePage({ type }: LegalCreatePageProps) {
   const createDocument = useCreateLegalDocument();
 
   const config = getLegalDocumentConfig(type);
-  const basePath = `/admin/legal/${type}`;
+  const basePath = `/admin/${type}`;
 
   usePageHeader({
     title: `Create ${config.title}`,

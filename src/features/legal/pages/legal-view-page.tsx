@@ -22,7 +22,7 @@ export function LegalViewPage({ type, id }: LegalViewPageProps) {
   const navigate = useNavigate();
 
   const config = getLegalDocumentConfig(type);
-  const basePath = `/admin/legal/${type}`;
+  const basePath = `/admin/${type}`;
 
   const { data: documentResponse, isLoading } = useLegalDocument({
     variables: id,

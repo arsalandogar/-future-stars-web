@@ -25,7 +25,7 @@ export function LegalDocumentRow({
   onPublish,
   onDelete,
 }: LegalDocumentRowProps) {
-  const basePath = `/admin/legal/${type}`;
+  const basePath = `/admin/${type}`;
   const status = document.isDraft ? 'draft' : 'published';
 
   return (

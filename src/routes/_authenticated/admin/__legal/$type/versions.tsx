@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { LegalCreatePage } from '@/features/legal';
+import { LegalVersionsPage } from '@/features/legal';
 
 export const Route = createFileRoute(
-  '/_authenticated/admin/legal/$type/create'
+  '/_authenticated/admin/__legal/$type/versions'
 )({
   component: RouteComponent,
 });
@@ -11,5 +11,5 @@ export const Route = createFileRoute(
 function RouteComponent() {
   const { type } = Route.useParams();
 
-  return <LegalCreatePage type={type} />;
+  return <LegalVersionsPage type={type} />;
 }

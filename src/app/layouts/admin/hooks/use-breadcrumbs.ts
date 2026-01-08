@@ -17,7 +17,6 @@ const PATH_LABELS: Record<string, string> = {
   'featured-items': 'Featured Items',
   'template-types': 'Template Types',
   configs: 'Configs',
-  legal: 'Legal',
   terms: 'Terms & Conditions',
   'privacy-policy': 'Privacy Policy',
   'color-leagues': 'Color Leagues',

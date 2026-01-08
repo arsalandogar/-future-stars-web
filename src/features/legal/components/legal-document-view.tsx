@@ -9,7 +9,7 @@ import {
   TypographyStylesProvider,
 } from '@mantine/core';
 import { Link } from '@tanstack/react-router';
-import { Edit, Send, Trash2, Plus, History } from 'lucide-react';
+import { Edit, Send, Trash2, Plus } from 'lucide-react';
 
 import { formatDate } from '@/utils/date';
 
@@ -26,7 +26,7 @@ export function LegalDocumentView({
   onPublish,
   onDelete,
 }: LegalDocumentViewProps) {
-  const basePath = `/admin/legal/${document.type}`;
+  const basePath = `/admin/${document.type}`;
   const status = document.isDraft ? 'draft' : 'published';
   const statusColor = document.isDraft ? 'gray' : 'green';
 
@@ -62,15 +62,6 @@ export function LegalDocumentView({
               )}
             </div>
             <Group gap="sm">
-              <Button
-                component={Link}
-                to={`${basePath}/versions`}
-                variant="subtle"
-                leftSection={<History size={16} />}
-                aria-label="View version history"
-              >
-                Version History
-              </Button>
               {document.isDraft ? (
                 <>
                   <Button

@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, notFound } from '@tanstack/react-router';
 
 import { isLegalDocumentType, type LegalDocumentType } from '@/features/legal';
 
-export const Route = createFileRoute('/_authenticated/admin/legal/$type')({
+export const Route = createFileRoute('/_authenticated/admin/__legal/$type')({
   params: {
     parse: (params): { type: LegalDocumentType } => {
       if (!isLegalDocumentType(params.type)) {
