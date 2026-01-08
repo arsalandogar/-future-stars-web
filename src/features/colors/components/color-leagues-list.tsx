@@ -4,13 +4,13 @@ import { useState } from 'react';
 import { Plus } from 'lucide-react';
 
 import { DataTable, type Column } from '@/components/ui/data-table';
+import { ListingShell, useListingContext } from '@/components/ui/listing';
+import { usePageHeader } from '@/hooks';
 
 import { useColorLeagues } from '../api/get-color-leagues';
 import type { ColorLeague } from '../types';
 import { ColorLeagueRow } from './color-league-row';
 import { ColorLeagueModal } from './color-league-modal';
-import { ListingShell, useListingContext } from '@/components/ui/listing';
-import { usePageHeader } from '@/hooks';
 
 const COLUMNS: Column[] = [
   { label: 'ID', width: 60 },

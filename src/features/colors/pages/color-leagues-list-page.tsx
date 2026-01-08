@@ -1,5 +1,6 @@
 import { Head } from '@/components/seo/head';
-import { ColorLeaguesList } from '../color-leagues';
+
+import { ColorLeaguesList } from '../components/color-leagues-list';
 
 export function ColorLeaguesPage() {
   return (

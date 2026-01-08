@@ -1,31 +1,24 @@
-import {
-  Table,
-  Text,
-  Badge,
-  ActionIcon,
-  Menu,
-  Group,
-  ColorSwatch,
-} from '@mantine/core';
+import { Table, Text, Badge, ActionIcon, Menu } from '@mantine/core';
 import { Edit, MoreHorizontal, Trash2 } from 'lucide-react';
 
-import { useDeleteColorPreset } from '../api/delete-color-preset';
-import type { ColorPreset } from '../types';
 import { openDeleteModal } from '@/utils/open-delete-modal';
 
-type ColorPresetRowProps = {
-  item: ColorPreset;
-  onEdit: (item: ColorPreset) => void;
+import { useDeleteColorLeague } from '../api/delete-color-league';
+import type { ColorLeague } from '../types';
+
+type ColorLeagueRowProps = {
+  item: ColorLeague;
+  onEdit: (item: ColorLeague) => void;
 };
 
-export function ColorPresetRow({ item, onEdit }: ColorPresetRowProps) {
-  const deleteColorPreset = useDeleteColorPreset();
+export function ColorLeagueRow({ item, onEdit }: ColorLeagueRowProps) {
+  const deleteColorLeague = useDeleteColorLeague();
 
-  const handleDelete = (item: ColorPreset) => {
+  const handleDelete = (item: ColorLeague) => {
     openDeleteModal({
-      entityType: 'Color Preset',
-      itemName: item.name,
-      onConfirm: () => deleteColorPreset.mutate(item.id),
+      entityType: 'Color League',
+      itemName: item.label,
+      onConfirm: () => deleteColorLeague.mutate(item.id),
     });
   };
 
@@ -37,39 +30,13 @@ export function ColorPresetRow({ item, onEdit }: ColorPresetRowProps) {
         </Text>
       </Table.Td>
       <Table.Td>
-        <Text size="sm">{item.league?.label ?? '—'}</Text>
-      </Table.Td>
-      <Table.Td>
         <Text size="sm">{item.name}</Text>
       </Table.Td>
       <Table.Td>
-        <Text size="sm" c="dimmed">
-          {item.abbreviation}
-        </Text>
-      </Table.Td>
-      <Table.Td>
-        <Group gap={4}>
-          {item.colors.slice(0, 5).map((color) => (
-            <ColorSwatch key={color} color={color} size={20} />
-          ))}
-          {item.colors.length > 5 && (
-            <Text size="xs" c="dimmed">
-              +{item.colors.length - 5}
-            </Text>
-          )}
-        </Group>
+        <Text size="sm">{item.label}</Text>
       </Table.Td>
       <Table.Td>
         <Text size="sm">{item.rank}</Text>
-      </Table.Td>
-      <Table.Td>
-        <Badge
-          variant="light"
-          color={item.isFeatured ? 'blue' : 'gray'}
-          size="xs"
-        >
-          {item.isFeatured ? 'Yes' : 'No'}
-        </Badge>
       </Table.Td>
       <Table.Td>
         <Badge

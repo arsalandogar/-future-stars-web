@@ -5,9 +5,9 @@ import { useAppForm } from '@/lib/form';
 
 import { useCreateColorPreset } from '../api/create-color-preset';
 import { useUpdateColorPreset } from '../api/update-color-preset';
+import { useColorLeagues } from '../api/get-color-leagues';
 import { colorPresetSchema } from '../utils/validation';
 import type { ColorPreset } from '../types';
-import { useColorLeagues } from '../../color-leagues';
 
 interface Props {
   item?: ColorPreset;
