@@ -27,6 +27,8 @@ import { Route as AuthenticatedAdminListingTemplatesRouteImport } from './routes
 import { Route as AuthenticatedAdminListingTagsRouteImport } from './routes/_authenticated/admin/_listing/tags'
 import { Route as AuthenticatedAdminListingOrdersRouteImport } from './routes/_authenticated/admin/_listing/orders'
 import { Route as AuthenticatedAdminListingFeaturedItemsRouteImport } from './routes/_authenticated/admin/_listing/featured-items'
+import { Route as AuthenticatedAdminListingColorPresetsRouteImport } from './routes/_authenticated/admin/_listing/color-presets'
+import { Route as AuthenticatedAdminListingColorLeaguesRouteImport } from './routes/_authenticated/admin/_listing/color-leagues'
 import { Route as AuthenticatedAdminLegalTypeRouteRouteImport } from './routes/_authenticated/admin/legal/$type/route'
 import { Route as AuthenticatedAdminTemplatesIdIndexRouteImport } from './routes/_authenticated/admin/templates/$id/index'
 import { Route as AuthenticatedAdminTemplatesIdEditRouteImport } from './routes/_authenticated/admin/templates/$id/edit'
@@ -134,6 +136,18 @@ const AuthenticatedAdminListingFeaturedItemsRoute =
     path: '/featured-items',
     getParentRoute: () => AuthenticatedAdminListingRoute,
   } as any)
+const AuthenticatedAdminListingColorPresetsRoute =
+  AuthenticatedAdminListingColorPresetsRouteImport.update({
+    id: '/color-presets',
+    path: '/color-presets',
+    getParentRoute: () => AuthenticatedAdminListingRoute,
+  } as any)
+const AuthenticatedAdminListingColorLeaguesRoute =
+  AuthenticatedAdminListingColorLeaguesRouteImport.update({
+    id: '/color-leagues',
+    path: '/color-leagues',
+    getParentRoute: () => AuthenticatedAdminListingRoute,
+  } as any)
 const AuthenticatedAdminLegalTypeRouteRoute =
   AuthenticatedAdminLegalTypeRouteRouteImport.update({
     id: '/legal/$type',
@@ -201,6 +215,8 @@ export interface FileRoutesByFullPath {
   '/admin/template-types': typeof AuthenticatedAdminTemplateTypesRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/legal/$type': typeof AuthenticatedAdminListingLegalTypeRoute
+  '/admin/color-leagues': typeof AuthenticatedAdminListingColorLeaguesRoute
+  '/admin/color-presets': typeof AuthenticatedAdminListingColorPresetsRoute
   '/admin/featured-items': typeof AuthenticatedAdminListingFeaturedItemsRoute
   '/admin/orders': typeof AuthenticatedAdminListingOrdersRoute
   '/admin/tags': typeof AuthenticatedAdminListingTagsRoute
@@ -226,6 +242,8 @@ export interface FileRoutesByTo {
   '/admin/configs': typeof AuthenticatedAdminConfigsRoute
   '/admin/template-types': typeof AuthenticatedAdminTemplateTypesRoute
   '/admin/legal/$type': typeof AuthenticatedAdminListingLegalTypeRoute
+  '/admin/color-leagues': typeof AuthenticatedAdminListingColorLeaguesRoute
+  '/admin/color-presets': typeof AuthenticatedAdminListingColorPresetsRoute
   '/admin/featured-items': typeof AuthenticatedAdminListingFeaturedItemsRoute
   '/admin/orders': typeof AuthenticatedAdminListingOrdersRoute
   '/admin/tags': typeof AuthenticatedAdminListingTagsRoute
@@ -254,6 +272,8 @@ export interface FileRoutesById {
   '/_authenticated/admin/template-types': typeof AuthenticatedAdminTemplateTypesRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/legal/$type': typeof AuthenticatedAdminLegalTypeRouteRouteWithChildren
+  '/_authenticated/admin/_listing/color-leagues': typeof AuthenticatedAdminListingColorLeaguesRoute
+  '/_authenticated/admin/_listing/color-presets': typeof AuthenticatedAdminListingColorPresetsRoute
   '/_authenticated/admin/_listing/featured-items': typeof AuthenticatedAdminListingFeaturedItemsRoute
   '/_authenticated/admin/_listing/orders': typeof AuthenticatedAdminListingOrdersRoute
   '/_authenticated/admin/_listing/tags': typeof AuthenticatedAdminListingTagsRoute
@@ -283,6 +303,8 @@ export interface FileRouteTypes {
     | '/admin/template-types'
     | '/admin/'
     | '/admin/legal/$type'
+    | '/admin/color-leagues'
+    | '/admin/color-presets'
     | '/admin/featured-items'
     | '/admin/orders'
     | '/admin/tags'
@@ -308,6 +330,8 @@ export interface FileRouteTypes {
     | '/admin/configs'
     | '/admin/template-types'
     | '/admin/legal/$type'
+    | '/admin/color-leagues'
+    | '/admin/color-presets'
     | '/admin/featured-items'
     | '/admin/orders'
     | '/admin/tags'
@@ -335,6 +359,8 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/template-types'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/legal/$type'
+    | '/_authenticated/admin/_listing/color-leagues'
+    | '/_authenticated/admin/_listing/color-presets'
     | '/_authenticated/admin/_listing/featured-items'
     | '/_authenticated/admin/_listing/orders'
     | '/_authenticated/admin/_listing/tags'
@@ -486,6 +512,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminListingFeaturedItemsRouteImport
       parentRoute: typeof AuthenticatedAdminListingRoute
     }
+    '/_authenticated/admin/_listing/color-presets': {
+      id: '/_authenticated/admin/_listing/color-presets'
+      path: '/color-presets'
+      fullPath: '/admin/color-presets'
+      preLoaderRoute: typeof AuthenticatedAdminListingColorPresetsRouteImport
+      parentRoute: typeof AuthenticatedAdminListingRoute
+    }
+    '/_authenticated/admin/_listing/color-leagues': {
+      id: '/_authenticated/admin/_listing/color-leagues'
+      path: '/color-leagues'
+      fullPath: '/admin/color-leagues'
+      preLoaderRoute: typeof AuthenticatedAdminListingColorLeaguesRouteImport
+      parentRoute: typeof AuthenticatedAdminListingRoute
+    }
     '/_authenticated/admin/legal/$type': {
       id: '/_authenticated/admin/legal/$type'
       path: '/legal/$type'
@@ -567,6 +607,8 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 )
 
 interface AuthenticatedAdminListingRouteChildren {
+  AuthenticatedAdminListingColorLeaguesRoute: typeof AuthenticatedAdminListingColorLeaguesRoute
+  AuthenticatedAdminListingColorPresetsRoute: typeof AuthenticatedAdminListingColorPresetsRoute
   AuthenticatedAdminListingFeaturedItemsRoute: typeof AuthenticatedAdminListingFeaturedItemsRoute
   AuthenticatedAdminListingOrdersRoute: typeof AuthenticatedAdminListingOrdersRoute
   AuthenticatedAdminListingTagsRoute: typeof AuthenticatedAdminListingTagsRoute
@@ -577,6 +619,10 @@ interface AuthenticatedAdminListingRouteChildren {
 
 const AuthenticatedAdminListingRouteChildren: AuthenticatedAdminListingRouteChildren =
   {
+    AuthenticatedAdminListingColorLeaguesRoute:
+      AuthenticatedAdminListingColorLeaguesRoute,
+    AuthenticatedAdminListingColorPresetsRoute:
+      AuthenticatedAdminListingColorPresetsRoute,
     AuthenticatedAdminListingFeaturedItemsRoute:
       AuthenticatedAdminListingFeaturedItemsRoute,
     AuthenticatedAdminListingOrdersRoute: AuthenticatedAdminListingOrdersRoute,

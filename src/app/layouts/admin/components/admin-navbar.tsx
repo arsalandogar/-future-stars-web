@@ -61,6 +61,8 @@ const menuItems: NavItem[] = [
     children: [
       { label: 'Configs', href: '/admin/configs' },
       { label: 'Featured Items', href: '/admin/featured-items' },
+      { label: 'Color Leagues', href: '/admin/color-leagues' },
+      { label: 'Color Presets', href: '/admin/color-presets' },
     ],
   },
 ];
