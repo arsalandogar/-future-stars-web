@@ -3,7 +3,6 @@ import {
   Button,
   Checkbox,
   Group,
-  MultiSelect,
   Select,
   SimpleGrid,
   Stack,
@@ -179,19 +178,17 @@ export function TemplateForm({
           </SimpleGrid>
 
           {/* Tags */}
-          <form.Field name="tagIds">
+          <form.AppField name="tagIds">
             {(field) => (
-              <MultiSelect
+              <field.MultiSelectField
                 label="Tags"
                 data={tagOptions}
-                value={field.state.value}
-                onChange={field.handleChange}
                 placeholder="Select tags"
                 searchable
                 clearable
               />
             )}
-          </form.Field>
+          </form.AppField>
 
           {/* Set as Default Back Template - only show for back templates */}
           <form.Subscribe selector={(state) => state.values.side}>
