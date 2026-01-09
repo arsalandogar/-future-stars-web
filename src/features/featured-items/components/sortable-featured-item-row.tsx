@@ -7,20 +7,45 @@ import {
   Image,
   Anchor,
 } from '@mantine/core';
-import { Edit, MoreHorizontal, Trash2 } from 'lucide-react';
+import { Edit, GripVertical, MoreHorizontal, Trash2 } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import dayjs from 'dayjs';
 import type { FeaturedItem } from '../types';
 import { openDeleteModal } from '@/utils/open-delete-modal';
 import { useDeleteFeaturedItem } from '../api/delete-featured-item';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
-type FeaturedItemRowProps = {
+type SortableFeaturedItemRowProps = {
   item: FeaturedItem;
   onEdit: (item: FeaturedItem) => void;
+  isDragDisabled?: boolean;
 };
 
-export function FeaturedItemRow({ item, onEdit }: FeaturedItemRowProps) {
+export function SortableFeaturedItemRow({
+  item,
+  onEdit,
+  isDragDisabled,
+}: SortableFeaturedItemRowProps) {
   const deleteFeaturedItem = useDeleteFeaturedItem();
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: item.id,
+    disabled: isDragDisabled,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
 
   const handleDelete = (item: FeaturedItem) => {
     openDeleteModal({
@@ -31,12 +56,21 @@ export function FeaturedItemRow({ item, onEdit }: FeaturedItemRowProps) {
   };
 
   return (
-    <>
+    <Table.Tr ref={setNodeRef} style={style}>
       <Table.Td>
-        <Text fw={500} size="sm">
-          #{item.id}
-        </Text>
+        <ActionIcon
+          variant="subtle"
+          color="gray"
+          style={{ cursor: isDragDisabled ? 'not-allowed' : 'grab' }}
+          disabled={isDragDisabled}
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical size={16} />
+        </ActionIcon>
       </Table.Td>
+
+      <Table.Td>{item.displayOrder ?? '—'}</Table.Td>
       <Table.Td>
         {item.imageUrl ? (
           <Image src={item.imageUrl} w={60} h={40} radius="sm" fit="cover" />
@@ -68,9 +102,6 @@ export function FeaturedItemRow({ item, onEdit }: FeaturedItemRowProps) {
             —
           </Text>
         )}
-      </Table.Td>
-      <Table.Td>
-        <Text size="sm">{item.displayOrder}</Text>
       </Table.Td>
       <Table.Td>
         <Badge
@@ -108,6 +139,6 @@ export function FeaturedItemRow({ item, onEdit }: FeaturedItemRowProps) {
           </Menu.Dropdown>
         </Menu>
       </Table.Td>
-    </>
+    </Table.Tr>
   );
 }
