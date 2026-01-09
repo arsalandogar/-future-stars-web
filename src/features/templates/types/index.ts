@@ -135,6 +135,6 @@ export interface TemplateFormValues {
   backTemplateId: number | null;
   useDefaultBack: boolean;
   isDefaultBack: boolean;
-  tagIds: string[];
+  tagIds: number[];
   attributes: TemplateAttributeFormValues[];
 }

@@ -40,6 +40,6 @@ export const templateFormSchema = v.object({
   backTemplateId: v.nullable(v.number()),
   useDefaultBack: v.boolean(),
   isDefaultBack: v.boolean(),
-  tagIds: v.array(v.string()),
+  tagIds: v.array(v.number()),
   attributes: v.array(templateAttributeSchema),
 });

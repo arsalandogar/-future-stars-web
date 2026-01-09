@@ -28,7 +28,7 @@ export function ColorPresetForm({ item, modalClose }: Props) {
     })) ?? [];
 
   const defaultValues = {
-    colorLeagueId: item?.colorLeagueId ? String(item.colorLeagueId) : '',
+    colorLeagueId: item?.colorLeagueId ?? null,
     name: item?.name ?? '',
     abbreviation: item?.abbreviation ?? '',
     colors: item?.colors ?? [],
@@ -48,7 +48,7 @@ export function ColorPresetForm({ item, modalClose }: Props) {
 
       const data = {
         ...value,
-        colorLeagueId: Number(value.colorLeagueId),
+        colorLeagueId: value.colorLeagueId!,
       };
 
       if (isEdit) {
@@ -68,7 +68,7 @@ export function ColorPresetForm({ item, modalClose }: Props) {
         <Stack gap="md">
           <form.AppField name="colorLeagueId">
             {(field) => (
-              <field.SelectField
+              <field.NumberSelectField
                 label="Color League"
                 placeholder="Select color league"
                 data={leagueOptions}

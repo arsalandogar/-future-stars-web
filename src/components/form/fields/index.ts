@@ -7,6 +7,8 @@ export { FloatingTextField } from './floating-text-field';
 export { FloatingPasswordField } from './floating-password-field';
 export { ImageUploadCardField } from './image-upload-card-field';
 export { NumberInputField } from './number-input-field';
+export { NumberSelectField } from './number-select-field';
+export { NumberMultiSelectField } from './number-multi-select-field';
 export { CheckboxField } from './checkbox-field';
 export { ColorInputField } from './color-input-field';
 export { SubmitButton } from './submit-button';

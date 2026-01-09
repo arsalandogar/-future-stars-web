@@ -101,7 +101,7 @@ Uses **TanStack Form** with **Valibot** for schema validation and form compositi
 
 - Use `useAppForm` from `@/lib/form` instead of `useForm` for pre-bound field components
 - Use `form.AppField` with field components like `<field.TextField label="Name" />`
-- Available field components: `TextField`, `PasswordField`, `SelectField`, `MultiSelectField`, `TextareaField`, `FloatingTextField`, `FloatingPasswordField`, `NumberInputField`, `ImageUploadCardField`, `CheckboxField`, `ColorInputField`
+- Available field components: `TextField`, `PasswordField`, `SelectField`, `NumberSelectField`, `MultiSelectField`, `NumberMultiSelectField`, `TextareaField`, `FloatingTextField`, `FloatingPasswordField`, `NumberInputField`, `ImageUploadCardField`, `CheckboxField`, `ColorInputField`
 - Available form components: `Form`, `SubmitButton` (wrap with `<form.AppForm>` to use)
 
 ```typescript

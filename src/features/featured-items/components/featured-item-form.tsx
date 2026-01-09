@@ -29,7 +29,7 @@ export function FeaturedItemForm({ item, modalClose }: Props) {
     description: item?.description ?? '',
     ctaText: item?.ctaText ?? '',
     displayOrder: item?.displayOrder ?? 0,
-    templateId: item?.templateId ? String(item.templateId) : null,
+    templateId: item?.templateId ?? null,
     isActive: item?.isActive ?? true,
     image: null as File | null,
   };
@@ -45,7 +45,7 @@ export function FeaturedItemForm({ item, modalClose }: Props) {
 
       const data = {
         ...value,
-        templateId: value.templateId ? Number(value.templateId) : undefined,
+        templateId: value.templateId ?? undefined,
       };
 
       if (isEdit) {
@@ -78,7 +78,7 @@ export function FeaturedItemForm({ item, modalClose }: Props) {
 
           <form.AppField name="templateId">
             {(field) => (
-              <field.SelectField
+              <field.NumberSelectField
                 label="Template"
                 placeholder="Search and select template"
                 data={templateOptions}

@@ -10,7 +10,10 @@ export const colorLeagueSchema = v.object({
 export type ColorLeagueFormValues = v.InferInput<typeof colorLeagueSchema>;
 
 export const colorPresetSchema = v.object({
-  colorLeagueId: v.pipe(v.string(), v.minLength(1, 'Color League is required')),
+  colorLeagueId: v.pipe(
+    v.nullable(v.number()),
+    v.check((val) => val !== null, 'Color League is required')
+  ),
   name: v.pipe(
     v.string(),
     v.minLength(1, 'Name is required'),

@@ -22,7 +22,7 @@ export const featuredItemSchema = v.object({
   description: featuredItemDescriptionSchema,
   ctaText: featuredItemCtaTextSchema,
   displayOrder: v.number(),
-  templateId: v.string(),
+  templateId: v.nullable(v.number()),
   image: v.nullable(v.file()),
   isActive: v.boolean(),
 });

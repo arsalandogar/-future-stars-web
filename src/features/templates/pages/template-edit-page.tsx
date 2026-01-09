@@ -67,7 +67,7 @@ export function TemplateEditPage({ id }: TemplateEditPageProps) {
     backTemplateId: template.backTemplateId ?? null,
     useDefaultBack,
     isDefaultBack: template.isDefaultBack ?? false,
-    tagIds: template.tags.map((tag) => String(tag.id)),
+    tagIds: template.tags.map((tag) => tag.id),
     attributes: template.attributes.map((attr) => ({
       type: attr.type,
       name: attr.name,
