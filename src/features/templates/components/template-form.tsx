@@ -1,13 +1,11 @@
 import {
-  Box,
+  Badge,
   Button,
-  Checkbox,
+  Card,
   Group,
-  Select,
   SimpleGrid,
   Stack,
   Text,
-  Textarea,
   Title,
 } from '@mantine/core';
 import { Plus } from 'lucide-react';
@@ -19,12 +17,15 @@ import { useTemplateTypes } from '@/features/template-types';
 import { useTemplates } from '../api/get-templates';
 import type { TemplateFormValues } from '../types';
 import { AttributesTable } from './attributes-table';
+import { TemplateCodeSection } from './template-code-section';
 import { useTemplateForm, DEFAULT_ATTRIBUTE } from './template-form-context';
+import { TemplatePreviewPanel } from './template-preview-panel';
 
 interface TemplateFormProps {
   initialValues?: Partial<TemplateFormValues>;
   onSubmit: (values: TemplateFormValues) => void | Promise<void>;
   submitLabel?: string;
+  onCancel?: () => void;
 }
 
 const SIDE_OPTIONS = [
@@ -36,6 +37,7 @@ export function TemplateForm({
   initialValues,
   onSubmit,
   submitLabel = 'Save',
+  onCancel,
 }: TemplateFormProps) {
   const { data: tagsResponse } = useTags({ variables: {} });
   const { data: templateTypesResponse } = useTemplateTypes({});
@@ -62,231 +64,247 @@ export function TemplateForm({
     label: t.label,
   }));
 
+  const defaultBackTemplate = backTemplates.find((t) => t.isDefaultBack);
+
   const form = useTemplateForm(initialValues, onSubmit);
 
   return (
     <form.AppForm>
-      <form.Form>
-        <Stack gap="lg">
-          {/* Basic Info */}
-          <SimpleGrid cols={{ base: 1, sm: 2 }}>
-            <form.AppField name="side">
-              {(field) => (
-                <field.SelectField label="Side" data={SIDE_OPTIONS} required />
-              )}
-            </form.AppField>
+      <form.Form blockOnUnsavedChanges>
+        <div className="flex gap-6">
+          {/* Left column - scrollable form */}
+          <div className="flex-1 min-w-0">
+            <Stack gap="lg">
+              {/* Section 1: Basic Information */}
+              <Card withBorder radius="md" p="lg">
+                <Group justify="space-between" mb="md">
+                  <Title order={5}>Basic Information</Title>
+                  <form.Subscribe selector={(state) => state.isDirty}>
+                    {(isDirty) =>
+                      isDirty && (
+                        <Badge color="yellow" variant="light" size="sm">
+                          Unsaved changes
+                        </Badge>
+                      )
+                    }
+                  </form.Subscribe>
+                </Group>
 
-            <form.Field name="templateTypeId">
-              {(field) => (
-                <Select
-                  label="Template Type"
-                  data={templateTypeOptions}
-                  placeholder="Select template type"
-                  required
-                  value={
-                    field.state.value !== null
-                      ? String(field.state.value)
-                      : null
-                  }
-                  onChange={(value) =>
-                    field.handleChange(value ? Number(value) : null)
-                  }
-                  error={
-                    (
-                      field.state.meta.errors[0] as
-                        | { message: string }
-                        | undefined
-                    )?.message
-                  }
-                />
-              )}
-            </form.Field>
-          </SimpleGrid>
+                <Stack gap="md">
+                  <SimpleGrid cols={{ base: 1, sm: 2 }}>
+                    <form.AppField name="side">
+                      {(field) => (
+                        <field.SelectField
+                          label="Side"
+                          data={SIDE_OPTIONS}
+                          required
+                        />
+                      )}
+                    </form.AppField>
 
-          <SimpleGrid cols={{ base: 1, sm: 2 }}>
-            <form.AppField name="name">
-              {(field) => (
-                <field.TextField
-                  label="Name"
-                  placeholder="e.g., jersey-front-v1"
-                  required
-                  maxLength={255}
-                />
-              )}
-            </form.AppField>
+                    <form.AppField name="templateTypeId">
+                      {(field) => (
+                        <field.SelectField
+                          label="Template Type"
+                          data={templateTypeOptions}
+                          placeholder="Select template type"
+                          required
+                        />
+                      )}
+                    </form.AppField>
+                  </SimpleGrid>
 
-            <form.AppField name="label">
-              {(field) => (
-                <field.TextField
-                  label="Label"
-                  placeholder="e.g., Jersey Front Template v1"
-                  required
-                  maxLength={255}
-                />
-              )}
-            </form.AppField>
-          </SimpleGrid>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }}>
+                    <form.AppField name="name">
+                      {(field) => (
+                        <field.TextField
+                          label="Name"
+                          placeholder="e.g., jersey-front-v1"
+                          required
+                          maxLength={255}
+                        />
+                      )}
+                    </form.AppField>
 
-          <form.AppField name="description">
-            {(field) => (
-              <field.TextareaField
-                label="Description"
-                placeholder="Optional description for this template"
-                minRows={2}
-                maxLength={1000}
-              />
-            )}
-          </form.AppField>
+                    <form.AppField name="label">
+                      {(field) => (
+                        <field.TextField
+                          label="Label"
+                          placeholder="e.g., Jersey Front Template v1"
+                          required
+                          maxLength={255}
+                        />
+                      )}
+                    </form.AppField>
+                  </SimpleGrid>
 
-          {/* SVG Input with Live Preview */}
-          <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
-            <form.Field name="svgString">
-              {(field) => (
-                <Textarea
-                  label="SVG String"
-                  placeholder="Paste SVG markup here..."
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  rows={10}
-                  styles={{
-                    input: {
-                      fontFamily: 'monospace',
-                      fontSize: '12px',
-                      height: '250px',
-                      resize: 'none',
-                    },
-                  }}
-                />
-              )}
-            </form.Field>
+                  <form.AppField name="description">
+                    {(field) => (
+                      <field.TextareaField
+                        label="Description"
+                        placeholder="Optional description for this template"
+                        minRows={4}
+                        autosize
+                        maxRows={8}
+                        maxLength={1000}
+                      />
+                    )}
+                  </form.AppField>
 
-            <Box>
-              <Text size="sm" fw={500} mb={4}>
-                Preview
-              </Text>
-              <form.Subscribe selector={(state) => state.values.svgString}>
-                {(svgString) => (
-                  <SvgPreview
-                    svgString={svgString}
-                    height={250}
-                    className="w-full rounded-md border p-2"
-                    emptyMessage="Paste SVG to see preview"
-                  />
-                )}
+                  <form.AppField name="tagIds">
+                    {(field) => (
+                      <field.MultiSelectField
+                        label="Tags"
+                        data={tagOptions}
+                        placeholder="Select tags"
+                        searchable
+                        clearable
+                      />
+                    )}
+                  </form.AppField>
+                </Stack>
+              </Card>
+
+              {/* Section 2: Template Code */}
+              <TemplateCodeSection />
+
+              {/* Section 3: Set as Default Back Template - only for back templates */}
+              <form.Subscribe selector={(state) => state.values.side}>
+                {(side) =>
+                  side === 'back' && (
+                    <Card withBorder radius="md" p="lg">
+                      <Title order={5} mb="md">
+                        Default Settings
+                      </Title>
+                      <form.AppField name="isDefaultBack">
+                        {(field) => (
+                          <field.CheckboxField
+                            label="Set as Default Back Template"
+                            description="This template will be used as the default back template for front templates"
+                          />
+                        )}
+                      </form.AppField>
+                    </Card>
+                  )
+                }
               </form.Subscribe>
-            </Box>
-          </SimpleGrid>
 
-          {/* Tags */}
-          <form.AppField name="tagIds">
-            {(field) => (
-              <field.MultiSelectField
-                label="Tags"
-                data={tagOptions}
-                placeholder="Select tags"
-                searchable
-                clearable
-              />
-            )}
-          </form.AppField>
+              {/* Section 4: Back Template - only for front templates */}
+              <form.Subscribe
+                selector={(state) => ({
+                  side: state.values.side,
+                  useDefaultBack: state.values.useDefaultBack,
+                })}
+              >
+                {({ side, useDefaultBack }) =>
+                  side === 'front' && (
+                    <Card withBorder radius="md" p="lg">
+                      <Title order={5} mb="md">
+                        Back Template
+                      </Title>
+                      <Stack gap="md">
+                        <form.AppField name="useDefaultBack">
+                          {(field) => (
+                            <field.CheckboxField
+                              label="Use Default Back Template"
+                              description={
+                                defaultBackTemplate
+                                  ? `Will use "${defaultBackTemplate.label}" as the back template`
+                                  : 'No default back template has been set'
+                              }
+                            />
+                          )}
+                        </form.AppField>
 
-          {/* Set as Default Back Template - only show for back templates */}
-          <form.Subscribe selector={(state) => state.values.side}>
-            {(side) =>
-              side === 'back' && (
-                <form.Field name="isDefaultBack">
-                  {(field) => (
-                    <Checkbox
-                      label="Set as Default Back Template"
-                      description="This template will be used as the default back template for front templates"
-                      checked={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.checked)}
+                        {useDefaultBack && defaultBackTemplate && (
+                          <Group gap="md" align="center">
+                            <SvgPreview
+                              svgString={defaultBackTemplate.svgString ?? ''}
+                              height={60}
+                              className="rounded border p-1"
+                              svgClassName="[&>svg]:max-h-[50px] [&>svg]:w-auto"
+                              hideErrors
+                            />
+                            <div>
+                              <Text size="sm" fw={500}>
+                                {defaultBackTemplate.label}
+                              </Text>
+                              <Text size="xs" c="dimmed">
+                                Default back template
+                              </Text>
+                            </div>
+                          </Group>
+                        )}
+
+                        {!useDefaultBack && (
+                          <form.AppField name="backTemplateId">
+                            {(field) => (
+                              <field.SelectField
+                                label="Select Back Template"
+                                data={backTemplateOptions}
+                                placeholder="Choose a specific back template"
+                                clearable
+                                searchable
+                              />
+                            )}
+                          </form.AppField>
+                        )}
+                      </Stack>
+                    </Card>
+                  )
+                }
+              </form.Subscribe>
+
+              {/* Section 5: Attributes */}
+              <Card withBorder radius="md" p="lg">
+                <Group justify="space-between" mb="md">
+                  <Title order={5}>Attributes</Title>
+                  <form.Field name="attributes" mode="array">
+                    {(field) => (
+                      <Button
+                        variant="light"
+                        size="xs"
+                        leftSection={<Plus size={14} />}
+                        onClick={() => field.pushValue(DEFAULT_ATTRIBUTE)}
+                      >
+                        Add Attribute
+                      </Button>
+                    )}
+                  </form.Field>
+                </Group>
+
+                <form.Field name="attributes" mode="array">
+                  {(arrayField) => (
+                    <AttributesTable
+                      mode="edit"
+                      attributes={arrayField.state.value}
+                      onRemove={(index) => arrayField.removeValue(index)}
                     />
                   )}
                 </form.Field>
-              )
-            }
-          </form.Subscribe>
+              </Card>
 
-          {/* Back Template - only show for front templates */}
-          <form.Subscribe
-            selector={(state) => ({
-              side: state.values.side,
-              useDefaultBack: state.values.useDefaultBack,
-            })}
-          >
-            {({ side, useDefaultBack }) =>
-              side === 'front' && (
-                <Stack gap="sm">
-                  <form.Field name="useDefaultBack">
-                    {(field) => (
-                      <Checkbox
-                        label="Use Default Back Template"
-                        description="Use the default back template instead of selecting a specific one"
-                        checked={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.checked)}
-                      />
-                    )}
-                  </form.Field>
-
-                  {!useDefaultBack && (
-                    <form.Field name="backTemplateId">
-                      {(field) => (
-                        <Select
-                          label="Back Template"
-                          description="Link a back template to this front template"
-                          data={backTemplateOptions}
-                          placeholder="Select back template (optional)"
-                          value={
-                            field.state.value !== null
-                              ? String(field.state.value)
-                              : null
-                          }
-                          onChange={(value) =>
-                            field.handleChange(value ? Number(value) : null)
-                          }
-                          clearable
-                          searchable
-                        />
-                      )}
-                    </form.Field>
-                  )}
-                </Stack>
-              )
-            }
-          </form.Subscribe>
-
-          {/* Dynamic Attributes */}
-          <Stack gap="sm">
-            <Group justify="space-between">
-              <Title order={5}>Attributes</Title>
-              <form.Field name="attributes" mode="array">
-                {(field) => (
-                  <Button
-                    variant="light"
-                    size="xs"
-                    leftSection={<Plus size={14} />}
-                    onClick={() => field.pushValue(DEFAULT_ATTRIBUTE)}
-                  >
-                    Add Attribute
+              {/* Action buttons */}
+              <Group justify="flex-end" gap="sm">
+                {onCancel && (
+                  <Button variant="default" onClick={onCancel}>
+                    Cancel
                   </Button>
                 )}
-              </form.Field>
-            </Group>
+                <form.SubmitButton>{submitLabel}</form.SubmitButton>
+              </Group>
+            </Stack>
+          </div>
 
-            <form.Field name="attributes" mode="array">
-              {(arrayField) => (
-                <AttributesTable
-                  mode="edit"
-                  attributes={arrayField.state.value}
-                  onRemove={(index) => arrayField.removeValue(index)}
-                />
-              )}
-            </form.Field>
-          </Stack>
-
-          <form.SubmitButton>{submitLabel}</form.SubmitButton>
-        </Stack>
+          {/* Right column - sticky preview (desktop only) */}
+          <div className="hidden lg:block w-[350px] shrink-0">
+            <div className="sticky top-4">
+              <form.Subscribe selector={(state) => state.values.svgString}>
+                {(svgString) => <TemplatePreviewPanel svgString={svgString} />}
+              </form.Subscribe>
+            </div>
+          </div>
+        </div>
       </form.Form>
     </form.AppForm>
   );

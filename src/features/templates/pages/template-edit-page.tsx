@@ -1,4 +1,4 @@
-import { Card, Loader, Text } from '@mantine/core';
+import { Loader, Text } from '@mantine/core';
 import { useNavigate } from '@tanstack/react-router';
 
 import { Head } from '@/components/seo/head';
@@ -83,13 +83,12 @@ export function TemplateEditPage({ id }: TemplateEditPageProps) {
         title={`Edit ${template.label}`}
         description={`Edit template: ${template.label}`}
       />
-      <Card withBorder radius="md" p="lg">
-        <TemplateForm
-          initialValues={initialValues}
-          onSubmit={handleSubmit}
-          submitLabel="Save Changes"
-        />
-      </Card>
+      <TemplateForm
+        initialValues={initialValues}
+        onSubmit={handleSubmit}
+        submitLabel="Save Changes"
+        onCancel={() => void navigate({ to: `/admin/templates/${id}` })}
+      />
     </>
   );
 }

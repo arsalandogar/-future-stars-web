@@ -104,6 +104,44 @@ export function AttributesTable(props: AttributesTableProps) {
   );
 }
 
+function DefaultValueCell({ attr }: { attr: TemplateAttribute }) {
+  if (!attr.defaultValue) {
+    return (
+      <Text size="sm" c="dimmed">
+        —
+      </Text>
+    );
+  }
+
+  if (attr.type === 'color') {
+    return (
+      <Group gap="xs">
+        <ColorSwatch color={attr.defaultValue} size={16} />
+        <Text size="sm">{attr.defaultValue}</Text>
+      </Group>
+    );
+  }
+
+  return <Text size="sm">{attr.defaultValue}</Text>;
+}
+
+function TextColorCell({ attr }: { attr: TemplateAttribute }) {
+  if (attr.type !== 'string' || !attr.defaultColor) {
+    return (
+      <Text size="sm" c="dimmed">
+        —
+      </Text>
+    );
+  }
+
+  return (
+    <Group gap="xs">
+      <ColorSwatch color={attr.defaultColor} size={16} />
+      <Text size="sm">{attr.defaultColor}</Text>
+    </Group>
+  );
+}
+
 function ViewRows({ attributes }: { attributes: TemplateAttribute[] }) {
   return (
     <>
@@ -119,30 +157,10 @@ function ViewRows({ attributes }: { attributes: TemplateAttribute[] }) {
             <Text size="sm">{attr.label}</Text>
           </Table.Td>
           <Table.Td>
-            {attr.type === 'color' && attr.defaultValue ? (
-              <Group gap="xs">
-                <ColorSwatch color={attr.defaultValue} size={16} />
-                <Text size="sm">{attr.defaultValue}</Text>
-              </Group>
-            ) : attr.defaultValue ? (
-              <Text size="sm">{attr.defaultValue}</Text>
-            ) : (
-              <Text size="sm" c="dimmed">
-                —
-              </Text>
-            )}
+            <DefaultValueCell attr={attr} />
           </Table.Td>
           <Table.Td>
-            {attr.type === 'string' && attr.defaultColor ? (
-              <Group gap="xs">
-                <ColorSwatch color={attr.defaultColor} size={16} />
-                <Text size="sm">{attr.defaultColor}</Text>
-              </Group>
-            ) : (
-              <Text size="sm" c="dimmed">
-                —
-              </Text>
-            )}
+            <TextColorCell attr={attr} />
           </Table.Td>
         </Table.Tr>
       ))}
@@ -205,20 +223,28 @@ function EditRows({
 
           <Table.Td>
             <form.Subscribe
-              selector={(state) => state.values.attributes[index]?.type}
+              selector={(state) => ({
+                type: state.values.attributes[index]?.type,
+                defaultValue: state.values.attributes[index]?.defaultValue,
+              })}
             >
-              {(type) =>
+              {({ type, defaultValue }) =>
                 type === 'color' ? (
-                  <form.AppField name={`attributes[${index}].defaultValue`}>
-                    {(field) => (
-                      <field.ColorInputField
-                        variant="filled"
-                        size="sm"
-                        format="hex"
-                        swatches={COLOR_SWATCHES}
-                      />
+                  <Group gap="xs" wrap="nowrap">
+                    {defaultValue && (
+                      <ColorSwatch color={defaultValue} size={20} />
                     )}
-                  </form.AppField>
+                    <form.AppField name={`attributes[${index}].defaultValue`}>
+                      {(field) => (
+                        <field.ColorInputField
+                          variant="filled"
+                          size="sm"
+                          format="hex"
+                          swatches={COLOR_SWATCHES}
+                        />
+                      )}
+                    </form.AppField>
+                  </Group>
                 ) : (
                   <form.AppField name={`attributes[${index}].defaultValue`}>
                     {(field) => (
