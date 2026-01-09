@@ -11,5 +11,6 @@ export { NumberSelectField } from './number-select-field';
 export { NumberMultiSelectField } from './number-multi-select-field';
 export { CheckboxField } from './checkbox-field';
 export { ColorInputField } from './color-input-field';
+export { TemplateSelectField } from './template-select-field';
 export { SubmitButton } from './submit-button';
 export { Form } from './form';

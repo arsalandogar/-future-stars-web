@@ -57,11 +57,6 @@ export function TemplateForm({
     label: type.name,
   }));
 
-  const backTemplateOptions = backTemplates.map((t) => ({
-    value: String(t.id),
-    label: t.label,
-  }));
-
   const defaultBackTemplate = backTemplates.find((t) => t.isDefaultBack);
 
   const form = useTemplateForm(initialValues, onSubmit);
@@ -217,9 +212,9 @@ export function TemplateForm({
                         {!useDefaultBack && (
                           <form.AppField name="backTemplateId">
                             {(field) => (
-                              <field.NumberSelectField
+                              <field.TemplateSelectField
                                 label="Select Back Template"
-                                data={backTemplateOptions}
+                                templates={backTemplates}
                                 placeholder="Choose a specific back template"
                                 clearable
                                 searchable

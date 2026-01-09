@@ -18,12 +18,6 @@ export function FeaturedItemForm({ item, modalClose }: Props) {
   const updateFeaturedItem = useUpdateFeaturedItem();
   const { data: templatesData } = useTemplates({ variables: {} });
 
-  const templateOptions =
-    templatesData?.data.map((template) => ({
-      value: String(template.id),
-      label: template.label,
-    })) ?? [];
-
   const defaultValues = {
     title: item?.title ?? '',
     description: item?.description ?? '',
@@ -78,10 +72,10 @@ export function FeaturedItemForm({ item, modalClose }: Props) {
 
           <form.AppField name="templateId">
             {(field) => (
-              <field.NumberSelectField
+              <field.TemplateSelectField
                 label="Template"
                 placeholder="Search and select template"
-                data={templateOptions}
+                templates={templatesData?.data ?? []}
                 searchable
                 clearable
                 nothingFoundMessage="No templates found"

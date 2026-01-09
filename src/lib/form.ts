@@ -14,6 +14,7 @@ import {
   PasswordField,
   SelectField,
   SubmitButton,
+  TemplateSelectField,
   TextField,
   TextareaField,
 } from '@/components/form/fields';
@@ -39,6 +40,7 @@ export const { useAppForm, withForm } = createFormHook({
     NumberSelectField,
     CheckboxField,
     ColorInputField,
+    TemplateSelectField,
   },
   formComponents: {
     Form,
