@@ -78,7 +78,7 @@ export function FeaturedItemsList() {
 
   const reorderMutation = useReorderFeaturedItems();
 
-  const featuredItem = queryResult.data?.data ?? [];
+  const featuredItems = queryResult.data?.data ?? [];
 
   const queryKey = useFeaturedItems.getKey({ search: search || undefined });
   const isDragDisabled = Boolean(search);
@@ -87,9 +87,9 @@ export function FeaturedItemsList() {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      const oldIndex = featuredItem.findIndex((t) => t.id === active.id);
-      const newIndex = featuredItem.findIndex((t) => t.id === over.id);
-      const newOrder = arrayMove(featuredItem, oldIndex, newIndex);
+      const oldIndex = featuredItems.findIndex((t) => t.id === active.id);
+      const newIndex = featuredItems.findIndex((t) => t.id === over.id);
+      const newOrder = arrayMove(featuredItems, oldIndex, newIndex);
 
       const previousData =
         queryClient.getQueryData<FeaturedItemsListResponse>(queryKey);
@@ -138,7 +138,7 @@ export function FeaturedItemsList() {
               </Table.Thead>
               {queryResult.isLoading ? (
                 <Table.Tbody>
-                  {Array.from({ length: 7 }).map((_, rowIndex) => (
+                  {Array.from({ length: 5 }).map((_, rowIndex) => (
                     // eslint-disable-next-line react-x/no-array-index-key
                     <Table.Tr key={rowIndex}>
                       {COLUMNS.map((column) => (
@@ -149,7 +149,7 @@ export function FeaturedItemsList() {
                     </Table.Tr>
                   ))}
                 </Table.Tbody>
-              ) : featuredItem.length === 0 ? (
+              ) : featuredItems.length === 0 ? (
                 <Table.Tbody>
                   <Table.Tr>
                     <Table.Td colSpan={COLUMNS.length}>
@@ -166,11 +166,11 @@ export function FeaturedItemsList() {
                   onDragEnd={handleDragEnd}
                 >
                   <SortableContext
-                    items={featuredItem.map((t) => t.id)}
+                    items={featuredItems.map((t) => t.id)}
                     strategy={verticalListSortingStrategy}
                   >
                     <Table.Tbody>
-                      {featuredItem.map((item) => (
+                      {featuredItems.map((item) => (
                         <SortableFeaturedItemRow
                           key={item.id}
                           item={item}

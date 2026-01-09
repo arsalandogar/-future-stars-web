@@ -16,7 +16,7 @@ import { useDeleteFeaturedItem } from '../api/delete-featured-item';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-type FeaturedItemRowProps = {
+type SortableFeaturedItemRowProps = {
   item: FeaturedItem;
   onEdit: (item: FeaturedItem) => void;
   isDragDisabled?: boolean;
@@ -26,7 +26,7 @@ export function SortableFeaturedItemRow({
   item,
   onEdit,
   isDragDisabled,
-}: FeaturedItemRowProps) {
+}: SortableFeaturedItemRowProps) {
   const deleteFeaturedItem = useDeleteFeaturedItem();
 
   const {
