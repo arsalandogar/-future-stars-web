@@ -9,6 +9,7 @@ export { TemplateRow } from './components/template-row';
 
 // API
 export { useTemplates } from './api/get-templates';
+export { useSetDefaultBack } from './api/set-default-back';
 
 // Types
 export type { Template, TemplateSide } from './types';

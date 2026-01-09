@@ -13,6 +13,7 @@ import {
 import { usePageHeader } from '@/hooks/use-page-header';
 
 import { useTemplates } from '../api/get-templates';
+import { useSetDefaultBack } from '../api/set-default-back';
 import type { Template, TemplateSide } from '../types';
 
 import { TemplateRow } from './template-row';
@@ -57,6 +58,12 @@ export function TemplatesList() {
     title: 'Templates',
     description: 'Manage your card templates.',
   });
+
+  const setDefaultBackMutation = useSetDefaultBack();
+
+  const handleSetDefaultBack = (template: Template) => {
+    setDefaultBackMutation.mutate(template.id);
+  };
 
   const handleSetTags = (template: Template) => {
     setSelectedTemplate(template);
@@ -116,6 +123,7 @@ export function TemplatesList() {
               template={template}
               side={side}
               onSetTags={handleSetTags}
+              onSetDefaultBack={handleSetDefaultBack}
             />
           )}
         />

@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Checkbox,
   Group,
   MultiSelect,
   Select,
@@ -23,7 +24,7 @@ import { useTemplateForm, DEFAULT_ATTRIBUTE } from './template-form-context';
 
 interface TemplateFormProps {
   initialValues?: Partial<TemplateFormValues>;
-  onSubmit: (values: TemplateFormValues) => void;
+  onSubmit: (values: TemplateFormValues) => void | Promise<void>;
   submitLabel?: string;
 }
 
@@ -184,7 +185,7 @@ export function TemplateForm({
                 label="Tags"
                 data={tagOptions}
                 value={field.state.value}
-                onChange={(value) => field.handleChange(value)}
+                onChange={field.handleChange}
                 placeholder="Select tags"
                 searchable
                 clearable
@@ -192,30 +193,68 @@ export function TemplateForm({
             )}
           </form.Field>
 
-          {/* Back Template - only show for front templates */}
+          {/* Set as Default Back Template - only show for back templates */}
           <form.Subscribe selector={(state) => state.values.side}>
             {(side) =>
-              side === 'front' && (
-                <form.Field name="backTemplateId">
+              side === 'back' && (
+                <form.Field name="isDefaultBack">
                   {(field) => (
-                    <Select
-                      label="Back Template"
-                      description="Link a back template to this front template"
-                      data={backTemplateOptions}
-                      placeholder="Select back template (optional)"
-                      value={
-                        field.state.value !== null
-                          ? String(field.state.value)
-                          : null
-                      }
-                      onChange={(value) =>
-                        field.handleChange(value ? Number(value) : null)
-                      }
-                      clearable
-                      searchable
+                    <Checkbox
+                      label="Set as Default Back Template"
+                      description="This template will be used as the default back template for front templates"
+                      checked={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.checked)}
                     />
                   )}
                 </form.Field>
+              )
+            }
+          </form.Subscribe>
+
+          {/* Back Template - only show for front templates */}
+          <form.Subscribe
+            selector={(state) => ({
+              side: state.values.side,
+              useDefaultBack: state.values.useDefaultBack,
+            })}
+          >
+            {({ side, useDefaultBack }) =>
+              side === 'front' && (
+                <Stack gap="sm">
+                  <form.Field name="useDefaultBack">
+                    {(field) => (
+                      <Checkbox
+                        label="Use Default Back Template"
+                        description="Use the default back template instead of selecting a specific one"
+                        checked={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.checked)}
+                      />
+                    )}
+                  </form.Field>
+
+                  {!useDefaultBack && (
+                    <form.Field name="backTemplateId">
+                      {(field) => (
+                        <Select
+                          label="Back Template"
+                          description="Link a back template to this front template"
+                          data={backTemplateOptions}
+                          placeholder="Select back template (optional)"
+                          value={
+                            field.state.value !== null
+                              ? String(field.state.value)
+                              : null
+                          }
+                          onChange={(value) =>
+                            field.handleChange(value ? Number(value) : null)
+                          }
+                          clearable
+                          searchable
+                        />
+                      )}
+                    </form.Field>
+                  )}
+                </Stack>
               )
             }
           </form.Subscribe>

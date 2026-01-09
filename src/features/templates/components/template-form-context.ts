@@ -13,34 +13,26 @@ const DEFAULT_VALUES: TemplateFormValues = {
   svgString: '',
   templateTypeId: null,
   backTemplateId: null,
+  useDefaultBack: false,
+  isDefaultBack: false,
   tagIds: [],
   attributes: [],
 };
 
 export function useTemplateForm(
   initialValues?: Partial<TemplateFormValues>,
-  onSubmit?: (values: TemplateFormValues) => void
+  onSubmit?: (values: TemplateFormValues) => void | Promise<void>
 ) {
   return useAppForm({
-    defaultValues: {
-      side: initialValues?.side ?? DEFAULT_VALUES.side,
-      name: initialValues?.name ?? DEFAULT_VALUES.name,
-      label: initialValues?.label ?? DEFAULT_VALUES.label,
-      description: initialValues?.description ?? DEFAULT_VALUES.description,
-      svgString: initialValues?.svgString ?? DEFAULT_VALUES.svgString,
-      templateTypeId:
-        initialValues?.templateTypeId ?? DEFAULT_VALUES.templateTypeId,
-      backTemplateId:
-        initialValues?.backTemplateId ?? DEFAULT_VALUES.backTemplateId,
-      tagIds: initialValues?.tagIds ?? DEFAULT_VALUES.tagIds,
-      attributes: initialValues?.attributes ?? DEFAULT_VALUES.attributes,
-    },
+    defaultValues: { ...DEFAULT_VALUES, ...initialValues },
     validators: {
       onDynamic: templateFormSchema,
     },
     validationLogic: revalidateLogic(),
     onSubmit: onSubmit
-      ? ({ value }) => onSubmit(value as TemplateFormValues)
+      ? async ({ value }) => {
+          await onSubmit(value as TemplateFormValues);
+        }
       : undefined,
   });
 }

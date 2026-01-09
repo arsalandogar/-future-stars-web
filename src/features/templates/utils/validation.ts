@@ -38,6 +38,8 @@ export const templateFormSchema = v.object({
     v.check((val) => val !== null, 'Template type is required')
   ),
   backTemplateId: v.nullable(v.number()),
+  useDefaultBack: v.boolean(),
+  isDefaultBack: v.boolean(),
   tagIds: v.array(v.string()),
   attributes: v.array(templateAttributeSchema),
 });

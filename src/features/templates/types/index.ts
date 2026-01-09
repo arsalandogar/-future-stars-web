@@ -50,9 +50,11 @@ export interface Template {
   frontendComponentName?: string;
   frontendComponentFileName?: string;
   backTemplateId?: number;
+  isDefaultBack?: boolean;
   createdAt: string;
   attributes: TemplateAttribute[];
   backTemplate: TemplateBackTemplate | null;
+  defaultBackTemplate?: TemplateBackTemplate;
   type: TemplateTypeRef;
   tags: Tag[];
 }
@@ -91,7 +93,8 @@ export interface CreateTemplateParams {
   svgString?: string;
   frontendComponentName?: string;
   frontendComponentFileName?: string;
-  backTemplateId?: number;
+  backTemplateId?: number | null;
+  isDefaultBack?: boolean;
   attributes?: CreateTemplateAttributeParams[];
   tagIds?: number[];
 }
@@ -108,6 +111,7 @@ export interface UpdateTemplateParams {
   frontendComponentName?: string;
   frontendComponentFileName?: string;
   backTemplateId?: number | null;
+  isDefaultBack?: boolean;
   attributes?: CreateTemplateAttributeParams[];
   tagIds?: number[];
 }
@@ -129,6 +133,8 @@ export interface TemplateFormValues {
   svgString: string;
   templateTypeId: number | null;
   backTemplateId: number | null;
+  useDefaultBack: boolean;
+  isDefaultBack: boolean;
   tagIds: string[];
   attributes: TemplateAttributeFormValues[];
 }

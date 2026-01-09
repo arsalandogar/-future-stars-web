@@ -7,6 +7,7 @@ import { usePageHeader } from '@/hooks/use-page-header';
 import { useCreateTemplate } from '../api/create-template';
 import { TemplateForm } from '../components/template-form';
 import type { TemplateFormValues } from '../types';
+import { transformFormValuesToParams } from '../utils/transform-form-values';
 
 export function TemplateCreatePage() {
   const navigate = useNavigate();
@@ -16,31 +17,11 @@ export function TemplateCreatePage() {
     title: 'Create Template',
   });
 
-  const handleSubmit = (values: TemplateFormValues) => {
-    createTemplate.mutate(
-      {
-        side: values.side,
-        name: values.name,
-        label: values.label,
-        description: values.description || undefined,
-        svgString: values.svgString || undefined,
-        templateTypeId: values.templateTypeId!,
-        backTemplateId: values.backTemplateId ?? undefined,
-        tagIds: values.tagIds.map((id) => Number(id)),
-        attributes: values.attributes.map((attr) => ({
-          type: attr.type,
-          name: attr.name,
-          label: attr.label,
-          defaultValue: attr.defaultValue || undefined,
-          defaultColor: attr.defaultColor || undefined,
-        })),
-      },
-      {
-        onSuccess: (data) => {
-          void navigate({ to: `/admin/templates/${data.id}` });
-        },
-      }
+  const handleSubmit = async (values: TemplateFormValues) => {
+    const data = await createTemplate.mutateAsync(
+      transformFormValuesToParams(values)
     );
+    void navigate({ to: `/admin/templates/${data.id}` });
   };
 
   return (

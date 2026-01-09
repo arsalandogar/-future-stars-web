@@ -8,6 +8,7 @@ import { useTemplate } from '../api/get-template';
 import { useUpdateTemplate } from '../api/update-template';
 import { TemplateForm } from '../components/template-form';
 import type { TemplateFormValues } from '../types';
+import { transformFormValuesToParams } from '../utils/transform-form-values';
 
 export interface TemplateEditPageProps {
   id: number;
@@ -28,32 +29,12 @@ export function TemplateEditPage({ id }: TemplateEditPageProps) {
     dynamicBreadcrumb: template?.label,
   });
 
-  const handleSubmit = (values: TemplateFormValues) => {
-    updateTemplate.mutate(
-      {
-        id,
-        side: values.side,
-        name: values.name,
-        label: values.label,
-        description: values.description || undefined,
-        svgString: values.svgString || undefined,
-        templateTypeId: values.templateTypeId!,
-        backTemplateId: values.backTemplateId,
-        tagIds: values.tagIds.map((id) => Number(id)),
-        attributes: values.attributes.map((attr) => ({
-          type: attr.type,
-          name: attr.name,
-          label: attr.label,
-          defaultValue: attr.defaultValue || undefined,
-          defaultColor: attr.defaultColor || undefined,
-        })),
-      },
-      {
-        onSuccess: () => {
-          void navigate({ to: `/admin/templates/${id}` });
-        },
-      }
-    );
+  const handleSubmit = async (values: TemplateFormValues) => {
+    await updateTemplate.mutateAsync({
+      id,
+      ...transformFormValuesToParams(values),
+    });
+    void navigate({ to: `/admin/templates/${id}` });
   };
 
   if (isLoading) {
@@ -72,6 +53,10 @@ export function TemplateEditPage({ id }: TemplateEditPageProps) {
     );
   }
 
+  // For front templates, useDefaultBack is true if no specific backTemplateId is set
+  const useDefaultBack =
+    template.side === 'front' && template.backTemplateId == null;
+
   const initialValues: Partial<TemplateFormValues> = {
     side: template.side,
     name: template.name,
@@ -80,6 +65,8 @@ export function TemplateEditPage({ id }: TemplateEditPageProps) {
     svgString: template.svgString,
     templateTypeId: template.templateTypeId,
     backTemplateId: template.backTemplateId ?? null,
+    useDefaultBack,
+    isDefaultBack: template.isDefaultBack ?? false,
     tagIds: template.tags.map((tag) => String(tag.id)),
     attributes: template.attributes.map((attr) => ({
       type: attr.type,

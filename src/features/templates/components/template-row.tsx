@@ -9,7 +9,7 @@ import {
   Text,
   Tooltip,
 } from '@mantine/core';
-import { Edit, Eye, MoreHorizontal, Tags } from 'lucide-react';
+import { Edit, Eye, MoreHorizontal, Star, Tags } from 'lucide-react';
 
 import { SvgPreview } from '@/components/svg-preview';
 import { formatDate } from '@/utils/date';
@@ -20,6 +20,7 @@ interface TemplateRowProps {
   template: Template;
   side: TemplateSide;
   onSetTags?: (template: Template) => void;
+  onSetDefaultBack?: (template: Template) => void;
   hideTags?: boolean;
   hideBack?: boolean;
 }
@@ -30,10 +31,44 @@ const SVG_PREVIEW_PROPS = {
   hideErrors: true,
 } as const;
 
+const DEFAULT_BACK_PREVIEW_PROPS = {
+  className: 'h-12 w-12 rounded border-2 border-dashed border-yellow-500/50',
+  svgClassName: '[&>svg]:h-full [&>svg]:w-full',
+  hideErrors: true,
+} as const;
+
+function BackTemplatePreview({
+  template,
+}: {
+  template: Template;
+}): React.ReactNode {
+  const backTemplate = template.backTemplate ?? template.defaultBackTemplate;
+
+  if (!backTemplate) {
+    return (
+      <Text size="sm" c="dimmed">
+        —
+      </Text>
+    );
+  }
+
+  const isDefault = !template.backTemplate && template.defaultBackTemplate;
+  const previewProps = isDefault
+    ? DEFAULT_BACK_PREVIEW_PROPS
+    : SVG_PREVIEW_PROPS;
+
+  return (
+    <Anchor component={Link} to={`/admin/templates/${backTemplate.id}`}>
+      <SvgPreview svgString={backTemplate.svgString ?? ''} {...previewProps} />
+    </Anchor>
+  );
+}
+
 export function TemplateRow({
   template,
   side,
   onSetTags,
+  onSetDefaultBack,
   hideTags,
   hideBack,
 }: TemplateRowProps) {
@@ -44,31 +79,24 @@ export function TemplateRow({
       </Table.Td>
       {side === 'front' && !hideBack && (
         <Table.Td>
-          {template.backTemplate ? (
-            <Anchor
-              component={Link}
-              to={`/admin/templates/${template.backTemplate.id}`}
-            >
-              <SvgPreview
-                svgString={template.backTemplate.svgString ?? ''}
-                {...SVG_PREVIEW_PROPS}
-              />
-            </Anchor>
-          ) : (
-            <Text size="sm" c="dimmed">
-              —
-            </Text>
-          )}
+          <BackTemplatePreview template={template} />
         </Table.Td>
       )}
       <Table.Td>
-        <Anchor
-          component={Link}
-          to={`/admin/templates/${template.id}`}
-          fw={500}
-        >
-          {template.label}
-        </Anchor>
+        <Group gap="xs">
+          <Anchor
+            component={Link}
+            to={`/admin/templates/${template.id}`}
+            fw={500}
+          >
+            {template.label}
+          </Anchor>
+          {template.isDefaultBack && (
+            <Badge size="xs" variant="light" color="yellow">
+              Default
+            </Badge>
+          )}
+        </Group>
       </Table.Td>
       <Table.Td>
         {template.description ? (
@@ -135,6 +163,14 @@ export function TemplateRow({
                   Set Tags
                 </Menu.Item>
               </>
+            )}
+            {side === 'back' && onSetDefaultBack && (
+              <Menu.Item
+                leftSection={<Star size={14} />}
+                onClick={() => onSetDefaultBack(template)}
+              >
+                Set as Default Back
+              </Menu.Item>
             )}
           </Menu.Dropdown>
         </Menu>

@@ -24,6 +24,63 @@ const SVG_PREVIEW_PROPS = {
   hideErrors: true,
 } as const;
 
+function TemplatePreviewCard({
+  template,
+}: {
+  template: Template;
+}): React.ReactNode {
+  const backTemplate = template.backTemplate ?? template.defaultBackTemplate;
+  const isDefaultBack =
+    !template.backTemplate && Boolean(template.defaultBackTemplate);
+
+  return (
+    <Card withBorder radius="md" p="lg">
+      <Title order={5} mb="md">
+        Template Preview
+      </Title>
+      {backTemplate ? (
+        <SimpleGrid cols={{ base: 1, md: 2 }}>
+          <Box className="flex flex-col items-center">
+            <Text size="sm" fw={500} c="dimmed" mb="xs" tt="capitalize">
+              {template.side}
+            </Text>
+            <SvgPreview svgString={template.svgString} {...SVG_PREVIEW_PROPS} />
+          </Box>
+          <Box className="flex flex-col items-center">
+            <Group gap="xs" mb="xs">
+              <Text size="sm" fw={500} c="dimmed" tt="capitalize">
+                {backTemplate.side}
+              </Text>
+              {isDefaultBack && (
+                <Badge size="xs" variant="light" color="yellow">
+                  Default
+                </Badge>
+              )}
+            </Group>
+            <Link
+              to="/admin/templates/$id"
+              params={{ id: String(backTemplate.id) }}
+              className="inline-flex no-underline"
+            >
+              <SvgPreview
+                svgString={backTemplate.svgString ?? ''}
+                {...SVG_PREVIEW_PROPS}
+              />
+            </Link>
+            <Text size="xs" c="dimmed" mt="xs">
+              Click to view back template
+            </Text>
+          </Box>
+        </SimpleGrid>
+      ) : (
+        <Box className="flex flex-col items-center">
+          <SvgPreview svgString={template.svgString} {...SVG_PREVIEW_PROPS} />
+        </Box>
+      )}
+    </Card>
+  );
+}
+
 interface TemplateViewProps {
   template: Template;
   onDelete: () => void;
@@ -76,46 +133,7 @@ export function TemplateView({ template, onDelete }: TemplateViewProps) {
       </Card>
 
       {/* SVG Preview - Front and Back side by side */}
-      <Card withBorder radius="md" p="lg">
-        <Title order={5} mb="md">
-          Template Preview
-        </Title>
-        {template.backTemplate ? (
-          <SimpleGrid cols={{ base: 1, md: 2 }}>
-            <Box className="flex flex-col items-center">
-              <Text size="sm" fw={500} c="dimmed" mb="xs" tt="capitalize">
-                {template.side}
-              </Text>
-              <SvgPreview
-                svgString={template.svgString}
-                {...SVG_PREVIEW_PROPS}
-              />
-            </Box>
-            <Box className="flex flex-col items-center">
-              <Text size="sm" fw={500} c="dimmed" mb="xs" tt="capitalize">
-                {template.backTemplate.side}
-              </Text>
-              <Link
-                to="/admin/templates/$id"
-                params={{ id: String(template.backTemplate.id) }}
-                className="inline-flex no-underline"
-              >
-                <SvgPreview
-                  svgString={template.backTemplate.svgString ?? ''}
-                  {...SVG_PREVIEW_PROPS}
-                />
-              </Link>
-              <Text size="xs" c="dimmed" mt="xs">
-                Click to view back template
-              </Text>
-            </Box>
-          </SimpleGrid>
-        ) : (
-          <Box className="flex flex-col items-center">
-            <SvgPreview svgString={template.svgString} {...SVG_PREVIEW_PROPS} />
-          </Box>
-        )}
-      </Card>
+      <TemplatePreviewCard template={template} />
 
       {/* Description */}
       {template.description && (
