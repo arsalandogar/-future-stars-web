@@ -6,5 +6,8 @@
       "WebFetch(domain:lucide.dev)",
       "WebFetch(domain:api.futurestarsapp.com)"
     ]
+  },
+  "enabledPlugins": {
+    "code-simplifier@claude-plugins-official": true
   }
 }

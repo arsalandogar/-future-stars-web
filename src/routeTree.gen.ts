@@ -31,6 +31,7 @@ import { Route as AuthenticatedAdminListingColorPresetsRouteImport } from './rou
 import { Route as AuthenticatedAdminListingColorLeaguesRouteImport } from './routes/_authenticated/admin/_listing/color-leagues'
 import { Route as AuthenticatedAdmin_legalTypeRouteRouteImport } from './routes/_authenticated/admin/__legal/$type/route'
 import { Route as AuthenticatedAdminTemplatesIdIndexRouteImport } from './routes/_authenticated/admin/templates/$id/index'
+import { Route as AuthenticatedAdminTagsIdIndexRouteImport } from './routes/_authenticated/admin/tags/$id/index'
 import { Route as AuthenticatedAdminTemplatesIdEditRouteImport } from './routes/_authenticated/admin/templates/$id/edit'
 import { Route as AuthenticatedAdminListing_legalTypeRouteImport } from './routes/_authenticated/admin/_listing/__legal.$type'
 import { Route as AuthenticatedAdmin_legalTypeVersionsRouteImport } from './routes/_authenticated/admin/__legal/$type/versions'
@@ -160,6 +161,12 @@ const AuthenticatedAdminTemplatesIdIndexRoute =
     path: '/templates/$id/',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminTagsIdIndexRoute =
+  AuthenticatedAdminTagsIdIndexRouteImport.update({
+    id: '/tags/$id/',
+    path: '/tags/$id/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminTemplatesIdEditRoute =
   AuthenticatedAdminTemplatesIdEditRouteImport.update({
     id: '/templates/$id/edit',
@@ -227,6 +234,7 @@ export interface FileRoutesByFullPath {
   '/admin/$type/create': typeof AuthenticatedAdmin_legalTypeCreateRoute
   '/admin/$type/versions': typeof AuthenticatedAdmin_legalTypeVersionsRoute
   '/admin/templates/$id/edit': typeof AuthenticatedAdminTemplatesIdEditRoute
+  '/admin/tags/$id': typeof AuthenticatedAdminTagsIdIndexRoute
   '/admin/templates/$id': typeof AuthenticatedAdminTemplatesIdIndexRoute
   '/admin/$type/$id/edit': typeof AuthenticatedAdmin_legalTypeIdEditRoute
   '/admin/$type/$id/': typeof AuthenticatedAdmin_legalTypeIdIndexRoute
@@ -253,6 +261,7 @@ export interface FileRoutesByTo {
   '/admin/$type/create': typeof AuthenticatedAdmin_legalTypeCreateRoute
   '/admin/$type/versions': typeof AuthenticatedAdmin_legalTypeVersionsRoute
   '/admin/templates/$id/edit': typeof AuthenticatedAdminTemplatesIdEditRoute
+  '/admin/tags/$id': typeof AuthenticatedAdminTagsIdIndexRoute
   '/admin/templates/$id': typeof AuthenticatedAdminTemplatesIdIndexRoute
   '/admin/$type/$id/edit': typeof AuthenticatedAdmin_legalTypeIdEditRoute
   '/admin/$type/$id': typeof AuthenticatedAdmin_legalTypeIdIndexRoute
@@ -285,6 +294,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/__legal/$type/versions': typeof AuthenticatedAdmin_legalTypeVersionsRoute
   '/_authenticated/admin/_listing/__legal/$type': typeof AuthenticatedAdminListing_legalTypeRoute
   '/_authenticated/admin/templates/$id/edit': typeof AuthenticatedAdminTemplatesIdEditRoute
+  '/_authenticated/admin/tags/$id/': typeof AuthenticatedAdminTagsIdIndexRoute
   '/_authenticated/admin/templates/$id/': typeof AuthenticatedAdminTemplatesIdIndexRoute
   '/_authenticated/admin/__legal/$type/$id/edit': typeof AuthenticatedAdmin_legalTypeIdEditRoute
   '/_authenticated/admin/__legal/$type/$id/': typeof AuthenticatedAdmin_legalTypeIdIndexRoute
@@ -315,6 +325,7 @@ export interface FileRouteTypes {
     | '/admin/$type/create'
     | '/admin/$type/versions'
     | '/admin/templates/$id/edit'
+    | '/admin/tags/$id'
     | '/admin/templates/$id'
     | '/admin/$type/$id/edit'
     | '/admin/$type/$id/'
@@ -341,6 +352,7 @@ export interface FileRouteTypes {
     | '/admin/$type/create'
     | '/admin/$type/versions'
     | '/admin/templates/$id/edit'
+    | '/admin/tags/$id'
     | '/admin/templates/$id'
     | '/admin/$type/$id/edit'
     | '/admin/$type/$id'
@@ -372,6 +384,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/__legal/$type/versions'
     | '/_authenticated/admin/_listing/__legal/$type'
     | '/_authenticated/admin/templates/$id/edit'
+    | '/_authenticated/admin/tags/$id/'
     | '/_authenticated/admin/templates/$id/'
     | '/_authenticated/admin/__legal/$type/$id/edit'
     | '/_authenticated/admin/__legal/$type/$id/'
@@ -540,6 +553,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTemplatesIdIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/tags/$id/': {
+      id: '/_authenticated/admin/tags/$id/'
+      path: '/tags/$id'
+      fullPath: '/admin/tags/$id'
+      preLoaderRoute: typeof AuthenticatedAdminTagsIdIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/templates/$id/edit': {
       id: '/_authenticated/admin/templates/$id/edit'
       path: '/templates/$id/edit'
@@ -686,6 +706,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdmin_legalTypeRouteRoute: typeof AuthenticatedAdmin_legalTypeRouteRouteWithChildren
   AuthenticatedAdminTemplatesCreateRoute: typeof AuthenticatedAdminTemplatesCreateRoute
   AuthenticatedAdminTemplatesIdEditRoute: typeof AuthenticatedAdminTemplatesIdEditRoute
+  AuthenticatedAdminTagsIdIndexRoute: typeof AuthenticatedAdminTagsIdIndexRoute
   AuthenticatedAdminTemplatesIdIndexRoute: typeof AuthenticatedAdminTemplatesIdIndexRoute
 }
 
@@ -701,6 +722,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
       AuthenticatedAdminTemplatesCreateRoute,
     AuthenticatedAdminTemplatesIdEditRoute:
       AuthenticatedAdminTemplatesIdEditRoute,
+    AuthenticatedAdminTagsIdIndexRoute: AuthenticatedAdminTagsIdIndexRoute,
     AuthenticatedAdminTemplatesIdIndexRoute:
       AuthenticatedAdminTemplatesIdIndexRoute,
   }

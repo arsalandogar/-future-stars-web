@@ -1,8 +1,9 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Table, Text, Badge, ActionIcon, Menu } from '@mantine/core';
+import { Table, Text, Badge, ActionIcon, Menu, Anchor } from '@mantine/core';
+import { Link } from '@tanstack/react-router';
 import dayjs from 'dayjs';
-import { Edit, GripVertical, MoreHorizontal, Trash2 } from 'lucide-react';
+import { Edit, Eye, GripVertical, MoreHorizontal, Trash2 } from 'lucide-react';
 
 import { openDeleteModal } from '@/utils/open-delete-modal';
 import type { Tag } from '@/types';
@@ -66,7 +67,9 @@ export function SortableTagRow({
       <Table.Td>{tag.displayOrder ?? '—'}</Table.Td>
 
       <Table.Td>
-        <Text size="sm">{tag.name}</Text>
+        <Anchor component={Link} to={`/admin/tags/${tag.id}`} fw={500}>
+          {tag.name}
+        </Anchor>
       </Table.Td>
 
       <Table.Td>
@@ -94,17 +97,25 @@ export function SortableTagRow({
           </Menu.Target>
           <Menu.Dropdown>
             <Menu.Item
+              component={Link}
+              to={`/admin/tags/${tag.id}`}
+              leftSection={<Eye size={14} />}
+            >
+              View
+            </Menu.Item>
+            <Menu.Item
               leftSection={<Edit size={14} />}
               onClick={() => onEdit(tag)}
             >
-              Edit Tag
+              Edit
             </Menu.Item>
+            <Menu.Divider />
             <Menu.Item
               leftSection={<Trash2 size={14} />}
               c={'red'}
               onClick={() => handleDelete(tag)}
             >
-              Delete Tag
+              Delete
             </Menu.Item>
           </Menu.Dropdown>
         </Menu>

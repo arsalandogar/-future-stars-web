@@ -19,7 +19,9 @@ import type { Template, TemplateSide } from '../types';
 interface TemplateRowProps {
   template: Template;
   side: TemplateSide;
-  onSetTags: (template: Template) => void;
+  onSetTags?: (template: Template) => void;
+  hideTags?: boolean;
+  hideBack?: boolean;
 }
 
 const SVG_PREVIEW_PROPS = {
@@ -28,13 +30,19 @@ const SVG_PREVIEW_PROPS = {
   hideErrors: true,
 } as const;
 
-export function TemplateRow({ template, side, onSetTags }: TemplateRowProps) {
+export function TemplateRow({
+  template,
+  side,
+  onSetTags,
+  hideTags,
+  hideBack,
+}: TemplateRowProps) {
   return (
     <>
       <Table.Td>
         <SvgPreview svgString={template.svgString} {...SVG_PREVIEW_PROPS} />
       </Table.Td>
-      {side === 'front' && (
+      {side === 'front' && !hideBack && (
         <Table.Td>
           {template.backTemplate ? (
             <Anchor
@@ -75,21 +83,23 @@ export function TemplateRow({ template, side, onSetTags }: TemplateRowProps) {
           </Text>
         )}
       </Table.Td>
-      <Table.Td>
-        {template.tags.length > 0 ? (
-          <Group gap="xs">
-            {template.tags.map((tag) => (
-              <Badge key={tag.id} variant="light" size="sm">
-                {tag.label}
-              </Badge>
-            ))}
-          </Group>
-        ) : (
-          <Text size="sm" c="dimmed">
-            —
-          </Text>
-        )}
-      </Table.Td>
+      {!hideTags && (
+        <Table.Td>
+          {template.tags.length > 0 ? (
+            <Group gap="xs">
+              {template.tags.map((tag) => (
+                <Badge key={tag.id} variant="light" size="sm">
+                  {tag.label}
+                </Badge>
+              ))}
+            </Group>
+          ) : (
+            <Text size="sm" c="dimmed">
+              —
+            </Text>
+          )}
+        </Table.Td>
+      )}
       <Table.Td>
         <Text size="sm">{formatDate(template.createdAt)}</Text>
       </Table.Td>
@@ -115,13 +125,17 @@ export function TemplateRow({ template, side, onSetTags }: TemplateRowProps) {
             >
               Edit
             </Menu.Item>
-            <Menu.Divider />
-            <Menu.Item
-              leftSection={<Tags size={14} />}
-              onClick={() => onSetTags(template)}
-            >
-              Set Tags
-            </Menu.Item>
+            {onSetTags && (
+              <>
+                <Menu.Divider />
+                <Menu.Item
+                  leftSection={<Tags size={14} />}
+                  onClick={() => onSetTags(template)}
+                >
+                  Set Tags
+                </Menu.Item>
+              </>
+            )}
           </Menu.Dropdown>
         </Menu>
       </Table.Td>
