@@ -3,6 +3,7 @@ export type Tag = {
   name: string;
   label: string;
   description?: string;
+  displayOrder?: number;
   createdAt?: string;
   updatedAt?: string;
 };

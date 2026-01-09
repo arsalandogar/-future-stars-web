@@ -1,17 +1,44 @@
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Table, Text, Badge, ActionIcon, Menu } from '@mantine/core';
-import { Edit, MoreHorizontal, Trash2 } from 'lucide-react';
 import dayjs from 'dayjs';
-import type { Tag } from '@/types';
+import { Edit, GripVertical, MoreHorizontal, Trash2 } from 'lucide-react';
+
 import { openDeleteModal } from '@/utils/open-delete-modal';
+import type { Tag } from '@/types';
+
 import { useDeleteTag } from '../api/delete-tag';
 
-type TagRowProps = {
+type SortableTagRowProps = {
   tag: Tag;
   onEdit: (tag: Tag) => void;
+  isDragDisabled?: boolean;
 };
 
-export function TagRow({ tag, onEdit }: TagRowProps) {
+export function SortableTagRow({
+  tag,
+  onEdit,
+  isDragDisabled,
+}: SortableTagRowProps) {
   const deleteTag = useDeleteTag();
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: tag.id,
+    disabled: isDragDisabled,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
 
   const handleDelete = (tag: Tag) => {
     openDeleteModal({
@@ -22,12 +49,22 @@ export function TagRow({ tag, onEdit }: TagRowProps) {
   };
 
   return (
-    <>
+    <Table.Tr ref={setNodeRef} style={style}>
       <Table.Td>
-        <Text fw={500} size="sm">
-          #{tag.id}
-        </Text>
+        <ActionIcon
+          variant="subtle"
+          color="gray"
+          style={{ cursor: isDragDisabled ? 'not-allowed' : 'grab' }}
+          disabled={isDragDisabled}
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical size={16} />
+        </ActionIcon>
       </Table.Td>
+
+      <Table.Td>{tag.displayOrder ?? '—'}</Table.Td>
+
       <Table.Td>
         <Text size="sm">{tag.name}</Text>
       </Table.Td>
@@ -72,6 +109,6 @@ export function TagRow({ tag, onEdit }: TagRowProps) {
           </Menu.Dropdown>
         </Menu>
       </Table.Td>
-    </>
+    </Table.Tr>
   );
 }
