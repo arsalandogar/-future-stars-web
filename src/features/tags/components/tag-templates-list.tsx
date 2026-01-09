@@ -18,25 +18,30 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { useTag } from '../api/get-tag';
 import { useReorderTagTemplates } from '../api/reorder-tag-templates';
-import type { TagDetailResponse, TagWithTemplates } from '../types';
+import type {
+  TagDetailResponse,
+  TagTemplate,
+  TagWithTemplates,
+} from '../types';
 
 import { SortableTemplateRow } from './sortable-template-row';
 
 const COLUMNS = [
-  { label: '', width: 40 },
-  { label: 'Order', width: 60 },
-  { label: 'Preview', width: 80 },
-  { label: 'Label' },
-  { label: 'Description' },
-  { label: 'Created', width: 150 },
-  { label: 'Actions', width: 60 },
+  { key: 'drag', label: '', width: 40 },
+  { key: 'order', label: 'Order', width: 60 },
+  { key: 'preview', label: 'Preview', width: 80 },
+  { key: 'label', label: 'Label' },
+  { key: 'description', label: 'Description' },
+  { key: 'created', label: 'Created', width: 150 },
+  { key: 'actions', label: 'Actions', width: 60 },
 ];
 
 interface TagTemplatesListProps {
   tag: TagWithTemplates;
+  templates: TagTemplate[];
 }
 
-export function TagTemplatesList({ tag }: TagTemplatesListProps) {
+export function TagTemplatesList({ tag, templates }: TagTemplatesListProps) {
   const queryClient = useQueryClient();
   const queryKey = useTag.getKey(tag.id);
   const reorderMutation = useReorderTagTemplates();
@@ -52,12 +57,16 @@ export function TagTemplatesList({ tag }: TagTemplatesListProps) {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      const oldIndex = tag.templates.findIndex((t) => t.id === active.id);
-      const newIndex = tag.templates.findIndex((t) => t.id === over.id);
-      const newOrder = arrayMove(tag.templates, oldIndex, newIndex);
+      const oldIndex = templates.findIndex((t) => t.id === active.id);
+      const newIndex = templates.findIndex((t) => t.id === over.id);
+      const reorderedFront = arrayMove(templates, oldIndex, newIndex);
 
       const previousData =
         queryClient.getQueryData<TagDetailResponse>(queryKey);
+
+      // Preserve back templates, only reorder front templates
+      const backTemplates = tag.templates.filter((t) => t.side === 'back');
+      const newOrder = [...reorderedFront, ...backTemplates];
 
       queryClient.setQueryData<TagDetailResponse>(queryKey, (old) => {
         if (!old) return old;
@@ -65,7 +74,7 @@ export function TagTemplatesList({ tag }: TagTemplatesListProps) {
       });
 
       reorderMutation.mutate(
-        { tagId: tag.id, templateIds: newOrder.map((t) => t.id) },
+        { tagId: tag.id, templateIds: reorderedFront.map((t) => t.id) },
         {
           onError: () => {
             queryClient.setQueryData(queryKey, previousData);
@@ -75,10 +84,10 @@ export function TagTemplatesList({ tag }: TagTemplatesListProps) {
     }
   };
 
-  if (tag.templates.length === 0) {
+  if (templates.length === 0) {
     return (
       <Text c="dimmed" ta="center" py="xl">
-        No templates associated with this tag
+        No front templates associated with this tag
       </Text>
     );
   }
@@ -89,7 +98,7 @@ export function TagTemplatesList({ tag }: TagTemplatesListProps) {
         <Table.Thead>
           <Table.Tr>
             {COLUMNS.map((column) => (
-              <Table.Th key={column.label || 'drag'} w={column.width}>
+              <Table.Th key={column.key} w={column.width}>
                 {column.label}
               </Table.Th>
             ))}
@@ -101,11 +110,11 @@ export function TagTemplatesList({ tag }: TagTemplatesListProps) {
           onDragEnd={handleDragEnd}
         >
           <SortableContext
-            items={tag.templates.map((t) => t.id)}
+            items={templates.map((t) => t.id)}
             strategy={verticalListSortingStrategy}
           >
             <Table.Tbody>
-              {tag.templates.map((template) => (
+              {templates.map((template) => (
                 <SortableTemplateRow key={template.id} template={template} />
               ))}
             </Table.Tbody>

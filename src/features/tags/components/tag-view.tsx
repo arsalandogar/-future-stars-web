@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Badge, Button, Card, Group, Stack, Text, Title } from '@mantine/core';
 import { Edit, Trash2 } from 'lucide-react';
 
@@ -5,6 +6,7 @@ import { formatDate } from '@/utils/date';
 
 import type { TagWithTemplates } from '../types';
 
+import { TagBackTemplatesList } from './tag-back-templates-list';
 import { TagTemplatesList } from './tag-templates-list';
 
 interface TagViewProps {
@@ -14,6 +16,15 @@ interface TagViewProps {
 }
 
 export function TagView({ tag, onEdit, onDelete }: TagViewProps) {
+  const frontTemplates = useMemo(
+    () => tag.templates.filter((t) => t.side === 'front'),
+    [tag.templates]
+  );
+  const backTemplates = useMemo(
+    () => tag.templates.filter((t) => t.side === 'back'),
+    [tag.templates]
+  );
+
   return (
     <Stack gap="lg">
       <Card withBorder radius="md" p="lg">
@@ -56,9 +67,16 @@ export function TagView({ tag, onEdit, onDelete }: TagViewProps) {
 
       <Card withBorder radius="md" p="lg">
         <Title order={5} mb="md">
-          Templates ({tag.templates.length})
+          Front Templates ({frontTemplates.length})
         </Title>
-        <TagTemplatesList tag={tag} />
+        <TagTemplatesList tag={tag} templates={frontTemplates} />
+      </Card>
+
+      <Card withBorder radius="md" p="lg">
+        <Title order={5} mb="md">
+          Back Templates ({backTemplates.length})
+        </Title>
+        <TagBackTemplatesList templates={backTemplates} />
       </Card>
     </Stack>
   );
