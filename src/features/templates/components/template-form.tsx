@@ -5,12 +5,10 @@ import {
   Group,
   SimpleGrid,
   Stack,
-  Text,
   Title,
 } from '@mantine/core';
 import { Plus } from 'lucide-react';
 
-import { SvgPreview } from '@/components/svg-preview';
 import { useTags } from '@/features/tags';
 import { useTemplateTypes } from '@/features/template-types';
 
@@ -216,26 +214,6 @@ export function TemplateForm({
                           )}
                         </form.AppField>
 
-                        {useDefaultBack && defaultBackTemplate && (
-                          <Group gap="md" align="center">
-                            <SvgPreview
-                              svgString={defaultBackTemplate.svgString ?? ''}
-                              height={60}
-                              className="rounded border p-1"
-                              svgClassName="[&>svg]:max-h-[50px] [&>svg]:w-auto"
-                              hideErrors
-                            />
-                            <div>
-                              <Text size="sm" fw={500}>
-                                {defaultBackTemplate.label}
-                              </Text>
-                              <Text size="xs" c="dimmed">
-                                Default back template
-                              </Text>
-                            </div>
-                          </Group>
-                        )}
-
                         {!useDefaultBack && (
                           <form.AppField name="backTemplateId">
                             {(field) => (
@@ -297,7 +275,7 @@ export function TemplateForm({
           </div>
 
           {/* Right column - sticky preview (desktop only) */}
-          <div className="hidden lg:block w-[350px] shrink-0">
+          <div className="hidden lg:block w-87.5 shrink-0">
             <div className="sticky top-4">
               <form.Subscribe selector={(state) => state.values.svgString}>
                 {(svgString) => <TemplatePreviewPanel svgString={svgString} />}
