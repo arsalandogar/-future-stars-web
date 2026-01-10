@@ -68,7 +68,8 @@ export function ColorPresetForm({ item, modalClose }: Props) {
         <Stack gap="md">
           <form.AppField name="colorLeagueId">
             {(field) => (
-              <field.NumberSelectField
+              <field.SelectField
+                valueAs="number"
                 label="Color League"
                 placeholder="Select color league"
                 data={leagueOptions}

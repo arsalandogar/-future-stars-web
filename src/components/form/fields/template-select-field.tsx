@@ -3,7 +3,7 @@ import type { SelectProps } from '@mantine/core';
 import { FileX } from 'lucide-react';
 
 import { SvgPreview } from '@/components/svg-preview';
-import { NumberSelectField } from './number-select-field';
+import { SelectField } from './select-field';
 
 interface TemplateOption {
   id: number;
@@ -19,7 +19,8 @@ type TemplateSelectFieldProps = Omit<
 };
 
 /**
- * NumberSelectField variant that displays template options with SVG previews.
+ * SelectField variant that displays template options with SVG previews.
+ * Uses valueAs="number" for numeric template IDs.
  */
 export function TemplateSelectField({
   templates,
@@ -58,7 +59,8 @@ export function TemplateSelectField({
   };
 
   return (
-    <NumberSelectField
+    <SelectField
+      valueAs="number"
       data={data}
       renderOption={renderOption}
       maxDropdownHeight={300}

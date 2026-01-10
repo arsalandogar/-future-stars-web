@@ -97,7 +97,8 @@ export function TemplateForm({
 
                     <form.AppField name="templateTypeId">
                       {(field) => (
-                        <field.NumberSelectField
+                        <field.SelectField
+                          valueAs="number"
                           label="Template Type"
                           data={templateTypeOptions}
                           placeholder="Select template type"
@@ -146,7 +147,9 @@ export function TemplateForm({
 
                   <form.AppField name="tagIds">
                     {(field) => (
-                      <field.NumberMultiSelectField
+                      <field.SelectField
+                        multi
+                        valueAs="number"
                         label="Tags"
                         data={tagOptions}
                         placeholder="Select tags"
