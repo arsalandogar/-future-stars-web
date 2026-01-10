@@ -15,6 +15,7 @@ const DEFAULT_VALUES: TemplateFormValues = {
   backTemplateId: null,
   useDefaultBack: false,
   isDefaultBack: false,
+  isPublished: true,
   tagIds: [],
   attributes: [],
 };

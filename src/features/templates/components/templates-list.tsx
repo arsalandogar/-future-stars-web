@@ -30,6 +30,7 @@ const FRONT_COLUMNS: Column[] = [
   { label: 'Front', width: 80 },
   { label: 'Back', width: 80 },
   { label: 'Label' },
+  { label: 'Published', width: 100 },
   { label: 'Description' },
   { label: 'Tags' },
   { label: 'Created', width: 150 },
@@ -39,6 +40,7 @@ const FRONT_COLUMNS: Column[] = [
 const BACK_COLUMNS: Column[] = [
   { label: 'Preview', width: 80 },
   { label: 'Label' },
+  { label: 'Published', width: 100 },
   { label: 'Description' },
   { label: 'Tags' },
   { label: 'Created', width: 150 },

@@ -37,11 +37,13 @@ const DEFAULT_BACK_PREVIEW_PROPS = {
   hideErrors: true,
 } as const;
 
+interface BackTemplatePreviewProps {
+  template: Template;
+}
+
 function BackTemplatePreview({
   template,
-}: {
-  template: Template;
-}): React.ReactNode {
+}: BackTemplatePreviewProps): React.ReactNode {
   const backTemplate = template.backTemplate ?? template.defaultBackTemplate;
 
   if (!backTemplate) {
@@ -97,6 +99,15 @@ export function TemplateRow({
             </Badge>
           )}
         </Group>
+      </Table.Td>
+      <Table.Td>
+        <Badge
+          variant="light"
+          color={template.isPublished ? 'green' : 'gray'}
+          size="sm"
+        >
+          {template.isPublished ? 'Yes' : 'No'}
+        </Badge>
       </Table.Td>
       <Table.Td>
         {template.description ? (

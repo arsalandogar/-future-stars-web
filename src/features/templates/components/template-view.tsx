@@ -24,11 +24,13 @@ const SVG_PREVIEW_PROPS = {
   hideErrors: true,
 } as const;
 
+interface TemplatePreviewCardProps {
+  template: Template;
+}
+
 function TemplatePreviewCard({
   template,
-}: {
-  template: Template;
-}): React.ReactNode {
+}: TemplatePreviewCardProps): React.ReactNode {
   const backTemplate = template.backTemplate ?? template.defaultBackTemplate;
   const isDefaultBack =
     !template.backTemplate && Boolean(template.defaultBackTemplate);
@@ -97,6 +99,12 @@ export function TemplateView({ template, onDelete }: TemplateViewProps) {
               <Title order={3}>{template.label}</Title>
               <Badge variant="light" tt="uppercase">
                 {template.side}
+              </Badge>
+              <Badge
+                variant="light"
+                color={template.isPublished ? 'green' : 'gray'}
+              >
+                {template.isPublished ? 'Published' : 'Draft'}
               </Badge>
             </Group>
             <Text size="sm" c="dimmed" mt="xs">

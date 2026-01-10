@@ -22,6 +22,7 @@ export function transformFormValuesToParams(
     templateTypeId: values.templateTypeId!,
     backTemplateId,
     isDefaultBack: values.side === 'back' ? values.isDefaultBack : undefined,
+    isPublished: values.isPublished,
     tagIds: values.tagIds,
     attributes: values.attributes.map((attr) => ({
       type: attr.type,

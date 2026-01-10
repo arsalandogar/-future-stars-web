@@ -51,6 +51,7 @@ export interface Template {
   frontendComponentFileName?: string;
   backTemplateId?: number;
   isDefaultBack?: boolean;
+  isPublished?: boolean;
   createdAt: string;
   attributes: TemplateAttribute[];
   backTemplate: TemplateBackTemplate | null;
@@ -95,6 +96,7 @@ export interface CreateTemplateParams {
   frontendComponentFileName?: string;
   backTemplateId?: number | null;
   isDefaultBack?: boolean;
+  isPublished?: boolean;
   attributes?: CreateTemplateAttributeParams[];
   tagIds?: number[];
 }
@@ -112,6 +114,7 @@ export interface UpdateTemplateParams {
   frontendComponentFileName?: string;
   backTemplateId?: number | null;
   isDefaultBack?: boolean;
+  isPublished?: boolean;
   attributes?: CreateTemplateAttributeParams[];
   tagIds?: number[];
 }
@@ -135,6 +138,7 @@ export interface TemplateFormValues {
   backTemplateId: number | null;
   useDefaultBack: boolean;
   isDefaultBack: boolean;
+  isPublished: boolean;
   tagIds: number[];
   attributes: TemplateAttributeFormValues[];
 }

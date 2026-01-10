@@ -155,6 +155,15 @@ export function TemplateForm({
                       />
                     )}
                   </form.AppField>
+
+                  <form.AppField name="isPublished">
+                    {(field) => (
+                      <field.CheckboxField
+                        label="Published"
+                        description="Make this template available for use"
+                      />
+                    )}
+                  </form.AppField>
                 </Stack>
               </Card>
 
