@@ -12,6 +12,7 @@ export interface ListingTab {
 export interface ListingShellProps {
   searchPlaceholder?: string;
   actions?: ReactNode;
+  filters?: ReactNode;
   showSearch?: boolean;
   showFilter?: boolean;
   onFilterClick?: () => void;
@@ -24,6 +25,7 @@ export interface ListingShellProps {
 export function ListingShell({
   searchPlaceholder = 'Search...',
   actions,
+  filters,
   showSearch = true,
   showFilter = true,
   onFilterClick,
@@ -55,8 +57,8 @@ export function ListingShell({
             </Tabs>
           )}
 
-          {(showSearch || showFilter) && (
-            <Group justify="space-between">
+          {(showSearch || showFilter || filters) && (
+            <Group justify="space-between" align="flex-start">
               {showSearch ? (
                 <TextInput
                   placeholder={searchPlaceholder}
@@ -68,16 +70,18 @@ export function ListingShell({
               ) : (
                 <div />
               )}
-              {showFilter && (
-                <Button
-                  variant="default"
-                  leftSection={<SlidersHorizontal size={16} />}
-                  onClick={onFilterClick}
-                  disabled={!onFilterClick}
-                >
-                  Filter
-                </Button>
-              )}
+              {filters
+                ? filters
+                : showFilter && (
+                    <Button
+                      variant="default"
+                      leftSection={<SlidersHorizontal size={16} />}
+                      onClick={onFilterClick}
+                      disabled={!onFilterClick}
+                    >
+                      Filter
+                    </Button>
+                  )}
             </Group>
           )}
 
