@@ -121,7 +121,6 @@ export function LegalDocumentList() {
         tabs={STATUS_TABS}
         activeTab={status ?? 'all'}
         onTabChange={handleStatusChange}
-        showFilter={false}
         actions={
           <div className="flex items-center gap-3">
             <Anchor href={config.publicUrl} target="_blank" size="sm">

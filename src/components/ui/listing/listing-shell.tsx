@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { Button, Card, Group, Tabs, TextInput } from '@mantine/core';
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { Card, Group, Tabs, TextInput } from '@mantine/core';
+import { Search } from 'lucide-react';
 
 import { useListingContext } from './use-listing-context';
 
@@ -14,8 +14,6 @@ export interface ListingShellProps {
   actions?: ReactNode;
   filters?: ReactNode;
   showSearch?: boolean;
-  showFilter?: boolean;
-  onFilterClick?: () => void;
   tabs?: ListingTab[];
   activeTab?: string;
   onTabChange?: (value: string | null) => void;
@@ -27,8 +25,6 @@ export function ListingShell({
   actions,
   filters,
   showSearch = true,
-  showFilter = true,
-  onFilterClick,
   tabs,
   activeTab,
   onTabChange,
@@ -57,7 +53,7 @@ export function ListingShell({
             </Tabs>
           )}
 
-          {(showSearch || showFilter || filters) && (
+          {(showSearch || filters) && (
             <Group justify="space-between" align="flex-start">
               {showSearch ? (
                 <TextInput
@@ -70,18 +66,7 @@ export function ListingShell({
               ) : (
                 <div />
               )}
-              {filters
-                ? filters
-                : showFilter && (
-                    <Button
-                      variant="default"
-                      leftSection={<SlidersHorizontal size={16} />}
-                      onClick={onFilterClick}
-                      disabled={!onFilterClick}
-                    >
-                      Filter
-                    </Button>
-                  )}
+              {filters}
             </Group>
           )}
 

@@ -6,32 +6,21 @@ import {
   type ActiveFilter,
 } from '@/components/ui/listing';
 
+import { ORDER_STATUS_OPTIONS } from '../constants';
 import type { OrderStatus } from '../types';
 
 const routeApi = getRouteApi('/_authenticated/admin/_listing/orders');
-
-const STATUS_OPTIONS: { value: OrderStatus; label: string }[] = [
-  { value: 'created', label: 'Created' },
-  { value: 'payment_failed', label: 'Payment Failed' },
-  { value: 'paid', label: 'Paid' },
-  { value: 'processing', label: 'Processing' },
-  { value: 'sent_to_production', label: 'Sent to Production' },
-  { value: 'shipped', label: 'Shipped' },
-  { value: 'delivered', label: 'Delivered' },
-  { value: 'cancelled', label: 'Cancelled' },
-  { value: 'refunded', label: 'Refunded' },
-];
 
 export function OrdersFilters() {
   const { status } = routeApi.useSearch();
   const navigate = useNavigate();
 
-  const updateFilter = (key: string, value: unknown) => {
+  const updateStatus = (value: OrderStatus | null) => {
     void navigate({
       to: '.',
       search: (prev) => ({
         ...prev,
-        [key]: value || undefined,
+        status: value ?? undefined,
         page: 1,
       }),
     });
@@ -58,7 +47,7 @@ export function OrdersFilters() {
   const activeFilters: ActiveFilter[] = [];
 
   if (status) {
-    const statusOption = STATUS_OPTIONS.find((o) => o.value === status);
+    const statusOption = ORDER_STATUS_OPTIONS.find((o) => o.value === status);
     activeFilters.push({
       key: 'status',
       label: 'Status',
@@ -74,9 +63,9 @@ export function OrdersFilters() {
     >
       <FilterSelect
         label="Status"
-        options={STATUS_OPTIONS}
+        options={ORDER_STATUS_OPTIONS}
         value={status}
-        onChange={(v) => updateFilter('status', v)}
+        onChange={(v) => updateStatus(v as OrderStatus | null)}
       />
     </ListingFilters>
   );

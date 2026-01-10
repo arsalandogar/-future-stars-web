@@ -1,15 +1,8 @@
 import type { PaginationMeta } from '@/types';
 
-export type OrderStatus =
-  | 'created'
-  | 'payment_failed'
-  | 'paid'
-  | 'processing'
-  | 'sent_to_production'
-  | 'shipped'
-  | 'delivered'
-  | 'cancelled'
-  | 'refunded';
+import type { OrderStatus } from '../constants';
+
+export type { OrderStatus };
 
 export interface OrderUser {
   id: number;

@@ -113,7 +113,6 @@ export function TemplatesList() {
         tabs={TABS}
         activeTab={side}
         onTabChange={handleTabChange}
-        showFilter={false}
       >
         <DataTable
           queryResult={queryResult}

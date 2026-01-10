@@ -22,7 +22,7 @@ const COLUMNS: Column[] = [
 
 export function OrdersList() {
   const { page, limit, search } = useListingContext();
-  const { status, userId } = routeApi.useSearch();
+  const { status } = routeApi.useSearch();
 
   usePageHeader({
     title: 'Orders',
@@ -35,7 +35,6 @@ export function OrdersList() {
       limit,
       search: search || undefined,
       status: status || undefined,
-      userId: userId || undefined,
     },
   });
 
