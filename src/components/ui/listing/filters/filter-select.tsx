@@ -17,7 +17,6 @@ export function FilterSelect({
 }: FilterSelectProps) {
   return (
     <Select
-      label={label}
       placeholder={placeholder ?? `All ${label.toLowerCase()}`}
       data={options}
       value={value ?? null}
