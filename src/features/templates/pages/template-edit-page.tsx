@@ -53,9 +53,10 @@ export function TemplateEditPage({ id }: TemplateEditPageProps) {
     );
   }
 
-  // For front templates, useDefaultBack is true if no specific backTemplateId is set
-  const useDefaultBack =
-    template.side === 'front' && template.backTemplateId == null;
+  const backTemplateMode =
+    template.side === 'front' && template.backTemplateId == null
+      ? 'default'
+      : 'custom';
 
   const initialValues: Partial<TemplateFormValues> = {
     side: template.side,
@@ -65,8 +66,9 @@ export function TemplateEditPage({ id }: TemplateEditPageProps) {
     svgString: template.svgString,
     templateTypeId: template.templateTypeId,
     backTemplateId: template.backTemplateId ?? null,
-    useDefaultBack,
+    backTemplateMode,
     isDefaultBack: template.isDefaultBack ?? false,
+    isPublished: template.isPublished ?? true,
     tagIds: template.tags.map((tag) => tag.id),
     attributes: template.attributes.map((attr) => ({
       type: attr.type,

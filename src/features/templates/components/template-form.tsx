@@ -1,14 +1,18 @@
 import {
   Badge,
+  Box,
   Button,
   Card,
   Group,
+  Radio,
   SimpleGrid,
   Stack,
+  Text,
   Title,
 } from '@mantine/core';
 import { Plus } from 'lucide-react';
 
+import { SvgPreview } from '@/components/svg-preview';
 import { useTags } from '@/features/tags';
 import { useTemplateTypes } from '@/features/template-types';
 
@@ -198,46 +202,88 @@ export function TemplateForm({
               <form.Subscribe
                 selector={(state) => ({
                   side: state.values.side,
-                  useDefaultBack: state.values.useDefaultBack,
+                  backTemplateMode: state.values.backTemplateMode,
+                  backTemplateId: state.values.backTemplateId,
                 })}
               >
-                {({ side, useDefaultBack }) =>
-                  side === 'front' && (
-                    <Card withBorder radius="md" p="lg">
-                      <Title order={5} mb="md">
-                        Back Template
-                      </Title>
-                      <Stack gap="md">
-                        <form.AppField name="useDefaultBack">
-                          {(field) => (
-                            <field.CheckboxField
-                              label="Use Default Back Template"
-                              description={
-                                defaultBackTemplate
-                                  ? `Will use "${defaultBackTemplate.label}" as the back template`
-                                  : 'No default back template has been set'
-                              }
-                            />
-                          )}
-                        </form.AppField>
+                {({ side, backTemplateMode, backTemplateId }) => {
+                  const selectedTemplate =
+                    backTemplateMode === 'default'
+                      ? defaultBackTemplate
+                      : backTemplates.find((t) => t.id === backTemplateId);
 
-                        {!useDefaultBack && (
-                          <form.AppField name="backTemplateId">
-                            {(field) => (
-                              <field.TemplateSelectField
-                                label="Select Back Template"
-                                templates={backTemplates}
-                                placeholder="Choose a specific back template"
-                                clearable
-                                searchable
-                              />
-                            )}
-                          </form.AppField>
-                        )}
-                      </Stack>
-                    </Card>
-                  )
-                }
+                  return (
+                    side === 'front' && (
+                      <Card withBorder radius="md" p="lg">
+                        <div className="flex items-start justify-between gap-6">
+                          <div className="flex-1">
+                            <Title order={5} mb="md">
+                              Back Template
+                            </Title>
+
+                            <Stack gap="md">
+                              <form.AppField name="backTemplateMode">
+                                {(field) => (
+                                  <field.RadioGroupField>
+                                    <Radio
+                                      value="default"
+                                      label="Use default back template"
+                                      description={
+                                        defaultBackTemplate
+                                          ? `Will use "${defaultBackTemplate.label}"`
+                                          : 'No default back template has been set'
+                                      }
+                                    />
+                                    <Radio
+                                      value="custom"
+                                      label="Select a back template"
+                                    />
+                                  </field.RadioGroupField>
+                                )}
+                              </form.AppField>
+
+                              {backTemplateMode === 'custom' && (
+                                <form.AppField name="backTemplateId">
+                                  {(field) => (
+                                    <field.TemplateSelectField
+                                      templates={backTemplates}
+                                      placeholder="Choose a specific back template"
+                                      clearable
+                                      searchable
+                                    />
+                                  )}
+                                </form.AppField>
+                              )}
+                            </Stack>
+                          </div>
+
+                          <Box className="w-28 shrink-0">
+                            <Box className="aspect-3/4 overflow-hidden rounded-md border p-1">
+                              {selectedTemplate ? (
+                                <SvgPreview
+                                  svgString={selectedTemplate.svgString}
+                                  className="h-full w-full"
+                                  svgClassName="[&>svg]:h-full [&>svg]:w-full"
+                                />
+                              ) : (
+                                <div className="flex h-full items-center justify-center">
+                                  <Text
+                                    size="xs"
+                                    c="dimmed"
+                                    ta="center"
+                                    px="xs"
+                                  >
+                                    No template
+                                  </Text>
+                                </div>
+                              )}
+                            </Box>
+                          </Box>
+                        </div>
+                      </Card>
+                    )
+                  );
+                }}
               </form.Subscribe>
 
               {/* Section 5: Attributes */}

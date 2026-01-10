@@ -13,7 +13,7 @@ const DEFAULT_VALUES: TemplateFormValues = {
   svgString: '',
   templateTypeId: null,
   backTemplateId: null,
-  useDefaultBack: false,
+  backTemplateMode: 'default',
   isDefaultBack: false,
   isPublished: true,
   tagIds: [],

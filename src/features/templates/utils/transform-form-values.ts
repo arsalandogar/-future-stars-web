@@ -7,9 +7,9 @@ import type { CreateTemplateParams, TemplateFormValues } from '../types';
 export function transformFormValuesToParams(
   values: TemplateFormValues
 ): Omit<CreateTemplateParams, 'id'> {
-  // For front templates, if useDefaultBack is true, send null for backTemplateId
+  // For front templates, if backTemplateMode is 'default', send null for backTemplateId
   const backTemplateId =
-    values.side === 'front' && values.useDefaultBack
+    values.side === 'front' && values.backTemplateMode === 'default'
       ? null
       : (values.backTemplateId ?? undefined);
 

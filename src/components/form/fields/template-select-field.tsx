@@ -63,7 +63,6 @@ export function TemplateSelectField({
       valueAs="number"
       data={data}
       renderOption={renderOption}
-      maxDropdownHeight={300}
       {...props}
     />
   );

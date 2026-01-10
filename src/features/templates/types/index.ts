@@ -128,6 +128,8 @@ export interface TemplateAttributeFormValues {
   defaultColor: string;
 }
 
+export type BackTemplateMode = 'default' | 'custom';
+
 export interface TemplateFormValues {
   side: TemplateSide;
   name: string;
@@ -136,7 +138,7 @@ export interface TemplateFormValues {
   svgString: string;
   templateTypeId: number | null;
   backTemplateId: number | null;
-  useDefaultBack: boolean;
+  backTemplateMode: BackTemplateMode;
   isDefaultBack: boolean;
   isPublished: boolean;
   tagIds: number[];

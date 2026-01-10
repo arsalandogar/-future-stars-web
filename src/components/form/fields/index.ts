@@ -8,6 +8,7 @@ export { ImageUploadCardField } from './image-upload-card-field';
 export { NumberInputField } from './number-input-field';
 export { CheckboxField } from './checkbox-field';
 export { ColorInputField } from './color-input-field';
+export { RadioGroupField } from './radio-group-field';
 export { TemplateSelectField } from './template-select-field';
 export { SubmitButton } from './submit-button';
 export { Form } from './form';

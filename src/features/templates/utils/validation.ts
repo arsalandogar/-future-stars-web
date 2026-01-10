@@ -38,7 +38,7 @@ export const templateFormSchema = v.object({
     v.check((val) => val !== null, 'Template type is required')
   ),
   backTemplateId: v.nullable(v.number()),
-  useDefaultBack: v.boolean(),
+  backTemplateMode: v.picklist(['default', 'custom']),
   isDefaultBack: v.boolean(),
   isPublished: v.boolean(),
   tagIds: v.array(v.number()),

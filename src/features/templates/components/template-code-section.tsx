@@ -75,7 +75,7 @@ export function TemplateCodeSection() {
             {(svgString) => (
               <SvgPreview
                 svgString={svgString}
-                height={200}
+                height={400}
                 className="w-full rounded-md border p-2"
                 emptyMessage="Paste SVG to see preview"
               />
