@@ -1,5 +1,12 @@
 import type { ReactNode } from 'react';
-import { Badge, Button, Drawer, Group, Stack } from '@mantine/core';
+import {
+  Badge,
+  Button,
+  Drawer,
+  Group,
+  Stack,
+  useMantineTheme,
+} from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { SlidersHorizontal } from 'lucide-react';
 
@@ -20,8 +27,9 @@ export function ListingFilters({
   onClearAll,
   layout = 'auto',
 }: ListingFiltersProps) {
+  const theme = useMantineTheme();
   const [drawerOpened, { open, close }] = useDisclosure(false);
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
 
   const shouldUseDrawer =
     layout === 'drawer' || (layout === 'auto' && isMobile);
