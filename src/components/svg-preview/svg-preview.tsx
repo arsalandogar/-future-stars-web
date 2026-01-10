@@ -1,7 +1,44 @@
 /* eslint-disable react-dom/no-dangerously-set-innerhtml */
+import { useId } from 'react';
 import { Box, Text } from '@mantine/core';
 import DOMPurify from 'dompurify';
 import isSvg from 'is-svg';
+
+function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function makeSvgIdsUnique(svg: string, prefix: string): string {
+  const idMatches = svg.matchAll(/\bid="([^"]+)"/g);
+  const ids = new Set<string>();
+  for (const match of idMatches) {
+    ids.add(match[1]);
+  }
+
+  let result = svg;
+  for (const id of ids) {
+    const escapedId = escapeRegExp(id);
+    const uniqueId = `${prefix}-${id}`;
+    result = result.replace(
+      new RegExp(`\\bid="${escapedId}"`, 'g'),
+      `id="${uniqueId}"`
+    );
+    result = result.replace(
+      new RegExp(`url\\(#${escapedId}\\)`, 'g'),
+      `url(#${uniqueId})`
+    );
+    result = result.replace(
+      new RegExp(`xlink:href="#${escapedId}"`, 'g'),
+      `xlink:href="#${uniqueId}"`
+    );
+    result = result.replace(
+      new RegExp(`href="#${escapedId}"`, 'g'),
+      `href="#${uniqueId}"`
+    );
+  }
+
+  return result;
+}
 
 export interface SvgPreviewProps {
   /** The SVG markup string to render */
@@ -33,6 +70,7 @@ export function SvgPreview({
   invalidMessage = 'Invalid SVG markup',
   hideErrors = false,
 }: SvgPreviewProps) {
+  const uniqueId = useId();
   const trimmedSvg = svgString.trim();
   const heightStyle = height ? { height } : undefined;
 
@@ -62,8 +100,10 @@ export function SvgPreview({
     );
   }
 
+  // Make IDs unique to prevent conflicts with other SVGs on the page
+  const svgWithUniqueIds = makeSvgIdsUnique(trimmedSvg, uniqueId);
   // Sanitize the SVG to prevent XSS attacks
-  const sanitizedSvg = DOMPurify.sanitize(trimmedSvg, {
+  const sanitizedSvg = DOMPurify.sanitize(svgWithUniqueIds, {
     USE_PROFILES: { svg: true, svgFilters: true },
   });
 
