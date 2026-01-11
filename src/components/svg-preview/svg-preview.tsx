@@ -1,5 +1,5 @@
 /* eslint-disable react-dom/no-dangerously-set-innerhtml */
-import { useId } from 'react';
+import { useDeferredValue, useId } from 'react';
 import { Box, Text } from '@mantine/core';
 import DOMPurify from 'dompurify';
 import isSvg from 'is-svg';
@@ -10,34 +10,20 @@ function escapeRegExp(string: string): string {
 
 function makeSvgIdsUnique(svg: string, prefix: string): string {
   const idMatches = svg.matchAll(/\bid="([^"]+)"/g);
-  const ids = new Set<string>();
-  for (const match of idMatches) {
-    ids.add(match[1]);
-  }
+  const ids = [...new Set([...idMatches].map((m) => m[1]))];
 
-  let result = svg;
-  for (const id of ids) {
-    const escapedId = escapeRegExp(id);
-    const uniqueId = `${prefix}-${id}`;
-    result = result.replace(
-      new RegExp(`\\bid="${escapedId}"`, 'g'),
-      `id="${uniqueId}"`
-    );
-    result = result.replace(
-      new RegExp(`url\\(#${escapedId}\\)`, 'g'),
-      `url(#${uniqueId})`
-    );
-    result = result.replace(
-      new RegExp(`xlink:href="#${escapedId}"`, 'g'),
-      `xlink:href="#${uniqueId}"`
-    );
-    result = result.replace(
-      new RegExp(`href="#${escapedId}"`, 'g'),
-      `href="#${uniqueId}"`
-    );
-  }
-
-  return result;
+  return ids.reduce((result, id) => {
+    const escaped = escapeRegExp(id);
+    const unique = `${prefix}-${id}`;
+    return result
+      .replace(new RegExp(`\\bid="${escaped}"`, 'g'), `id="${unique}"`)
+      .replace(new RegExp(`url\\(#${escaped}\\)`, 'g'), `url(#${unique})`)
+      .replace(
+        new RegExp(`xlink:href="#${escaped}"`, 'g'),
+        `xlink:href="#${unique}"`
+      )
+      .replace(new RegExp(`href="#${escaped}"`, 'g'), `href="#${unique}"`);
+  }, svg);
 }
 
 export interface SvgPreviewProps {
@@ -64,53 +50,43 @@ export interface SvgPreviewProps {
 export function SvgPreview({
   svgString,
   height,
-  className,
+  className = '',
   svgClassName = '[&>svg]:max-h-full [&>svg]:w-auto',
   emptyMessage = 'No SVG to preview',
   invalidMessage = 'Invalid SVG markup',
   hideErrors = false,
 }: SvgPreviewProps) {
   const uniqueId = useId();
-  const trimmedSvg = svgString.trim();
+  const deferredSvg = useDeferredValue(svgString);
+  const isPending = svgString !== deferredSvg;
+  const trimmedSvg = deferredSvg.trim();
   const heightStyle = height ? { height } : undefined;
 
-  if (!trimmedSvg) {
+  const isEmpty = !trimmedSvg;
+  const isInvalid = !isEmpty && !isSvg(trimmedSvg);
+
+  if (isEmpty || isInvalid) {
     if (hideErrors) return null;
     return (
       <Box
-        className={`flex items-center justify-center rounded-md border border-dashed ${className ?? ''}`}
+        className={`flex items-center justify-center rounded-md border border-dashed ${className}`}
         style={heightStyle}
-        c="dimmed"
+        c={isEmpty ? 'dimmed' : 'red'}
       >
-        <Text size="sm">{emptyMessage}</Text>
+        <Text size="sm">{isEmpty ? emptyMessage : invalidMessage}</Text>
       </Box>
     );
   }
 
-  if (!isSvg(trimmedSvg)) {
-    if (hideErrors) return null;
-    return (
-      <Box
-        className={`flex items-center justify-center rounded-md border border-dashed ${className ?? ''}`}
-        style={heightStyle}
-        c="red"
-      >
-        <Text size="sm">{invalidMessage}</Text>
-      </Box>
-    );
-  }
-
-  // Make IDs unique to prevent conflicts with other SVGs on the page
   const svgWithUniqueIds = makeSvgIdsUnique(trimmedSvg, uniqueId);
-  // Sanitize the SVG to prevent XSS attacks
   const sanitizedSvg = DOMPurify.sanitize(svgWithUniqueIds, {
     USE_PROFILES: { svg: true, svgFilters: true },
   });
 
   return (
     <Box
-      className={`inline-flex items-center justify-center overflow-hidden ${svgClassName} ${className ?? ''}`}
-      style={heightStyle}
+      className={`inline-flex items-center justify-center overflow-hidden transition-opacity ${svgClassName} ${className}`}
+      style={{ ...heightStyle, opacity: isPending ? 0.7 : 1 }}
       dangerouslySetInnerHTML={{ __html: sanitizedSvg }}
     />
   );
