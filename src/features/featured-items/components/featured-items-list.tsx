@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Text, Paper, Skeleton, Table } from '@mantine/core';
+import { Button, Text, Skeleton, Table } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Plus } from 'lucide-react';
 
@@ -125,65 +125,63 @@ export function FeaturedItemsList() {
         }
       >
         <div className="flex flex-col gap-4">
-          <Paper withBorder radius="md">
-            <Table horizontalSpacing="md" verticalSpacing="sm">
-              <Table.Thead>
-                <Table.Tr>
-                  {COLUMNS.map((column) => (
-                    <Table.Th key={column.label || 'drag'} w={column.width}>
-                      {column.label}
-                    </Table.Th>
-                  ))}
-                </Table.Tr>
-              </Table.Thead>
-              {queryResult.isLoading ? (
-                <Table.Tbody>
-                  {Array.from({ length: 5 }).map((_, rowIndex) => (
-                    // eslint-disable-next-line react-x/no-array-index-key
-                    <Table.Tr key={rowIndex}>
-                      {COLUMNS.map((column) => (
-                        <Table.Td key={column.label || 'drag'}>
-                          <Skeleton height={20} width={column.width ?? '70%'} />
-                        </Table.Td>
-                      ))}
-                    </Table.Tr>
-                  ))}
-                </Table.Tbody>
-              ) : featuredItems.length === 0 ? (
-                <Table.Tbody>
-                  <Table.Tr>
-                    <Table.Td colSpan={COLUMNS.length}>
-                      <Text ta="center" c="dimmed" py="xl">
-                        No featured items found
-                      </Text>
-                    </Table.Td>
+          <Table horizontalSpacing="md" verticalSpacing="sm">
+            <Table.Thead>
+              <Table.Tr>
+                {COLUMNS.map((column) => (
+                  <Table.Th key={column.label || 'drag'} w={column.width}>
+                    {column.label}
+                  </Table.Th>
+                ))}
+              </Table.Tr>
+            </Table.Thead>
+            {queryResult.isLoading ? (
+              <Table.Tbody>
+                {Array.from({ length: 5 }).map((_, rowIndex) => (
+                  // eslint-disable-next-line react-x/no-array-index-key
+                  <Table.Tr key={rowIndex}>
+                    {COLUMNS.map((column) => (
+                      <Table.Td key={column.label || 'drag'}>
+                        <Skeleton height={20} width={column.width ?? '70%'} />
+                      </Table.Td>
+                    ))}
                   </Table.Tr>
-                </Table.Tbody>
-              ) : (
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={handleDragEnd}
+                ))}
+              </Table.Tbody>
+            ) : featuredItems.length === 0 ? (
+              <Table.Tbody>
+                <Table.Tr>
+                  <Table.Td colSpan={COLUMNS.length}>
+                    <Text ta="center" c="dimmed" py="xl">
+                      No featured items found
+                    </Text>
+                  </Table.Td>
+                </Table.Tr>
+              </Table.Tbody>
+            ) : (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={featuredItems.map((t) => t.id)}
+                  strategy={verticalListSortingStrategy}
                 >
-                  <SortableContext
-                    items={featuredItems.map((t) => t.id)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    <Table.Tbody>
-                      {featuredItems.map((item) => (
-                        <SortableFeaturedItemRow
-                          key={item.id}
-                          item={item}
-                          onEdit={handleEdit}
-                          isDragDisabled={isDragDisabled}
-                        />
-                      ))}
-                    </Table.Tbody>
-                  </SortableContext>
-                </DndContext>
-              )}
-            </Table>
-          </Paper>
+                  <Table.Tbody>
+                    {featuredItems.map((item) => (
+                      <SortableFeaturedItemRow
+                        key={item.id}
+                        item={item}
+                        onEdit={handleEdit}
+                        isDragDisabled={isDragDisabled}
+                      />
+                    ))}
+                  </Table.Tbody>
+                </SortableContext>
+              </DndContext>
+            )}
+          </Table>
         </div>
       </ListingShell>
     </>

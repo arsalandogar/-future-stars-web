@@ -17,7 +17,7 @@ export function LegalLayout({ children }: LegalLayoutProps) {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-b py-6">
-        <Container size="md">
+        <Container>
           <Link to="/">
             <Image
               src={logo}
@@ -30,7 +30,7 @@ export function LegalLayout({ children }: LegalLayoutProps) {
         </Container>
       </header>
       <main className="flex-1 py-8">
-        <Container size="md">{children}</Container>
+        <Container>{children}</Container>
       </main>
       <footer className="border-t py-4 text-center text-sm text-gray-500">
         &copy; {new Date().getFullYear()} Future Stars. All rights reserved.

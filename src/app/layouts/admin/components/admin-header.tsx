@@ -7,7 +7,6 @@ import {
   Menu,
   UnstyledButton,
   Text,
-  Kbd,
 } from '@mantine/core';
 import {
   Search,
@@ -60,13 +59,6 @@ export function AdminHeader({ opened, toggle }: AdminHeaderProps) {
           leftSection={
             <Search size={16} className="text-(--mantine-color-dimmed)" />
           }
-          rightSection={
-            <Group gap={4}>
-              <Kbd size="xs">⌘</Kbd>
-              <Kbd size="xs">K</Kbd>
-            </Group>
-          }
-          rightSectionWidth={60}
         />
         <Group gap="sm">
           <ThemeToggle />

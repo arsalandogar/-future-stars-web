@@ -65,19 +65,11 @@ export function TagView({ tag, onEdit, onDelete }: TagViewProps) {
         </Group>
       </Card>
 
-      <Card withBorder radius="md" p="lg">
-        <Title order={5} mb="md">
-          Front Templates ({frontTemplates.length})
-        </Title>
-        <TagTemplatesList tag={tag} templates={frontTemplates} />
-      </Card>
+      <Title order={5}>Front Templates ({frontTemplates.length})</Title>
+      <TagTemplatesList tag={tag} templates={frontTemplates} />
 
-      <Card withBorder radius="md" p="lg">
-        <Title order={5} mb="md">
-          Back Templates ({backTemplates.length})
-        </Title>
-        <TagBackTemplatesList templates={backTemplates} />
-      </Card>
+      <Title order={5}>Back Templates ({backTemplates.length})</Title>
+      <TagBackTemplatesList templates={backTemplates} />
     </Stack>
   );
 }

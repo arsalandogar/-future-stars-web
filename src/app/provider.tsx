@@ -1,4 +1,4 @@
-import { useState, Suspense, type ReactNode } from 'react';
+import { Suspense, useState, type ReactNode } from 'react';
 import { HelmetProvider } from '@dr.pogodin/react-helmet';
 import { Center, Loader, MantineProvider } from '@mantine/core';
 import { ModalsProvider } from '@mantine/modals';
@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { theme } from '@/config/theme';
+import { cssVariableResolver } from '@/lib/css-variable-resolver';
 import { queryConfig } from '@/lib/react-query';
 import { useThemeStore } from '@/stores/theme-store';
 
@@ -30,7 +31,11 @@ export function AppProvider({ children }: AppProviderProps) {
     >
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
-          <MantineProvider theme={theme} forceColorScheme={colorScheme}>
+          <MantineProvider
+            theme={theme}
+            forceColorScheme={colorScheme}
+            cssVariablesResolver={cssVariableResolver}
+          >
             <ModalsProvider>
               <Notifications />
               {children}

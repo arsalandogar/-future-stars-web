@@ -31,6 +31,7 @@ const COLUMNS = [
   { key: 'order', label: 'Order', width: 60 },
   { key: 'preview', label: 'Preview', width: 80 },
   { key: 'label', label: 'Label' },
+  { key: 'published', label: 'Published', width: 80 },
   { key: 'description', label: 'Description' },
   { key: 'created', label: 'Created', width: 150 },
   { key: 'actions', label: 'Actions', width: 60 },

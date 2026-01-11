@@ -2,7 +2,6 @@ import { type ReactNode, use } from 'react';
 import {
   Group,
   Pagination,
-  Paper,
   Select,
   Skeleton,
   Table,
@@ -83,6 +82,42 @@ function EmptyState({
   );
 }
 
+interface TableBodyProps<T> {
+  isLoading: boolean;
+  items: T[];
+  columns: Column[];
+  emptyMessage: string;
+  renderRow: (item: T, index: number) => ReactNode;
+  keyExtractor: (item: T) => string | number;
+  skeletonCount: number;
+}
+
+function TableBody<T>({
+  isLoading,
+  items,
+  columns,
+  emptyMessage,
+  renderRow,
+  keyExtractor,
+  skeletonCount,
+}: TableBodyProps<T>) {
+  if (isLoading) {
+    return <TableSkeleton columns={columns} rowCount={skeletonCount} />;
+  }
+
+  if (items.length === 0) {
+    return <EmptyState message={emptyMessage} colSpan={columns.length} />;
+  }
+
+  return (
+    <Table.Tbody>
+      {items.map((item, index) => (
+        <Table.Tr key={keyExtractor(item)}>{renderRow(item, index)}</Table.Tr>
+      ))}
+    </Table.Tbody>
+  );
+}
+
 export function DataTable<T>({
   queryResult,
   columns,
@@ -97,32 +132,26 @@ export function DataTable<T>({
 
   return (
     <div className="flex flex-col gap-4">
-      <Paper withBorder radius="md">
-        <Table horizontalSpacing="md" verticalSpacing="sm">
-          <Table.Thead>
-            <Table.Tr>
-              {columns.map((column) => (
-                <Table.Th key={column.label} w={column.width}>
-                  {column.label}
-                </Table.Th>
-              ))}
-            </Table.Tr>
-          </Table.Thead>
-          {queryResult.isLoading ? (
-            <TableSkeleton columns={columns} rowCount={skeletonCount} />
-          ) : items.length === 0 ? (
-            <EmptyState message={emptyMessage} colSpan={columns.length} />
-          ) : (
-            <Table.Tbody>
-              {items.map((item, index) => (
-                <Table.Tr key={keyExtractor(item)}>
-                  {renderRow(item, index)}
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          )}
-        </Table>
-      </Paper>
+      <Table horizontalSpacing="md" verticalSpacing="sm">
+        <Table.Thead>
+          <Table.Tr>
+            {columns.map((column) => (
+              <Table.Th key={column.label} w={column.width}>
+                {column.label}
+              </Table.Th>
+            ))}
+          </Table.Tr>
+        </Table.Thead>
+        <TableBody
+          isLoading={queryResult.isLoading}
+          items={items}
+          columns={columns}
+          emptyMessage={emptyMessage}
+          renderRow={renderRow}
+          keyExtractor={keyExtractor}
+          skeletonCount={skeletonCount}
+        />
+      </Table>
 
       {meta && listingContext && (
         <Group justify="center" gap="lg">

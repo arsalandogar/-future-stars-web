@@ -14,7 +14,7 @@ import {
   verticalListSortingStrategy,
   arrayMove,
 } from '@dnd-kit/sortable';
-import { Button, Paper, Skeleton, Table, Text } from '@mantine/core';
+import { Button, Skeleton, Table, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
@@ -122,65 +122,63 @@ export function TagsList() {
         }
       >
         <div className="flex flex-col gap-4">
-          <Paper withBorder radius="md">
-            <Table horizontalSpacing="md" verticalSpacing="sm">
-              <Table.Thead>
-                <Table.Tr>
-                  {COLUMNS.map((column) => (
-                    <Table.Th key={column.label || 'drag'} w={column.width}>
-                      {column.label}
-                    </Table.Th>
-                  ))}
-                </Table.Tr>
-              </Table.Thead>
-              {queryResult.isLoading ? (
-                <Table.Tbody>
-                  {Array.from({ length: 5 }).map((_, rowIndex) => (
-                    // eslint-disable-next-line react-x/no-array-index-key
-                    <Table.Tr key={rowIndex}>
-                      {COLUMNS.map((column) => (
-                        <Table.Td key={column.label || 'drag'}>
-                          <Skeleton height={20} width={column.width ?? '70%'} />
-                        </Table.Td>
-                      ))}
-                    </Table.Tr>
-                  ))}
-                </Table.Tbody>
-              ) : tags.length === 0 ? (
-                <Table.Tbody>
-                  <Table.Tr>
-                    <Table.Td colSpan={COLUMNS.length}>
-                      <Text ta="center" c="dimmed" py="xl">
-                        No tags found
-                      </Text>
-                    </Table.Td>
+          <Table horizontalSpacing="md" verticalSpacing="sm">
+            <Table.Thead>
+              <Table.Tr>
+                {COLUMNS.map((column) => (
+                  <Table.Th key={column.label || 'drag'} w={column.width}>
+                    {column.label}
+                  </Table.Th>
+                ))}
+              </Table.Tr>
+            </Table.Thead>
+            {queryResult.isLoading ? (
+              <Table.Tbody>
+                {Array.from({ length: 5 }).map((_, rowIndex) => (
+                  // eslint-disable-next-line react-x/no-array-index-key
+                  <Table.Tr key={rowIndex}>
+                    {COLUMNS.map((column) => (
+                      <Table.Td key={column.label || 'drag'}>
+                        <Skeleton height={20} width={column.width ?? '70%'} />
+                      </Table.Td>
+                    ))}
                   </Table.Tr>
-                </Table.Tbody>
-              ) : (
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={handleDragEnd}
+                ))}
+              </Table.Tbody>
+            ) : tags.length === 0 ? (
+              <Table.Tbody>
+                <Table.Tr>
+                  <Table.Td colSpan={COLUMNS.length}>
+                    <Text ta="center" c="dimmed" py="xl">
+                      No tags found
+                    </Text>
+                  </Table.Td>
+                </Table.Tr>
+              </Table.Tbody>
+            ) : (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={tags.map((t) => t.id)}
+                  strategy={verticalListSortingStrategy}
                 >
-                  <SortableContext
-                    items={tags.map((t) => t.id)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    <Table.Tbody>
-                      {tags.map((tag) => (
-                        <SortableTagRow
-                          key={tag.id}
-                          tag={tag}
-                          onEdit={handleEdit}
-                          isDragDisabled={isDragDisabled}
-                        />
-                      ))}
-                    </Table.Tbody>
-                  </SortableContext>
-                </DndContext>
-              )}
-            </Table>
-          </Paper>
+                  <Table.Tbody>
+                    {tags.map((tag) => (
+                      <SortableTagRow
+                        key={tag.id}
+                        tag={tag}
+                        onEdit={handleEdit}
+                        isDragDisabled={isDragDisabled}
+                      />
+                    ))}
+                  </Table.Tbody>
+                </SortableContext>
+              </DndContext>
+            )}
+          </Table>
         </div>
       </ListingShell>
     </>

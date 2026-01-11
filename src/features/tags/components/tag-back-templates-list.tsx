@@ -7,6 +7,7 @@ import type { TagTemplate } from '../types';
 const COLUMNS = [
   { key: 'preview', label: 'Preview', width: 80 },
   { key: 'label', label: 'Label' },
+  { key: 'published', label: 'Published' },
   { key: 'description', label: 'Description' },
   { key: 'created', label: 'Created', width: 150 },
   { key: 'actions', label: 'Actions', width: 60 },
