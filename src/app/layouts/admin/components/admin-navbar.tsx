@@ -5,7 +5,6 @@ import {
   Group,
   ActionIcon,
   Tooltip,
-  UnstyledButton,
   Menu,
 } from '@mantine/core';
 import { Link, useLocation } from '@tanstack/react-router';
@@ -14,6 +13,7 @@ import {
   Users,
   Layers2,
   ChevronLeft,
+  ChevronRight,
   X,
   Box,
   Settings,
@@ -196,14 +196,28 @@ export function AdminNavbar({
     <nav className="flex h-full flex-col">
       <Group justify={collapsed ? 'center' : 'space-between'} px="md" py="lg">
         {collapsed ? (
-          <Tooltip label="Future Stars" position="right" withArrow>
-            <UnstyledButton onClick={onToggle}>
-              <Logo />
-            </UnstyledButton>
-          </Tooltip>
+          <Stack gap="xs" align="center">
+            <Tooltip label="Future Stars" position="right" withArrow>
+              <Link to="/">
+                <Logo />
+              </Link>
+            </Tooltip>
+            <Tooltip label="Expand" position="right" withArrow>
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                size="sm"
+                onClick={onToggle}
+              >
+                <ChevronRight size={18} />
+              </ActionIcon>
+            </Tooltip>
+          </Stack>
         ) : (
           <>
-            <Logo />
+            <Link to="/">
+              <Logo />
+            </Link>
             <ActionIcon
               variant="subtle"
               color="gray"

@@ -20,8 +20,7 @@ export const Route = createFileRoute('/auth')({
   beforeLoad: ({ context, search }) => {
     if (context.auth.isAuthenticated) {
       const redirectTo = search?.redirectTo;
-      const destination =
-        redirectTo ?? (context.auth.user?.isAdmin ? '/admin' : '/');
+      const destination = redirectTo ?? '/';
 
       // eslint-disable-next-line @typescript-eslint/only-throw-error
       throw redirect({ to: destination });

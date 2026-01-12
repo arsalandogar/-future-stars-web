@@ -1,4 +1,4 @@
-import { AppShell, useMantineTheme } from '@mantine/core';
+import { AppShell, MantineProvider, useMantineTheme } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { Outlet } from '@tanstack/react-router';
 
@@ -36,33 +36,35 @@ export function AdminLayout() {
       : HEADER_HEIGHT;
 
   return (
-    <AppShell
-      layout="alt"
-      header={{ height: headerHeight }}
-      navbar={{
-        width: isCollapsed ? NAVBAR_COLLAPSED_WIDTH : NAVBAR_WIDTH,
-        breakpoint: NAVBAR_BREAKPOINT,
-        collapsed: { mobile: !mobileOpened },
-      }}
-      padding="md"
-    >
-      <AppShell.Header>
-        <AdminHeader opened={mobileOpened} toggle={toggleMobile} />
-      </AppShell.Header>
+    <MantineProvider defaultColorScheme="dark">
+      <AppShell
+        layout="alt"
+        header={{ height: headerHeight }}
+        navbar={{
+          width: isCollapsed ? NAVBAR_COLLAPSED_WIDTH : NAVBAR_WIDTH,
+          breakpoint: NAVBAR_BREAKPOINT,
+          collapsed: { mobile: !mobileOpened },
+        }}
+        padding="md"
+      >
+        <AppShell.Header>
+          <AdminHeader opened={mobileOpened} toggle={toggleMobile} />
+        </AppShell.Header>
 
-      <AppShell.Navbar>
-        <AdminNavbar
-          collapsed={isCollapsed}
-          onToggle={toggleDesktop}
-          isMobile={isDesktop !== true}
-          onMobileClose={toggleMobile}
-        />
-      </AppShell.Navbar>
+        <AppShell.Navbar>
+          <AdminNavbar
+            collapsed={isCollapsed}
+            onToggle={toggleDesktop}
+            isMobile={isDesktop !== true}
+            onMobileClose={toggleMobile}
+          />
+        </AppShell.Navbar>
 
-      <AppShell.Main>
-        <PageHeader />
-        <Outlet />
-      </AppShell.Main>
-    </AppShell>
+        <AppShell.Main>
+          <PageHeader />
+          <Outlet />
+        </AppShell.Main>
+      </AppShell>
+    </MantineProvider>
   );
 }

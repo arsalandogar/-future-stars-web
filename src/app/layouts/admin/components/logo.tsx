@@ -1,4 +1,4 @@
-import { useMantineColorScheme, Image } from '@mantine/core';
+import { useComputedColorScheme, Image } from '@mantine/core';
 
 import hLogoBlack from '@/assets/logos/h-logo-black.png';
 import hLogoWhite from '@/assets/logos/h-logo-white.png';
@@ -7,7 +7,7 @@ import logoMarkWhite from '@/assets/logos/logo-mark-white.png';
 import { useSidebarStore } from '../stores/sidebar-store';
 
 export function Logo() {
-  const { colorScheme } = useMantineColorScheme();
+  const colorScheme = useComputedColorScheme('dark');
   const collapsed = useSidebarStore((state) => state.collapsed);
 
   const isDark = colorScheme === 'dark';

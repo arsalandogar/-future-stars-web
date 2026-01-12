@@ -1,0 +1,42 @@
+.navContainer {
+  height: 100%;
+}
+
+.navLink {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: var(--mantine-font-size-md);
+  transition: color 150ms ease;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: transparent;
+    transition: background-color 150ms ease;
+  }
+
+  &:hover {
+    font-weight: 800;
+  }
+
+  &[data-active='true'] {
+    font-weight: 800;
+
+    &::after {
+      background-color: var(--mantine-color-primary-filled);
+    }
+  }
+}
+
+.navLinkVertical {
+  display: block;
+  padding: 12px 0;
+}

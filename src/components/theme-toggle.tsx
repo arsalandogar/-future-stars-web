@@ -1,11 +1,13 @@
-import { ActionIcon, useComputedColorScheme } from '@mantine/core';
+import {
+  ActionIcon,
+  useComputedColorScheme,
+  useMantineColorScheme,
+} from '@mantine/core';
 import { Moon, Sun } from 'lucide-react';
 
-import { useThemeStore } from '@/stores/theme-store';
-
 export function ThemeToggle() {
-  const toggleColorScheme = useThemeStore((state) => state.toggleColorScheme);
-  const computedColorScheme = useComputedColorScheme('light');
+  const { toggleColorScheme } = useMantineColorScheme();
+  const computedColorScheme = useComputedColorScheme('dark');
 
   return (
     <ActionIcon
