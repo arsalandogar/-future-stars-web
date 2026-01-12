@@ -170,6 +170,18 @@ const primaryColors: MantineColorsTuple = [
   '#0000cd',
   '#0000b5',
 ];
+const primaryAltColors: MantineColorsTuple = [
+  '#edecff',
+  '#d7d5fe',
+  '#aca8f5',
+  '#7e77ed',
+  '#4f46e5',
+  '#3e34e3',
+  '#3127e2',
+  '#231bc9',
+  '#1c17b5',
+  '#1112a0',
+];
 
 export const theme: MantineThemeOverride = createTheme({
   fontFamily:
@@ -185,6 +197,7 @@ export const theme: MantineThemeOverride = createTheme({
 
     // Semantic color aliases
     primary: primaryColors,
+    primaryAlt: primaryAltColors,
     secondary: grayColors,
     dark: grayColors,
     error: redColors,

@@ -1,5 +1,5 @@
 import { Container, Image } from '@mantine/core';
-import { useMantineColorScheme } from '@mantine/core';
+import { useComputedColorScheme } from '@mantine/core';
 import { Link } from '@tanstack/react-router';
 
 import hLogoBlack from '@/assets/logos/h-logo-black.png';
@@ -10,7 +10,7 @@ interface LegalLayoutProps {
 }
 
 export function LegalLayout({ children }: LegalLayoutProps) {
-  const { colorScheme } = useMantineColorScheme();
+  const colorScheme = useComputedColorScheme('dark');
   const isDark = colorScheme === 'dark';
   const logo = isDark ? hLogoWhite : hLogoBlack;
 

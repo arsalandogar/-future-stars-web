@@ -9,7 +9,6 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { theme } from '@/config/theme';
 import { cssVariableResolver } from '@/lib/css-variable-resolver';
 import { queryConfig } from '@/lib/react-query';
-import { useThemeStore } from '@/stores/theme-store';
 
 type AppProviderProps = {
   children: ReactNode;
@@ -19,7 +18,6 @@ export function AppProvider({ children }: AppProviderProps) {
   const [queryClient] = useState(
     () => new QueryClient({ defaultOptions: queryConfig })
   );
-  const colorScheme = useThemeStore((state) => state.colorScheme);
 
   return (
     <Suspense
@@ -33,7 +31,7 @@ export function AppProvider({ children }: AppProviderProps) {
         <QueryClientProvider client={queryClient}>
           <MantineProvider
             theme={theme}
-            forceColorScheme={colorScheme}
+            forceColorScheme="dark"
             cssVariablesResolver={cssVariableResolver}
           >
             <ModalsProvider>

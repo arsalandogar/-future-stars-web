@@ -13,14 +13,20 @@ import { Route as TermsAndConditionsRouteImport } from './routes/terms-and-condi
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
-import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthRegisterRouteImport } from './routes/auth/register'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
+import { Route as AuthenticatedCustomerRouteImport } from './routes/_authenticated/_customer'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as AuthenticatedCustomerIndexRouteImport } from './routes/_authenticated/_customer/index'
 import { Route as AuthenticatedAdminTemplateTypesRouteImport } from './routes/_authenticated/admin/template-types'
 import { Route as AuthenticatedAdminConfigsRouteImport } from './routes/_authenticated/admin/configs'
 import { Route as AuthenticatedAdminListingRouteImport } from './routes/_authenticated/admin/_listing'
+import { Route as AuthenticatedCustomerTemplatesRouteImport } from './routes/_authenticated/_customer/templates'
+import { Route as AuthenticatedCustomerMyCardsRouteImport } from './routes/_authenticated/_customer/my-cards'
+import { Route as AuthenticatedCustomerCreateCardRouteImport } from './routes/_authenticated/_customer/create-card'
+import { Route as AuthenticatedCustomerCartRouteImport } from './routes/_authenticated/_customer/cart'
+import { Route as AuthenticatedCustomerAccountRouteImport } from './routes/_authenticated/_customer/account'
 import { Route as AuthenticatedAdminTemplatesCreateRouteImport } from './routes/_authenticated/admin/templates/create'
 import { Route as AuthenticatedAdminListingUsersRouteImport } from './routes/_authenticated/admin/_listing/users'
 import { Route as AuthenticatedAdminListingTemplatesRouteImport } from './routes/_authenticated/admin/_listing/templates'
@@ -59,11 +65,6 @@ const AuthRouteRoute = AuthRouteRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthRegisterRoute = AuthRegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -73,6 +74,10 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthenticatedCustomerRoute = AuthenticatedCustomerRouteImport.update({
+  id: '/_customer',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedAdminRouteRoute = AuthenticatedAdminRouteRouteImport.update({
   id: '/admin',
@@ -84,6 +89,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
+const AuthenticatedCustomerIndexRoute =
+  AuthenticatedCustomerIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedCustomerRoute,
+  } as any)
 const AuthenticatedAdminTemplateTypesRoute =
   AuthenticatedAdminTemplateTypesRouteImport.update({
     id: '/template-types',
@@ -100,6 +111,36 @@ const AuthenticatedAdminListingRoute =
   AuthenticatedAdminListingRouteImport.update({
     id: '/_listing',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedCustomerTemplatesRoute =
+  AuthenticatedCustomerTemplatesRouteImport.update({
+    id: '/templates',
+    path: '/templates',
+    getParentRoute: () => AuthenticatedCustomerRoute,
+  } as any)
+const AuthenticatedCustomerMyCardsRoute =
+  AuthenticatedCustomerMyCardsRouteImport.update({
+    id: '/my-cards',
+    path: '/my-cards',
+    getParentRoute: () => AuthenticatedCustomerRoute,
+  } as any)
+const AuthenticatedCustomerCreateCardRoute =
+  AuthenticatedCustomerCreateCardRouteImport.update({
+    id: '/create-card',
+    path: '/create-card',
+    getParentRoute: () => AuthenticatedCustomerRoute,
+  } as any)
+const AuthenticatedCustomerCartRoute =
+  AuthenticatedCustomerCartRouteImport.update({
+    id: '/cart',
+    path: '/cart',
+    getParentRoute: () => AuthenticatedCustomerRoute,
+  } as any)
+const AuthenticatedCustomerAccountRoute =
+  AuthenticatedCustomerAccountRouteImport.update({
+    id: '/account',
+    path: '/account',
+    getParentRoute: () => AuthenticatedCustomerRoute,
   } as any)
 const AuthenticatedAdminTemplatesCreateRoute =
   AuthenticatedAdminTemplatesCreateRouteImport.update({
@@ -217,9 +258,14 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminListingRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
-  '/': typeof AuthenticatedIndexRoute
+  '/account': typeof AuthenticatedCustomerAccountRoute
+  '/cart': typeof AuthenticatedCustomerCartRoute
+  '/create-card': typeof AuthenticatedCustomerCreateCardRoute
+  '/my-cards': typeof AuthenticatedCustomerMyCardsRoute
+  '/templates': typeof AuthenticatedCustomerTemplatesRoute
   '/admin/configs': typeof AuthenticatedAdminConfigsRoute
   '/admin/template-types': typeof AuthenticatedAdminTemplateTypesRoute
+  '/': typeof AuthenticatedCustomerIndexRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/$type': typeof AuthenticatedAdminListing_legalTypeRoute
   '/admin/color-leagues': typeof AuthenticatedAdminListingColorLeaguesRoute
@@ -245,10 +291,15 @@ export interface FileRoutesByTo {
   '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
-  '/': typeof AuthenticatedIndexRoute
+  '/account': typeof AuthenticatedCustomerAccountRoute
+  '/cart': typeof AuthenticatedCustomerCartRoute
+  '/create-card': typeof AuthenticatedCustomerCreateCardRoute
+  '/my-cards': typeof AuthenticatedCustomerMyCardsRoute
+  '/templates': typeof AuthenticatedCustomerTemplatesRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/configs': typeof AuthenticatedAdminConfigsRoute
   '/admin/template-types': typeof AuthenticatedAdminTemplateTypesRoute
+  '/': typeof AuthenticatedCustomerIndexRoute
   '/admin/$type': typeof AuthenticatedAdminListing_legalTypeRoute
   '/admin/color-leagues': typeof AuthenticatedAdminListingColorLeaguesRoute
   '/admin/color-presets': typeof AuthenticatedAdminListingColorPresetsRoute
@@ -273,12 +324,18 @@ export interface FileRoutesById {
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
+  '/_authenticated/_customer': typeof AuthenticatedCustomerRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
-  '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/_customer/account': typeof AuthenticatedCustomerAccountRoute
+  '/_authenticated/_customer/cart': typeof AuthenticatedCustomerCartRoute
+  '/_authenticated/_customer/create-card': typeof AuthenticatedCustomerCreateCardRoute
+  '/_authenticated/_customer/my-cards': typeof AuthenticatedCustomerMyCardsRoute
+  '/_authenticated/_customer/templates': typeof AuthenticatedCustomerTemplatesRoute
   '/_authenticated/admin/_listing': typeof AuthenticatedAdminListingRouteWithChildren
   '/_authenticated/admin/configs': typeof AuthenticatedAdminConfigsRoute
   '/_authenticated/admin/template-types': typeof AuthenticatedAdminTemplateTypesRoute
+  '/_authenticated/_customer/': typeof AuthenticatedCustomerIndexRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/__legal/$type': typeof AuthenticatedAdmin_legalTypeRouteRouteWithChildren
   '/_authenticated/admin/_listing/color-leagues': typeof AuthenticatedAdminListingColorLeaguesRoute
@@ -308,9 +365,14 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth/login'
     | '/auth/register'
-    | '/'
+    | '/account'
+    | '/cart'
+    | '/create-card'
+    | '/my-cards'
+    | '/templates'
     | '/admin/configs'
     | '/admin/template-types'
+    | '/'
     | '/admin/'
     | '/admin/$type'
     | '/admin/color-leagues'
@@ -336,10 +398,15 @@ export interface FileRouteTypes {
     | '/terms-and-conditions'
     | '/auth/login'
     | '/auth/register'
-    | '/'
+    | '/account'
+    | '/cart'
+    | '/create-card'
+    | '/my-cards'
+    | '/templates'
     | '/admin'
     | '/admin/configs'
     | '/admin/template-types'
+    | '/'
     | '/admin/$type'
     | '/admin/color-leagues'
     | '/admin/color-presets'
@@ -363,12 +430,18 @@ export interface FileRouteTypes {
     | '/privacy-policy'
     | '/terms-and-conditions'
     | '/_authenticated/admin'
+    | '/_authenticated/_customer'
     | '/auth/login'
     | '/auth/register'
-    | '/_authenticated/'
+    | '/_authenticated/_customer/account'
+    | '/_authenticated/_customer/cart'
+    | '/_authenticated/_customer/create-card'
+    | '/_authenticated/_customer/my-cards'
+    | '/_authenticated/_customer/templates'
     | '/_authenticated/admin/_listing'
     | '/_authenticated/admin/configs'
     | '/_authenticated/admin/template-types'
+    | '/_authenticated/_customer/'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/__legal/$type'
     | '/_authenticated/admin/_listing/color-leagues'
@@ -427,13 +500,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/': {
-      id: '/_authenticated/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/auth/register': {
       id: '/auth/register'
       path: '/register'
@@ -448,6 +514,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof AuthRouteRoute
     }
+    '/_authenticated/_customer': {
+      id: '/_authenticated/_customer'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthenticatedCustomerRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -461,6 +534,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/_customer/': {
+      id: '/_authenticated/_customer/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedCustomerIndexRouteImport
+      parentRoute: typeof AuthenticatedCustomerRoute
     }
     '/_authenticated/admin/template-types': {
       id: '/_authenticated/admin/template-types'
@@ -482,6 +562,41 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminListingRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/_customer/templates': {
+      id: '/_authenticated/_customer/templates'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof AuthenticatedCustomerTemplatesRouteImport
+      parentRoute: typeof AuthenticatedCustomerRoute
+    }
+    '/_authenticated/_customer/my-cards': {
+      id: '/_authenticated/_customer/my-cards'
+      path: '/my-cards'
+      fullPath: '/my-cards'
+      preLoaderRoute: typeof AuthenticatedCustomerMyCardsRouteImport
+      parentRoute: typeof AuthenticatedCustomerRoute
+    }
+    '/_authenticated/_customer/create-card': {
+      id: '/_authenticated/_customer/create-card'
+      path: '/create-card'
+      fullPath: '/create-card'
+      preLoaderRoute: typeof AuthenticatedCustomerCreateCardRouteImport
+      parentRoute: typeof AuthenticatedCustomerRoute
+    }
+    '/_authenticated/_customer/cart': {
+      id: '/_authenticated/_customer/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof AuthenticatedCustomerCartRouteImport
+      parentRoute: typeof AuthenticatedCustomerRoute
+    }
+    '/_authenticated/_customer/account': {
+      id: '/_authenticated/_customer/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AuthenticatedCustomerAccountRouteImport
+      parentRoute: typeof AuthenticatedCustomerRoute
     }
     '/_authenticated/admin/templates/create': {
       id: '/_authenticated/admin/templates/create'
@@ -732,14 +847,37 @@ const AuthenticatedAdminRouteRouteWithChildren =
     AuthenticatedAdminRouteRouteChildren,
   )
 
+interface AuthenticatedCustomerRouteChildren {
+  AuthenticatedCustomerAccountRoute: typeof AuthenticatedCustomerAccountRoute
+  AuthenticatedCustomerCartRoute: typeof AuthenticatedCustomerCartRoute
+  AuthenticatedCustomerCreateCardRoute: typeof AuthenticatedCustomerCreateCardRoute
+  AuthenticatedCustomerMyCardsRoute: typeof AuthenticatedCustomerMyCardsRoute
+  AuthenticatedCustomerTemplatesRoute: typeof AuthenticatedCustomerTemplatesRoute
+  AuthenticatedCustomerIndexRoute: typeof AuthenticatedCustomerIndexRoute
+}
+
+const AuthenticatedCustomerRouteChildren: AuthenticatedCustomerRouteChildren = {
+  AuthenticatedCustomerAccountRoute: AuthenticatedCustomerAccountRoute,
+  AuthenticatedCustomerCartRoute: AuthenticatedCustomerCartRoute,
+  AuthenticatedCustomerCreateCardRoute: AuthenticatedCustomerCreateCardRoute,
+  AuthenticatedCustomerMyCardsRoute: AuthenticatedCustomerMyCardsRoute,
+  AuthenticatedCustomerTemplatesRoute: AuthenticatedCustomerTemplatesRoute,
+  AuthenticatedCustomerIndexRoute: AuthenticatedCustomerIndexRoute,
+}
+
+const AuthenticatedCustomerRouteWithChildren =
+  AuthenticatedCustomerRoute._addFileChildren(
+    AuthenticatedCustomerRouteChildren,
+  )
+
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
-  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedCustomerRoute: typeof AuthenticatedCustomerRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
-  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedCustomerRoute: AuthenticatedCustomerRouteWithChildren,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
