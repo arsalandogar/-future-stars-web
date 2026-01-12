@@ -1,4 +1,4 @@
-import { Box, Burger, Button, Container, Group, Image } from '@mantine/core';
+import { Burger, Button, Container, Group, Image } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Link } from '@tanstack/react-router';
 import { UserStar } from 'lucide-react';
@@ -19,10 +19,9 @@ export function CustomerHeader() {
   ] = useDisclosure(false);
 
   return (
-    <Box component="header" h="100%">
+    <>
       <Container size="xl" h="100%">
         <Group h="100%" justify="space-between">
-          {/* Logo */}
           <Link to="/">
             <Image
               src={hLogoWhite}
@@ -33,12 +32,10 @@ export function CustomerHeader() {
             />
           </Link>
 
-          {/* Desktop Navigation */}
           <Group gap="xl" visibleFrom="sm" className={classes.navContainer}>
             <NavLinks />
           </Group>
 
-          {/* Desktop Actions */}
           <Group gap="md" visibleFrom="sm">
             <Button component={Link} to="/create-card">
               CREATE A CARD
@@ -56,7 +53,6 @@ export function CustomerHeader() {
             )}
           </Group>
 
-          {/* Mobile Actions */}
           <Group gap="xs" hiddenFrom="sm">
             <CartButton />
             <Burger
@@ -69,12 +65,11 @@ export function CustomerHeader() {
         </Group>
       </Container>
 
-      {/* Mobile Menu Drawer */}
       <MobileMenu
         opened={mobileMenuOpened}
         onClose={closeMobileMenu}
         isAdmin={user?.isAdmin}
       />
-    </Box>
+    </>
   );
 }

@@ -4,7 +4,6 @@ import {
   Container,
   Group,
   Image,
-  SimpleGrid,
   Stack,
   Text,
 } from '@mantine/core';
@@ -59,6 +58,31 @@ interface SocialLink {
   label: string;
 }
 
+interface AppBadgeLink {
+  icon: React.ComponentType;
+  href: string;
+  label: string;
+  smallText: string;
+  largeText: string;
+}
+
+const APP_STORE_LINKS: AppBadgeLink[] = [
+  {
+    icon: AppleIcon,
+    href: '#',
+    label: 'Download on the App Store',
+    smallText: 'Download on the',
+    largeText: 'App Store',
+  },
+  {
+    icon: PlayStoreIcon,
+    href: '#',
+    label: 'Get it on Google Play',
+    smallText: 'GET IT ON',
+    largeText: 'Google Play',
+  },
+];
+
 const PRODUCT_LINKS: FooterLink[] = [
   { label: 'Pricing', to: '#' },
   { label: 'Team Orders', to: '#' },
@@ -90,7 +114,7 @@ interface FooterLinkSectionProps {
 
 function FooterLinkSection({ title, links }: FooterLinkSectionProps) {
   return (
-    <Stack gap="xs">
+    <Stack gap="xs" className={classes.linkSection}>
       <Text fw={700} size="sm" c="white" tt="uppercase" mb="xs">
         {title}
       </Text>
@@ -108,13 +132,36 @@ function FooterLinkSection({ title, links }: FooterLinkSectionProps) {
   );
 }
 
+function AppBadge({
+  icon: Icon,
+  href,
+  label,
+  smallText,
+  largeText,
+}: AppBadgeLink) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={classes.appBadge}
+      aria-label={label}
+    >
+      <Icon />
+      <span className={classes.appBadgeText}>
+        <span className={classes.appBadgeSmall}>{smallText}</span>
+        <span className={classes.appBadgeLarge}>{largeText}</span>
+      </span>
+    </a>
+  );
+}
+
 export function CustomerFooter() {
   return (
-    <Box component="footer" className={classes.footer}>
+    <Box component="footer">
       <Container size="xl" py="xl">
-        <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="xl">
-          {/* Logo & App Store Badges */}
-          <Stack gap="md">
+        <div className={classes.footerGrid}>
+          <Stack gap="md" className={classes.logoSection}>
             <Image
               src={hLogoWhite}
               alt="Future Stars"
@@ -122,45 +169,21 @@ export function CustomerFooter() {
               w="auto"
               fit="contain"
             />
-            <Group gap="sm" mt="sm">
-              <a
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={classes.appBadge}
-                aria-label="Download on the App Store"
-              >
-                <AppleIcon />
-                <span className={classes.appBadgeText}>
-                  <span className={classes.appBadgeSmall}>Download on the</span>
-                  <span className={classes.appBadgeLarge}>App Store</span>
-                </span>
-              </a>
-              <a
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={classes.appBadge}
-                aria-label="Get it on Google Play"
-              >
-                <PlayStoreIcon />
-                <span className={classes.appBadgeText}>
-                  <span className={classes.appBadgeSmall}>GET IT ON</span>
-                  <span className={classes.appBadgeLarge}>Google Play</span>
-                </span>
-              </a>
+            <Group gap="sm" className={classes.appBadges}>
+              {APP_STORE_LINKS.map((badge) => (
+                <AppBadge key={badge.label} {...badge} />
+              ))}
             </Group>
           </Stack>
 
           <FooterLinkSection title="Product" links={PRODUCT_LINKS} />
           <FooterLinkSection title="Support" links={SUPPORT_LINKS} />
 
-          {/* Social Links */}
-          <Stack gap="xs">
+          <Stack gap="xs" className={classes.socialSection}>
             <Text fw={700} size="sm" c="white" tt="uppercase" mb="xs">
               Follow Us
             </Text>
-            <Group gap="sm">
+            <Group gap="sm" className={classes.socialIcons}>
               {SOCIAL_LINKS.map((social) => (
                 <a
                   key={social.label}
@@ -175,17 +198,21 @@ export function CustomerFooter() {
               ))}
             </Group>
           </Stack>
-        </SimpleGrid>
+        </div>
       </Container>
 
-      {/* Bottom Bar */}
       <Box className={classes.bottomBar}>
         <Container size="xl" py="md">
-          <Group justify="space-between" wrap="wrap" gap="md">
+          <Group
+            justify="space-between"
+            wrap="wrap"
+            gap="md"
+            className={classes.bottomBarContent}
+          >
             <Text size="sm" c="gray.5">
               &copy; {CURRENT_YEAR} Future Stars Inc. All Rights Reserved
             </Text>
-            <Group gap="md">
+            <Group gap="md" className={classes.legalLinks}>
               {LEGAL_LINKS.map((link) => (
                 <Anchor
                   key={link.label}

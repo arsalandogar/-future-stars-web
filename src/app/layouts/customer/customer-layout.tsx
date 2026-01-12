@@ -9,7 +9,9 @@ const HEADER_HEIGHT = 84;
 export function CustomerLayout() {
   return (
     <AppShell header={{ height: HEADER_HEIGHT }} padding={0}>
-      <AppShell.Header>
+      <AppShell.Header
+        style={{ borderBottomColor: 'var(--mantine-color-primaryAlt-4)' }}
+      >
         <CustomerHeader />
       </AppShell.Header>
 

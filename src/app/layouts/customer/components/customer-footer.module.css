@@ -1,7 +1,3 @@
-.footer {
-  background: transparent;
-}
-
 .footerLink {
   color: var(--mantine-color-gray-5);
   text-decoration: none;
@@ -13,8 +9,65 @@
   }
 }
 
+.footerGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--mantine-spacing-xl);
+
+  @media (max-width: 48em) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--mantine-spacing-lg);
+  }
+}
+
+.logoSection {
+  align-items: flex-start;
+  @media (max-width: 48em) {
+    grid-column: span 2;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+.linkSection {
+  @media (max-width: 48em) {
+    align-items: center;
+    text-align: center;
+  }
+}
+
+.socialSection {
+  @media (max-width: 48em) {
+    grid-column: span 2;
+    align-items: center;
+    text-align: center;
+  }
+}
+
 .bottomBar {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bottomBarContent {
+  @media (max-width: 48em) {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+.legalLinks {
+  @media (max-width: 48em) {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
+.appBadges,
+.socialIcons {
+  @media (max-width: 48em) {
+    justify-content: center;
+  }
 }
 
 .appBadge {
