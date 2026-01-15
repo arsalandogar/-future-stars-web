@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { getRouteApi, useNavigate } from '@tanstack/react-router';
-import { Skeleton, Text, Title } from '@mantine/core';
+import { Button, Skeleton, Text, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 
 import { Head } from '@/components/seo/head';
@@ -109,9 +109,9 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
       <Text c="gray.4" size="lg" mb="md">
         Failed to load templates
       </Text>
-      <button onClick={onRetry} className="text-primary-5 hover:underline">
+      <Button variant="subtle" onClick={onRetry}>
         Try again
-      </button>
+      </Button>
     </div>
   );
 }
