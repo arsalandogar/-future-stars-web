@@ -1,0 +1,31 @@
+.card {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease;
+
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-4px);
+    box-shadow:
+      0 0 0 4px var(--mantine-color-primary-5),
+      0 0 30px 8px
+        color-mix(in srgb, var(--mantine-color-primary-5) 60%, transparent);
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+
+  & img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+}

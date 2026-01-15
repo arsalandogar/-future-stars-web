@@ -158,7 +158,10 @@ function AppBadge({
 
 export function CustomerFooter() {
   return (
-    <Box component="footer">
+    <Box
+      component="footer"
+      style={{ borderTop: '1px solid var(--mantine-color-primaryAlt-4)' }}
+    >
       <Container size="xl" py="xl">
         <div className={classes.footerGrid}>
           <Stack gap="md" className={classes.logoSection}>
