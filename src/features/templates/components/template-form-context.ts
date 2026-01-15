@@ -45,10 +45,13 @@ export function useTemplateFormContext() {
   return form as unknown as TemplateForm;
 }
 
-export const DEFAULT_ATTRIBUTE: TemplateAttributeFormValues = {
-  type: 'string',
-  name: '',
-  label: '',
-  defaultValue: '',
-  defaultColor: '',
-};
+export function createDefaultAttribute(): TemplateAttributeFormValues {
+  return {
+    _formId: crypto.randomUUID(),
+    type: 'string',
+    name: '',
+    label: '',
+    defaultValue: '',
+    defaultColor: '',
+  };
+}

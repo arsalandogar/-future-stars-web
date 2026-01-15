@@ -1,6 +1,7 @@
 import * as v from 'valibot';
 
 export const templateAttributeSchema = v.object({
+  _formId: v.string(),
   type: v.picklist(
     ['color', 'image', 'string'],
     'Type must be color, image, or string'

@@ -1,6 +1,7 @@
 import { Loader, Text, Title, TypographyStylesProvider } from '@mantine/core';
 
 import { Head } from '@/components/seo/head';
+import { sanitizeHtml } from '@/utils/sanitize';
 
 import { usePublicLegalDocument } from '../api/get-public-legal-document';
 import { LegalLayout } from './legal-layout';
@@ -42,7 +43,10 @@ export function PublicLegalPage({ type, title }: PublicLegalPageProps) {
 
       {document && (
         <TypographyStylesProvider>
-          <div dangerouslySetInnerHTML={{ __html: document.content }} />
+          <div
+            // eslint-disable-next-line react-dom/no-dangerously-set-innerhtml
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(document.content) }}
+          />
         </TypographyStylesProvider>
       )}
     </LegalLayout>

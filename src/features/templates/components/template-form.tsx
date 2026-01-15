@@ -20,7 +20,10 @@ import { useTemplates } from '../api/get-templates';
 import type { TemplateFormValues } from '../types';
 import { AttributesTable } from './attributes-table';
 import { TemplateCodeSection } from './template-code-section';
-import { useTemplateForm, DEFAULT_ATTRIBUTE } from './template-form-context';
+import {
+  useTemplateForm,
+  createDefaultAttribute,
+} from './template-form-context';
 import { TemplatePreviewPanel } from './template-preview-panel';
 
 interface TemplateFormProps {
@@ -296,7 +299,9 @@ export function TemplateForm({
                         variant="light"
                         size="xs"
                         leftSection={<Plus size={14} />}
-                        onClick={() => field.pushValue(DEFAULT_ATTRIBUTE)}
+                        onClick={() =>
+                          field.pushValue(createDefaultAttribute())
+                        }
                       >
                         Add Attribute
                       </Button>

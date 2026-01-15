@@ -12,6 +12,7 @@ import { Link } from '@tanstack/react-router';
 import { Edit, Send, Trash2, Plus } from 'lucide-react';
 
 import { formatDate } from '@/utils/date';
+import { sanitizeHtml } from '@/utils/sanitize';
 
 import type { LegalDocument } from '../types';
 
@@ -111,7 +112,10 @@ export function LegalDocumentView({
           Content Preview
         </Title>
         <TypographyStylesProvider>
-          <div dangerouslySetInnerHTML={{ __html: document.content }} />
+          <div
+            // eslint-disable-next-line react-dom/no-dangerously-set-innerhtml
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(document.content) }}
+          />
         </TypographyStylesProvider>
       </Card>
     </Stack>

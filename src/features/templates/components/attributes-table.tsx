@@ -179,8 +179,8 @@ function EditRows({
 
   return (
     <>
-      {attributes.map((_, index) => (
-        <Table.Tr key={index}>
+      {attributes.map((attr, index) => (
+        <Table.Tr key={attr._formId}>
           <Table.Td>
             <form.AppField name={`attributes[${index}].type`}>
               {(field) => (

@@ -121,6 +121,7 @@ export interface UpdateTemplateParams {
 
 // Form values
 export interface TemplateAttributeFormValues {
+  _formId: string;
   type: TemplateAttributeType;
   name: string;
   label: string;

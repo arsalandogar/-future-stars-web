@@ -57,7 +57,13 @@ export function TemplatesBrowsePage() {
         {isLoading ? (
           <div className="flex gap-2">
             {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} height={32} width={80} radius="xl" />
+              <Skeleton
+                // eslint-disable-next-line react-x/no-array-index-key
+                key={`chip-skeleton-${i}`}
+                height={32}
+                width={80}
+                radius="xl"
+              />
             ))}
           </div>
         ) : (
@@ -90,11 +96,18 @@ function LoadingSkeleton() {
   return (
     <div className="flex flex-col gap-10">
       {Array.from({ length: 3 }).map((_, i) => (
-        <div key={i}>
+        // eslint-disable-next-line react-x/no-array-index-key -- static skeleton placeholders
+        <div key={`row-skeleton-${i}`}>
           <Skeleton height={28} width={200} mb="md" />
           <div className="flex gap-4">
             {Array.from({ length: 5 }).map((_, j) => (
-              <Skeleton key={j} height={240} width={180} radius="md" />
+              <Skeleton
+                // eslint-disable-next-line react-x/no-array-index-key
+                key={`card-skeleton-${i}-${j}`}
+                height={240}
+                width={180}
+                radius="md"
+              />
             ))}
           </div>
         </div>

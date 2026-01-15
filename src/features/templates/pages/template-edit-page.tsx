@@ -71,6 +71,7 @@ export function TemplateEditPage({ id }: TemplateEditPageProps) {
     isPublished: template.isPublished ?? true,
     tagIds: template.tags.map((tag) => tag.id),
     attributes: template.attributes.map((attr) => ({
+      _formId: crypto.randomUUID(),
       type: attr.type,
       name: attr.name,
       label: attr.label,
