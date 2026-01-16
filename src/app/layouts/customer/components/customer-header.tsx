@@ -20,7 +20,7 @@ export function CustomerHeader() {
 
   return (
     <>
-      <Container size="xl" h="100%">
+      <Container size="xxl" h="100%">
         <Group h="100%" justify="space-between">
           <Link to="/">
             <Image

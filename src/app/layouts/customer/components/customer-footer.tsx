@@ -162,7 +162,7 @@ export function CustomerFooter() {
       component="footer"
       style={{ borderTop: '1px solid var(--mantine-color-primaryAlt-4)' }}
     >
-      <Container size="xl" py="xl">
+      <Container size="xxl" py="xl">
         <div className={classes.footerGrid}>
           <Stack gap="md" className={classes.logoSection}>
             <Image
@@ -205,7 +205,7 @@ export function CustomerFooter() {
       </Container>
 
       <Box className={classes.bottomBar}>
-        <Container size="xl" py="md">
+        <Container size="xxl" py="md">
           <Group
             justify="space-between"
             wrap="wrap"

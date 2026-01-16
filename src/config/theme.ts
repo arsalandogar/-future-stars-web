@@ -88,8 +88,9 @@ const CONTAINER_SIZES: Record<string, string> = {
   sm: rem('400px'),
   md: rem('500px'),
   lg: rem('600px'),
-  xl: rem('1400px'),
-  xxl: rem('1600px'),
+  xl: rem('1116px'),
+  xxl: rem('1400px'),
+  xxxl: rem('1600px'),
 };
 
 export const theme: MantineThemeOverride = createTheme({
