@@ -14,6 +14,7 @@ import {
   createTheme,
   Dialog,
   Indicator,
+  colorsTuple,
   type MantineColorsTuple,
   type MantineThemeOverride,
   Mark,
@@ -30,42 +31,6 @@ import {
   Timeline,
   Tooltip,
 } from '@mantine/core';
-
-// Theme color helper constants and functions for O(1) lookups
-const THEME_COLOR_KEYS = new Set([
-  'gray',
-  'neutral',
-  'red',
-  'amber',
-  'yellow',
-  'green',
-  'blue',
-  'primary',
-  'secondary',
-  'dark',
-  'error',
-  'success',
-  'info',
-  'warning',
-]);
-
-const NEUTRAL_COLORS = new Set(['gray', 'neutral']);
-
-const getValidColorKey = (color: string | undefined): string | undefined =>
-  color && THEME_COLOR_KEYS.has(color) ? color : undefined;
-
-const isNeutralColorKey = (color: string | undefined): boolean =>
-  !!color && NEUTRAL_COLORS.has(color);
-
-const CONTAINER_SIZES: Record<string, string> = {
-  xxs: rem('200px'),
-  xs: rem('300px'),
-  sm: rem('400px'),
-  md: rem('500px'),
-  lg: rem('600px'),
-  xl: rem('1400px'),
-  xxl: rem('1600px'),
-};
 
 const grayColors: MantineColorsTuple = [
   '#f9fafb',
@@ -93,118 +58,46 @@ const neutralColors: MantineColorsTuple = [
   '#0a0a0a',
   '#737373',
 ];
-const redColors: MantineColorsTuple = [
-  '#FEF2F2',
-  '#FEE2E2',
-  '#FECACA',
-  '#FCA5A5',
-  '#F87171',
-  '#DC2626',
-  '#B91C1C',
-  '#991B1B',
-  '#7F1D1D',
-  '#450A0A',
-  '#EF4444',
-];
-const amberColors: MantineColorsTuple = [
-  '#FFFBEB',
-  '#FEF3C7',
-  '#FDE68A',
-  '#FCD34D',
-  '#FBBF24',
-  '#f59e0b',
-  '#D97706',
-  '#92400E',
-  '#78350F',
-  '#451A03',
-  '#F59E0B',
-];
-const yellowColors: MantineColorsTuple = [
-  '#fefce8',
-  '#fef9c3',
-  '#fef08a',
-  '#fde047',
-  '#facc15',
-  '#ca8a04',
-  '#a16207',
-  '#854d0e',
-  '#713f12',
-  '#3f2c06',
-  '#F59E0B',
-];
-const greenColors: MantineColorsTuple = [
-  '#F0FDF4',
-  '#DCFCE7',
-  '#BBF7D0',
-  '#86EFAC',
-  '#4ADE80',
-  '#22c55e',
-  '#16A34A',
-  '#166534',
-  '#14532D',
-  '#052E16',
-  '#10B981',
-];
-const blueColors: MantineColorsTuple = [
-  '#eff6ff',
-  '#dbeafe',
-  '#bfdbfe',
-  '#93c5fd',
-  '#60a5fa',
-  '#3b82f6',
-  '#2563eb',
-  '#1e40af',
-  '#1e3a8a',
-  '#172554',
-  '#3B82F6',
-];
-const primaryColors: MantineColorsTuple = [
-  '#ebeaff',
-  '#d2cfff',
-  '#a09bff',
-  '#6c64ff',
-  '#5046ff',
-  '#2418ff',
-  '#1308ff',
-  '#0300e5',
-  '#0000cd',
-  '#0000b5',
-];
-const primaryAltColors: MantineColorsTuple = [
-  '#edecff',
-  '#d7d5fe',
-  '#aca8f5',
-  '#7e77ed',
-  '#4f46e5',
-  '#3e34e3',
-  '#3127e2',
-  '#231bc9',
-  '#1c17b5',
-  '#1112a0',
-];
+
+const themeColors = {
+  primary: colorsTuple('#5046FF'),
+  primaryAlt: colorsTuple('#4F46E5'),
+  primaryLight: colorsTuple('#8179FF'),
+  secondary: colorsTuple('#1F2937'),
+  border: colorsTuple('#454655'),
+  success: colorsTuple('#42C873'),
+  error: colorsTuple('#FE637A'),
+  warning: colorsTuple('#F59E0B'),
+  gray: grayColors,
+  neutral: neutralColors,
+} as const;
+
+const THEME_COLOR_KEYS = new Set(Object.keys(themeColors));
+
+const NEUTRAL_COLORS = new Set(['gray', 'neutral']);
+
+const getValidColorKey = (color: string | undefined): string | undefined =>
+  color && THEME_COLOR_KEYS.has(color) ? color : undefined;
+
+const isNeutralColorKey = (color: string | undefined): boolean =>
+  !!color && NEUTRAL_COLORS.has(color);
+
+const CONTAINER_SIZES: Record<string, string> = {
+  xxs: rem('200px'),
+  xs: rem('300px'),
+  sm: rem('400px'),
+  md: rem('500px'),
+  lg: rem('600px'),
+  xl: rem('1400px'),
+  xxl: rem('1600px'),
+};
 
 export const theme: MantineThemeOverride = createTheme({
   fontFamily:
     'Poppins, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
-  colors: {
-    gray: grayColors,
-    neutral: neutralColors,
-    red: redColors,
-    amber: amberColors,
-    yellow: yellowColors,
-    green: greenColors,
-    blue: blueColors,
-
-    // Semantic color aliases
-    primary: primaryColors,
-    primaryAlt: primaryAltColors,
-    secondary: grayColors,
-    dark: grayColors,
-    error: redColors,
-    success: greenColors,
-    info: blueColors,
-    warning: amberColors,
-  },
+  colors: themeColors,
+  white: '#FFFFFF',
+  black: '#000000',
   focusRing: 'never',
   scale: 1,
   primaryColor: 'primary',
@@ -518,8 +411,8 @@ export const theme: MantineThemeOverride = createTheme({
     Tooltip: Tooltip.extend({
       vars: () => ({
         tooltip: {
-          '--tooltip-bg': 'var(--mantine-color-primary-color-filled)',
-          '--tooltip-color': 'var(--mantine-color-primary-color-contrast)',
+          '--tooltip-bg': 'var(--mantine-primary-color-filled)',
+          '--tooltip-color': 'var(--mantine-primary-color-contrast)',
         },
       }),
     }),
@@ -678,7 +571,7 @@ export const theme: MantineThemeOverride = createTheme({
     }),
     Mark: Mark.extend({
       vars: (_, props) => {
-        const colorKey = getValidColorKey(props.color) ?? 'yellow';
+        const colorKey = getValidColorKey(props.color) ?? 'warning';
         return {
           root: {
             '--mark-bg-light': `var(--mantine-color-${colorKey}-${isNeutralColorKey(colorKey) ? '3' : 'filled-hover'})`,
