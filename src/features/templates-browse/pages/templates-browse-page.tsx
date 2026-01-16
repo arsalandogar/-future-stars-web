@@ -6,7 +6,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { Head } from '@/components/seo/head';
 
 import { useBrowseTemplates } from '../api/browse-templates';
-import { CategoryFilterChips } from '../components/category-filter-chips';
+import { TagFilterChips } from '../components/tag-filter-chips';
 import { TemplateCarousel } from '../components/template-carousel';
 import { TemplatePreviewModal } from '../components/template-preview-modal';
 import { TemplatesGrid } from '../components/templates-grid';
@@ -15,7 +15,7 @@ import type { BrowseTemplate, TagWithTemplates } from '../types';
 const routeApi = getRouteApi('/_authenticated/_customer/templates');
 
 export function TemplatesBrowsePage() {
-  const { category } = routeApi.useSearch();
+  const { tag } = routeApi.useSearch();
   const navigate = useNavigate();
   const [selectedTemplate, setSelectedTemplate] =
     useState<BrowseTemplate | null>(null);
@@ -24,10 +24,10 @@ export function TemplatesBrowsePage() {
 
   const { data, isLoading, error } = useBrowseTemplates({});
 
-  const handleCategoryChange = (newCategory: string | null) => {
+  const handleTagChange = (newTag: string | null) => {
     void navigate({
       to: '.',
-      search: { category: newCategory ?? undefined },
+      search: { tag: newTag ?? undefined },
     });
   };
 
@@ -36,12 +36,12 @@ export function TemplatesBrowsePage() {
     openModal();
   };
 
-  const filteredCategories = category
-    ? data?.data.filter((cat) => cat.name === category)
+  const filteredTags = tag
+    ? data?.data.filter((t) => t.name === tag)
     : data?.data;
 
-  // If category filter is active, show grid view
-  const showGrid = !!category;
+  // If tag filter is active, show grid view
+  const showGrid = !!tag;
 
   return (
     <>
@@ -67,10 +67,10 @@ export function TemplatesBrowsePage() {
             ))}
           </div>
         ) : (
-          <CategoryFilterChips
-            categories={data?.data ?? []}
-            selected={category ?? null}
-            onChange={handleCategoryChange}
+          <TagFilterChips
+            tags={data?.data ?? []}
+            selected={tag ?? null}
+            onChange={handleTagChange}
           />
         )}
       </div>
@@ -79,7 +79,7 @@ export function TemplatesBrowsePage() {
         isLoading={isLoading}
         error={error}
         showGrid={showGrid}
-        filteredCategories={filteredCategories}
+        filteredTags={filteredTags}
         onTemplateClick={handleTemplateClick}
       />
 
@@ -133,7 +133,7 @@ interface TemplateContentProps {
   isLoading: boolean;
   error: Error | null;
   showGrid: boolean;
-  filteredCategories: TagWithTemplates[] | undefined;
+  filteredTags: TagWithTemplates[] | undefined;
   onTemplateClick: (template: BrowseTemplate) => void;
 }
 
@@ -141,7 +141,7 @@ function TemplateContent({
   isLoading,
   error,
   showGrid,
-  filteredCategories,
+  filteredTags,
   onTemplateClick,
 }: TemplateContentProps) {
   if (isLoading) {
@@ -155,7 +155,7 @@ function TemplateContent({
   if (showGrid) {
     return (
       <TemplatesGrid
-        templates={filteredCategories?.[0]?.templates ?? []}
+        templates={filteredTags?.[0]?.templates ?? []}
         onTemplateClick={onTemplateClick}
       />
     );
@@ -163,10 +163,10 @@ function TemplateContent({
 
   return (
     <>
-      {filteredCategories?.map((cat) => (
+      {filteredTags?.map((t) => (
         <TemplateCarousel
-          key={cat.id}
-          category={cat}
+          key={t.id}
+          tag={t}
           onTemplateClick={onTemplateClick}
         />
       ))}

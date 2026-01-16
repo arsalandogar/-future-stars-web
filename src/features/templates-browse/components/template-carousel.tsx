@@ -7,25 +7,25 @@ import type { BrowseTemplate, TagWithTemplates } from '../types';
 import { TemplateCard } from './template-card';
 
 interface TemplateCarouselProps {
-  category: TagWithTemplates;
+  tag: TagWithTemplates;
   onTemplateClick: (template: BrowseTemplate) => void;
 }
 
 export function TemplateCarousel({
-  category,
+  tag,
   onTemplateClick,
 }: TemplateCarouselProps) {
-  if (category.templates.length === 0) return null;
+  if (tag.templates.length === 0) return null;
 
   return (
     <div className="mb-10">
       <Group justify="space-between" mb="md">
         <Title order={2} size="h3" c="white">
-          {category.label} Cards
+          {tag.label} Cards
         </Title>
         <Link
           to="/templates"
-          search={{ category: category.name }}
+          search={{ tag: tag.name }}
           className="flex items-center gap-1 text-sm text-gray-400 hover:text-white"
         >
           See All <ArrowRight size={16} />
@@ -33,8 +33,8 @@ export function TemplateCarousel({
       </Group>
       <ScrollArea type="scroll" offsetScrollbars={false}>
         <div className="flex gap-4 py-3 px-1">
-          {category.templates.map((template) => (
-            <div key={template.id} className="w-[140px] shrink-0">
+          {tag.templates.map((template) => (
+            <div key={template.id} className="w-35 shrink-0">
               <TemplateCard
                 template={template}
                 onClick={() => onTemplateClick(template)}
