@@ -9,7 +9,7 @@ const COLUMNS: Column[] = [
   { label: 'Address' },
   { label: 'Country', width: 140 },
   { label: 'Phone', width: 140 },
-  { label: 'Tags', width: 140 },
+  { label: 'Status', width: 140 },
 ];
 
 interface AddressesTableProps {

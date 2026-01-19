@@ -1,5 +1,4 @@
 import { Loader, Text } from '@mantine/core';
-// import { useNavigate } from '@tanstack/react-router';
 
 import { Head } from '@/components/seo/head';
 import { usePageHeader } from '@/hooks/use-page-header';
@@ -12,8 +11,6 @@ export interface UserViewPageProps {
 }
 
 export function UserViewPage({ id }: UserViewPageProps) {
-  // const navigate = useNavigate();
-
   const { data: userResponse, isLoading } = useUser({
     variables: id,
   });
@@ -42,10 +39,7 @@ export function UserViewPage({ id }: UserViewPageProps) {
 
   return (
     <>
-      <Head
-        title={'User Profile'}
-        // description={`user information of : ${user.fullName}`}
-      />
+      <Head title={'User Profile'} />
       <UserView user={user} />
     </>
   );

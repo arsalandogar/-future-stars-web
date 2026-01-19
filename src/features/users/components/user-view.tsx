@@ -1,20 +1,22 @@
-import { useState } from 'react';
 import { ListingShell, type ListingTab } from '@/components/ui/listing';
 import { formatDate } from '@/utils/date';
 import { Card, Stack, Title, Text, SimpleGrid } from '@mantine/core';
 
 import type { UserWithRelations } from '../types';
 import { AddressesList } from './addresses-list';
-import { CardsList } from './user-cards-list';
+import { UserCardsList } from './user-cards-list';
 import { CartItemsList } from './cart-items-list';
-import { OrdersList } from './user-orders-list';
-import { PacksList } from './user-packs-list';
+import { UserOrdersList } from './user-orders-list';
+import { UserPacksList } from './user-packs-list';
+import { getRouteApi, useNavigate } from '@tanstack/react-router';
+
+const routeApi = getRouteApi('/_authenticated/admin/_listing/users/$id/');
 
 interface UserViewProps {
   user: UserWithRelations;
 }
 
-type TabValue = 'orders' | 'cards' | 'packs' | 'cartItems' | 'addresses';
+export type TabValue = 'orders' | 'cards' | 'packs' | 'cartItems' | 'addresses';
 
 const TABS: ListingTab[] = [
   { value: 'orders', label: 'Orders' },
@@ -25,22 +27,26 @@ const TABS: ListingTab[] = [
 ];
 
 export function UserView({ user }: UserViewProps) {
-  const [activeTab, setActiveTab] = useState<TabValue>('orders');
+  const navigate = useNavigate();
+  const { tab: activeTab } = routeApi.useSearch();
 
   const handleTabChange = (value: string | null) => {
     if (value) {
-      setActiveTab(value as TabValue);
+      void navigate({
+        to: '.',
+        search: (prev) => ({ ...prev, tab: value as TabValue }),
+      });
     }
   };
 
   const renderTable = () => {
     switch (activeTab) {
       case 'orders':
-        return <OrdersList userId={user.id} />;
+        return <UserOrdersList userId={user.id} />;
       case 'cards':
-        return <CardsList userId={user.id} />;
+        return <UserCardsList userId={user.id} />;
       case 'packs':
-        return <PacksList userId={user.id} />;
+        return <UserPacksList userId={user.id} />;
       case 'cartItems':
         return <CartItemsList userId={user.id} />;
       case 'addresses':
@@ -92,7 +98,6 @@ export function UserView({ user }: UserViewProps) {
   );
 }
 
-/* Reusable Stat Card */
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
     <Card withBorder radius="md" p="md">

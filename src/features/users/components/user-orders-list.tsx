@@ -11,11 +11,11 @@ const COLUMNS: Column[] = [
   { label: 'Status', width: 120 },
 ];
 
-interface OrdersTableProps {
+interface OrdersListProps {
   userId: number;
 }
 
-export function OrdersList({ userId }: OrdersTableProps) {
+export function UserOrdersList({ userId }: OrdersListProps) {
   const { page, limit, search } = useListingContext();
 
   const queryResult = useUserOrders({

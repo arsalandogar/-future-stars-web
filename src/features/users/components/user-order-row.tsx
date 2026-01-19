@@ -1,19 +1,17 @@
-import { Anchor, Badge, Table, Text } from '@mantine/core';
-
+import { Anchor, Table, Text } from '@mantine/core';
 import { formatCurrency } from '@/utils/currency';
 import { formatDate } from '@/utils/date';
 
 import type { UserOrder } from '../types';
 import { ORDER_STATUS_COLORS } from '@/features/orders';
 import { Link } from '@tanstack/react-router';
+import { MappedBadge } from '@/components/ui/mapped-badge';
 
 interface UserOrderRowProps {
   order: UserOrder;
 }
 
 export function UserOrderRow({ order }: UserOrderRowProps) {
-  const statusColor = ORDER_STATUS_COLORS[order.status];
-
   return (
     <>
       <Table.Td>
@@ -35,9 +33,7 @@ export function UserOrderRow({ order }: UserOrderRowProps) {
         </Text>
       </Table.Td>
       <Table.Td>
-        <Badge size="sm" tt="capitalize" variant="light" color={statusColor}>
-          {order.status.replace(/_/g, ' ')}
-        </Badge>
+        <MappedBadge value={order.status} colorMap={ORDER_STATUS_COLORS} />
       </Table.Td>
     </>
   );

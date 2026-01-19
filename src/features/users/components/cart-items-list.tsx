@@ -12,11 +12,11 @@ const COLUMNS: Column[] = [
   { label: 'Added', width: 120 },
 ];
 
-interface CartItemsTableProps {
+interface CartItemsListProps {
   userId: number;
 }
 
-export function CartItemsList({ userId }: CartItemsTableProps) {
+export function CartItemsList({ userId }: CartItemsListProps) {
   const { page, limit, search } = useListingContext();
 
   const queryResult = useUserCartItems({

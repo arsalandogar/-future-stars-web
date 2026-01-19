@@ -12,11 +12,11 @@ const COLUMNS: Column[] = [
   { label: 'Created', width: 120 },
 ];
 
-interface PacksTableProps {
+interface PacksListProps {
   userId: number;
 }
 
-export function PacksList({ userId }: PacksTableProps) {
+export function UserPacksList({ userId }: PacksListProps) {
   const { page, limit, search } = useListingContext();
 
   const queryResult = useUserPacks({

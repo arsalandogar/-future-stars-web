@@ -12,7 +12,6 @@ interface CardRowProps {
 }
 
 export function CardRow({ card }: CardRowProps) {
-  console.log(card);
   return (
     <>
       <Table.Td>

@@ -13,11 +13,11 @@ const COLUMNS: Column[] = [
   { label: 'Created', width: 120 },
 ];
 
-interface CardsTableProps {
+interface CardsListProps {
   userId: number;
 }
 
-export function CardsList({ userId }: CardsTableProps) {
+export function UserCardsList({ userId }: CardsListProps) {
   const { page, limit, search } = useListingContext();
 
   const queryResult = useUserCards({
