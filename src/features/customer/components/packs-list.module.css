@@ -1,0 +1,16 @@
+.container {
+  width: 100%;
+}
+
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--mantine-color-dark-6);
+}
+
+.loadMore {
+  display: flex;
+  justify-content: center;
+  padding: var(--mantine-spacing-xl);
+  min-height: 60px;
+}

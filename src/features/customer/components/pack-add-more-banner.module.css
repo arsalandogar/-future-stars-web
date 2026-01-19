@@ -1,0 +1,27 @@
+.container {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-md);
+  background-color: var(--mantine-color-dark-7);
+  padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
+  margin-top: var(--mantine-spacing-md);
+}
+
+.container p {
+  margin: 0;
+}
+
+.link {
+  background: none;
+  border: none;
+  color: #10b981;
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.link:hover {
+  color: #34d399;
+}

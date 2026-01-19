@@ -1,0 +1,40 @@
+.container {
+  width: 100%;
+  overflow: hidden;
+}
+
+.scrollContainer {
+  display: flex;
+  gap: var(--mantine-spacing-sm);
+  overflow-x: auto;
+  padding: var(--mantine-spacing-xs) 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--mantine-color-dark-4) transparent;
+}
+
+.scrollContainer::-webkit-scrollbar {
+  height: 6px;
+}
+
+.scrollContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollContainer::-webkit-scrollbar-thumb {
+  background-color: var(--mantine-color-dark-4);
+  border-radius: 3px;
+}
+
+.card {
+  flex-shrink: 0;
+  width: 60px;
+  aspect-ratio: 2.5 / 3.5;
+  overflow: hidden;
+  border: 1px solid var(--mantine-color-dark-4);
+}
+
+.cardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

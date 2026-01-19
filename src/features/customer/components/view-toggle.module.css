@@ -1,0 +1,13 @@
+.container {
+  display: flex;
+  gap: var(--mantine-spacing-xs);
+}
+
+.button {
+  border-radius: var(--mantine-radius-sm);
+  border: 1px solid var(--mantine-color-primary-4);
+}
+
+.button:hover {
+  background-color: var(--mantine-color-primary-4);
+}

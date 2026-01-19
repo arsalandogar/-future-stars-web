@@ -1,6 +1,6 @@
 import { ActionIcon, Indicator } from '@mantine/core';
 import { Link } from '@tanstack/react-router';
-import { ShoppingCart } from 'lucide-react';
+import { MdOutlineShoppingCart } from 'react-icons/md';
 
 export function CartButton() {
   // TODO: Connect to cart state/query when available
@@ -27,7 +27,7 @@ export function CartButton() {
         color="gray"
         aria-label={ariaLabel}
       >
-        <ShoppingCart size={22} color="white" />
+        <MdOutlineShoppingCart size={22} color="white" />
       </ActionIcon>
     </Indicator>
   );

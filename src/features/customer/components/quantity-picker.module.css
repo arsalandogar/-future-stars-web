@@ -1,0 +1,30 @@
+.container {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+  background-color: var(--mantine-color-dark-7);
+  border-radius: var(--mantine-radius-full);
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+}
+
+.button {
+  color: var(--mantine-color-primary-4);
+}
+
+.button:hover {
+  background-color: transparent;
+}
+
+.button:disabled {
+  color: var(--mantine-color-dark-4);
+  opacity: 0.5;
+  background-color: transparent;
+}
+
+.value {
+  min-width: 2rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: var(--mantine-font-size-lg);
+  color: var(--mantine-color-white);
+}
