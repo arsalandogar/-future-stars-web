@@ -11,7 +11,7 @@ export const useUserCartItems = createQuery({
     limit,
     search,
   }: UserRelationParams): Promise<UserCartItemsResponse> =>
-    api.get(`admin/users/${userId}/cartItems`, {
+    api.get(`admin/users/${userId}/cart-items`, {
       params: { page, limit, search },
     }),
 });
