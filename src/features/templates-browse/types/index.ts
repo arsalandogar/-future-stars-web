@@ -7,6 +7,8 @@ export interface BrowseTemplate {
   templateImageMedium: string;
   isPublished: boolean;
   pivotDisplayOrder: number;
+  backTemplateId?: number;
+  backTemplate?: BrowseTemplate;
 }
 
 export interface TagWithTemplates {
@@ -21,3 +23,5 @@ export interface TagWithTemplates {
 export interface BrowseTemplatesResponse {
   data: TagWithTemplates[];
 }
+
+export type ActiveTagFilter = 'all' | number;

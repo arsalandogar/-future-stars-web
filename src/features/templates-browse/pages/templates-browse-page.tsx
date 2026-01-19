@@ -1,7 +1,5 @@
-import { useState } from 'react';
 import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { Button, Skeleton, Text, Title } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
 
 import { Head } from '@/components/seo/head';
 
@@ -15,29 +13,48 @@ import type { BrowseTemplate, TagWithTemplates } from '../types';
 const routeApi = getRouteApi('/_authenticated/_customer/templates');
 
 export function TemplatesBrowsePage() {
-  const { tag } = routeApi.useSearch();
+  const { tag, preview } = routeApi.useSearch();
   const navigate = useNavigate();
-  const [selectedTemplate, setSelectedTemplate] =
-    useState<BrowseTemplate | null>(null);
-  const [modalOpened, { open: openModal, close: closeModal }] =
-    useDisclosure(false);
 
   const { data, isLoading, error } = useBrowseTemplates({});
 
   const handleTagChange = (newTag: string | null) => {
     void navigate({
       to: '.',
-      search: { tag: newTag ?? undefined },
+      search: { tag: newTag ?? undefined, preview },
     });
   };
 
   const handleTemplateClick = (template: BrowseTemplate) => {
-    setSelectedTemplate(template);
-    openModal();
+    void navigate({
+      to: '.',
+      search: { tag, preview: template.id },
+    });
   };
 
+  const handleCloseModal = () => {
+    void navigate({
+      to: '.',
+      search: { tag, preview: undefined },
+    });
+  };
+
+  const handleTemplateChange = (templateId: number) => {
+    void navigate({
+      to: '.',
+      search: { tag, preview: templateId },
+    });
+  };
+
+  // Find the template to preview from URL param
+  const allTemplates = data?.data.flatMap((tagItem) => tagItem.templates) ?? [];
+  const selectedTemplate = preview
+    ? (allTemplates.find((tpl) => tpl.id === preview) ?? null)
+    : null;
+  const modalOpened = !!selectedTemplate;
+
   const filteredTags = tag
-    ? data?.data.filter((t) => t.name === tag)
+    ? data?.data.filter((tagItem) => tagItem.name === tag)
     : data?.data;
 
   // If tag filter is active, show grid view
@@ -83,11 +100,15 @@ export function TemplatesBrowsePage() {
         onTemplateClick={handleTemplateClick}
       />
 
-      <TemplatePreviewModal
-        template={selectedTemplate}
-        opened={modalOpened}
-        onClose={closeModal}
-      />
+      {modalOpened && selectedTemplate ? (
+        <TemplatePreviewModal
+          template={selectedTemplate}
+          allTags={data?.data ?? []}
+          opened={modalOpened}
+          onClose={handleCloseModal}
+          onTemplateChange={handleTemplateChange}
+        />
+      ) : null}
     </>
   );
 }
@@ -163,10 +184,10 @@ function TemplateContent({
 
   return (
     <>
-      {filteredTags?.map((t) => (
+      {filteredTags?.map((tagItem) => (
         <TemplateCarousel
-          key={t.id}
-          tag={t}
+          key={tagItem.id}
+          tag={tagItem}
           onTemplateClick={onTemplateClick}
         />
       ))}
