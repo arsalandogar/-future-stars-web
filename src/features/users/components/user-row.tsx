@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router';
 import { ActionIcon, Menu, Table, Text } from '@mantine/core';
 import { Eye, MoreHorizontal } from 'lucide-react';
 
@@ -42,7 +43,13 @@ export function UserRow({ user }: UserRowProps) {
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item leftSection={<Eye size={14} />}>View Details</Menu.Item>
+            <Menu.Item
+              component={Link}
+              to={`/admin/users/${user.id}`}
+              leftSection={<Eye size={14} />}
+            >
+              View Details
+            </Menu.Item>
           </Menu.Dropdown>
         </Menu>
       </Table.Td>
