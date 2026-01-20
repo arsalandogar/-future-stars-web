@@ -22,9 +22,7 @@ export function CartItemRow({ cartItem }: CartItemRowProps) {
         </Text>
       </Table.Td>
       <Table.Td>
-        <Badge size="sm" variant="light" color="blue">
-          {cartItem.quantity}
-        </Badge>
+        <Text size="sm">{cartItem.quantity}</Text>
       </Table.Td>
       <Table.Td>
         {cartItem.orderId ? (
