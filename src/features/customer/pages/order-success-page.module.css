@@ -1,0 +1,258 @@
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+.container {
+  padding: var(--mantine-spacing-xl) var(--mantine-spacing-md);
+  width: 100%;
+}
+
+.pageTitle {
+  margin-bottom: 2rem;
+}
+
+.content {
+  background-color: black;
+  border-radius: var(--mantine-radius-lg);
+  padding: var(--mantine-spacing-xl);
+}
+
+.topRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4rem;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--mantine-spacing-xl);
+}
+
+@media (min-width: 768px) {
+  .topRow {
+    flex-wrap: nowrap;
+  }
+}
+
+/* Card Fan Styles */
+.cardFan {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 340px;
+  height: 280px;
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .cardFan {
+    width: 400px;
+    height: 320px;
+  }
+}
+
+.cardFan::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(
+    circle,
+    var(--customer-primary-glow) 0%,
+    var(--customer-primary-glow) 30%,
+    transparent 70%
+  );
+  filter: blur(50px);
+  z-index: 0;
+}
+
+@media (min-width: 768px) {
+  .cardFan::before {
+    width: 360px;
+    height: 360px;
+    filter: blur(60px);
+  }
+}
+
+.fanCard {
+  position: absolute;
+  width: auto;
+  aspect-ratio: 2.5 / 3.5;
+  object-fit: cover;
+  border-radius: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.leftCard {
+  left: 0;
+  transform: rotate(-12deg);
+  height: 140px;
+  z-index: 1;
+}
+
+@media (min-width: 768px) {
+  .leftCard {
+    height: 170px;
+  }
+}
+
+.centerCard {
+  left: 50%;
+  transform: translateX(-50%);
+  height: 200px;
+  z-index: 3;
+}
+
+@media (min-width: 768px) {
+  .centerCard {
+    height: 240px;
+  }
+}
+
+.rightCard {
+  right: 0;
+  transform: rotate(12deg);
+  height: 140px;
+  z-index: 2;
+}
+
+@media (min-width: 768px) {
+  .rightCard {
+    height: 170px;
+  }
+}
+
+/* Order Info Styles */
+.orderInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  background-color: var(--customer-order-card-bg);
+  border-radius: 0;
+  padding: var(--mantine-spacing-xl);
+  gap: var(--mantine-spacing-lg);
+}
+
+@media (min-width: 768px) {
+  .orderInfo {
+    align-items: center;
+    text-align: center;
+    flex: 1;
+    max-width: 420px;
+    padding: var(--mantine-spacing-xl);
+  }
+}
+
+.confirmedHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+}
+
+.checkIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mantine-color-green-5);
+}
+
+.thankYou {
+  margin: 0;
+}
+
+.orderDetails {
+  width: 100%;
+  background-color: var(--customer-order-details-bg);
+  border-radius: var(--mantine-radius-md);
+  padding: var(--mantine-spacing-md);
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--mantine-spacing-xs) 0;
+}
+
+.detailRow:first-child {
+  border-bottom: 1px solid var(--mantine-color-dark-5);
+  padding-bottom: var(--mantine-spacing-sm);
+  margin-bottom: var(--mantine-spacing-xs);
+}
+
+/* What's Next Section */
+.whatsNext {
+  margin-top: var(--mantine-spacing-md);
+}
+
+.whatsNextTitle {
+  margin-bottom: 1.5rem;
+}
+
+.nextSteps {
+  display: flex;
+  flex-wrap: wrap;
+  background-color: var(--customer-order-steps-bg);
+  border-radius: var(--mantine-radius-lg);
+  padding: var(--mantine-spacing-xl);
+  gap: var(--mantine-spacing-lg);
+}
+
+@media (min-width: 900px) {
+  .nextSteps {
+    flex-wrap: nowrap;
+    gap: 0;
+  }
+}
+
+.stepCard {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--mantine-spacing-md);
+  flex: 1 1 100%;
+}
+
+@media (min-width: 900px) {
+  .stepCard {
+    flex: 1 1 0;
+    padding: 0 var(--mantine-spacing-md);
+  }
+}
+
+.stepIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  background-color: var(--customer-order-icon-bg);
+  border-radius: 50%;
+  color: var(--customer-order-icon-color);
+}
+
+.stepContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-xs);
+}
+
+.stepDivider {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .stepDivider {
+    display: block;
+    width: 1px;
+    background-color: var(--mantine-color-primaryLight-filled);
+    align-self: stretch;
+  }
+}

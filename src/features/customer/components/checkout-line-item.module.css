@@ -1,0 +1,119 @@
+.container {
+  background-color: var(--customer-input-bg);
+  border-radius: var(--mantine-radius-md);
+  overflow: hidden;
+}
+
+.mainContent {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--mantine-spacing-md);
+  padding: var(--mantine-spacing-md);
+}
+
+.thumbnail {
+  flex-shrink: 0;
+  width: 30px;
+  aspect-ratio: 2.5 / 3.5;
+  overflow: hidden;
+  border: 2px solid var(--mantine-color-primary-4);
+}
+
+.thumbnailImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbnailPlaceholder {
+  width: 100%;
+  height: 100%;
+  background-color: var(--mantine-color-dark-6);
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+}
+
+.packName {
+  color: var(--mantine-color-white);
+  font-weight: 600;
+}
+
+.cardCount {
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.expandButton {
+  flex-shrink: 0;
+  color: var(--mantine-color-white);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: var(--mantine-spacing-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 150ms ease;
+}
+
+.expandButton:hover {
+  color: var(--mantine-color-primaryLight-filled);
+}
+
+.expandedContent {
+  padding: 0 var(--mantine-spacing-md) var(--mantine-spacing-md);
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: var(--mantine-spacing-sm);
+}
+
+.cardItem {
+  position: relative;
+}
+
+.cardImage {
+  width: 100%;
+  aspect-ratio: 2.5 / 3.5;
+  object-fit: cover;
+  border: 1px solid var(--mantine-color-dark-5);
+}
+
+.quantityBadge {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background-color: var(--mantine-color-primary-4);
+  color: white;
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: var(--mantine-radius-sm);
+}
+
+.addMoreBanner {
+  border-top: 1px solid var(--mantine-color-dark-6);
+}
+
+@media (max-width: 576px) {
+  .mainContent {
+    padding: var(--mantine-spacing-sm);
+  }
+
+  .thumbnail {
+    width: 25px;
+  }
+
+  .packName {
+    font-size: var(--mantine-font-size-sm);
+  }
+
+  .cardsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  }
+}

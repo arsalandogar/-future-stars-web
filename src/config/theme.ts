@@ -68,6 +68,7 @@ const themeColors = {
   success: colorsTuple('#42C873'),
   error: colorsTuple('#FE637A'),
   warning: colorsTuple('#F59E0B'),
+  surface: colorsTuple('#1A212B'),
   gray: grayColors,
   neutral: neutralColors,
 } as const;

@@ -1,0 +1,11 @@
+.panel {
+  background-color: var(--mantine-color-black);
+  border-radius: var(--mantine-radius-xs);
+  padding: var(--mantine-spacing-xl);
+}
+
+@media (max-width: 576px) {
+  .panel {
+    padding: var(--mantine-spacing-sm);
+  }
+}

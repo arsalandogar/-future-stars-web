@@ -1,4 +1,6 @@
-import { NavTabs } from '@/components/ui/nav-tabs';
+import { Link } from '@tanstack/react-router';
+
+import classes from './customer-header.module.css';
 
 const NAV_ITEMS = [
   { label: 'HOME', to: '/' },
@@ -14,6 +16,19 @@ interface NavLinksProps {
 
 export function NavLinks({ onClick, vertical }: NavLinksProps) {
   return (
-    <NavTabs items={[...NAV_ITEMS]} onClick={onClick} vertical={vertical} />
+    <>
+      {NAV_ITEMS.map((item) => (
+        <Link
+          key={item.to}
+          to={item.to}
+          onClick={onClick}
+          className={`${classes.navLink} ${vertical ? classes.navLinkVertical : ''}`}
+          activeProps={{ 'data-active': 'true' }}
+          activeOptions={{ exact: item.to === '/' }}
+        >
+          {item.label}
+        </Link>
+      ))}
+    </>
   );
 }

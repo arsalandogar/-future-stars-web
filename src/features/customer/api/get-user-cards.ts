@@ -13,6 +13,8 @@ interface UserCardsResponse {
 export interface UserCardsParams {
   page?: number;
   limit?: number;
+  includeIds?: number[];
+  excludeIds?: number[];
 }
 
 export const USER_CARDS_INITIAL_PAGE = 1;

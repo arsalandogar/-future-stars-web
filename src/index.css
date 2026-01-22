@@ -7,6 +7,59 @@
   --customer-control-bg: #8179ff1a;
   --customer-primary-glow: #8179ff4a;
   --customer-title-spacing: 0.05em;
+
+  /* Account page colors */
+  --customer-input-bg: #323C4C;
+  --customer-card-bg: #1A222F;
+  --customer-active-item-bg: #1D293B;
+  --customer-button-secondary-bg: #333849;
+
+  /* Order confirmation colors */
+  --customer-order-card-bg: #141B24;
+  --customer-order-details-bg: #1D2633;
+  --customer-order-steps-bg: #19212C;
+  --customer-order-icon-bg: #313B4A;
+  --customer-order-icon-color: #9CA3AF;
+
+  /* Typography colors */
+  --text-primary: #FFFFFF;
+  --text-secondary: #E5E7EB;
+  --text-muted: #9CA3AF;
+
+  /* Icon colors */
+  --icon-default: #E5E7EB;
+
+  /* Typography weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+}
+
+/* Global typography */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  margin: 0;
+}
+
+h1 {
+  font-weight: var(--font-weight-bold);
+}
+
+h2 {
+  font-weight: var(--font-weight-semibold);
+}
+
+p {
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+  margin: 0;
+}
+
+/* Icon styling */
+.icon {
+  color: var(--icon-default);
+  stroke-width: 2;
 }
 
 /* Montserrat Font */

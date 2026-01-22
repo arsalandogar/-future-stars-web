@@ -1,9 +1,9 @@
 .container {
-  --cards-grid-spacing: 32px;
+  --cards-grid-spacing: 10px;
   padding: var(--mantine-spacing-xl) var(--mantine-spacing-md);
 
   @media (max-width: 576px) {
-    --cards-grid-spacing: 16px;
+    --cards-grid-spacing: 6px;
     padding: var(--mantine-spacing-md) var(--mantine-spacing-sm);
   }
 }
@@ -21,14 +21,7 @@
   margin-bottom: var(--mantine-spacing-lg);
 }
 
-.contentContainer {
-  background-color: var(--mantine-color-dark-9);
-  border-radius: var(--mantine-radius-lg) var(--mantine-radius-lg) 0 0;
-  padding: var(--cards-grid-spacing);
-  min-height: calc(100vh - 84px);
-}
-
-.contentContainer.transparentBg {
+.transparentBg {
   background-color: transparent;
 }
 
@@ -48,4 +41,11 @@
 .createPackButton:hover {
   background-color: var(--mantine-color-primary-4);
   border-color: var(--mantine-color-primary-4);
+}
+
+.emptyStateWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
 }

@@ -1,4 +1,4 @@
-import { ActionIcon, Image, Text } from '@mantine/core';
+import { Image, Text } from '@mantine/core';
 import { Check, Minus, Plus } from 'lucide-react';
 
 import type { Card } from '@/types';
@@ -34,19 +34,26 @@ export function SelectableCardItem({
     onQuantityChange(quantity + 1);
   };
 
-  const handleClick = () => {
-    if (disabled && !isSelected) return;
+  const handleCardClick = () => {
+    // Only allow selecting, not deselecting by clicking the card
+    if (isSelected) return;
+    if (disabled) return;
     onSelect();
+  };
+
+  const handleCheckClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelect(); // Deselect
   };
 
   return (
     <div
       className={`${styles.card} ${isSelected ? styles.selected : ''} ${disabled && !isSelected ? styles.disabled : ''}`}
-      onClick={handleClick}
+      onClick={handleCardClick}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          handleClick();
+          handleCardClick();
         }
       }}
       role="button"
@@ -62,28 +69,30 @@ export function SelectableCardItem({
 
         {isSelected && (
           <>
-            <div className={styles.checkBadge}>
+            <button
+              type="button"
+              className={styles.checkBadge}
+              onClick={handleCheckClick}
+            >
               <Check size={16} strokeWidth={3} />
-            </div>
+            </button>
 
             <div className={styles.quantityPicker}>
-              <ActionIcon
-                variant="transparent"
-                size="sm"
+              <button
+                type="button"
                 onClick={handleDecrement}
                 className={styles.quantityButton}
               >
-                <Minus size={16} />
-              </ActionIcon>
+                <Minus size={22} />
+              </button>
               <Text className={styles.quantityValue}>{quantity}</Text>
-              <ActionIcon
-                variant="transparent"
-                size="sm"
+              <button
+                type="button"
                 onClick={handleIncrement}
                 className={styles.quantityButton}
               >
-                <Plus size={16} />
-              </ActionIcon>
+                <Plus size={22} />
+              </button>
             </div>
           </>
         )}
