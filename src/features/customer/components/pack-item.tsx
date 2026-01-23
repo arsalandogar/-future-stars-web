@@ -1,4 +1,11 @@
-import { ActionIcon, Button, Image, Menu, Text, TextInput } from '@mantine/core';
+import {
+  ActionIcon,
+  Button,
+  Image,
+  Menu,
+  Text,
+  TextInput,
+} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
   Check,
@@ -17,6 +24,7 @@ import { MdOutlineShoppingCart } from 'react-icons/md';
 import type { Pack } from '@/types';
 
 import { useUpdatePack } from '../api/update-pack';
+import { formatDate } from '../utils/format-date';
 
 import { DeletePackModal } from './delete-pack-modal';
 import { PackAddMoreBanner } from './pack-add-more-banner';
@@ -32,11 +40,6 @@ interface PackItemProps {
   onEdit?: (pack: Pack) => void;
   onCopy?: (pack: Pack) => void;
   readOnly?: boolean;
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
 }
 
 function getTotalQuantity(pack: Pack): number {
@@ -112,7 +115,9 @@ export function PackItem({
   };
 
   return (
-    <div className={`${styles.container} ${styles[variant]} ${readOnly ? styles.readOnly : ''}`}>
+    <div
+      className={`${styles.container} ${styles[variant]} ${readOnly ? styles.readOnly : ''}`}
+    >
       <div className={styles.mainContent}>
         <button
           type="button"
@@ -168,7 +173,13 @@ export function PackItem({
               </>
             ) : (
               <>
-                <Text fw={600} size="lg" c="white" m={0} className={styles.name}>
+                <Text
+                  fw={600}
+                  size="lg"
+                  c="white"
+                  m={0}
+                  className={styles.name}
+                >
                   {pack.name}
                 </Text>
                 {!readOnly && (
@@ -233,7 +244,11 @@ export function PackItem({
                   onClick={() => setIsExpanded(!isExpanded)}
                 >
                   <span>View Cards</span>
-                  {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  {isExpanded ? (
+                    <ChevronUp size={16} />
+                  ) : (
+                    <ChevronDown size={16} />
+                  )}
                 </button>
               )}
               <Button
@@ -257,7 +272,9 @@ export function PackItem({
         </div>
       )}
 
-      {!readOnly && <PackAddMoreBanner pack={pack} totalQuantity={totalQuantity} />}
+      {!readOnly && (
+        <PackAddMoreBanner pack={pack} totalQuantity={totalQuantity} />
+      )}
 
       {!readOnly && (
         <DeletePackModal

@@ -1,4 +1,4 @@
-import type { Order } from '@/features/orders/types';
+import type { Order } from '@/types';
 
 import { api } from '@/lib/api-client';
 import { createMutation, invalidateQueries } from '@/lib/react-query';

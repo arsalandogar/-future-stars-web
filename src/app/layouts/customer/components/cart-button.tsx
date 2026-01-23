@@ -2,7 +2,7 @@ import { ActionIcon, Indicator } from '@mantine/core';
 import { Link } from '@tanstack/react-router';
 import { MdOutlineShoppingCart } from 'react-icons/md';
 
-import { useCartItems } from '@/features/customer/api/get-cart-items';
+import { useCartItems } from '@/features/customer';
 
 export function CartButton() {
   const { data } = useCartItems();

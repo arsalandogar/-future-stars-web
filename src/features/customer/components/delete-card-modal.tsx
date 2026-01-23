@@ -1,13 +1,8 @@
-import {
-  ActionIcon,
-  Button,
-  Checkbox,
-  Modal,
-  Text,
-  Title,
-} from '@mantine/core';
-import { ArrowLeft, Check, X } from 'lucide-react';
+import { Checkbox, Text } from '@mantine/core';
+import { Check } from 'lucide-react';
 import { useState } from 'react';
+
+import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 
 import { useDeleteCard } from '../api/delete-card';
 
@@ -55,89 +50,54 @@ export function DeleteCardModal({
     onClose();
   };
 
-  const isConfirmDisabled =
-    !deleteFromGallery && !deleteFromPacks || deleteCard.isPending;
+  const isConfirmDisabled = !deleteFromGallery && !deleteFromPacks;
 
   return (
-    <Modal
+    <ConfirmationModal
       opened={opened}
       onClose={handleClose}
-      withCloseButton={false}
-      centered
+      title="DELETE CARD"
+      confirmLabel="Confirm"
+      confirmIcon={<Check size={18} />}
+      onConfirm={handleConfirm}
+      isPending={deleteCard.isPending}
+      disabled={isConfirmDisabled}
       size={480}
-      classNames={{
-        content: styles.content,
-        body: styles.body,
-      }}
     >
-      <div className={styles.header}>
-        <Title order={4} className={styles.headerTitle}>
-          DELETE CARD
-        </Title>
-        <ActionIcon
-          variant="transparent"
+      <Text className={styles.subtitle}>Choose an action for this card</Text>
+
+      <div className={styles.checkboxGroup}>
+        <Checkbox
+          label="Delete from My Cards"
+          checked={deleteFromGallery}
+          onChange={(e) => setDeleteFromGallery(e.currentTarget.checked)}
           size="md"
-          onClick={handleClose}
-          className={styles.closeButton}
-        >
-          <X size={24} />
-        </ActionIcon>
+          classNames={{
+            root: styles.checkboxRoot,
+            body: styles.checkboxBody,
+            inner: styles.checkboxInner,
+            label: deleteFromGallery
+              ? styles.checkboxLabelChecked
+              : styles.checkboxLabel,
+            input: styles.checkboxInput,
+          }}
+        />
+        <Checkbox
+          label="Delete from Packs"
+          checked={deleteFromPacks}
+          onChange={(e) => setDeleteFromPacks(e.currentTarget.checked)}
+          size="md"
+          classNames={{
+            root: styles.checkboxRoot,
+            body: styles.checkboxBody,
+            inner: styles.checkboxInner,
+            label: deleteFromPacks
+              ? styles.checkboxLabelChecked
+              : styles.checkboxLabel,
+            input: styles.checkboxInput,
+          }}
+        />
       </div>
-
-      <div className={styles.contentSection}>
-        <Text className={styles.subtitle}>Choose an action for this card</Text>
-
-        <div className={styles.checkboxGroup}>
-          <Checkbox
-            label="Delete from My Cards"
-            checked={deleteFromGallery}
-            onChange={(e) => setDeleteFromGallery(e.currentTarget.checked)}
-            size="md"
-            classNames={{
-              root: styles.checkboxRoot,
-              body: styles.checkboxBody,
-              inner: styles.checkboxInner,
-              label: deleteFromGallery ? styles.checkboxLabelChecked : styles.checkboxLabel,
-              input: styles.checkboxInput,
-            }}
-          />
-          <Checkbox
-            label="Delete from Packs"
-            checked={deleteFromPacks}
-            onChange={(e) => setDeleteFromPacks(e.currentTarget.checked)}
-            size="md"
-            classNames={{
-              root: styles.checkboxRoot,
-              body: styles.checkboxBody,
-              inner: styles.checkboxInner,
-              label: deleteFromPacks ? styles.checkboxLabelChecked : styles.checkboxLabel,
-              input: styles.checkboxInput,
-            }}
-          />
-        </div>
-      </div>
-
-      <div className={styles.footer}>
-        <Button
-          variant="transparent"
-          color="white"
-          leftSection={<ArrowLeft size={18} />}
-          onClick={handleClose}
-          className={styles.cancelButton}
-        >
-          Cancel
-        </Button>
-        <Button
-          variant="filled"
-          leftSection={<Check size={18} />}
-          onClick={handleConfirm}
-          disabled={isConfirmDisabled}
-          loading={deleteCard.isPending}
-          className={styles.confirmButton}
-        >
-          Confirm
-        </Button>
-      </div>
-    </Modal>
+    </ConfirmationModal>
   );
 }

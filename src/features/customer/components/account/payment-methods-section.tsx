@@ -10,7 +10,7 @@ import { ArrowLeft, CreditCard, Trash2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 
-import { stripeAppearance, stripePromise } from '@/lib/stripe';
+import { getStripePromise, stripeAppearance } from '@/lib/stripe';
 
 import { useCreateSetupIntent } from '../../api/create-setup-intent';
 import { useDeletePaymentMethod } from '../../api/delete-payment-method';
@@ -19,6 +19,7 @@ import {
   usePaymentMethods,
 } from '../../api/get-payment-methods';
 import { useSetDefaultPayment } from '../../api/set-default-payment';
+import { AccountSectionHeader } from './account-section-header';
 import styles from './account-section.module.css';
 import paymentModalStyles from '../payment-modal.module.css';
 
@@ -39,11 +40,15 @@ export function PaymentMethodsSection() {
   const { data, isLoading } = usePaymentMethods();
   const [modalOpened, { open: openModal, close: closeModal }] =
     useDisclosure(false);
-  const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] =
-    useDisclosure(false);
+  const [
+    deleteModalOpened,
+    { open: openDeleteModal, close: closeDeleteModal },
+  ] = useDisclosure(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [isLoadingSetupIntent, setIsLoadingSetupIntent] = useState(false);
-  const [methodToDelete, setMethodToDelete] = useState<PaymentMethod | null>(null);
+  const [methodToDelete, setMethodToDelete] = useState<PaymentMethod | null>(
+    null
+  );
 
   const deletePaymentMethod = useDeletePaymentMethod();
   const setDefaultPayment = useSetDefaultPayment();
@@ -53,14 +58,16 @@ export function PaymentMethodsSection() {
   useEffect(() => {
     if (modalOpened && !clientSecret) {
       setIsLoadingSetupIntent(true);
-      createSetupIntent.mutateAsync(undefined)
-        .then((response) => {
+      createSetupIntent.mutate(undefined, {
+        onSuccess: (response) => {
           setClientSecret(response.data.setupIntentSecret);
-        })
-        .finally(() => {
+        },
+        onSettled: () => {
           setIsLoadingSetupIntent(false);
-        });
+        },
+      });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Only fetch when modal opens, clientSecret check is inside
   }, [modalOpened]);
 
   const handleCloseModal = () => {
@@ -95,17 +102,14 @@ export function PaymentMethodsSection() {
   if (isLoading) {
     return (
       <div>
-        <div className={styles.header}>
-          <div>
-            <Title order={2} c="white" fw={800} className={styles.title}>
-              Payment Methods
-            </Title>
-            <Text component="span" c="dimmed" size="md" display="block">
-              Manage your payment methods
-            </Text>
-          </div>
-        </div>
-        <div className={styles.card} style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+        <AccountSectionHeader
+          title="Payment Methods"
+          description="Manage your payment methods"
+        />
+        <div
+          className={styles.card}
+          style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}
+        >
           <Loader size="lg" />
         </div>
       </div>
@@ -114,16 +118,10 @@ export function PaymentMethodsSection() {
 
   return (
     <div>
-      <div className={styles.header}>
-        <div>
-          <Title order={2} c="white" fw={800} className={styles.title}>
-            Payment Methods
-          </Title>
-          <Text component="span" c="dimmed" size="md" display="block">
-            Manage your payment methods
-          </Text>
-        </div>
-      </div>
+      <AccountSectionHeader
+        title="Payment Methods"
+        description="Manage your payment methods"
+      />
 
       <div className={styles.cardsList}>
         {defaultMethod && (
@@ -152,7 +150,10 @@ export function PaymentMethodsSection() {
         )}
       </div>
 
-      <div className={styles.actions} style={{ marginTop: 'var(--mantine-spacing-lg)' }}>
+      <div
+        className={styles.actions}
+        style={{ marginTop: 'var(--mantine-spacing-lg)' }}
+      >
         <Button
           variant="filled"
           radius="xl"
@@ -180,19 +181,25 @@ export function PaymentMethodsSection() {
         }}
       >
         {isLoadingSetupIntent ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              padding: '3rem',
+            }}
+          >
             <Loader size="lg" />
           </div>
         ) : clientSecret ? (
           <Elements
-            stripe={stripePromise}
+            stripe={getStripePromise()}
             options={{
               clientSecret,
               appearance: stripeAppearance,
             }}
           >
-              <AddPaymentMethodForm onSuccess={handleCloseModal} />
-            </Elements>
+            <AddPaymentMethodForm onSuccess={handleCloseModal} />
+          </Elements>
         ) : null}
       </Modal>
 
@@ -221,7 +228,9 @@ export function PaymentMethodsSection() {
         <Text c="dimmed" size="md">
           Are you sure you want to delete{' '}
           <Text component="span" c="white" fw={500}>
-            {methodToDelete?.card ? `${formatCardBrand(methodToDelete.card.brand)} (••••${methodToDelete.card.last4})` : 'this payment method'}
+            {methodToDelete?.card
+              ? `${formatCardBrand(methodToDelete.card.brand)} (••••${methodToDelete.card.last4})`
+              : 'this payment method'}
           </Text>
           ?
         </Text>
@@ -270,7 +279,13 @@ function PaymentMethodCard({
   return (
     <div className={styles.card}>
       <div className={styles.cardHeader}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--mantine-spacing-sm)' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--mantine-spacing-sm)',
+          }}
+        >
           <Text c="white" fw={500} size="md" style={{ margin: 0 }}>
             Credit Card {formatCardBrand(brand)} ({last4})
           </Text>
@@ -280,7 +295,12 @@ function PaymentMethodCard({
             </Button>
           ) : (
             onSetDefault && (
-              <Button size="compact-xs" radius="xl" variant="outline" onClick={onSetDefault}>
+              <Button
+                size="compact-xs"
+                radius="xl"
+                variant="outline"
+                onClick={onSetDefault}
+              >
                 Default
               </Button>
             )
@@ -333,13 +353,21 @@ function AddPaymentMethodForm({ onSuccess }: AddPaymentMethodFormProps) {
       setIsLoading(false);
     } else {
       // Invalidate payment methods query to refetch
-      void queryClient.invalidateQueries({ queryKey: ['customer', 'payment-methods'] });
+      void queryClient.invalidateQueries({
+        queryKey: ['customer', 'payment-methods'],
+      });
       onSuccess();
     }
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--mantine-spacing-lg)' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--mantine-spacing-lg)',
+      }}
+    >
       <div style={{ minHeight: 200 }}>
         <PaymentElement
           options={{
@@ -365,11 +393,17 @@ function AddPaymentMethodForm({ onSuccess }: AddPaymentMethodFormProps) {
         </Text>
       )}
 
-      <div style={{ display: 'flex', gap: 'var(--mantine-spacing-sm)', justifyContent: 'flex-end' }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: 'var(--mantine-spacing-sm)',
+          justifyContent: 'flex-end',
+        }}
+      >
         <Button
           variant="filled"
           radius="xl"
-          onClick={handleSubmit}
+          onClick={() => void handleSubmit()}
           loading={isLoading}
           disabled={!stripe || !elements}
         >

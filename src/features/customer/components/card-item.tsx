@@ -22,7 +22,13 @@ export function CardItem({ imageUrl, alt = 'Card', onClick }: CardItemProps) {
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
     >
-      <Image src={imageUrl} alt={alt} fit="cover" className={styles.image} />
+      <Image
+        src={imageUrl}
+        alt={alt}
+        fit="cover"
+        className={styles.image}
+        loading="lazy"
+      />
     </div>
   );
 }

@@ -1,9 +1,14 @@
 import { Button, Modal, Text, Title } from '@mantine/core';
-import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
+import {
+  Elements,
+  PaymentElement,
+  useElements,
+  useStripe,
+} from '@stripe/react-stripe-js';
 import { CreditCard } from 'lucide-react';
 import { useState } from 'react';
 
-import { stripeAppearance, stripePromise } from '@/lib/stripe';
+import { getStripePromise, stripeAppearance } from '@/lib/stripe';
 
 import styles from './payment-modal.module.css';
 
@@ -65,7 +70,7 @@ function PaymentFormInner({ onPaymentSuccess, amount }: PaymentFormInnerProps) {
         radius="xl"
         fullWidth
         leftSection={<CreditCard size={20} />}
-        onClick={handleSubmit}
+        onClick={() => void handleSubmit()}
         loading={isProcessing}
         disabled={!stripe || !elements}
         className={styles.payButton}
@@ -111,7 +116,7 @@ export function PaymentModal({
       }}
     >
       <Elements
-        stripe={stripePromise}
+        stripe={getStripePromise()}
         options={{
           clientSecret,
           customerSessionClientSecret: customerSessionClientSecret ?? undefined,

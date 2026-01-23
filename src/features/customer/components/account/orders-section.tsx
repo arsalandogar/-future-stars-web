@@ -1,9 +1,10 @@
-import { Button, Collapse, Loader, Text, Title } from '@mantine/core';
+import { Button, Collapse, Loader, Text } from '@mantine/core';
 import { ChevronDown, ChevronUp, SlidersHorizontal, Truck } from 'lucide-react';
 import { useState } from 'react';
 
 import { type Order, type OrderStatus, useOrders } from '../../api/get-orders';
 import { OrderPackItem } from '../order-pack-item';
+import { AccountSectionHeader } from './account-section-header';
 import styles from './account-section.module.css';
 import orderStyles from './orders-section.module.css';
 
@@ -55,17 +56,14 @@ export function OrdersSection() {
   if (isLoading) {
     return (
       <div>
-        <div className={styles.header}>
-          <div>
-            <Title order={2} c="white" fw={800} className={styles.title}>
-              My Orders
-            </Title>
-            <Text component="span" c="dimmed" size="md" display="block">
-              {orders.length} Orders
-            </Text>
-          </div>
-        </div>
-        <div className={styles.card} style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+        <AccountSectionHeader
+          title="My Orders"
+          description={`${orders.length} Orders`}
+        />
+        <div
+          className={styles.card}
+          style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}
+        >
           <Loader size="lg" />
         </div>
       </div>
@@ -74,24 +72,20 @@ export function OrdersSection() {
 
   return (
     <div>
-      <div className={styles.header}>
-        <div>
-          <Title order={2} c="white" fw={800} className={styles.title}>
-            My Orders
-          </Title>
-          <Text component="span" c="dimmed" size="md" display="block">
-            {orders.length} Orders
-          </Text>
-        </div>
-        <Button
-          variant="default"
-          radius="xl"
-          leftSection={<SlidersHorizontal size={16} />}
-          disabled
-        >
-          Filters
-        </Button>
-      </div>
+      <AccountSectionHeader
+        title="My Orders"
+        description={`${orders.length} Orders`}
+        action={
+          <Button
+            variant="default"
+            radius="xl"
+            leftSection={<SlidersHorizontal size={16} />}
+            disabled
+          >
+            Filters
+          </Button>
+        }
+      />
 
       {orders.length === 0 ? (
         <div className={styles.card}>
@@ -103,7 +97,11 @@ export function OrdersSection() {
         <div className={styles.card}>
           <div className={orderStyles.ordersList}>
             {orders.map((order, index) => (
-              <OrderCard key={order.id} order={order} isLast={index === orders.length - 1} />
+              <OrderCard
+                key={order.id}
+                order={order}
+                isLast={index === orders.length - 1}
+              />
             ))}
           </div>
         </div>
@@ -140,10 +138,15 @@ function OrderCard({ order, isLast }: OrderCardProps) {
   };
 
   // Calculate subtotal from line items
-  const subtotal = order.lineItems.reduce((sum, item) => sum + item.totalPrice, 0);
+  const subtotal = order.lineItems.reduce(
+    (sum, item) => sum + item.totalPrice,
+    0
+  );
 
   return (
-    <div className={`${orderStyles.orderCard} ${isLast ? '' : orderStyles.withDivider}`}>
+    <div
+      className={`${orderStyles.orderCard} ${isLast ? '' : orderStyles.withDivider}`}
+    >
       <button
         type="button"
         className={orderStyles.orderHeader}
@@ -154,7 +157,8 @@ function OrderCard({ order, isLast }: OrderCardProps) {
             Order #{order.id}
           </Text>
           <Text size="sm" style={{ color: 'var(--text-secondary)' }}>
-            {formatDate(order.createdAt)} | {packCount} pack{packCount !== 1 ? 's' : ''}
+            {formatDate(order.createdAt)} | {packCount} pack
+            {packCount !== 1 ? 's' : ''}
           </Text>
           {order.trackingNumber && (
             <button
@@ -164,7 +168,10 @@ function OrderCard({ order, isLast }: OrderCardProps) {
             >
               <Truck size={14} />
               <Text size="sm" style={{ color: 'var(--text-muted)' }}>
-                {order.trackingCarrier}: <span className={orderStyles.trackingNumber}>{order.trackingNumber}</span>
+                {order.trackingCarrier}:{' '}
+                <span className={orderStyles.trackingNumber}>
+                  {order.trackingNumber}
+                </span>
               </Text>
             </button>
           )}
@@ -174,7 +181,11 @@ function OrderCard({ order, isLast }: OrderCardProps) {
             <Text c="white" fw={800} size="xl" m={0}>
               {formatPrice(order.totalAmount)}
             </Text>
-            {expanded ? <ChevronUp size={22} strokeWidth={2.5} /> : <ChevronDown size={22} strokeWidth={2.5} />}
+            {expanded ? (
+              <ChevronUp size={22} strokeWidth={2.5} />
+            ) : (
+              <ChevronDown size={22} strokeWidth={2.5} />
+            )}
           </div>
           <div className={orderStyles.statusRow}>
             <span
@@ -191,7 +202,8 @@ function OrderCard({ order, isLast }: OrderCardProps) {
       {order.promoCode && order.discount > 0 && (
         <div className={orderStyles.promoCode}>
           <Text c="primaryLight" size="sm">
-            ${(order.discount / 100).toFixed(0)} promo code applied ({order.promoCode})
+            ${(order.discount / 100).toFixed(0)} promo code applied (
+            {order.promoCode})
           </Text>
         </div>
       )}
@@ -206,18 +218,30 @@ function OrderCard({ order, isLast }: OrderCardProps) {
 
           <div className={orderStyles.summarySection}>
             <div className={orderStyles.summaryRow}>
-              <Text c="dimmed" size="sm">Subtotal</Text>
-              <Text c="white" size="sm">{formatPrice(subtotal)}</Text>
-            </div>
-            <div className={orderStyles.summaryRow}>
-              <Text c="dimmed" size="sm">Shipping</Text>
+              <Text c="dimmed" size="sm">
+                Subtotal
+              </Text>
               <Text c="white" size="sm">
-                {order.totalAmount - subtotal === 0 ? 'Free' : formatPrice(order.totalAmount - subtotal)}
+                {formatPrice(subtotal)}
               </Text>
             </div>
             <div className={orderStyles.summaryRow}>
-              <Text c="white" size="sm" fw={600}>Total</Text>
-              <Text c="white" size="sm" fw={600}>{formatPrice(order.totalAmount)}</Text>
+              <Text c="dimmed" size="sm">
+                Shipping
+              </Text>
+              <Text c="white" size="sm">
+                {order.totalAmount - subtotal === 0
+                  ? 'Free'
+                  : formatPrice(order.totalAmount - subtotal)}
+              </Text>
+            </div>
+            <div className={orderStyles.summaryRow}>
+              <Text c="white" size="sm" fw={600}>
+                Total
+              </Text>
+              <Text c="white" size="sm" fw={600}>
+                {formatPrice(order.totalAmount)}
+              </Text>
             </div>
           </div>
 
@@ -227,14 +251,17 @@ function OrderCard({ order, isLast }: OrderCardProps) {
                 Shipping Address
               </Text>
               <Text c="white" size="sm">
-                {order.shippingAddress.firstName} {order.shippingAddress.lastName}
+                {order.shippingAddress.firstName}{' '}
+                {order.shippingAddress.lastName}
               </Text>
               <Text c="dimmed" size="sm">
                 {order.shippingAddress.addressLine1}
-                {order.shippingAddress.addressLine2 && `, ${order.shippingAddress.addressLine2}`}
+                {order.shippingAddress.addressLine2 &&
+                  `, ${order.shippingAddress.addressLine2}`}
               </Text>
               <Text c="dimmed" size="sm">
-                {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.postalCode}
+                {order.shippingAddress.city}, {order.shippingAddress.state}{' '}
+                {order.shippingAddress.postalCode}
               </Text>
             </div>
           )}

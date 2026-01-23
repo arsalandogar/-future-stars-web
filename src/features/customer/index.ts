@@ -1,3 +1,4 @@
+export { useCartItems } from './api/get-cart-items';
 export { GlobalAddedToCartPopup } from './components/global-added-to-cart-popup';
 export { GlobalCreatePackModal } from './components/global-create-pack-modal';
 export { AccountPage } from './pages/account-page';

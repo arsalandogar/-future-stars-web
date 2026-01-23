@@ -5,6 +5,8 @@ import { useState } from 'react';
 
 import type { CartItem as CartItemType } from '@/types';
 
+import { formatDate } from '../utils/format-date';
+
 import { CartItemQuantityPicker } from './cart-item-quantity-picker';
 import styles from './cart-item.module.css';
 import { PackAddMoreBanner } from './pack-add-more-banner';
@@ -17,11 +19,6 @@ interface CartItemProps {
   onDelete?: () => void;
   onViewPack?: () => void;
   readOnly?: boolean;
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
 }
 
 function getTotalPackQuantity(item: CartItemType): number {
@@ -46,11 +43,7 @@ export function CartItem({
   return (
     <div className={`${styles.container} ${readOnly ? styles.readOnly : ''}`}>
       <div className={styles.mainContent}>
-        <button
-          type="button"
-          className={styles.thumbnail}
-          onClick={onViewPack}
-        >
+        <button type="button" className={styles.thumbnail} onClick={onViewPack}>
           {firstCard ? (
             <Image
               src={firstCard.frontCardImage}
@@ -65,9 +58,7 @@ export function CartItem({
 
         <div className={styles.info}>
           <div className={styles.titleRow}>
-            <span className={styles.name}>
-              {item.pack.name}
-            </span>
+            <span className={styles.name}>{item.pack.name}</span>
             <span className={styles.price}>
               ${(item.totalPrice / 100).toFixed(2)}
             </span>

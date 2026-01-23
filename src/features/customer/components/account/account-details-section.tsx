@@ -1,9 +1,10 @@
-import { Button, Select, Text, TextInput, Title } from '@mantine/core';
+import { Button, Select, Text, TextInput } from '@mantine/core';
 import { useState } from 'react';
 
 import { useAuthStore } from '@/stores/auth-store';
 
 import { useUpdateProfile } from '../../api/update-profile';
+import { AccountSectionHeader } from './account-section-header';
 import styles from './account-section.module.css';
 
 const INPUT_STYLES = {
@@ -52,7 +53,9 @@ export function AccountDetailsSection() {
   };
 
   const handleSave = () => {
-    const phoneWithCountryCode = formData.phone ? `+1${formData.phone.replace(/\D/g, '')}` : undefined;
+    const phoneWithCountryCode = formData.phone
+      ? `+1${formData.phone.replace(/\D/g, '')}`
+      : undefined;
     updateProfile.mutate(
       {
         firstName: formData.firstName,
@@ -87,16 +90,10 @@ export function AccountDetailsSection() {
   if (isEditing) {
     return (
       <div>
-        <div className={styles.header}>
-          <div>
-            <Title order={2} c="white" fw={800} className={styles.title}>
-              Account Details
-            </Title>
-            <Text component="span" c="dimmed" size="md" display="block">
-              Manage your personal information and account settings
-            </Text>
-          </div>
-        </div>
+        <AccountSectionHeader
+          title="Account Details"
+          description="Manage your personal information and account settings"
+        />
 
         <div className={styles.card}>
           <div className={styles.fieldGroup}>
@@ -112,10 +109,19 @@ export function AccountDetailsSection() {
               styles={INPUT_STYLES}
             />
             <div>
-              <Text component="span" size="md" c="dimmed" fw={600} mb={6} display="block">
+              <Text
+                component="span"
+                size="md"
+                c="dimmed"
+                fw={600}
+                mb={6}
+                display="block"
+              >
                 Phone *
               </Text>
-              <div style={{ display: 'flex', gap: 'var(--mantine-spacing-xs)' }}>
+              <div
+                style={{ display: 'flex', gap: 'var(--mantine-spacing-xs)' }}
+              >
                 <Select
                   value="+1"
                   data={[{ value: '+1', label: '+1 (US)' }]}
@@ -184,23 +190,19 @@ export function AccountDetailsSection() {
 
   return (
     <div>
-      <div className={styles.header}>
-        <div>
-          <Title order={2} c="white" fw={800} className={styles.title}>
-            Account Details
-          </Title>
-          <Text component="span" c="dimmed" size="md" display="block">
-            Manage your personal information and account settings
-          </Text>
-        </div>
-        <Button
-          variant="transparent"
-          className={styles.editButton}
-          onClick={handleEdit}
-        >
-          Edit
-        </Button>
-      </div>
+      <AccountSectionHeader
+        title="Account Details"
+        description="Manage your personal information and account settings"
+        action={
+          <Button
+            variant="transparent"
+            className={styles.editButton}
+            onClick={handleEdit}
+          >
+            Edit
+          </Button>
+        }
+      />
 
       <div className={styles.card}>
         <div className={styles.fieldGroup}>
@@ -210,7 +212,9 @@ export function AccountDetailsSection() {
           </div>
           <div className={styles.field}>
             <span className={styles.fieldLabel}>Phone *</span>
-            <span className={styles.fieldValue}>{formatPhoneDisplay(user?.phone)}</span>
+            <span className={styles.fieldValue}>
+              {formatPhoneDisplay(user?.phone)}
+            </span>
           </div>
           <div className={styles.field}>
             <span className={styles.fieldLabel}>Email *</span>

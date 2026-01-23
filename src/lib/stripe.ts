@@ -1,8 +1,16 @@
+import type { Stripe } from '@stripe/stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 
 import { env } from '@/config/env';
 
-export const stripePromise = loadStripe(env.STRIPE_PUBLISHABLE_KEY);
+let stripePromiseInstance: Promise<Stripe | null> | null = null;
+
+export function getStripePromise() {
+  if (!stripePromiseInstance) {
+    stripePromiseInstance = loadStripe(env.STRIPE_PUBLISHABLE_KEY);
+  }
+  return stripePromiseInstance;
+}
 
 export const stripeAppearance = {
   theme: 'night' as const,

@@ -65,6 +65,7 @@ export function SelectableCardItem({
           alt="Card"
           fit="cover"
           className={styles.image}
+          loading="lazy"
         />
 
         {isSelected && (

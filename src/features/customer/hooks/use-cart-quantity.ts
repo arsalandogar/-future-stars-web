@@ -8,7 +8,7 @@ import { useDeleteCartItem } from '../api/delete-cart-item';
 import { type CartItemsResponse, useCartItems } from '../api/get-cart-items';
 import { useUpdateCartItem } from '../api/update-cart-item';
 
-const DEBOUNCE_DELAY = 3000; // 3 seconds
+const DEBOUNCE_DELAY = 500; // 500ms - reduced from 3s to minimize race condition window
 
 export function useCartQuantity(cartItems: CartItem[]) {
   const queryClient = useQueryClient();
@@ -110,10 +110,22 @@ export function useCartQuantity(cartItems: CartItem[]) {
     return { totalPrice: totalPriceInCents / 100, totalPacks };
   }, [cartItems]);
 
+  // Flush all pending updates immediately (call before checkout)
+  const flushPendingUpdates = useCallback(() => {
+    syncToApi.flush();
+  }, [syncToApi]);
+
+  // Check if there are any pending updates
+  const hasPendingUpdates = useCallback(() => {
+    return pendingUpdates.current.size > 0;
+  }, []);
+
   return {
     handleQuantityChange,
     handleDelete,
     calculateTotals,
+    flushPendingUpdates,
+    hasPendingUpdates,
     isDeleting: deleteCartItem.isPending,
   };
 }

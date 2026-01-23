@@ -27,12 +27,18 @@ export function CartPage() {
   const { data: packsData } = useUserPacks({ variables: { limit: 1 } });
   const { openCreate, openEdit } = useCreatePackModalStore();
   const [selectedPack, setSelectedPack] = useState<Pack | null>(null);
-  const [packPreviewOpened, { open: openPackPreview, close: closePackPreview }] =
-    useDisclosure(false);
+  const [
+    packPreviewOpened,
+    { open: openPackPreview, close: closePackPreview },
+  ] = useDisclosure(false);
 
   const cartItems = data?.data ?? [];
-  const { handleQuantityChange, handleDelete, calculateTotals } =
-    useCartQuantity(cartItems);
+  const {
+    handleQuantityChange,
+    handleDelete,
+    calculateTotals,
+    flushPendingUpdates,
+  } = useCartQuantity(cartItems);
 
   const { totalPrice, totalPacks } = calculateTotals();
 
@@ -75,6 +81,8 @@ export function CartPage() {
   };
 
   const handleCheckout = () => {
+    // Flush any pending quantity updates before navigating to checkout
+    flushPendingUpdates();
     void navigate({ to: '/checkout' });
   };
 

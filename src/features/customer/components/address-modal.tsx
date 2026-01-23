@@ -1,18 +1,26 @@
-import { ActionIcon, Button, Loader, Modal, Radio, Text, Title } from '@mantine/core';
-import { AddressElement, Elements } from '@stripe/react-stripe-js';
-import type { StripeAddressElementChangeEvent } from '@stripe/stripe-js';
+import {
+  ActionIcon,
+  Button,
+  Loader,
+  Modal,
+  Radio,
+  Text,
+  Title,
+} from '@mantine/core';
+import { Elements } from '@stripe/react-stripe-js';
 import { ArrowLeft, Check, Plus, Trash2, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import type { Address, CreateAddressParams } from '@/types';
 
-import { stripeAppearance, stripePromise } from '@/lib/stripe';
+import { getStripePromise, stripeAppearance } from '@/lib/stripe';
 
 import { useCreateAddress } from '../api/create-address';
 import { useDeleteAddress } from '../api/delete-address';
 import { useAddresses } from '../api/get-addresses';
 import { useSetDefaultAddress } from '../api/set-default-address';
 
+import { AddressFormInner } from './address-form-inner';
 import styles from './address-modal.module.css';
 
 interface AddressModalProps {
@@ -23,64 +31,6 @@ interface AddressModalProps {
 }
 
 type ModalView = 'list' | 'add-new';
-
-// Inner component for the address form - needs Elements context
-interface AddressFormInnerProps {
-  addressCount: number;
-  onAddressChange: (data: CreateAddressParams | null, complete: boolean) => void;
-}
-
-function AddressFormInner({ addressCount, onAddressChange }: AddressFormInnerProps) {
-  const handleChange = (event: StripeAddressElementChangeEvent) => {
-    if (event.complete) {
-      const { firstName, lastName, phone, address } = event.value;
-
-      onAddressChange(
-        {
-          firstName: firstName ?? '',
-          lastName: lastName ?? '',
-          addressLine1: address.line1 ?? '',
-          addressLine2: address.line2 ?? undefined,
-          city: address.city ?? '',
-          state: address.state ?? '',
-          postalCode: address.postal_code ?? '',
-          country: address.country ?? 'US',
-          phone: phone?.replace(/\+/g, '') ?? '',
-          isDefault: addressCount === 0,
-        },
-        true
-      );
-    } else {
-      onAddressChange(null, false);
-    }
-  };
-
-  return (
-    <AddressElement
-      options={{
-        mode: 'shipping',
-        defaultValues: {
-          address: {
-            country: 'US',
-          },
-        },
-        fields: {
-          phone: 'always',
-        },
-        validation: {
-          phone: {
-            required: 'always',
-          },
-        },
-        allowedCountries: ['US'],
-        display: {
-          name: 'split',
-        },
-      }}
-      onChange={handleChange}
-    />
-  );
-}
 
 export function AddressModal({
   opened,
@@ -93,22 +43,22 @@ export function AddressModal({
   const deleteAddress = useDeleteAddress();
   const setDefaultAddress = useSetDefaultAddress();
 
-  const [view, setView] = useState<ModalView>('list');
-  const [addressData, setAddressData] = useState<CreateAddressParams | null>(null);
-  const [isAddressComplete, setIsAddressComplete] = useState(false);
-
   const addresses = data?.data ?? [];
 
-  // Reset view when modal opens/closes
-  useEffect(() => {
-    if (opened) {
-      setView(addresses.length === 0 ? 'add-new' : 'list');
-      setAddressData(null);
-      setIsAddressComplete(false);
-    }
-  }, [opened, addresses.length]);
+  // Use null to indicate "use computed default", explicit value for user choice
+  const [viewOverride, setViewOverride] = useState<ModalView | null>(null);
+  const [addressData, setAddressData] = useState<CreateAddressParams | null>(
+    null
+  );
+  const [isAddressComplete, setIsAddressComplete] = useState(false);
 
-  const handleAddressChange = (data: CreateAddressParams | null, complete: boolean) => {
+  // Compute effective view: user choice or default based on addresses
+  const view = viewOverride ?? (addresses.length === 0 ? 'add-new' : 'list');
+
+  const handleAddressChange = (
+    data: CreateAddressParams | null,
+    complete: boolean
+  ) => {
     setIsAddressComplete(complete);
     setAddressData(data);
   };
@@ -119,7 +69,7 @@ export function AddressModal({
     createAddress.mutate(addressData, {
       onSuccess: (newAddress) => {
         onSelectAddress(newAddress);
-        setView('list');
+        setViewOverride('list');
         setAddressData(null);
         setIsAddressComplete(false);
       },
@@ -143,7 +93,7 @@ export function AddressModal({
 
   const handleBack = () => {
     if (view === 'add-new' && addresses.length > 0) {
-      setView('list');
+      setViewOverride('list');
       setAddressData(null);
       setIsAddressComplete(false);
     } else {
@@ -189,7 +139,9 @@ export function AddressModal({
                 <div
                   key={address.id}
                   className={`${styles.addressItem} ${
-                    selectedAddress?.id === address.id ? styles.addressItemSelected : ''
+                    selectedAddress?.id === address.id
+                      ? styles.addressItemSelected
+                      : ''
                   }`}
                   onClick={() => handleSelectAddress(address)}
                 >
@@ -205,15 +157,21 @@ export function AddressModal({
                         <span className={styles.defaultBadge}>Default</span>
                       )}
                     </Text>
-                    <Text className={styles.addressLine}>{address.addressLine1}</Text>
+                    <Text className={styles.addressLine}>
+                      {address.addressLine1}
+                    </Text>
                     {address.addressLine2 && (
-                      <Text className={styles.addressLine}>{address.addressLine2}</Text>
+                      <Text className={styles.addressLine}>
+                        {address.addressLine2}
+                      </Text>
                     )}
                     <Text className={styles.addressLine}>
                       {address.city}, {address.state} {address.postalCode}
                     </Text>
                     {address.phone && (
-                      <Text className={styles.addressLine}>{address.phone}</Text>
+                      <Text className={styles.addressLine}>
+                        {address.phone}
+                      </Text>
                     )}
                   </div>
                   <div className={styles.addressActions}>
@@ -246,7 +204,7 @@ export function AddressModal({
             <Button
               variant="subtle"
               leftSection={<Plus size={18} />}
-              onClick={() => setView('add-new')}
+              onClick={() => setViewOverride('add-new')}
               className={styles.addNewButton}
               fullWidth
             >
@@ -255,7 +213,10 @@ export function AddressModal({
           </>
         ) : (
           <div className={styles.addressForm}>
-            <Elements stripe={stripePromise} options={{ appearance: stripeAppearance }}>
+            <Elements
+              stripe={getStripePromise()}
+              options={{ appearance: stripeAppearance }}
+            >
               <AddressFormInner
                 addressCount={addresses.length}
                 onAddressChange={handleAddressChange}

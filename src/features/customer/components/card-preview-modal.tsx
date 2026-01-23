@@ -11,11 +11,12 @@ import {
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { Copy, MoreVertical, Pencil, Share2, Trash2, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { MdOutlineShoppingCart } from 'react-icons/md';
 
 import { FlipIcon } from '@/components/icons/flip-icon';
 import type { Card } from '../api/get-user-cards';
+import { formatDate } from '../utils/format-date';
 
 import styles from './card-preview-modal.module.css';
 import { DeleteCardModal } from './delete-card-modal';
@@ -28,11 +29,6 @@ interface CardPreviewModalProps {
   onBuyCard?: (cardId: number, quantity: number) => void;
 }
 
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
-}
-
 export function CardPreviewModal({
   card,
   opened,
@@ -43,15 +39,10 @@ export function CardPreviewModal({
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const [quantity, setQuantity] = useState(1);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] =
-    useDisclosure(false);
-
-  // Reset quantity when modal closes
-  useEffect(() => {
-    if (!opened) {
-      setQuantity(1);
-    }
-  }, [opened]);
+  const [
+    deleteModalOpened,
+    { open: openDeleteModal, close: closeDeleteModal },
+  ] = useDisclosure(false);
 
   const handleBuyCard = () => {
     if (onBuyCard && card) {
@@ -86,10 +77,16 @@ export function CardPreviewModal({
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown className={styles.menuDropdown}>
-            <Menu.Item leftSection={<Pencil size={16} />} className={styles.menuItem}>
+            <Menu.Item
+              leftSection={<Pencil size={16} />}
+              className={styles.menuItem}
+            >
               Edit Card
             </Menu.Item>
-            <Menu.Item leftSection={<Copy size={16} />} className={styles.menuItem}>
+            <Menu.Item
+              leftSection={<Copy size={16} />}
+              className={styles.menuItem}
+            >
               Duplicate Card
             </Menu.Item>
             <Menu.Item
@@ -99,7 +96,10 @@ export function CardPreviewModal({
             >
               Delete Card
             </Menu.Item>
-            <Menu.Item leftSection={<Share2 size={16} />} className={styles.menuItem}>
+            <Menu.Item
+              leftSection={<Share2 size={16} />}
+              className={styles.menuItem}
+            >
               Share Card
             </Menu.Item>
           </Menu.Dropdown>

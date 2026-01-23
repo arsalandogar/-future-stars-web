@@ -3,7 +3,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { useNavigate } from '@tanstack/react-router';
 import { ArrowLeft, CreditCard } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import type { Address, CartItem } from '@/types';
 
@@ -28,15 +28,20 @@ export function CheckoutPage() {
   const checkout = useCheckout();
   const confirmPayment = useConfirmPayment();
 
-  const [addressModalOpened, { open: openAddressModal, close: closeAddressModal }] =
-    useDisclosure(false);
-  const [paymentModalOpened, { open: openPaymentModal, close: closePaymentModal }] =
-    useDisclosure(false);
+  const [
+    addressModalOpened,
+    { open: openAddressModal, close: closeAddressModal },
+  ] = useDisclosure(false);
+  const [
+    paymentModalOpened,
+    { open: openPaymentModal, close: closePaymentModal },
+  ] = useDisclosure(false);
 
   // State
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [customerSessionClientSecret, setCustomerSessionClientSecret] = useState<string | null>(null);
+  const [customerSessionClientSecret, setCustomerSessionClientSecret] =
+    useState<string | null>(null);
   const [orderId, setOrderId] = useState<number | null>(null);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [isInitiatingCheckout, setIsInitiatingCheckout] = useState(false);
@@ -46,20 +51,25 @@ export function CheckoutPage() {
   const cartItems = cartData?.data ?? [];
   const addresses = addressData?.data ?? [];
   // Use stored cart items during payment, otherwise use live cart data
-  const displayCartItems = clientSecret && checkoutCartItems.length > 0 ? checkoutCartItems : cartItems;
+  const displayCartItems =
+    clientSecret && checkoutCartItems.length > 0
+      ? checkoutCartItems
+      : cartItems;
   const totalPacks = displayCartItems.length;
-  const subtotal = displayCartItems.reduce((sum, item) => sum + item.totalPrice, 0);
+  const subtotal = displayCartItems.reduce(
+    (sum, item) => sum + item.totalPrice,
+    0
+  );
   const shipping = 0; // Free shipping
   const total = subtotal + shipping;
 
   // Set default address on load
-  useEffect(() => {
-    if (addresses.length > 0 && !selectedAddress) {
-      const defaultAddress = addresses.find((addr) => addr.isDefault);
+  if (!selectedAddress) {
+    const defaultAddress = addresses.find((addr) => addr.isDefault);
+    if (defaultAddress) {
       setSelectedAddress(defaultAddress ?? addresses[0]);
     }
-  }, [addresses, selectedAddress]);
-
+  }
 
   const handleBack = () => {
     void navigate({ to: '/cart' });
@@ -105,7 +115,9 @@ export function CheckoutPage() {
       {
         onSuccess: (response) => {
           setClientSecret(response.data.paymentIntentSecret);
-          setCustomerSessionClientSecret(response.data.customerSessionClientSecret);
+          setCustomerSessionClientSecret(
+            response.data.customerSessionClientSecret
+          );
           setOrderId(response.data.order.id);
           setIsInitiatingCheckout(false);
           openPaymentModal();
@@ -126,18 +138,25 @@ export function CheckoutPage() {
 
     confirmPayment.mutate(orderId, {
       onSuccess: () => {
-        void navigate({ to: '/order-success/$orderId', params: { orderId: String(orderId) } });
+        void navigate({
+          to: '/order-success/$orderId',
+          params: { orderId: String(orderId) },
+        });
       },
       onError: () => {
         // Payment succeeded but confirmation failed - still navigate to success
         // The webhook will handle the status update
-        void navigate({ to: '/order-success/$orderId', params: { orderId: String(orderId) } });
+        void navigate({
+          to: '/order-success/$orderId',
+          params: { orderId: String(orderId) },
+        });
       },
     });
   };
 
   const isLoading = isCartLoading || isAddressLoading;
-  const canProceed = selectedAddress && acceptTerms && displayCartItems.length > 0;
+  const canProceed =
+    selectedAddress && acceptTerms && displayCartItems.length > 0;
 
   if (isLoading) {
     return (
@@ -265,12 +284,14 @@ export function CheckoutPage() {
       </div>
 
       {/* Address Modal */}
-      <AddressModal
-        opened={addressModalOpened}
-        onClose={closeAddressModal}
-        selectedAddress={selectedAddress}
-        onSelectAddress={handleSelectAddress}
-      />
+      {addressModalOpened && (
+        <AddressModal
+          opened={addressModalOpened}
+          onClose={closeAddressModal}
+          selectedAddress={selectedAddress}
+          onSelectAddress={handleSelectAddress}
+        />
+      )}
 
       {/* Payment Modal */}
       {clientSecret && (

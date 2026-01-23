@@ -28,7 +28,8 @@
 }
 
 .contentSection {
-  padding: var(--mantine-spacing-xl) var(--mantine-spacing-xl) var(--mantine-spacing-lg);
+  padding: var(--mantine-spacing-xl) var(--mantine-spacing-xl)
+    var(--mantine-spacing-lg);
   text-align: center;
 }
 
@@ -55,6 +56,6 @@
   font-weight: 500;
 }
 
-.deleteButton {
+.confirmButton {
   font-weight: 600;
 }

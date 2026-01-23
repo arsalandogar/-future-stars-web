@@ -3,6 +3,7 @@ import { notifications } from '@mantine/notifications';
 import { api } from '@/lib/api-client';
 import { createMutation, invalidateQueries } from '@/lib/react-query';
 
+import { useCartItems } from './get-cart-items';
 import { useUserCards } from './get-user-cards';
 import { useUserPacks } from './get-user-packs';
 
@@ -21,7 +22,13 @@ export const useDeleteCard = createMutation({
     api.delete(`cards/${cardId}`, {
       params: { deleteFromGallery, deleteFromPacks },
     }),
-  use: [invalidateQueries([useUserCards.getKey(), useUserPacks.getKey()])],
+  use: [
+    invalidateQueries([
+      useUserCards.getKey(),
+      useUserPacks.getKey(),
+      useCartItems.getKey(),
+    ]),
+  ],
   onSuccess: () => {
     notifications.show({
       title: 'Card deleted',

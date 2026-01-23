@@ -3,7 +3,7 @@ import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { Images, Plus } from 'lucide-react';
 import { MdOutlineShoppingCart } from 'react-icons/md';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 const routeApi = getRouteApi('/_authenticated/_customer/my-cards');
 
@@ -52,9 +52,9 @@ export function MyCardsPage() {
     packPreviewOpened,
     { open: openPackPreview, close: closePackPreview },
   ] = useDisclosure(false);
-  const [packsView, setPacksView] = useState<ViewMode>('list');
   const navigate = useNavigate();
   const isMobile = useMediaQuery('(max-width: 576px)');
+  const [packsView, setPacksView] = useState<ViewMode>('list');
 
   const { openCreate, openEdit, openCopy, openBuy } = useCreatePackModalStore();
   const openAddedToCartPopup = useAddedToCartPopupStore((s) => s.open);
@@ -66,13 +66,6 @@ export function MyCardsPage() {
       search: { tab: tab as 'cards' | 'packs' },
     });
   };
-
-  // Force list view on mobile
-  useEffect(() => {
-    if (isMobile) {
-      setPacksView('list');
-    }
-  }, [isMobile]);
 
   const {
     data: cardsData,
@@ -204,12 +197,18 @@ export function MyCardsPage() {
             <Text size="lg" c="white" fw={500}>
               {totalPacksCount} Packs Created
             </Text>
-            {!isMobile && <ViewToggle view={packsView} onChange={setPacksView} />}
+            {!isMobile && (
+              <ViewToggle view={packsView} onChange={setPacksView} />
+            )}
           </div>
         )}
 
         <ContentPanel
-          className={activeTab === 'packs' && packsView === 'grid' ? styles.transparentBg : ''}
+          className={
+            activeTab === 'packs' && packsView === 'grid'
+              ? styles.transparentBg
+              : ''
+          }
         >
           {activeTab === 'cards' && (
             <>
@@ -274,12 +273,14 @@ export function MyCardsPage() {
         </ContentPanel>
       </Container>
 
-      <CardPreviewModal
-        card={selectedCard}
-        opened={modalOpened}
-        onClose={closeModal}
-        onBuyCard={handleBuyCard}
-      />
+      {modalOpened && (
+        <CardPreviewModal
+          card={selectedCard}
+          opened={modalOpened}
+          onClose={closeModal}
+          onBuyCard={handleBuyCard}
+        />
+      )}
 
       <PackPreviewModal
         pack={selectedPack ?? null}
