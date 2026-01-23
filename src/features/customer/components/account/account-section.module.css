@@ -1,0 +1,124 @@
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--mantine-spacing-lg);
+}
+
+.title {
+  margin-bottom: var(--mantine-spacing-xs);
+}
+
+.editButton {
+  color: var(--mantine-color-primaryLight-filled);
+  font-size: var(--mantine-font-size-md);
+  font-weight: 700;
+}
+
+.card {
+  background-color: var(--customer-card-bg);
+  border-radius: var(--mantine-radius-xs);
+  padding: var(--mantine-spacing-xl);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--mantine-spacing-md);
+}
+
+.defaultBadge {
+  color: var(--mantine-color-primaryLight-filled);
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 600;
+}
+
+.cardEditButton {
+  color: var(--mantine-color-primaryLight-filled);
+  font-size: var(--mantine-font-size-md);
+  font-weight: 700;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.cardEditButton:hover {
+  text-decoration: underline;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-lg);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fieldLabel {
+  font-size: var(--mantine-font-size-sm);
+  color: var(--mantine-color-dimmed);
+}
+
+.fieldValue {
+  font-size: var(--mantine-font-size-md);
+  color: var(--mantine-color-white);
+  font-weight: 500;
+  margin-right: var(--mantine-spacing-md);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--mantine-spacing-sm);
+  margin-top: var(--mantine-spacing-xl);
+}
+
+.cardsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-md);
+}
+
+/* Legal content typography */
+.legalContent {
+  color: var(--text-secondary);
+}
+
+.legalContent h1,
+.legalContent h2,
+.legalContent h3,
+.legalContent h4,
+.legalContent h5,
+.legalContent h6 {
+  color: var(--text-primary);
+}
+
+.legalContent a {
+  color: var(--mantine-color-primary-4);
+}
+
+.legalContent p {
+  color: var(--text-secondary);
+}
+
+.legalContent ul,
+.legalContent ol {
+  color: var(--text-secondary);
+}
+
+@media (max-width: 576px) {
+  .header {
+    flex-direction: column;
+    gap: var(--mantine-spacing-sm);
+  }
+
+  .card {
+    padding: var(--mantine-spacing-md);
+  }
+}

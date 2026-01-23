@@ -1,0 +1,65 @@
+.container {
+  background-color: var(--mantine-color-surface-filled);
+  border-radius: var(--mantine-radius-md);
+  padding: var(--mantine-spacing-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-md);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.label {
+  color: var(--mantine-color-gray-4);
+}
+
+.value {
+  color: var(--mantine-color-white);
+  font-weight: 500;
+}
+
+.divider {
+  height: 1px;
+  background-color: var(--mantine-color-primary-4);
+  margin: var(--mantine-spacing-xs) 0;
+}
+
+.totalLabel {
+  color: var(--mantine-color-white);
+  font-weight: 600;
+}
+
+.totalValue {
+  color: var(--mantine-color-white);
+  font-weight: 700;
+  font-size: var(--mantine-font-size-xl);
+}
+
+.termsSection {
+  margin-top: var(--mantine-spacing-md);
+  padding-top: var(--mantine-spacing-md);
+  border-top: 1px solid var(--mantine-color-dark-5);
+}
+
+.termsLink {
+  color: var(--mantine-color-primaryLight-filled);
+  text-decoration: none;
+}
+
+.termsLink:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 576px) {
+  .container {
+    padding: var(--mantine-spacing-lg);
+  }
+
+  .totalValue {
+    font-size: var(--mantine-font-size-lg);
+  }
+}

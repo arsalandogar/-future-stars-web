@@ -1,0 +1,129 @@
+.modalContent {
+  background-color: var(--mantine-color-black);
+  border-radius: var(--mantine-radius-xs);
+  border: 1px solid rgba(80, 70, 255, 0.4);
+  box-shadow:
+    0 0 20px rgba(80, 70, 255, 0.4),
+    0 0 40px rgba(80, 70, 255, 0.2);
+  max-height: calc(100vh - 168px);
+  display: flex;
+  flex-direction: column;
+}
+
+.modalBody {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: var(--mantine-spacing-lg) var(--mantine-spacing-xl);
+  border-bottom: 1px solid color-mix(in srgb, var(--mantine-color-primaryLight-filled) 40%, transparent);
+}
+
+.title {
+  letter-spacing: var(--customer-title-spacing);
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.closeButton {
+  position: absolute;
+  right: var(--mantine-spacing-xl);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--mantine-color-white);
+  cursor: pointer;
+  padding: var(--mantine-spacing-xs);
+}
+
+.content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.selectedIndicator {
+  padding: var(--mantine-spacing-md) var(--mantine-spacing-xl);
+  background-color: var(--mantine-color-dark-8);
+  border-bottom: 1px solid var(--mantine-color-dark-6);
+}
+
+.cardsArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--mantine-spacing-xl);
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+}
+
+.loadMore {
+  display: flex;
+  justify-content: center;
+  padding: var(--mantine-spacing-xl);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--mantine-spacing-lg) var(--mantine-spacing-xl);
+  border-top: 1px solid color-mix(in srgb, var(--mantine-color-primaryLight-filled) 40%, transparent);
+}
+
+@media (max-width: 576px) {
+  .modalContent {
+    max-height: 100%;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+  }
+
+  .header {
+    padding: var(--mantine-spacing-md) var(--mantine-spacing-lg);
+  }
+
+  .title {
+    font-size: var(--mantine-font-size-lg);
+  }
+
+  .closeButton {
+    right: var(--mantine-spacing-lg);
+  }
+
+  .closeButton svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .selectedIndicator {
+    padding: var(--mantine-spacing-sm) var(--mantine-spacing-lg);
+  }
+
+  .cardsArea {
+    padding: var(--mantine-spacing-md);
+  }
+
+  .footer {
+    padding: var(--mantine-spacing-md) var(--mantine-spacing-lg);
+  }
+}

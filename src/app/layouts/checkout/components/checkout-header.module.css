@@ -1,0 +1,21 @@
+.secureCheckout {
+  color: var(--mantine-color-white);
+}
+
+.secureText {
+  letter-spacing: 0.05em;
+}
+
+.spacer {
+  width: 120px;
+}
+
+@media (max-width: 576px) {
+  .spacer {
+    display: none;
+  }
+
+  .secureText {
+    font-size: var(--mantine-font-size-sm);
+  }
+}

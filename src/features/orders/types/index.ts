@@ -1,81 +1,14 @@
-import type { PaginationMeta } from '@/types';
-
-export type OrderStatus =
-  | 'created'
-  | 'payment_failed'
-  | 'paid'
-  | 'processing'
-  | 'sent_to_production'
-  | 'shipped'
-  | 'delivered'
-  | 'cancelled'
-  | 'refunded';
-
-export interface OrderUser {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-}
-
-export interface ShippingAddress {
-  firstName: string;
-  lastName: string;
-  addressLine1: string;
-  addressLine2?: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-}
-
-export interface PackCardSnapshot {
-  cardId: number;
-  quantity: number;
-  svgString: string;
-}
-
-export interface PackSnapshot {
-  id: number;
-  name: string;
-  cardSnapshots: PackCardSnapshot[];
-}
-
-export interface OrderLineItem {
-  id: number;
-  orderId: number;
-  quantity: number;
-  unitPrice: number;
-  totalPrice: number;
-  packSnapshot: PackSnapshot;
-}
-
-export interface Order {
-  id: number;
-  userId: number;
-  stripePaymentIntentId: string;
-  totalAmount: number;
-  status: OrderStatus;
-  shippingAddress: ShippingAddress;
-  user: OrderUser;
-  lineItems: OrderLineItem[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface OrdersListParams {
-  page?: number;
-  limit?: number;
-  userId?: number;
-  status?: OrderStatus;
-  search?: string;
-}
-
-export interface OrdersListResponse {
-  meta: PaginationMeta;
-  data: Order[];
-}
-
-export interface OrderResponse {
-  data: Order;
-}
+// Re-export all order types from the shared types module
+// This maintains backwards compatibility for existing imports
+export type {
+  Order,
+  OrderLineItem,
+  OrderResponse,
+  OrdersListParams,
+  OrdersListResponse,
+  OrderStatus,
+  OrderUser,
+  PackCardSnapshot,
+  PackSnapshot,
+  ShippingAddress,
+} from '@/types';

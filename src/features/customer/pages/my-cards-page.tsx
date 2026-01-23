@@ -1,16 +1,21 @@
 import { Button, Container, Text, Title } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { useNavigate } from '@tanstack/react-router';
+import { useDisclosure, useMediaQuery } from '@mantine/hooks';
+import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { Images, Plus } from 'lucide-react';
 import { MdOutlineShoppingCart } from 'react-icons/md';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
+
+const routeApi = getRouteApi('/_authenticated/_customer/my-cards');
 
 import { Head } from '@/components/seo/head';
+import { ContentPanel } from '@/components/ui/content-panel';
 import { EmptyState } from '@/components/ui/empty-state';
-import { NavTabs } from '@/components/ui/nav-tabs';
+
+import { ContentTabs } from '../components/content-tabs';
 
 import type { Pack } from '@/types';
 
+import { useAddCartItem } from '../api/add-cart-item';
 import {
   type Card,
   useUserCards,
@@ -25,9 +30,11 @@ import {
 import { CardPreviewModal } from '../components/card-preview-modal';
 import { CardsGrid } from '../components/cards-grid';
 import { CardsSkeleton } from '../components/cards-skeleton';
-import { CreatePackDrawer } from '../components/create-pack-drawer';
+import { PackPreviewModal } from '../components/pack-preview-modal';
 import { PacksList } from '../components/packs-list';
 import { ViewToggle, type ViewMode } from '../components/view-toggle';
+import { useAddedToCartPopupStore } from '../stores/added-to-cart-popup-store';
+import { useCreatePackModalStore } from '../stores/create-pack-modal-store';
 import styles from './my-cards-page.module.css';
 
 const TAB_ITEMS = [
@@ -36,16 +43,29 @@ const TAB_ITEMS = [
 ];
 
 export function MyCardsPage() {
-  const [activeTab, setActiveTab] = useState('cards');
+  const { tab: activeTab } = routeApi.useSearch();
   const [selectedCard, setSelectedCard] = useState<Card | undefined>();
+  const [selectedPack, setSelectedPack] = useState<Pack | undefined>();
   const [modalOpened, { open: openModal, close: closeModal }] =
     useDisclosure(false);
   const [
-    createPackDrawerOpened,
-    { open: openCreatePackDrawer, close: closeCreatePackDrawer },
+    packPreviewOpened,
+    { open: openPackPreview, close: closePackPreview },
   ] = useDisclosure(false);
-  const [packsView, setPacksView] = useState<ViewMode>('list');
   const navigate = useNavigate();
+  const isMobile = useMediaQuery('(max-width: 576px)');
+  const [packsView, setPacksView] = useState<ViewMode>('list');
+
+  const { openCreate, openEdit, openCopy, openBuy } = useCreatePackModalStore();
+  const openAddedToCartPopup = useAddedToCartPopupStore((s) => s.open);
+  const addCartItem = useAddCartItem();
+
+  const setActiveTab = (tab: string) => {
+    void navigate({
+      to: '/my-cards',
+      search: { tab: tab as 'cards' | 'packs' },
+    });
+  };
 
   const {
     data: cardsData,
@@ -90,9 +110,42 @@ export function MyCardsPage() {
   };
 
   const handleAddPackToCart = (pack: Pack) => {
-    // TODO: Implement add to cart functionality
-    console.log('Add to cart:', pack.id);
+    addCartItem.mutate(
+      { packId: pack.id, quantity: 1 },
+      {
+        onSuccess: (response) => {
+          openAddedToCartPopup(response.data);
+        },
+      }
+    );
   };
+
+  const handlePackPreview = (pack: Pack) => {
+    setSelectedPack(pack);
+    openPackPreview();
+  };
+
+  const handleEditPack = useCallback(
+    (pack: Pack) => {
+      openEdit(pack);
+    },
+    [openEdit]
+  );
+
+  const handleCopyPack = useCallback(
+    (pack: Pack) => {
+      openCopy(pack);
+    },
+    [openCopy]
+  );
+
+  const handleBuyCard = useCallback(
+    (cardId: number, quantity: number) => {
+      closeModal();
+      openBuy(cardId, quantity);
+    },
+    [closeModal, openBuy]
+  );
 
   return (
     <>
@@ -110,7 +163,7 @@ export function MyCardsPage() {
         </Title>
 
         <div className={styles.tabsRow}>
-          <NavTabs
+          <ContentTabs
             items={TAB_ITEMS}
             activeValue={activeTab}
             onChange={setActiveTab}
@@ -122,7 +175,7 @@ export function MyCardsPage() {
               size="md"
               radius="xl"
               leftSection={<MdOutlineShoppingCart size={18} />}
-              onClick={openCreatePackDrawer}
+              onClick={openCreate}
             >
               Buy Cards
             </Button>
@@ -132,7 +185,7 @@ export function MyCardsPage() {
               radius="xl"
               leftSection={<Plus size={18} />}
               className={styles.createPackButton}
-              onClick={openCreatePackDrawer}
+              onClick={openCreate}
             >
               Create Pack
             </Button>
@@ -144,27 +197,35 @@ export function MyCardsPage() {
             <Text size="lg" c="white" fw={500}>
               {totalPacksCount} Packs Created
             </Text>
-            <ViewToggle view={packsView} onChange={setPacksView} />
+            {!isMobile && (
+              <ViewToggle view={packsView} onChange={setPacksView} />
+            )}
           </div>
         )}
 
-        <div
-          className={`${styles.contentContainer} ${activeTab === 'packs' && packsView === 'grid' ? styles.transparentBg : ''}`}
+        <ContentPanel
+          className={
+            activeTab === 'packs' && packsView === 'grid'
+              ? styles.transparentBg
+              : ''
+          }
         >
           {activeTab === 'cards' && (
             <>
               {isLoadingCards ? (
                 <CardsSkeleton />
               ) : visibleCards.length === 0 ? (
-                <EmptyState
-                  shape="rectangle"
-                  icon={<Images size={48} />}
-                  title="No Cards Yet!"
-                  subtitle="Click below to create your first card"
-                  actionLabel="Create Card"
-                  actionIcon={<Plus size={18} />}
-                  onAction={handleCreateCard}
-                />
+                <div className={styles.emptyStateWrapper}>
+                  <EmptyState
+                    shape="rectangle"
+                    icon={<Images size={48} />}
+                    title="No Cards Yet!"
+                    subtitle="Click below to create your first card"
+                    actionLabel="Create Card"
+                    actionIcon={<Plus size={18} />}
+                    onAction={handleCreateCard}
+                  />
+                </div>
               ) : (
                 <CardsGrid
                   cards={visibleCards}
@@ -183,15 +244,17 @@ export function MyCardsPage() {
               {isLoadingPacks ? (
                 <CardsSkeleton />
               ) : allPacks.length === 0 ? (
-                <EmptyState
-                  shape="rectangle"
-                  icon={<Images size={48} />}
-                  title="No Packs Yet!"
-                  subtitle="Tap below to create your first pack"
-                  actionLabel="Create a Pack"
-                  actionIcon={<Plus size={18} />}
-                  onAction={openCreatePackDrawer}
-                />
+                <div className={styles.emptyStateWrapper}>
+                  <EmptyState
+                    shape="rectangle"
+                    icon={<Images size={48} />}
+                    title="No Packs Yet!"
+                    subtitle="Tap below to create your first pack"
+                    actionLabel="Create a Pack"
+                    actionIcon={<Plus size={18} />}
+                    onAction={openCreate}
+                  />
+                </div>
               ) : (
                 <PacksList
                   packs={allPacks}
@@ -200,22 +263,30 @@ export function MyCardsPage() {
                   isFetchingNextPage={isFetchingNextPacksPage}
                   fetchNextPage={() => void fetchNextPacksPage()}
                   onAddToCart={handleAddPackToCart}
+                  onPreview={handlePackPreview}
+                  onEdit={handleEditPack}
+                  onCopy={handleCopyPack}
                 />
               )}
             </>
           )}
-        </div>
+        </ContentPanel>
       </Container>
 
-      <CardPreviewModal
-        card={selectedCard}
-        opened={modalOpened}
-        onClose={closeModal}
-      />
+      {modalOpened && (
+        <CardPreviewModal
+          card={selectedCard}
+          opened={modalOpened}
+          onClose={closeModal}
+          onBuyCard={handleBuyCard}
+        />
+      )}
 
-      <CreatePackDrawer
-        opened={createPackDrawerOpened}
-        onClose={closeCreatePackDrawer}
+      <PackPreviewModal
+        pack={selectedPack ?? null}
+        opened={packPreviewOpened}
+        onClose={closePackPreview}
+        onEditPack={handleEditPack}
       />
     </>
   );

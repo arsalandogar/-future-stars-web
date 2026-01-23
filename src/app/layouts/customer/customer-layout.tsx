@@ -1,6 +1,11 @@
 import { AppShell, Container } from '@mantine/core';
 import { Outlet } from '@tanstack/react-router';
 
+import {
+  GlobalAddedToCartPopup,
+  GlobalCreatePackModal,
+} from '@/features/customer';
+
 import { CustomerFooter } from './components/customer-footer';
 import { CustomerHeader } from './components/customer-header';
 import styles from './customer-layout.module.css';
@@ -34,6 +39,9 @@ export function CustomerLayout() {
       </AppShell.Main>
 
       <CustomerFooter />
+
+      <GlobalCreatePackModal />
+      <GlobalAddedToCartPopup />
     </AppShell>
   );
 }

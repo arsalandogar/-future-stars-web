@@ -1,6 +1,11 @@
 .card {
   cursor: pointer;
-  transition: opacity 150ms ease;
+  transition: opacity 150ms ease, margin-bottom 150ms ease;
+  position: relative;
+}
+
+.card.selected {
+  margin-bottom: 24px;
 }
 
 .card.disabled {
@@ -10,14 +15,14 @@
 
 .imageContainer {
   position: relative;
-  border-radius: var(--mantine-radius-sm);
-  overflow: hidden;
-  border: 3px solid transparent;
-  transition: border-color 150ms ease;
+  border-radius: 0;
+  border: 4px solid transparent;
+  transition: border-color 150ms ease, border-radius 150ms ease;
 }
 
 .card.selected .imageContainer {
   border-color: var(--mantine-color-primary-4);
+  border-radius: var(--mantine-radius-xs);
 }
 
 .card:not(.disabled):hover .imageContainer {
@@ -39,36 +44,59 @@
   height: 28px;
   background-color: var(--mantine-color-primary-4);
   border-radius: 50%;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
+  cursor: pointer;
+  transition: transform 150ms ease;
+}
+
+.checkBadge:hover {
+  transform: scale(1.1);
 }
 
 .quantityPicker {
   position: absolute;
-  bottom: 0;
+  bottom: -21px;
   left: 0;
   right: 0;
+  height: 42px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   background-color: var(--mantine-color-primary-4);
-  padding: 6px 8px;
+  border-radius: 9999px;
+  overflow: hidden;
 }
 
 .quantityButton {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
   color: white;
+  cursor: pointer;
+  transition: background-color 150ms ease;
 }
 
-.quantityButton:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+
+.quantityButton:first-child {
+  border-radius: 9999px 0 0 9999px;
+}
+
+.quantityButton:last-child {
+  border-radius: 0 9999px 9999px 0;
 }
 
 .quantityValue {
   font-weight: 600;
-  font-size: var(--mantine-font-size-md);
+  font-size: var(--mantine-font-size-xl);
   color: white;
-  min-width: 24px;
+  min-width: 40px;
   text-align: center;
+  flex-shrink: 0;
 }

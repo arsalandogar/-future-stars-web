@@ -5,7 +5,6 @@
 .listContainer {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid var(--mantine-color-dark-6);
 }
 
 .loadMore {

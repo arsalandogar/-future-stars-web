@@ -25,6 +25,7 @@ This is a React 19 + TypeScript + Vite application with the React Compiler enabl
 - Path alias `@/*` maps to `src/*` for clean imports
 - UI components use [Mantine](https://mantine.dev) - reference https://mantine.dev/llms.txt for documentation
 - **Primary color**: When "primary" is mentioned, use `var(--mantine-color-primary-4)` (the value is `#5046FF`)
+- **Card images**: Card images should never have border-radius - always display with sharp corners
 - Icons use [Lucide React](https://lucide.dev/icons/) - import from `lucide-react`
 - **Backend API**: Fetch the OpenAPI spec at https://api.futurestarsapp.com/api.json when creating or modifying API hooks to get accurate endpoints, request/response schemas, and validation rules
 

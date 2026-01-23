@@ -1,4 +1,3 @@
-import { Text } from '@mantine/core';
 import { Plus } from 'lucide-react';
 
 import styles from './create-card-button.module.css';
@@ -28,8 +27,6 @@ export function CreateCardButton({ onClick }: CreateCardButtonProps) {
           <Plus size={64} className={styles.icon} />
         </div>
       </div>
-      <Text className={styles.title}>Create a Card</Text>
-      <Text className={styles.subtitle}>Click here to start</Text>
     </div>
   );
 }

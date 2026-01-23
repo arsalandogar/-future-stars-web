@@ -1,0 +1,142 @@
+.ordersList {
+  display: flex;
+  flex-direction: column;
+}
+
+.orderCard {
+  padding-bottom: var(--mantine-spacing-md);
+}
+
+.orderCard.withDivider {
+  border-bottom: 1px solid var(--mantine-color-primaryLight-filled);
+  margin-bottom: var(--mantine-spacing-md);
+}
+
+.orderHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--mantine-spacing-sm) 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  gap: var(--mantine-spacing-md);
+}
+
+.orderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tracking {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.tracking:hover .trackingNumber {
+  color: var(--mantine-color-primary-4);
+}
+
+.trackingNumber {
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+
+.orderRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  color: var(--text-muted);
+}
+
+.priceRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--mantine-spacing-sm);
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.promoCode {
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+  background-color: var(--mantine-color-dark-5);
+  border-radius: var(--mantine-radius-sm);
+  text-align: right;
+  margin-bottom: var(--mantine-spacing-sm);
+}
+
+.orderDetails {
+  padding: var(--mantine-spacing-md) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-md);
+}
+
+.packsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-sm);
+}
+
+.summarySection {
+  padding: var(--mantine-spacing-md);
+  background-color: var(--customer-input-bg);
+  border-radius: var(--mantine-radius-md);
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.addressSection {
+  padding: var(--mantine-spacing-md);
+  background-color: var(--customer-input-bg);
+  border-radius: var(--mantine-radius-md);
+}
+
+@media (max-width: 576px) {
+  .orderHeader {
+    flex-direction: column;
+    gap: var(--mantine-spacing-sm);
+  }
+
+  .orderRight {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .priceRow {
+    order: 1;
+  }
+
+  .statusRow {
+    order: 0;
+  }
+}

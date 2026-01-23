@@ -15,6 +15,9 @@ interface PacksListProps {
   isFetchingNextPage: boolean;
   fetchNextPage: () => void;
   onAddToCart: (pack: Pack) => void;
+  onPreview: (pack: Pack) => void;
+  onEdit: (pack: Pack) => void;
+  onCopy: (pack: Pack) => void;
 }
 
 export function PacksList({
@@ -24,6 +27,9 @@ export function PacksList({
   isFetchingNextPage,
   fetchNextPage,
   onAddToCart,
+  onPreview,
+  onEdit,
+  onCopy,
 }: PacksListProps) {
   const { ref, entry } = useIntersection({
     threshold: 0.5,
@@ -45,6 +51,9 @@ export function PacksList({
               pack={pack}
               variant="grid"
               onAddToCart={onAddToCart}
+              onPreview={() => onPreview(pack)}
+              onEdit={onEdit}
+              onCopy={onCopy}
             />
           ))}
         </SimpleGrid>
@@ -67,6 +76,9 @@ export function PacksList({
             pack={pack}
             variant="list"
             onAddToCart={onAddToCart}
+            onPreview={() => onPreview(pack)}
+            onEdit={onEdit}
+            onCopy={onCopy}
           />
         ))}
       </div>
