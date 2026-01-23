@@ -1,6 +1,7 @@
 import { ActionIcon, Button, Loader, Text, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
+import { Elements } from '@stripe/react-stripe-js';
 import { useNavigate } from '@tanstack/react-router';
 import { ArrowLeft, CreditCard } from 'lucide-react';
 import { useState } from 'react';
@@ -8,6 +9,7 @@ import { useState } from 'react';
 import type { Address, CartItem } from '@/types';
 
 import { Head } from '@/components/seo/head';
+import { getStripePromise, stripeAppearance } from '@/lib/stripe';
 
 import { useCheckout } from '../api/checkout';
 import { useConfirmPayment } from '../api/confirm-payment';
@@ -294,15 +296,24 @@ export function CheckoutPage() {
       )}
 
       {/* Payment Modal */}
-      {clientSecret && (
-        <PaymentModal
-          opened={paymentModalOpened}
-          onClose={closePaymentModal}
-          clientSecret={clientSecret}
-          customerSessionClientSecret={customerSessionClientSecret}
-          amount={total}
-          onPaymentSuccess={handlePaymentSuccess}
-        />
+      {clientSecret && orderId && (
+        <Elements
+          stripe={getStripePromise()}
+          options={{
+            clientSecret,
+            customerSessionClientSecret:
+              customerSessionClientSecret ?? undefined,
+            appearance: stripeAppearance,
+          }}
+        >
+          <PaymentModal
+            opened={paymentModalOpened}
+            onClose={closePaymentModal}
+            amount={total}
+            orderId={orderId}
+            onPaymentSuccess={handlePaymentSuccess}
+          />
+        </Elements>
       )}
     </>
   );

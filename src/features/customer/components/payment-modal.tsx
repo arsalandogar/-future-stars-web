@@ -1,6 +1,5 @@
 import { Button, Modal, Text, Title } from '@mantine/core';
 import {
-  Elements,
   PaymentElement,
   useElements,
   useStripe,
@@ -8,16 +7,15 @@ import {
 import { CreditCard } from 'lucide-react';
 import { useState } from 'react';
 
-import { getStripePromise, stripeAppearance } from '@/lib/stripe';
-
 import styles from './payment-modal.module.css';
 
-interface PaymentFormInnerProps {
+interface PaymentFormProps {
   onPaymentSuccess: () => void;
   amount: number;
+  orderId: number;
 }
 
-function PaymentFormInner({ onPaymentSuccess, amount }: PaymentFormInnerProps) {
+function PaymentForm({ onPaymentSuccess, amount, orderId }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -34,7 +32,7 @@ function PaymentFormInner({ onPaymentSuccess, amount }: PaymentFormInnerProps) {
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: window.location.origin + '/order-success',
+        return_url: `${window.location.origin}/order-success/${orderId}`,
       },
       redirect: 'if_required',
     });
@@ -50,12 +48,7 @@ function PaymentFormInner({ onPaymentSuccess, amount }: PaymentFormInnerProps) {
   return (
     <div className={styles.formContainer}>
       <div className={styles.paymentElement}>
-        <PaymentElement
-          options={{
-            layout: 'tabs',
-            paymentMethodOrder: ['card'],
-          }}
-        />
+        <PaymentElement options={{ layout: 'tabs' }} />
       </div>
 
       {errorMessage && (
@@ -84,18 +77,16 @@ function PaymentFormInner({ onPaymentSuccess, amount }: PaymentFormInnerProps) {
 interface PaymentModalProps {
   opened: boolean;
   onClose: () => void;
-  clientSecret: string;
-  customerSessionClientSecret?: string | null;
   amount: number;
+  orderId: number;
   onPaymentSuccess: () => void;
 }
 
 export function PaymentModal({
   opened,
   onClose,
-  clientSecret,
-  customerSessionClientSecret,
   amount,
+  orderId,
   onPaymentSuccess,
 }: PaymentModalProps) {
   return (
@@ -115,16 +106,11 @@ export function PaymentModal({
         header: styles.header,
       }}
     >
-      <Elements
-        stripe={getStripePromise()}
-        options={{
-          clientSecret,
-          customerSessionClientSecret: customerSessionClientSecret ?? undefined,
-          appearance: stripeAppearance,
-        }}
-      >
-        <PaymentFormInner onPaymentSuccess={onPaymentSuccess} amount={amount} />
-      </Elements>
+      <PaymentForm
+        onPaymentSuccess={onPaymentSuccess}
+        amount={amount}
+        orderId={orderId}
+      />
     </Modal>
   );
 }

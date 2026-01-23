@@ -372,7 +372,6 @@ function AddPaymentMethodForm({ onSuccess }: AddPaymentMethodFormProps) {
         <PaymentElement
           options={{
             layout: 'tabs',
-            paymentMethodOrder: ['card'],
             defaultValues: {
               billingDetails: {
                 address: {
