@@ -227,52 +227,6 @@ Uses **Tailwind CSS v4** with **Mantine v7** via `tailwind-preset-mantine`. See 
 | Complex hover/focus combinations            | CSS Modules         |
 | 5+ style modifications                      | CSS Modules         |
 
-### Modal/Popup Guidelines
-
-When creating modals or popups, follow this structure:
-
-**Header:**
-- Use `<Title order={4}>` for the heading text
-- Close button: X icon from lucide-react, always white color (`var(--mantine-color-white)`), no hover effect
-- Border bottom: `1px solid color-mix(in srgb, var(--mantine-color-primaryLight-filled) 40%, transparent)`
-- Padding: `var(--mantine-spacing-lg) var(--mantine-spacing-xl)`
-
-**Overlay:**
-- Dark background: `rgba(0, 0, 0, 0.6)`
-- Never covers the header - use `top: 84px` (header height) instead of `inset: 0`
-- z-index: 1000+
-
-**Container:**
-- Background: `var(--mantine-color-black)` for customer-facing modals
-- Border radius: `var(--mantine-radius-xs)` (never rounded corners on modals)
-- Glow effect: `box-shadow: 0 0 30px rgba(80, 70, 255, 0.5)`
-
-**Content:**
-- Padding: `var(--mantine-spacing-xl) var(--mantine-spacing-xl)`
-
-**Footer:**
-- Border top: `1px solid color-mix(in srgb, var(--mantine-color-primaryLight-filled) 40%, transparent)`
-- Padding: `var(--mantine-spacing-lg) var(--mantine-spacing-xl)`
-- Buttons: Use `size="md"` with `radius="xl"` for action buttons
-- Layout: `display: flex` with `gap: var(--mantine-spacing-md)`
-
-**Example structure:**
-```tsx
-<div className={styles.container}>
-  <div className={styles.header}>
-    <Title order={4} c="white">Modal Title</Title>
-    <button className={styles.closeButton} onClick={onClose}>
-      <X size={24} />
-    </button>
-  </div>
-  <div className={styles.content}>{/* Content */}</div>
-  <div className={styles.footer}>
-    <Button variant="outline" size="md" radius="xl">Cancel</Button>
-    <Button variant="filled" size="md" radius="xl">Confirm</Button>
-  </div>
-</div>
-```
-
 ### Environment Variables
 
 Environment variables are accessed via `src/config/env.ts`:
