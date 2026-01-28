@@ -1,3 +1,26 @@
+/* Modal entrance animations */
+@keyframes modalContentEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .overlay {
   backdrop-filter: blur(8px);
   background-color: rgba(0, 0, 0, 0.7);
@@ -9,7 +32,9 @@
   border-radius: var(--mantine-radius-lg);
   box-shadow: 0 0 40px 10px
     color-mix(in srgb, var(--mantine-color-primary-4) 50%, transparent);
-  overflow: hidden;
+  overflow-y: auto;
+  max-height: 90vh;
+  animation: modalContentEnter 300ms ease-out;
 }
 
 .body {
@@ -52,19 +77,62 @@
 }
 
 .contentContainer {
-  padding: 4rem 1rem;
+  padding: var(--mantine-spacing-xl) var(--mantine-spacing-md);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--mantine-spacing-xl);
+  gap: var(--mantine-spacing-md);
+  animation: fadeSlideUp 300ms ease-out 100ms backwards;
+}
+
+/* Card Counter */
+.cardCounter {
+  color: var(--mantine-color-dimmed);
+  font-size: var(--mantine-font-size-sm);
+  text-align: center;
 }
 
 .cardsWrapper {
   display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+  width: 100%;
+  max-width: calc(280px * 2 + var(--mantine-spacing-xl) + 100px);
+}
+
+.cardsContent {
+  display: flex;
   flex-direction: column;
   gap: var(--mantine-spacing-xl);
-  width: 100%;
-  max-width: calc(280px * 2 + var(--mantine-spacing-xl));
+  flex: 1;
+  min-width: 0;
+}
+
+/* Navigation Arrows */
+.navArrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--mantine-color-white);
+  cursor: pointer;
+  border-radius: 50%;
+  transition:
+    background-color 150ms ease,
+    opacity 150ms ease;
+}
+
+.navArrow:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navArrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .actionsRow {
@@ -122,6 +190,7 @@
   justify-content: space-between;
   padding: var(--mantine-spacing-lg);
   border-top: 2px solid var(--mantine-color-primary-4);
+  animation: fadeSlideUp 300ms ease-out 200ms backwards;
 }
 
 .buyButton {
@@ -133,6 +202,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  animation: fadeSlideUp 300ms ease-out;
 }
 
 .flipCard {
@@ -206,6 +276,20 @@
 
 .drawer .contentContainer {
   padding: var(--mantine-spacing-md);
+}
+
+.drawer .cardCounter {
+  font-size: var(--mantine-font-size-xs);
+}
+
+.drawer .navArrow {
+  width: 36px;
+  height: 36px;
+}
+
+.drawer .navArrow svg {
+  width: 24px;
+  height: 24px;
 }
 
 .drawer .footer {

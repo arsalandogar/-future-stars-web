@@ -32,7 +32,7 @@
 }
 
 .headerTitle span {
-  color: var(--mantine-color-gray-5);
+  color: var(--mantine-color-gray-3);
   font-weight: 400;
 }
 
@@ -46,7 +46,7 @@
 
 .content {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: 1fr 480px;
   gap: var(--mantine-spacing-xl);
   align-items: start;
 }
@@ -94,6 +94,20 @@
   }
 }
 
+.termsSection {
+  margin-top: var(--mantine-spacing-xl);
+  padding: 0 var(--mantine-spacing-md);
+}
+
+.termsLink {
+  color: var(--mantine-color-primaryLight-filled);
+  text-decoration: none;
+}
+
+.termsLink:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 576px) {
   .container {
     gap: var(--mantine-spacing-md);
@@ -110,5 +124,9 @@
 
   .mobileFooter {
     display: block;
+  }
+
+  .termsSection {
+    padding: 0 var(--mantine-spacing-sm);
   }
 }

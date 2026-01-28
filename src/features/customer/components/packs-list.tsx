@@ -43,7 +43,7 @@ export function PacksList({
 
   if (view === 'grid') {
     return (
-      <div className={styles.container}>
+      <div className={`${styles.container} ${styles.gridContainer}`}>
         <SimpleGrid cols={2} spacing="md">
           {packs.map((pack) => (
             <PackItem

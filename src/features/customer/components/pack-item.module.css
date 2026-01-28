@@ -9,12 +9,16 @@
   padding: var(--mantine-spacing-md);
   box-shadow: 0 0 20px rgba(80, 70, 255, 0.4);
   border: 2px solid transparent;
-  transition: border-color 200ms ease, box-shadow 200ms ease;
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease;
 }
 
 .container.grid:hover {
   border-color: var(--mantine-color-primary-filled);
-  box-shadow: 0 0 30px rgba(80, 70, 255, 0.6), 0 8px 16px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    0 0 30px rgba(80, 70, 255, 0.6),
+    0 8px 16px rgba(0, 0, 0, 0.3);
 }
 
 .container.list {
@@ -137,6 +141,14 @@
   text-decoration: underline;
 }
 
+.chevron {
+  transition: transform 200ms ease;
+}
+
+.chevron.open {
+  transform: rotate(180deg);
+}
+
 .addToCartButton {
   margin-left: auto;
   white-space: nowrap;
@@ -179,11 +191,25 @@
   color: white;
 }
 
+.expandedContentWrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 250ms ease-out;
+}
+
+.expandedContentWrapper.open {
+  grid-template-rows: 1fr;
+}
+
 .expandedContent {
-  margin-top: var(--mantine-spacing-md);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: var(--mantine-spacing-sm);
+}
+
+.expandedContent.open {
+  margin-top: var(--mantine-spacing-md);
 }
 
 @media (max-width: 576px) {

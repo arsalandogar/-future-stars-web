@@ -1,3 +1,14 @@
+@keyframes itemEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .container {
   width: 100%;
 }
@@ -5,6 +16,67 @@
 .listContainer {
   display: flex;
   flex-direction: column;
+}
+
+.listContainer > * {
+  animation: itemEnter 300ms ease-out backwards;
+}
+
+/* Staggered entrance delays for list */
+.listContainer > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.listContainer > *:nth-child(2) {
+  animation-delay: 50ms;
+}
+.listContainer > *:nth-child(3) {
+  animation-delay: 100ms;
+}
+.listContainer > *:nth-child(4) {
+  animation-delay: 150ms;
+}
+.listContainer > *:nth-child(5) {
+  animation-delay: 200ms;
+}
+.listContainer > *:nth-child(6) {
+  animation-delay: 250ms;
+}
+.listContainer > *:nth-child(7) {
+  animation-delay: 300ms;
+}
+.listContainer > *:nth-child(8) {
+  animation-delay: 350ms;
+}
+
+/* Grid container animation */
+.gridContainer > div > * {
+  animation: itemEnter 300ms ease-out backwards;
+}
+
+/* Staggered entrance delays for grid */
+.gridContainer > div > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.gridContainer > div > *:nth-child(2) {
+  animation-delay: 50ms;
+}
+.gridContainer > div > *:nth-child(3) {
+  animation-delay: 100ms;
+}
+.gridContainer > div > *:nth-child(4) {
+  animation-delay: 150ms;
+}
+.gridContainer > div > *:nth-child(5) {
+  animation-delay: 200ms;
+}
+.gridContainer > div > *:nth-child(6) {
+  animation-delay: 250ms;
+}
+.gridContainer > div > *:nth-child(7) {
+  animation-delay: 300ms;
+}
+.gridContainer > div > *:nth-child(8) {
+  animation-delay: 350ms;
 }
 
 .loadMore {

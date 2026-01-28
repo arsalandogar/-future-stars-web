@@ -6,6 +6,7 @@ import { UserStar } from 'lucide-react';
 import hLogoWhite from '@/assets/logos/h-logo-white.png';
 import { useAuthStore } from '@/stores/auth-store';
 
+import { AccountButton } from './account-button';
 import { CartButton } from './cart-button';
 import classes from './customer-header.module.css';
 import { MobileMenu } from './mobile-menu';
@@ -41,6 +42,7 @@ export function CustomerHeader() {
               CREATE A CARD
             </Button>
             <CartButton />
+            <AccountButton />
             {user?.isAdmin && (
               <Button
                 component={Link}
@@ -55,6 +57,7 @@ export function CustomerHeader() {
 
           <Group gap="xs" hiddenFrom="sm">
             <CartButton />
+            <AccountButton />
             <Burger
               opened={mobileMenuOpened}
               onClick={toggleMobileMenu}

@@ -1,5 +1,5 @@
 import { Container, Loader, Text, Title } from '@mantine/core';
-import { Check, Mail, Package, Truck } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 import { Head } from '@/components/seo/head';
 
@@ -123,69 +123,11 @@ export function OrderSuccessPage({ orderId }: OrderSuccessPageProps) {
                 <div className={styles.detailRow}>
                   <Text c="dimmed">
                     {summary.packCount} Pack{summary.packCount !== 1 ? 's' : ''}{' '}
-                    ({summary.cardCount} Card{summary.cardCount !== 1 ? 's' : ''}
-                    )
+                    ({summary.cardCount} Card
+                    {summary.cardCount !== 1 ? 's' : ''})
                   </Text>
                   <Text c="white" fw={600}>
                     ${(summary.total / 100).toFixed(2)}
-                  </Text>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* What's Next Section */}
-          <div className={styles.whatsNext}>
-            <Title order={3} c="white" fw={700} className={styles.whatsNextTitle}>
-              What's Next?
-            </Title>
-
-            <div className={styles.nextSteps}>
-              <div className={styles.stepCard}>
-                <div className={styles.stepIcon}>
-                  <Mail size={24} />
-                </div>
-                <div className={styles.stepContent}>
-                  <Text fw={600} c="white">
-                    Confirmation Email
-                  </Text>
-                  <Text size="sm" c="dimmed">
-                    You will receive a confirmation email with your order details
-                    and tracking information.
-                  </Text>
-                </div>
-              </div>
-
-              <div className={styles.stepDivider} />
-
-              <div className={styles.stepCard}>
-                <div className={styles.stepIcon}>
-                  <Package size={24} />
-                </div>
-                <div className={styles.stepContent}>
-                  <Text fw={600} c="white">
-                    Order Processing
-                  </Text>
-                  <Text size="sm" c="dimmed">
-                    We'll start processing your order and prepare it for shipping
-                    within 1-2 business days.
-                  </Text>
-                </div>
-              </div>
-
-              <div className={styles.stepDivider} />
-
-              <div className={styles.stepCard}>
-                <div className={styles.stepIcon}>
-                  <Truck size={24} />
-                </div>
-                <div className={styles.stepContent}>
-                  <Text fw={600} c="white">
-                    Shipping Updates
-                  </Text>
-                  <Text size="sm" c="dimmed">
-                    You'll receive shipping updates and tracking information once
-                    your order ships.
                   </Text>
                 </div>
               </div>

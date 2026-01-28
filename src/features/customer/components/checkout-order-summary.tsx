@@ -57,6 +57,7 @@ export function CheckoutOrderSummary({
           <Checkbox
             checked={acceptTerms}
             onChange={(e) => onAcceptTermsChange(e.currentTarget.checked)}
+            radius={0}
             label={
               <Text size="sm" c="dimmed">
                 I agree to the{' '}

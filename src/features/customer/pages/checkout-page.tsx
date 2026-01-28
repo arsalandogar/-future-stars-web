@@ -1,4 +1,11 @@
-import { ActionIcon, Button, Loader, Text, Title } from '@mantine/core';
+import {
+  ActionIcon,
+  Button,
+  Checkbox,
+  Loader,
+  Text,
+  Title,
+} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { Elements } from '@stripe/react-stripe-js';
@@ -259,10 +266,37 @@ export function CheckoutPage() {
               subtotal={subtotal}
               shipping={shipping}
               total={total}
-              acceptTerms={acceptTerms}
-              onAcceptTermsChange={setAcceptTerms}
-              showTerms={!clientSecret}
             />
+            {!clientSecret && (
+              <div className={styles.termsSection}>
+                <Checkbox
+                  checked={acceptTerms}
+                  onChange={(e) => setAcceptTerms(e.currentTarget.checked)}
+                  radius={0}
+                  color="primary"
+                  label={
+                    <Text size="sm" c="white">
+                      I agree to the{' '}
+                      <a
+                        href="/terms"
+                        target="_blank"
+                        className={styles.termsLink}
+                      >
+                        Terms & Conditions
+                      </a>{' '}
+                      and{' '}
+                      <a
+                        href="/privacy"
+                        target="_blank"
+                        className={styles.termsLink}
+                      >
+                        Privacy Policy
+                      </a>
+                    </Text>
+                  }
+                />
+              </div>
+            )}
           </div>
         </div>
 

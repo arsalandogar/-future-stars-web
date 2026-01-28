@@ -1,9 +1,10 @@
 import { AppShell, Container } from '@mantine/core';
-import { Outlet } from '@tanstack/react-router';
+import { Outlet, useLocation } from '@tanstack/react-router';
 
 import {
   GlobalAddedToCartPopup,
   GlobalCreatePackModal,
+  GlobalPackAutofillModal,
 } from '@/features/customer';
 
 import { CustomerFooter } from './components/customer-footer';
@@ -13,6 +14,8 @@ import styles from './customer-layout.module.css';
 const HEADER_HEIGHT = 84;
 
 export function CustomerLayout() {
+  const location = useLocation();
+
   return (
     <AppShell
       header={{ height: HEADER_HEIGHT }}
@@ -34,7 +37,9 @@ export function CustomerLayout() {
 
       <AppShell.Main className={styles.layout}>
         <Container size="xl" p={{ base: 'sm', sm: 'xl' }}>
-          <Outlet />
+          <div key={location.pathname} className={styles.pageTransition}>
+            <Outlet />
+          </div>
         </Container>
       </AppShell.Main>
 
@@ -42,6 +47,7 @@ export function CustomerLayout() {
 
       <GlobalCreatePackModal />
       <GlobalAddedToCartPopup />
+      <GlobalPackAutofillModal />
     </AppShell>
   );
 }

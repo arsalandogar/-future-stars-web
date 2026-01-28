@@ -1,7 +1,42 @@
+@keyframes itemEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .container {
   /* ContentPanel handles bg and border-radius */
 }
 
 .itemsContainer {
   /* ContentPanel provides padding */
+}
+
+.itemsContainer > * {
+  animation: itemEnter 300ms ease-out backwards;
+}
+
+/* Staggered entrance delays */
+.itemsContainer > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.itemsContainer > *:nth-child(2) {
+  animation-delay: 50ms;
+}
+.itemsContainer > *:nth-child(3) {
+  animation-delay: 100ms;
+}
+.itemsContainer > *:nth-child(4) {
+  animation-delay: 150ms;
+}
+.itemsContainer > *:nth-child(5) {
+  animation-delay: 200ms;
+}
+.itemsContainer > *:nth-child(6) {
+  animation-delay: 250ms;
 }

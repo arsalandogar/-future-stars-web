@@ -1,7 +1,10 @@
 import { AppShell, Container } from '@mantine/core';
-import { Outlet } from '@tanstack/react-router';
+import { Outlet, useLocation } from '@tanstack/react-router';
 
-import { GlobalCreatePackModal } from '@/features/customer';
+import {
+  GlobalCreatePackModal,
+  GlobalPackAutofillModal,
+} from '@/features/customer';
 
 import { CheckoutHeader } from './components/checkout-header';
 import styles from './checkout-layout.module.css';
@@ -9,6 +12,8 @@ import styles from './checkout-layout.module.css';
 const HEADER_HEIGHT = 84;
 
 export function CheckoutLayout() {
+  const location = useLocation();
+
   return (
     <AppShell
       header={{ height: HEADER_HEIGHT }}
@@ -30,11 +35,14 @@ export function CheckoutLayout() {
 
       <AppShell.Main className={styles.layout}>
         <Container size="xl" p={{ base: 'sm', sm: 'xl' }}>
-          <Outlet />
+          <div key={location.pathname} className={styles.pageTransition}>
+            <Outlet />
+          </div>
         </Container>
       </AppShell.Main>
 
       <GlobalCreatePackModal />
+      <GlobalPackAutofillModal />
     </AppShell>
   );
 }

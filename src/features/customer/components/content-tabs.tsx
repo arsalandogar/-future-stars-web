@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from 'react';
+
 import styles from './content-tabs.module.css';
 
 export interface ContentTabItem {
@@ -18,14 +20,34 @@ export function ContentTabs({
   onChange,
   gap = 'var(--mantine-spacing-xl)',
 }: ContentTabsProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+
+  useEffect(() => {
+    const activeTab = tabRefs.current.get(activeValue);
+    const container = containerRef.current;
+    if (activeTab && container) {
+      const containerRect = container.getBoundingClientRect();
+      const tabRect = activeTab.getBoundingClientRect();
+      setIndicatorStyle({
+        left: tabRect.left - containerRect.left,
+        width: tabRect.width,
+      });
+    }
+  }, [activeValue, items]);
+
   return (
-    <div className={styles.container} style={{ gap }}>
+    <div ref={containerRef} className={styles.container} style={{ gap }}>
       {items.map((item) => {
         const isActive = activeValue === item.value;
 
         return (
           <button
             key={item.value}
+            ref={(el) => {
+              if (el) tabRefs.current.set(item.value, el);
+            }}
             type="button"
             className={styles.tab}
             data-active={isActive ? 'true' : undefined}
@@ -35,6 +57,13 @@ export function ContentTabs({
           </button>
         );
       })}
+      <div
+        className={styles.indicator}
+        style={{
+          transform: `translateX(${indicatorStyle.left}px)`,
+          width: indicatorStyle.width,
+        }}
+      />
     </div>
   );
 }

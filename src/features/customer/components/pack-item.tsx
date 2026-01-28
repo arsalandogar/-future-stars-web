@@ -10,7 +10,6 @@ import { useDisclosure } from '@mantine/hooks';
 import {
   Check,
   ChevronDown,
-  ChevronUp,
   Copy,
   MoreVertical,
   Pencil,
@@ -244,11 +243,10 @@ export function PackItem({
                   onClick={() => setIsExpanded(!isExpanded)}
                 >
                   <span>View Cards</span>
-                  {isExpanded ? (
-                    <ChevronUp size={16} />
-                  ) : (
-                    <ChevronDown size={16} />
-                  )}
+                  <ChevronDown
+                    size={16}
+                    className={`${styles.chevron} ${isExpanded ? styles.open : ''}`}
+                  />
                 </button>
               )}
               <Button
@@ -266,9 +264,15 @@ export function PackItem({
         </div>
       </div>
 
-      {!readOnly && isExpanded && (
-        <div className={styles.expandedContent}>
-          <PackCardsPreview cards={pack.packCards.map((pc) => pc.card)} />
+      {!readOnly && hasMultipleCards && (
+        <div
+          className={`${styles.expandedContentWrapper} ${isExpanded ? styles.open : ''}`}
+        >
+          <div
+            className={`${styles.expandedContent} ${isExpanded ? styles.open : ''}`}
+          >
+            <PackCardsPreview cards={pack.packCards.map((pc) => pc.card)} />
+          </div>
         </div>
       )}
 

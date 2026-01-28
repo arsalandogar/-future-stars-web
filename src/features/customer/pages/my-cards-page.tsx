@@ -44,7 +44,7 @@ const TAB_ITEMS = [
 
 export function MyCardsPage() {
   const { tab: activeTab } = routeApi.useSearch();
-  const [selectedCard, setSelectedCard] = useState<Card | undefined>();
+  const [selectedCardIndex, setSelectedCardIndex] = useState<number>(0);
   const [selectedPack, setSelectedPack] = useState<Pack | undefined>();
   const [modalOpened, { open: openModal, close: closeModal }] =
     useDisclosure(false);
@@ -105,7 +105,8 @@ export function MyCardsPage() {
   };
 
   const handleCardClick = (card: Card) => {
-    setSelectedCard(card);
+    const index = visibleCards.findIndex((c) => c.id === card.id);
+    setSelectedCardIndex(index >= 0 ? index : 0);
     openModal();
   };
 
@@ -210,75 +211,80 @@ export function MyCardsPage() {
               : ''
           }
         >
-          {activeTab === 'cards' && (
-            <>
-              {isLoadingCards ? (
-                <CardsSkeleton />
-              ) : visibleCards.length === 0 ? (
-                <div className={styles.emptyStateWrapper}>
-                  <EmptyState
-                    shape="rectangle"
-                    icon={<Images size={48} />}
-                    title="No Cards Yet!"
-                    subtitle="Click below to create your first card"
-                    actionLabel="Create Card"
-                    actionIcon={<Plus size={18} />}
-                    onAction={handleCreateCard}
+          <div key={activeTab} className={styles.tabContent}>
+            {activeTab === 'cards' && (
+              <>
+                {isLoadingCards ? (
+                  <CardsSkeleton />
+                ) : visibleCards.length === 0 ? (
+                  <div className={styles.emptyStateWrapper}>
+                    <EmptyState
+                      shape="rectangle"
+                      icon={<Images size={48} />}
+                      title="No Cards Yet!"
+                      subtitle="Click below to create your first card"
+                      actionLabel="Create Card"
+                      actionIcon={<Plus size={18} />}
+                      onAction={handleCreateCard}
+                    />
+                  </div>
+                ) : (
+                  <CardsGrid
+                    cards={visibleCards}
+                    hasNextPage={hasNextCardsPage ?? false}
+                    isFetchingNextPage={isFetchingNextCardsPage}
+                    fetchNextPage={() => void fetchNextCardsPage()}
+                    onCreateCard={handleCreateCard}
+                    onCardClick={handleCardClick}
                   />
-                </div>
-              ) : (
-                <CardsGrid
-                  cards={visibleCards}
-                  hasNextPage={hasNextCardsPage ?? false}
-                  isFetchingNextPage={isFetchingNextCardsPage}
-                  fetchNextPage={() => void fetchNextCardsPage()}
-                  onCreateCard={handleCreateCard}
-                  onCardClick={handleCardClick}
-                />
-              )}
-            </>
-          )}
+                )}
+              </>
+            )}
 
-          {activeTab === 'packs' && (
-            <>
-              {isLoadingPacks ? (
-                <CardsSkeleton />
-              ) : allPacks.length === 0 ? (
-                <div className={styles.emptyStateWrapper}>
-                  <EmptyState
-                    shape="rectangle"
-                    icon={<Images size={48} />}
-                    title="No Packs Yet!"
-                    subtitle="Tap below to create your first pack"
-                    actionLabel="Create a Pack"
-                    actionIcon={<Plus size={18} />}
-                    onAction={openCreate}
+            {activeTab === 'packs' && (
+              <>
+                {isLoadingPacks ? (
+                  <CardsSkeleton />
+                ) : allPacks.length === 0 ? (
+                  <div className={styles.emptyStateWrapper}>
+                    <EmptyState
+                      shape="rectangle"
+                      icon={<Images size={48} />}
+                      title="No Packs Yet!"
+                      subtitle="Tap below to create your first pack"
+                      actionLabel="Create a Pack"
+                      actionIcon={<Plus size={18} />}
+                      onAction={openCreate}
+                    />
+                  </div>
+                ) : (
+                  <PacksList
+                    packs={allPacks}
+                    view={packsView}
+                    hasNextPage={hasNextPacksPage ?? false}
+                    isFetchingNextPage={isFetchingNextPacksPage}
+                    fetchNextPage={() => void fetchNextPacksPage()}
+                    onAddToCart={handleAddPackToCart}
+                    onPreview={handlePackPreview}
+                    onEdit={handleEditPack}
+                    onCopy={handleCopyPack}
                   />
-                </div>
-              ) : (
-                <PacksList
-                  packs={allPacks}
-                  view={packsView}
-                  hasNextPage={hasNextPacksPage ?? false}
-                  isFetchingNextPage={isFetchingNextPacksPage}
-                  fetchNextPage={() => void fetchNextPacksPage()}
-                  onAddToCart={handleAddPackToCart}
-                  onPreview={handlePackPreview}
-                  onEdit={handleEditPack}
-                  onCopy={handleCopyPack}
-                />
-              )}
-            </>
-          )}
+                )}
+              </>
+            )}
+          </div>
         </ContentPanel>
       </Container>
 
       {modalOpened && (
         <CardPreviewModal
-          card={selectedCard}
+          cards={visibleCards}
+          initialIndex={selectedCardIndex}
           opened={modalOpened}
           onClose={closeModal}
           onBuyCard={handleBuyCard}
+          hasNextPage={hasNextCardsPage}
+          onLoadMore={() => void fetchNextCardsPage()}
         />
       )}
 

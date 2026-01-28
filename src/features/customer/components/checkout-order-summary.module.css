@@ -14,7 +14,7 @@
 }
 
 .label {
-  color: var(--mantine-color-gray-4);
+  color: var(--mantine-color-white);
 }
 
 .value {
@@ -24,7 +24,7 @@
 
 .divider {
   height: 1px;
-  background-color: var(--mantine-color-primary-4);
+  background-color: var(--mantine-color-primaryLight-filled);
   margin: var(--mantine-spacing-xs) 0;
 }
 

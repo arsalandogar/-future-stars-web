@@ -1,3 +1,23 @@
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 .overlay {
   position: fixed;
   top: 84px;
@@ -6,6 +26,7 @@
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.6);
   z-index: 1000;
+  animation: overlayFadeIn 200ms ease-out;
 }
 
 .container {
@@ -18,6 +39,7 @@
   border-radius: var(--mantine-radius-xs);
   box-shadow: 0 0 30px rgba(80, 70, 255, 0.5);
   overflow: hidden;
+  animation: slideInRight 300ms ease-out;
 }
 
 .header {
@@ -25,7 +47,12 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--mantine-spacing-lg) var(--mantine-spacing-xl);
-  border-bottom: 1px solid color-mix(in srgb, var(--mantine-color-primaryLight-filled) 40%, transparent);
+  border-bottom: 1px solid
+    color-mix(
+      in srgb,
+      var(--mantine-color-primaryLight-filled) 40%,
+      transparent
+    );
 }
 
 .headerLeft {
@@ -58,7 +85,12 @@
   align-items: center;
   gap: var(--mantine-spacing-md);
   padding: var(--mantine-spacing-lg) var(--mantine-spacing-xl);
-  border-top: 1px solid color-mix(in srgb, var(--mantine-color-primaryLight-filled) 40%, transparent);
+  border-top: 1px solid
+    color-mix(
+      in srgb,
+      var(--mantine-color-primaryLight-filled) 40%,
+      transparent
+    );
 }
 
 .viewCartButton {

@@ -1,6 +1,6 @@
 import { Image } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 
 import type { CartItem as CartItemType } from '@/types';
@@ -19,6 +19,7 @@ interface CartItemProps {
   onDelete?: () => void;
   onViewPack?: () => void;
   readOnly?: boolean;
+  removing?: boolean;
 }
 
 function getTotalPackQuantity(item: CartItemType): number {
@@ -32,6 +33,7 @@ export function CartItem({
   onDelete,
   onViewPack,
   readOnly = false,
+  removing = false,
 }: CartItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const isMobile = useMediaQuery('(max-width: 576px)');
@@ -41,7 +43,9 @@ export function CartItem({
   const totalPackQuantity = getTotalPackQuantity(item);
 
   return (
-    <div className={`${styles.container} ${readOnly ? styles.readOnly : ''}`}>
+    <div
+      className={`${styles.container} ${readOnly ? styles.readOnly : ''} ${removing ? styles.removing : ''}`}
+    >
       <div className={styles.mainContent}>
         <button type="button" className={styles.thumbnail} onClick={onViewPack}>
           {firstCard ? (
@@ -78,11 +82,11 @@ export function CartItem({
                   onClick={() => setIsExpanded(!isExpanded)}
                 >
                   <span>View Cards</span>
-                  {isExpanded ? (
-                    <ChevronUp size={isMobile ? 14 : 16} strokeWidth={3} />
-                  ) : (
-                    <ChevronDown size={isMobile ? 14 : 16} strokeWidth={3} />
-                  )}
+                  <ChevronDown
+                    size={isMobile ? 14 : 16}
+                    strokeWidth={3}
+                    className={`${styles.chevron} ${isExpanded ? styles.open : ''}`}
+                  />
                 </button>
               )}
               {quantity !== undefined && onQuantityChange && onDelete && (
@@ -99,9 +103,17 @@ export function CartItem({
         </div>
       </div>
 
-      {!readOnly && isExpanded && (
-        <div className={styles.expandedContent}>
-          <PackCardsPreview cards={item.pack.packCards.map((pc) => pc.card)} />
+      {!readOnly && hasMultipleCards && (
+        <div
+          className={`${styles.expandedContentWrapper} ${isExpanded ? styles.open : ''}`}
+        >
+          <div
+            className={`${styles.expandedContent} ${isExpanded ? styles.open : ''}`}
+          >
+            <PackCardsPreview
+              cards={item.pack.packCards.map((pc) => pc.card)}
+            />
+          </div>
         </div>
       )}
 

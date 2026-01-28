@@ -6,7 +6,6 @@ const NAV_ITEMS = [
   { label: 'HOME', to: '/' },
   { label: 'TEMPLATES', to: '/templates' },
   { label: 'MY CARDS', to: '/my-cards' },
-  { label: 'ACCOUNT', to: '/account' },
 ] as const;
 
 interface NavLinksProps {

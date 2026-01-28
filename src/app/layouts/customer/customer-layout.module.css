@@ -1,3 +1,19 @@
+/* Page transition animation */
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pageTransition {
+  animation: pageEnter 300ms ease-out;
+}
+
 /* Customer site typography defaults */
 .layout {
   /* Scoped typography for customer pages */

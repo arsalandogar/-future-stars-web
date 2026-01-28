@@ -1,11 +1,4 @@
-import {
-  Button,
-  Loader,
-  Modal,
-  SimpleGrid,
-  Text,
-  Title,
-} from '@mantine/core';
+import { Button, Loader, Modal, SimpleGrid, Text, Title } from '@mantine/core';
 import { useIntersection, useMediaQuery } from '@mantine/hooks';
 import { Check, RefreshCw, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -61,17 +54,15 @@ export function CreatePackModal({
   });
 
   // Query for selected cards (only in edit mode)
-  const {
-    data: selectedCardsData,
-    isLoading: isLoadingSelected,
-  } = useUserCards({
-    variables: {
-      page: USER_CARDS_INITIAL_PAGE,
-      limit: MAX_PACK_CARDS,
-      includeIds: editingCardIds,
-    },
-    enabled: isEditMode && editingCardIds.length > 0,
-  });
+  const { data: selectedCardsData, isLoading: isLoadingSelected } =
+    useUserCards({
+      variables: {
+        page: USER_CARDS_INITIAL_PAGE,
+        limit: MAX_PACK_CARDS,
+        includeIds: editingCardIds,
+      },
+      enabled: isEditMode && editingCardIds.length > 0,
+    });
 
   // Query for remaining cards (excludes selected cards in edit mode)
   const {
@@ -88,8 +79,22 @@ export function CreatePackModal({
     },
   });
 
-  // Initialize state when modal opens with editing pack or initial selected cards
-  useEffect(() => {
+  // Track previous state for "adjust state during render" pattern
+  const [prevOpened, setPrevOpened] = useState(opened);
+  const [prevEditingPack, setPrevEditingPack] = useState(editingPack);
+  const [prevInitialSelectedCards, setPrevInitialSelectedCards] =
+    useState(initialSelectedCards);
+
+  // Initialize state when modal opens with editing pack or initial selected cards - adjust state during render
+  if (
+    opened !== prevOpened ||
+    editingPack !== prevEditingPack ||
+    initialSelectedCards !== prevInitialSelectedCards
+  ) {
+    setPrevOpened(opened);
+    setPrevEditingPack(editingPack);
+    setPrevInitialSelectedCards(initialSelectedCards);
+
     if (opened) {
       if (editingPack) {
         // Edit mode: initialize from pack's cards
@@ -106,7 +111,7 @@ export function CreatePackModal({
         setSelectedCards(new Map());
       }
     }
-  }, [opened, editingPack, initialSelectedCards]);
+  }
 
   useEffect(() => {
     if (entry?.isIntersecting && hasNextPage && !isFetchingNextPage) {
@@ -241,7 +246,7 @@ export function CreatePackModal({
       <Modal
         opened={opened}
         onClose={handleClose}
-        size="1400px"
+        size="1200px"
         fullScreen={isMobile ?? false}
         centered
         withCloseButton={false}
@@ -270,13 +275,14 @@ export function CreatePackModal({
         {/* Content */}
         <div className={styles.content}>
           {/* Cards Selected indicator */}
-          {hasSelection && (
-            <div className={styles.selectedIndicator}>
-              <Text c="white" fw={600} size={isMobile ? 'sm' : 'md'}>
-                {totalSelected} {totalSelected === 1 ? 'Card' : 'Cards'} Selected
-              </Text>
-            </div>
-          )}
+          <div className={styles.selectedIndicator}>
+            <Text c="white" fw={600} size={isMobile ? 'sm' : 'md'}>
+              {totalSelected} {totalSelected === 1 ? 'Card' : 'Cards'} Selected
+            </Text>
+            <Text c="dimmed" size={isMobile ? 'xs' : 'sm'}>
+              min 1 | max 20
+            </Text>
+          </div>
 
           {/* Cards Grid */}
           <div className={styles.cardsArea}>

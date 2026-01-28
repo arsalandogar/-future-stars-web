@@ -1,3 +1,19 @@
+/* Tab content animation */
+@keyframes tabContentEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tabContent {
+  animation: tabContentEnter 250ms ease-out;
+}
+
 .container {
   --cards-grid-spacing: 10px;
   padding: var(--mantine-spacing-xl) var(--mantine-spacing-md);

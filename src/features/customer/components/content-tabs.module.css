@@ -1,4 +1,5 @@
 .container {
+  position: relative;
   display: flex;
   align-items: center;
   height: 100%;
@@ -18,28 +19,26 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: color 150ms ease;
+  transition:
+    color 150ms ease,
+    font-weight 150ms ease;
+}
 
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background-color: transparent;
-    transition: background-color 150ms ease;
-  }
+.tab:hover {
+  font-weight: 800;
+}
 
-  &:hover {
-    font-weight: 800;
-  }
+.tab[data-active='true'] {
+  font-weight: 800;
+}
 
-  &[data-active='true'] {
-    font-weight: 800;
-
-    &::after {
-      background-color: var(--mantine-color-primary-filled);
-    }
-  }
+.indicator {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  height: 4px;
+  background-color: var(--mantine-color-primary-filled);
+  transition:
+    transform 300ms ease,
+    width 300ms ease;
 }

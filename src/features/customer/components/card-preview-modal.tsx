@@ -10,8 +10,17 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
-import { Copy, MoreVertical, Pencil, Share2, Trash2, X } from 'lucide-react';
-import { useState } from 'react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  MoreVertical,
+  Pencil,
+  Share2,
+  Trash2,
+  X,
+} from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { MdOutlineShoppingCart } from 'react-icons/md';
 
 import { FlipIcon } from '@/components/icons/flip-icon';
@@ -23,26 +32,84 @@ import { DeleteCardModal } from './delete-card-modal';
 import { QuantityPicker } from './quantity-picker';
 
 interface CardPreviewModalProps {
-  card: Card | undefined;
+  cards: Card[];
+  initialIndex: number;
   opened: boolean;
   onClose: () => void;
   onBuyCard?: (cardId: number, quantity: number) => void;
+  hasNextPage?: boolean;
+  onLoadMore?: () => void;
 }
 
 export function CardPreviewModal({
-  card,
+  cards,
+  initialIndex,
   opened,
   onClose,
   onBuyCard,
+  hasNextPage,
+  onLoadMore,
 }: CardPreviewModalProps) {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [quantity, setQuantity] = useState(1);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [prevInitialIndex, setPrevInitialIndex] = useState(initialIndex);
   const [
     deleteModalOpened,
     { open: openDeleteModal, close: closeDeleteModal },
   ] = useDisclosure(false);
+  const isLoadingMoreRef = useRef(false);
+  const prevCardsLengthRef = useRef(cards.length);
+
+  // Reset index when initialIndex changes (new card selected) - adjust state during render
+  if (initialIndex !== prevInitialIndex) {
+    setPrevInitialIndex(initialIndex);
+    setCurrentIndex(initialIndex);
+    setQuantity(1);
+    setIsFlipped(false);
+  }
+
+  // Reset loading flag when cards length changes (new cards loaded)
+  useEffect(() => {
+    if (cards.length !== prevCardsLengthRef.current) {
+      isLoadingMoreRef.current = false;
+      prevCardsLengthRef.current = cards.length;
+    }
+  }, [cards.length]);
+
+  // Load more cards when approaching the end (with guard against duplicate calls)
+  useEffect(() => {
+    if (
+      currentIndex >= cards.length - 2 &&
+      hasNextPage &&
+      onLoadMore &&
+      !isLoadingMoreRef.current
+    ) {
+      isLoadingMoreRef.current = true;
+      onLoadMore();
+    }
+  }, [currentIndex, cards.length, hasNextPage, onLoadMore]);
+
+  const card = cards[currentIndex];
+  const totalCards = cards.length;
+  const canGoPrev = currentIndex > 0;
+  const canGoNext = currentIndex < totalCards - 1 || hasNextPage;
+
+  const handlePrev = () => {
+    if (canGoPrev) {
+      setCurrentIndex((prev) => prev - 1);
+      setIsFlipped(false);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentIndex < totalCards - 1) {
+      setCurrentIndex((prev) => prev + 1);
+      setIsFlipped(false);
+    }
+  };
 
   const handleBuyCard = () => {
     if (onBuyCard && card) {
@@ -107,69 +174,98 @@ export function CardPreviewModal({
       </div>
 
       <div className={styles.contentContainer}>
-        <div className={styles.cardsWrapper}>
-          <div className={styles.actionsRow}>
-            <button type="button" className={styles.actionButton}>
-              <Share2 size={18} />
-              <span>Share Card</span>
-            </button>
-            <button type="button" className={styles.actionButton}>
-              <Pencil size={18} />
-              <span>Edit Card</span>
-            </button>
-          </div>
+        {/* Card Counter */}
+        <Text className={styles.cardCounter}>
+          Card {currentIndex + 1} of {totalCards}
+        </Text>
 
-          {isMobile ? (
-            <div className={styles.mobileCardSection}>
-              <div className={styles.flipCard} data-flipped={isFlipped}>
-                <div className={styles.flipCardInner}>
-                  <div className={styles.flipCardFront}>
-                    <Image
-                      src={card.frontCardImage}
-                      alt="Card front"
-                      fit="contain"
-                      className={styles.cardImage}
-                    />
-                  </div>
-                  <div className={styles.flipCardBack}>
-                    <Image
-                      src={card.backCardImage}
-                      alt="Card back"
-                      fit="contain"
-                      className={styles.cardImage}
-                    />
-                  </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                className={styles.flipButton}
-                onClick={() => setIsFlipped(!isFlipped)}
-              >
-                <FlipIcon size={20} />
-                <span>Flip</span>
+        <div className={styles.cardsWrapper}>
+          {/* Left Arrow */}
+          <button
+            type="button"
+            className={`${styles.navArrow} ${styles.navArrowLeft}`}
+            onClick={handlePrev}
+            disabled={!canGoPrev}
+            aria-label="Previous card"
+          >
+            <ChevronLeft size={32} />
+          </button>
+
+          <div className={styles.cardsContent}>
+            <div className={styles.actionsRow}>
+              <button type="button" className={styles.actionButton}>
+                <Share2 size={18} />
+                <span>Share Card</span>
+              </button>
+              <button type="button" className={styles.actionButton}>
+                <Pencil size={18} />
+                <span>Edit Card</span>
               </button>
             </div>
-          ) : (
-            <div className={styles.cardsRow}>
-              <div className={styles.cardImageWrapper}>
-                <Image
-                  src={card.frontCardImage}
-                  alt="Card front"
-                  fit="contain"
-                  className={styles.cardImage}
-                />
+
+            {isMobile ? (
+              <div className={styles.mobileCardSection}>
+                <div className={styles.flipCard} data-flipped={isFlipped}>
+                  <div className={styles.flipCardInner}>
+                    <div className={styles.flipCardFront}>
+                      <Image
+                        src={card.frontCardImage}
+                        alt="Card front"
+                        fit="contain"
+                        className={styles.cardImage}
+                      />
+                    </div>
+                    <div className={styles.flipCardBack}>
+                      <Image
+                        src={card.backCardImage}
+                        alt="Card back"
+                        fit="contain"
+                        className={styles.cardImage}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className={styles.flipButton}
+                  onClick={() => setIsFlipped(!isFlipped)}
+                >
+                  <FlipIcon size={20} />
+                  <span>Flip</span>
+                </button>
               </div>
-              <div className={styles.cardImageWrapper}>
-                <Image
-                  src={card.backCardImage}
-                  alt="Card back"
-                  fit="contain"
-                  className={styles.cardImage}
-                />
+            ) : (
+              <div className={styles.cardsRow}>
+                <div className={styles.cardImageWrapper}>
+                  <Image
+                    src={card.frontCardImage}
+                    alt="Card front"
+                    fit="contain"
+                    className={styles.cardImage}
+                  />
+                </div>
+                <div className={styles.cardImageWrapper}>
+                  <Image
+                    src={card.backCardImage}
+                    alt="Card back"
+                    fit="contain"
+                    className={styles.cardImage}
+                  />
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+
+          {/* Right Arrow */}
+          <button
+            type="button"
+            className={`${styles.navArrow} ${styles.navArrowRight}`}
+            onClick={handleNext}
+            disabled={!canGoNext}
+            aria-label="Next card"
+          >
+            <ChevronRight size={32} />
+          </button>
         </div>
 
         <Text className={styles.createdDate}>

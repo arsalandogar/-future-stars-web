@@ -1,5 +1,5 @@
-import { Box, Burger, Container, Drawer } from '@mantine/core';
-import { useDisclosure, useMediaQuery } from '@mantine/hooks';
+import { Box, Container, Drawer } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import { getRouteApi } from '@tanstack/react-router';
 
 import { Head } from '@/components/seo/head';
@@ -10,11 +10,17 @@ import { AddressesSection } from '../components/account/addresses-section';
 import { OrdersSection } from '../components/account/orders-section';
 import { PaymentMethodsSection } from '../components/account/payment-methods-section';
 import { PrivacyPolicySection } from '../components/account/privacy-policy-section';
+import { useAccountSidebarStore } from '../stores/account-sidebar-store';
 import styles from './account-page.module.css';
 
 const routeApi = getRouteApi('/_authenticated/_customer/account');
 
-type Section = 'account-details' | 'payment-methods' | 'addresses' | 'orders' | 'privacy-policy';
+type Section =
+  | 'account-details'
+  | 'payment-methods'
+  | 'addresses'
+  | 'orders'
+  | 'privacy-policy';
 
 const SECTION_TITLES: Record<Section, string> = {
   'account-details': 'Account Details',
@@ -26,8 +32,7 @@ const SECTION_TITLES: Record<Section, string> = {
 
 export function AccountPage() {
   const { section } = routeApi.useSearch();
-  const [drawerOpened, { open: openDrawer, close: closeDrawer }] =
-    useDisclosure(false);
+  const { isOpen: drawerOpened, close: closeDrawer } = useAccountSidebarStore();
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   const renderContent = () => {
@@ -55,17 +60,6 @@ export function AccountPage() {
       />
       <Box className={styles.pageContainer}>
         <Container size="xl" className={styles.container}>
-          {isMobile && (
-            <div className={styles.mobileHeader}>
-              <Burger
-                opened={drawerOpened}
-                onClick={openDrawer}
-                color="white"
-                size="sm"
-              />
-            </div>
-          )}
-
           <div className={styles.layout}>
             {!isMobile && (
               <aside className={styles.sidebar}>

@@ -62,6 +62,28 @@ export function PackPreviewModal({
   const currentPackCard = packCards[currentCardIndex];
   const totalCards = packCards.length;
 
+  // Track previous state for "adjust state during render" pattern
+  const [prevOpened, setPrevOpened] = useState(opened);
+  const [prevPack, setPrevPack] = useState(pack);
+  const [prevCardIndex, setPrevCardIndex] = useState(currentCardIndex);
+
+  // Reset to first card when pack changes - adjust state during render
+  if (opened !== prevOpened || pack !== prevPack) {
+    setPrevOpened(opened);
+    setPrevPack(pack);
+    if (opened && pack) {
+      setCurrentCardIndex(0);
+      setIsFlipped(false);
+      setPrevCardIndex(0);
+    }
+  }
+
+  // Reset flip state when card changes - adjust state during render
+  if (currentCardIndex !== prevCardIndex) {
+    setPrevCardIndex(currentCardIndex);
+    setIsFlipped(false);
+  }
+
   const handleEditCard = () => {
     if (!currentPackCard) return;
     void navigate({
@@ -111,19 +133,6 @@ export function PackPreviewModal({
       setCurrentCardIndex(Math.min(currentCardIndex, totalCards - 2));
     }
   };
-
-  // Reset to first card when pack changes
-  useEffect(() => {
-    if (opened && pack) {
-      setCurrentCardIndex(0);
-      setIsFlipped(false);
-    }
-  }, [opened, pack]);
-
-  // Reset flip state when card changes
-  useEffect(() => {
-    setIsFlipped(false);
-  }, [currentCardIndex]);
 
   // Sync carousel with current card index
   useEffect(() => {
@@ -310,7 +319,9 @@ export function PackPreviewModal({
                     loading="lazy"
                     decoding="async"
                   />
-                  <span className={styles.quantityPill}>x{packCard.quantity}</span>
+                  <span className={styles.quantityPill}>
+                    x{packCard.quantity}
+                  </span>
                 </button>
               </Carousel.Slide>
             );
@@ -359,7 +370,7 @@ export function PackPreviewModal({
       <Modal
         opened={opened}
         onClose={onClose}
-        size={800}
+        size="xl"
         centered
         withCloseButton={false}
         classNames={{

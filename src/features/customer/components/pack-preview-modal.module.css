@@ -1,3 +1,26 @@
+/* Modal entrance animations */
+@keyframes modalContentEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .overlay {
   backdrop-filter: blur(8px);
   background-color: rgba(0, 0, 0, 0.7);
@@ -9,7 +32,9 @@
   border-radius: var(--mantine-radius-lg);
   box-shadow: 0 0 40px 10px
     color-mix(in srgb, var(--mantine-color-primary-4) 50%, transparent);
-  overflow: hidden;
+  overflow-y: auto;
+  max-height: 90vh;
+  animation: modalContentEnter 300ms ease-out;
 }
 
 .body {
@@ -43,6 +68,7 @@
 .cardCounter {
   text-align: center;
   padding: var(--mantine-spacing-lg) var(--mantine-spacing-md);
+  animation: fadeSlideUp 300ms ease-out 50ms backwards;
 }
 
 .previewSection {
@@ -50,6 +76,7 @@
   gap: var(--mantine-spacing-xl);
   justify-content: center;
   padding: 0 var(--mantine-spacing-xl) var(--mantine-spacing-xl);
+  animation: fadeSlideUp 300ms ease-out 100ms backwards;
 }
 
 .previewCard {
@@ -66,8 +93,10 @@
   display: flex;
   align-items: center;
   gap: var(--mantine-spacing-md);
-  padding: var(--mantine-spacing-xl) var(--mantine-spacing-xl) var(--mantine-spacing-lg);
+  padding: var(--mantine-spacing-xl) var(--mantine-spacing-xl)
+    var(--mantine-spacing-lg);
   background-color: alpha(var(--mantine-color-dark-7), 0.65);
+  animation: fadeSlideUp 300ms ease-out 200ms backwards;
 }
 
 .carousel {
@@ -141,6 +170,7 @@
   flex-direction: column;
   align-items: center;
   padding: var(--mantine-spacing-md);
+  animation: fadeSlideUp 300ms ease-out 100ms backwards;
 }
 
 .flipCard {

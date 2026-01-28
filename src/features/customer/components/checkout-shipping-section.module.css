@@ -30,13 +30,12 @@
 }
 
 .addressCard {
-  background-color: var(--mantine-color-surface-filled);
+  background-color: #1f2937cc;
   border-radius: var(--mantine-radius-md);
   padding: var(--mantine-spacing-lg);
   display: flex;
   align-items: flex-start;
   gap: var(--mantine-spacing-md);
-  border: 1px solid var(--mantine-color-dark-5);
 }
 
 .addressInfo {

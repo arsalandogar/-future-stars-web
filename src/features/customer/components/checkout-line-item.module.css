@@ -1,5 +1,5 @@
 .container {
-  background-color: var(--customer-input-bg);
+  background-color: #1f2937cc;
   border-radius: var(--mantine-radius-md);
   overflow: hidden;
 }
@@ -63,8 +63,31 @@
   color: var(--mantine-color-primaryLight-filled);
 }
 
+.chevron {
+  transition: transform 200ms ease;
+}
+
+.chevron.open {
+  transform: rotate(180deg);
+}
+
+.expandedContentWrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 250ms ease-out;
+}
+
+.expandedContentWrapper.open {
+  grid-template-rows: 1fr;
+}
+
 .expandedContent {
-  padding: 0 var(--mantine-spacing-md) var(--mantine-spacing-md);
+  overflow: hidden;
+}
+
+.expandedContentInner {
+  padding: var(--mantine-spacing-md);
+  background-color: #1f2937cc;
 }
 
 .cardsGrid {
@@ -97,7 +120,7 @@
 }
 
 .addMoreBanner {
-  border-top: 1px solid var(--mantine-color-dark-6);
+  padding: 0 var(--mantine-spacing-md) var(--mantine-spacing-md);
 }
 
 @media (max-width: 576px) {

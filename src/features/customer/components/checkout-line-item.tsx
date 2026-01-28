@@ -1,5 +1,5 @@
 import { Image, Text } from '@mantine/core';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 
 import type { CartItem } from '@/types';
@@ -52,30 +52,37 @@ export function CheckoutLineItem({ item }: CheckoutLineItemProps) {
           onClick={() => setIsExpanded(!isExpanded)}
           aria-label={isExpanded ? 'Collapse' : 'Expand'}
         >
-          {isExpanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+          <ChevronDown
+            size={24}
+            className={`${styles.chevron} ${isExpanded ? styles.open : ''}`}
+          />
         </button>
       </div>
 
-      {isExpanded && (
+      <div
+        className={`${styles.expandedContentWrapper} ${isExpanded ? styles.open : ''}`}
+      >
         <div className={styles.expandedContent}>
-          <div className={styles.cardsGrid}>
-            {item.pack.packCards.map((packCard) => (
-              <div key={packCard.cardId} className={styles.cardItem}>
-                <img
-                  src={packCard.card.frontCardImage}
-                  alt={`Card ${packCard.cardId}`}
-                  className={styles.cardImage}
-                />
-                {packCard.quantity > 1 && (
-                  <span className={styles.quantityBadge}>
-                    x{packCard.quantity}
-                  </span>
-                )}
-              </div>
-            ))}
+          <div className={styles.expandedContentInner}>
+            <div className={styles.cardsGrid}>
+              {item.pack.packCards.map((packCard) => (
+                <div key={packCard.cardId} className={styles.cardItem}>
+                  <img
+                    src={packCard.card.frontCardImage}
+                    alt={`Card ${packCard.cardId}`}
+                    className={styles.cardImage}
+                  />
+                  {packCard.quantity > 1 && (
+                    <span className={styles.quantityBadge}>
+                      x{packCard.quantity}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      )}
+      </div>
 
       <div className={styles.addMoreBanner}>
         <PackAddMoreBanner pack={item.pack} totalQuantity={totalCardCount} />

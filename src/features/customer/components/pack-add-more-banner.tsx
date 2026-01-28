@@ -3,7 +3,7 @@ import { Text } from '@mantine/core';
 import type { Pack } from '@/types';
 import { MAX_PACK_CARDS } from '@/types';
 
-import { useCreatePackModalStore } from '../stores/create-pack-modal-store';
+import { usePackAutofillModalStore } from '../stores/pack-autofill-modal-store';
 
 import styles from './pack-add-more-banner.module.css';
 
@@ -16,7 +16,7 @@ export function PackAddMoreBanner({
   pack,
   totalQuantity,
 }: PackAddMoreBannerProps) {
-  const openEdit = useCreatePackModalStore((state) => state.openEdit);
+  const openAutofillModal = usePackAutofillModalStore((state) => state.open);
   const remaining = MAX_PACK_CARDS - totalQuantity;
 
   if (remaining <= 0) return null;
@@ -29,7 +29,7 @@ export function PackAddMoreBanner({
       <button
         type="button"
         className={styles.link}
-        onClick={() => openEdit(pack)}
+        onClick={() => openAutofillModal(pack)}
       >
         Add more Cards
       </button>

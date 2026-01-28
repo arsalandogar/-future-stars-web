@@ -18,8 +18,13 @@ export const USER_PACKS_DEFAULT_LIMIT = 20;
 
 export const useUserPacks = createInfiniteQuery({
   queryKey: ['customer', 'packs'],
-  fetcher: async (params: UserPacksParams): Promise<UserPacksResponse> => {
-    const response: UserPacksResponse = await api.get('packs', { params });
+  fetcher: async (
+    params: UserPacksParams,
+    { pageParam }
+  ): Promise<UserPacksResponse> => {
+    const response: UserPacksResponse = await api.get('packs', {
+      params: { ...params, page: pageParam },
+    });
     // Filter out packCards that don't have a card (e.g., if the card was deleted)
     return {
       ...response,

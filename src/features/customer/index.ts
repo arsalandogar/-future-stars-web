@@ -1,6 +1,7 @@
 export { useCartItems } from './api/get-cart-items';
 export { GlobalAddedToCartPopup } from './components/global-added-to-cart-popup';
 export { GlobalCreatePackModal } from './components/global-create-pack-modal';
+export { GlobalPackAutofillModal } from './components/global-pack-autofill-modal';
 export { AccountPage } from './pages/account-page';
 export { CartPage } from './pages/cart-page';
 export { CheckoutPage } from './pages/checkout-page';
