@@ -38,7 +38,14 @@ interface NavItem {
 const menuItems: NavItem[] = [
   { label: 'Dashboard', icon: LayoutGrid, href: '/admin' },
   { label: 'Users', icon: Users, href: '/admin/users' },
-  { label: 'Orders', icon: Box, href: '/admin/orders' },
+  {
+    label: 'Orders',
+    icon: Box,
+    children: [
+      { label: 'Orders', href: '/admin/orders' },
+      { label: 'Batches', href: '/admin/batches' },
+    ],
+  },
   {
     label: 'Templates',
     icon: Layers2,

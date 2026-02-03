@@ -11,6 +11,8 @@ export type OrderStatus =
   | 'cancelled'
   | 'refunded';
 
+export type ShipmentStatus = 'unbatched' | 'batched' | 'printing' | 'shipped';
+
 export interface OrderUser {
   id: number;
   firstName: string;
@@ -50,15 +52,23 @@ export interface OrderLineItem {
   packSnapshot: PackSnapshot;
 }
 
+export interface OrderPrintBatch {
+  id: number;
+  name: string;
+}
+
 export interface Order {
   id: number;
   userId: number;
   stripePaymentIntentId: string;
   totalAmount: number;
   status: OrderStatus;
+  shipmentStatus: ShipmentStatus;
   shippingAddress: ShippingAddress;
   user: OrderUser;
   lineItems: OrderLineItem[];
+  printBatchId?: number;
+  printBatch?: OrderPrintBatch;
   createdAt: string;
   updatedAt: string;
 }
@@ -69,6 +79,9 @@ export interface OrdersListParams {
   userId?: number;
   status?: OrderStatus;
   search?: string;
+  inBatch?: boolean;
+  notInBatch?: boolean;
+  printBatchId?: number;
 }
 
 export interface OrdersListResponse {

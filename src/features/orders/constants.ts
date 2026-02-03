@@ -1,6 +1,6 @@
 import type { MantineColor } from '@mantine/core';
 
-import type { OrderStatus } from './types';
+import type { OrderStatus, ShipmentStatus } from './types';
 
 export const ORDER_STATUS_COLORS: Record<OrderStatus, MantineColor> = {
   created: 'gray',
@@ -12,4 +12,11 @@ export const ORDER_STATUS_COLORS: Record<OrderStatus, MantineColor> = {
   delivered: 'teal',
   cancelled: 'red',
   refunded: 'orange',
+};
+
+export const SHIPMENT_STATUS_COLORS: Record<ShipmentStatus, MantineColor> = {
+  unbatched: 'gray',
+  batched: 'blue',
+  printing: 'indigo',
+  shipped: 'green',
 };

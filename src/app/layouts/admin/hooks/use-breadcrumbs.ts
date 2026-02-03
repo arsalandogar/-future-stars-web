@@ -12,6 +12,7 @@ const PATH_LABELS: Record<string, string> = {
   admin: 'Home',
   users: 'Users',
   orders: 'Orders',
+  batches: 'Batches',
   templates: 'Templates',
   tags: 'Tags',
   'featured-items': 'Featured Items',

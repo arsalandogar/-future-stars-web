@@ -14,6 +14,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { ContentTabs } from '../components/content-tabs';
 
 import type { Pack } from '@/types';
+import { MAX_PACK_CARDS } from '@/types';
 
 import { useAddCartItem } from '../api/add-cart-item';
 import {
@@ -35,6 +36,8 @@ import { PacksList } from '../components/packs-list';
 import { ViewToggle, type ViewMode } from '../components/view-toggle';
 import { useAddedToCartPopupStore } from '../stores/added-to-cart-popup-store';
 import { useCreatePackModalStore } from '../stores/create-pack-modal-store';
+import { usePackAutofillModalStore } from '../stores/pack-autofill-modal-store';
+import { getTotalCards } from '../utils/get-total-cards';
 import styles from './my-cards-page.module.css';
 
 const TAB_ITEMS = [
@@ -58,6 +61,7 @@ export function MyCardsPage() {
 
   const { openCreate, openEdit, openCopy, openBuy } = useCreatePackModalStore();
   const openAddedToCartPopup = useAddedToCartPopupStore((s) => s.open);
+  const openAutofillModal = usePackAutofillModalStore((s) => s.open);
   const addCartItem = useAddCartItem();
 
   const setActiveTab = (tab: string) => {
@@ -111,6 +115,15 @@ export function MyCardsPage() {
   };
 
   const handleAddPackToCart = (pack: Pack) => {
+    const totalCards = getTotalCards(pack.packCards);
+
+    if (totalCards < MAX_PACK_CARDS) {
+      // Pack is not full - show autofill modal
+      openAutofillModal(pack, { needsAddToCart: true });
+      return;
+    }
+
+    // Pack is full - add directly to cart
     addCartItem.mutate(
       { packId: pack.id, quantity: 1 },
       {

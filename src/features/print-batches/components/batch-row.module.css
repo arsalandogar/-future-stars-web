@@ -1,0 +1,3 @@
+.selectedCell:first-child {
+  border-left: 3px solid var(--mantine-color-primary-4);
+}

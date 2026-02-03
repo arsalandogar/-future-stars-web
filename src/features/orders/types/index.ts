@@ -1,5 +1,4 @@
-// Re-export all order types from the shared types module
-// This maintains backwards compatibility for existing imports
+// Re-export shared order types for feature-local imports
 export type {
   Order,
   OrderLineItem,
@@ -10,5 +9,6 @@ export type {
   OrderUser,
   PackCardSnapshot,
   PackSnapshot,
+  ShipmentStatus,
   ShippingAddress,
 } from '@/types';

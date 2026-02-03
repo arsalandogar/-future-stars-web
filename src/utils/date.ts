@@ -21,3 +21,21 @@ export function formatMonthShort(dateString: string): string {
     .format(new Date(dateString))
     .toUpperCase();
 }
+
+/**
+ * Formats an ISO date string to a date with time.
+ * @param dateString - ISO date string (e.g., "2024-01-15T10:30:00Z")
+ * @returns Formatted date time string (e.g., "1/15/2024 10:30am ET")
+ */
+export function formatDateTime(dateString: string): string {
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'numeric',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZoneName: 'short',
+  }).format(date);
+}

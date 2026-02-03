@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { MAX_PACK_CARDS } from '@/types';
 
+import { useAddCartItem } from '../api/add-cart-item';
 import { useAutofillPack } from '../api/autofill-pack';
 import { useCreatePackModalStore } from '../stores/create-pack-modal-store';
 import { usePackAutofillModalStore } from '../stores/pack-autofill-modal-store';
@@ -12,23 +13,19 @@ import { getTotalCards } from '../utils/get-total-cards';
 
 import styles from './pack-autofill-modal.module.css';
 
-type AutofillOption = 'selected' | 'gallery' | 'manual';
-
-const OPTIONS: Array<{ value: AutofillOption; label: string }> = [
-  { value: 'selected', label: 'Auto-fill with selected cards' },
-  { value: 'gallery', label: 'Auto-fill with gallery cards' },
-  { value: 'manual', label: 'Select more cards' },
-];
+type AutofillOption = 'selected' | 'gallery' | 'manual' | 'proceed';
 
 export function PackAutofillModal() {
   const navigate = useNavigate();
-  const { isOpen, pack, close } = usePackAutofillModalStore();
+  const { isOpen, pack, needsAddToCart, close } = usePackAutofillModalStore();
   const { openEdit, close: closeCreatePackModal } = useCreatePackModalStore();
   const autofillPack = useAutofillPack();
+  const addCartItem = useAddCartItem();
 
   const [selectedOption, setSelectedOption] =
     useState<AutofillOption>('selected');
   const [isExiting, setIsExiting] = useState(false);
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
   const exitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Cleanup timeout on unmount
@@ -40,22 +37,38 @@ export function PackAutofillModal() {
     };
   }, []);
 
+  // Reset to default option when modal opens - adjust state during render
+  if (isOpen && !prevIsOpen) {
+    setSelectedOption('selected');
+  }
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
+  }
+
   if (!isOpen || !pack) return null;
 
   const totalCards = getTotalCards(pack.packCards);
 
+  const OPTIONS: Array<{ value: AutofillOption; label: string }> = [
+    { value: 'selected', label: 'Auto-fill with selected cards' },
+    { value: 'gallery', label: 'Auto-fill with gallery cards' },
+    { value: 'manual', label: 'Select more cards' },
+    {
+      value: 'proceed',
+      label: `Proceed with ${totalCards} ${totalCards === 1 ? 'card' : 'cards'}`,
+    },
+  ];
+
+  const isPending = autofillPack.isPending || addCartItem.isPending;
+
   const handleOverlayClick = (event: React.MouseEvent) => {
-    if (
-      event.target === event.currentTarget &&
-      !isExiting &&
-      !autofillPack.isPending
-    ) {
+    if (event.target === event.currentTarget && !isExiting && !isPending) {
       close();
     }
   };
 
   const handleClose = () => {
-    if (!isExiting && !autofillPack.isPending) {
+    if (!isExiting && !isPending) {
       close();
     }
   };
@@ -65,6 +78,31 @@ export function PackAutofillModal() {
       // Open edit pack modal to manually select more cards
       close();
       openEdit(pack);
+      return;
+    }
+
+    if (selectedOption === 'proceed') {
+      // Skip autofill - proceed with current cards
+      const navigateToCart = () => {
+        setIsExiting(true);
+        exitTimeoutRef.current = setTimeout(() => {
+          close();
+          closeCreatePackModal();
+          void navigate({ to: '/cart' });
+          setIsExiting(false);
+        }, 400);
+      };
+
+      if (needsAddToCart) {
+        // Pack not in cart yet - add it first
+        addCartItem.mutate(
+          { packId: pack.id, quantity: 1 },
+          { onSuccess: navigateToCart }
+        );
+      } else {
+        // Pack already in cart - just navigate
+        navigateToCart();
+      }
       return;
     }
 
@@ -81,8 +119,6 @@ export function PackAutofillModal() {
             setIsExiting(false);
           }, 400);
         },
-        // onError is not needed - global interceptor handles error notifications
-        // Modal stays open so user can retry or choose a different option
       }
     );
   };
@@ -101,7 +137,7 @@ export function PackAutofillModal() {
             type="button"
             className={styles.closeButton}
             onClick={handleClose}
-            disabled={isExiting || autofillPack.isPending}
+            disabled={isExiting || isPending}
           >
             <X size={24} />
           </button>
@@ -153,7 +189,7 @@ export function PackAutofillModal() {
             radius="xl"
             className={styles.confirmButton}
             onClick={handleConfirm}
-            loading={autofillPack.isPending}
+            loading={isPending}
             disabled={isExiting}
           >
             Confirm

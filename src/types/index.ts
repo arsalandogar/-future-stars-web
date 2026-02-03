@@ -19,6 +19,7 @@ export type {
   OrderUser,
   PackCardSnapshot,
   PackSnapshot,
+  ShipmentStatus,
   ShippingAddress,
 } from './order';
 export type { Pack, PackCard } from './pack';

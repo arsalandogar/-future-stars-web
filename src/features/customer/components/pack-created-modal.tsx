@@ -1,6 +1,7 @@
 import { ActionIcon, Button, Text, TextInput, Title } from '@mantine/core';
 import { useNavigate } from '@tanstack/react-router';
-import { Check, Pencil, ShoppingCart, X } from 'lucide-react';
+import { RefreshCcw, X } from 'lucide-react';
+import { MdOutlineShoppingCart } from 'react-icons/md';
 import { useEffect, useRef, useState } from 'react';
 
 import { MAX_PACK_CARDS, type Pack } from '@/types';
@@ -31,9 +32,8 @@ export function PackCreatedModal({
   const addCartItem = useAddCartItem();
   const updatePack = useUpdatePack();
   const [isExiting, setIsExiting] = useState(false);
-  const [isEditing, setIsEditing] = useState(true);
-  const [displayName, setDisplayName] = useState(pack?.name ?? '');
-  const [editingName, setEditingName] = useState(pack?.name ?? '');
+  const [originalName, setOriginalName] = useState(pack?.name ?? '');
+  const [packName, setPackName] = useState(pack?.name ?? '');
   const inputRef = useRef<HTMLInputElement>(null);
   const exitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -49,62 +49,27 @@ export function PackCreatedModal({
   // Track previous pack for "adjust state during render" pattern
   const [prevPack, setPrevPack] = useState(pack);
 
-  // Focus input when editing starts
+  // Focus and select input when modal opens
   useEffect(() => {
-    if (isEditing) {
+    if (opened && pack) {
       inputRef.current?.focus();
       inputRef.current?.select();
     }
-  }, [isEditing]);
+  }, [opened, pack]);
 
   // Reset state when modal opens with new pack - adjust state during render
   if (pack !== prevPack) {
     setPrevPack(pack);
     if (pack) {
-      setDisplayName(pack.name);
-      setEditingName(pack.name);
-      setIsEditing(true);
+      setOriginalName(pack.name);
+      setPackName(pack.name);
     }
   }
 
   if (!opened || !pack) return null;
 
-  const handleStartEditing = () => {
-    setEditingName(displayName);
-    setIsEditing(true);
-  };
-
-  const handleCancelEditing = () => {
-    setEditingName(displayName);
-    setIsEditing(false);
-  };
-
-  const handleSaveEditing = () => {
-    const trimmedName = editingName.trim();
-    if (!trimmedName || trimmedName === displayName) {
-      handleCancelEditing();
-      return;
-    }
-
-    updatePack.mutate(
-      { id: pack.id, name: trimmedName },
-      {
-        onSuccess: () => {
-          setDisplayName(trimmedName);
-          setIsEditing(false);
-        },
-      }
-    );
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleSaveEditing();
-    } else if (e.key === 'Escape') {
-      e.preventDefault();
-      handleCancelEditing();
-    }
+  const handleResetName = () => {
+    setPackName(originalName);
   };
 
   const handleOverlayClick = (event: React.MouseEvent) => {
@@ -115,28 +80,47 @@ export function PackCreatedModal({
 
   const handleBuy = () => {
     const totalCards = getTotalCards(pack.packCards);
+    const trimmedName = packName.trim();
+    const nameHasChanged = trimmedName && trimmedName !== originalName;
 
-    addCartItem.mutate(
-      { packId: pack.id, quantity: 1 },
-      {
-        onSuccess: () => {
-          if (totalCards < MAX_PACK_CARDS) {
-            // Pack is not full - show autofill modal
-            onClose();
-            openAutofillModal(pack);
-          } else {
-            // Pack is full - navigate to cart
-            setIsExiting(true);
-            exitTimeoutRef.current = setTimeout(() => {
+    const proceedToCart = () => {
+      addCartItem.mutate(
+        { packId: pack.id, quantity: 1 },
+        {
+          onSuccess: () => {
+            if (totalCards < MAX_PACK_CARDS) {
+              // Pack is not full - show autofill modal
               onClose();
-              closeCreatePackModal();
-              void navigate({ to: '/cart' });
-              setIsExiting(false);
-            }, 400);
-          }
-        },
-      }
-    );
+              openAutofillModal(pack);
+            } else {
+              // Pack is full - navigate to cart
+              setIsExiting(true);
+              exitTimeoutRef.current = setTimeout(() => {
+                onClose();
+                closeCreatePackModal();
+                void navigate({ to: '/cart' });
+                setIsExiting(false);
+              }, 400);
+            }
+          },
+        }
+      );
+    };
+
+    // If name changed, update it first, then add to cart
+    if (nameHasChanged) {
+      updatePack.mutate(
+        { id: pack.id, name: trimmedName },
+        {
+          onSuccess: () => {
+            setOriginalName(trimmedName);
+            proceedToCart();
+          },
+        }
+      );
+    } else {
+      proceedToCart();
+    }
   };
 
   const firstCard = pack.packCards[0]?.card;
@@ -207,57 +191,24 @@ export function PackCreatedModal({
             </div>
             <div className={styles.packInfo}>
               <div className={styles.nameRow}>
-                {isEditing ? (
-                  <>
-                    <TextInput
-                      ref={inputRef}
-                      value={editingName}
-                      onChange={(e) => setEditingName(e.currentTarget.value)}
-                      onKeyDown={handleKeyDown}
-                      size="sm"
-                      className={styles.editNameInput}
-                      classNames={{ input: styles.editNameInputInner }}
-                    />
-                    <div className={styles.editActions}>
-                      <ActionIcon
-                        variant="filled"
-                        color="green"
-                        size="sm"
-                        onClick={handleSaveEditing}
-                        loading={updatePack.isPending}
-                      >
-                        <Check size={16} color="white" />
-                      </ActionIcon>
-                      <ActionIcon
-                        variant="filled"
-                        color="red"
-                        size="sm"
-                        onClick={handleCancelEditing}
-                        disabled={updatePack.isPending}
-                      >
-                        <X size={16} color="white" />
-                      </ActionIcon>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <Text
-                      fw={600}
-                      size="lg"
-                      c="white"
-                      className={styles.packName}
-                    >
-                      {displayName}
-                    </Text>
-                    <ActionIcon
-                      variant="transparent"
-                      size="sm"
-                      onClick={handleStartEditing}
-                      className={styles.editButton}
-                    >
-                      <Pencil size={16} />
-                    </ActionIcon>
-                  </>
+                <TextInput
+                  ref={inputRef}
+                  value={packName}
+                  onChange={(e) => setPackName(e.currentTarget.value)}
+                  size="sm"
+                  className={styles.editNameInput}
+                  classNames={{ input: styles.editNameInputInner }}
+                />
+                {packName !== originalName && (
+                  <ActionIcon
+                    variant="transparent"
+                    size="sm"
+                    onClick={handleResetName}
+                    className={styles.resetButton}
+                    aria-label="Reset to original name"
+                  >
+                    <RefreshCcw size={16} />
+                  </ActionIcon>
                 )}
               </div>
               <div className={styles.dateRow}>
@@ -276,10 +227,10 @@ export function PackCreatedModal({
             variant="filled"
             size="lg"
             radius="xl"
-            leftSection={<ShoppingCart size={20} />}
+            leftSection={<MdOutlineShoppingCart size={20} />}
             onClick={handleBuy}
-            loading={addCartItem.isPending}
-            disabled={isExiting}
+            loading={addCartItem.isPending || updatePack.isPending}
+            disabled={isExiting || !packName.trim()}
             fullWidth
             className={styles.buyButton}
           >

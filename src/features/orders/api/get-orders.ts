@@ -5,7 +5,6 @@ import type { OrdersListParams, OrdersListResponse } from '../types';
 
 export const useOrders = createQuery({
   queryKey: ['admin', 'orders'],
-  fetcher: (params: OrdersListParams): Promise<OrdersListResponse> => {
-    return api.get('admin/orders', { params });
-  },
+  fetcher: (params: OrdersListParams): Promise<OrdersListResponse> =>
+    api.get('admin/orders', { params }),
 });
