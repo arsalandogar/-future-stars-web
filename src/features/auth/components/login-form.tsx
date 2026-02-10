@@ -1,4 +1,4 @@
-import { Anchor, Divider, Group, Stack, Text } from '@mantine/core';
+import { Anchor, Group, Stack } from '@mantine/core';
 
 import { useAppForm } from '@/lib/form';
 import { revalidateLogic } from '@tanstack/react-form';
@@ -68,7 +68,7 @@ export function LoginForm() {
           </Stack>
 
           <Group justify="flex-end">
-            <Anchor component={Link} to="/auth/login" size="sm" c="dimmed">
+            <Anchor component={Link} to="/admin/login" size="sm" c="dimmed">
               Forgot password?
             </Anchor>
           </Group>
@@ -76,15 +76,6 @@ export function LoginForm() {
           <form.SubmitButton fullWidth size="md">
             Sign in
           </form.SubmitButton>
-
-          <Divider label="or" labelPosition="center" />
-
-          <Text size="sm" ta="center" c="dimmed">
-            Don&apos;t have an account?{' '}
-            <Anchor component={Link} to="/auth/register" fw={500}>
-              Create account
-            </Anchor>
-          </Text>
         </Stack>
       </form.Form>
     </form.AppForm>

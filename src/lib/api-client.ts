@@ -51,18 +51,23 @@ api.interceptors.response.use(
   (error: AxiosError<ApiErrorResponse>) => {
     const errorResponse = error.response?.data;
     const message = errorResponse?.errors?.[0]?.message ?? error.message;
-    const isAuthPage = window.location.pathname.startsWith('/auth/');
+    const isAuthPage =
+      window.location.pathname === '/login' ||
+      window.location.pathname === '/admin/login';
+    const isGuestLogin = error.config?.url === 'auth/guest';
 
-    notifications.show({
-      color: 'red',
-      title: 'Error',
-      message,
-    });
+    if (!isGuestLogin) {
+      notifications.show({
+        color: 'red',
+        title: 'Error',
+        message,
+      });
+    }
 
-    if (error.response?.status === 401 && !isAuthPage) {
+    if (error.response?.status === 401 && !isAuthPage && !isGuestLogin) {
       clearAuth();
       const redirectTo = window.location.pathname + window.location.search;
-      window.location.href = `/auth/login?redirectTo=${encodeURIComponent(redirectTo)}`;
+      window.location.href = `/login?redirectTo=${encodeURIComponent(redirectTo)}`;
     }
 
     return Promise.reject(error);

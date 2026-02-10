@@ -6,6 +6,7 @@ import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.css';
 import '@mantine/charts/styles.css';
 import '@/index.css';
+import { AuthInitializer } from '@/app/auth-initializer';
 import { AppProvider } from '@/app/provider';
 import { AppRouter } from '@/app/router';
 import { configureApiClient } from '@/lib/api-client';
@@ -19,7 +20,9 @@ configureApiClient({
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AppProvider>
-      <AppRouter />
+      <AuthInitializer>
+        <AppRouter />
+      </AuthInitializer>
     </AppProvider>
   </StrictMode>
 );

@@ -15,7 +15,12 @@ import { useAuthStore } from '@/stores/auth-store';
 
 import styles from './account-sidebar.module.css';
 
-type Section = 'account-details' | 'payment-methods' | 'addresses' | 'orders' | 'privacy-policy';
+type Section =
+  | 'account-details'
+  | 'payment-methods'
+  | 'addresses'
+  | 'orders'
+  | 'privacy-policy';
 
 interface AccountSidebarProps {
   activeSection: Section;
@@ -49,7 +54,7 @@ export function AccountSidebar({
 
   const handleLogout = () => {
     clearAuth();
-    void navigate({ to: '/' });
+    void navigate({ to: '/login' });
   };
 
   const handleSectionClick = (section: Section) => {
@@ -148,7 +153,11 @@ export function AccountSidebar({
 
       <Divider color="primaryLight" my="md" />
 
-      <button type="button" className={styles.logoutButton} onClick={handleLogout}>
+      <button
+        type="button"
+        className={styles.logoutButton}
+        onClick={handleLogout}
+      >
         <LogOut size={20} />
         <span>Log Out</span>
       </button>

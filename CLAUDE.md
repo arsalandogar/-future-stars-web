@@ -77,6 +77,20 @@ Uses **TanStack Query** with **react-query-kit** for type-safe API hooks:
   });
   ```
 - The Axios client in `@/lib/api-client` automatically unwraps `response.data`, so fetchers receive data directly
+- **API response wrapping**: The backend wraps resource responses in a `{ data: T }` object. Mutation fetchers must unwrap this before returning:
+
+  ```typescript
+  // WRONG — returns { data: User } instead of User
+  mutationFn: (params: UpdateParams): Promise<User> =>
+    api.patch('users/profile', params),
+
+  // CORRECT — unwrap response.data
+  mutationFn: async (params: UpdateParams): Promise<User> => {
+    const response: { data: User } = await api.patch('users/profile', params);
+    return response.data;
+  },
+  ```
+
 - Default query config: no refetch on window focus, no retry on failure, 1-minute stale time
 
 **Query Invalidation:** Use the `invalidateQueries` middleware to automatically invalidate queries after mutations:

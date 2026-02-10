@@ -11,10 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsAndConditionsRouteImport } from './routes/terms-and-conditions'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
-import { Route as AuthRouteRouteImport } from './routes/auth/route'
-import { Route as AuthRegisterRouteImport } from './routes/auth/register'
-import { Route as AuthLoginRouteImport } from './routes/auth/login'
+import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AuthenticatedCustomerRouteImport } from './routes/_authenticated/_customer'
 import { Route as AuthenticatedCheckoutRouteImport } from './routes/_authenticated/_checkout'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
@@ -62,24 +61,19 @@ const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
   path: '/privacy-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthRouteRoute = AuthRouteRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRegisterRoute = AuthRegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => AuthRouteRoute,
-} as any)
-const AuthLoginRoute = AuthLoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => AuthRouteRoute,
 } as any)
 const AuthenticatedCustomerRoute = AuthenticatedCustomerRouteImport.update({
   id: '/_customer',
@@ -292,12 +286,11 @@ const AuthenticatedAdmin_legalTypeIdEditRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/auth': typeof AuthRouteRouteWithChildren
+  '/login': typeof LoginRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/admin': typeof AuthenticatedAdminListingRouteWithChildren
-  '/auth/login': typeof AuthLoginRoute
-  '/auth/register': typeof AuthRegisterRoute
+  '/admin/login': typeof AdminLoginRoute
   '/checkout': typeof AuthenticatedCheckoutCheckoutRoute
   '/account': typeof AuthenticatedCustomerAccountRoute
   '/cart': typeof AuthenticatedCustomerCartRoute
@@ -331,11 +324,10 @@ export interface FileRoutesByFullPath {
   '/admin/users/$id': typeof AuthenticatedAdminListingUsersIdIndexRoute
 }
 export interface FileRoutesByTo {
-  '/auth': typeof AuthRouteRouteWithChildren
+  '/login': typeof LoginRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
-  '/auth/login': typeof AuthLoginRoute
-  '/auth/register': typeof AuthRegisterRoute
+  '/admin/login': typeof AdminLoginRoute
   '/checkout': typeof AuthenticatedCheckoutCheckoutRoute
   '/account': typeof AuthenticatedCustomerAccountRoute
   '/cart': typeof AuthenticatedCustomerCartRoute
@@ -369,15 +361,14 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/auth': typeof AuthRouteRouteWithChildren
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/login': typeof LoginRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/_checkout': typeof AuthenticatedCheckoutRouteWithChildren
   '/_authenticated/_customer': typeof AuthenticatedCustomerRouteWithChildren
-  '/auth/login': typeof AuthLoginRoute
-  '/auth/register': typeof AuthRegisterRoute
+  '/admin/login': typeof AdminLoginRoute
   '/_authenticated/_checkout/checkout': typeof AuthenticatedCheckoutCheckoutRoute
   '/_authenticated/_customer/account': typeof AuthenticatedCustomerAccountRoute
   '/_authenticated/_customer/cart': typeof AuthenticatedCustomerCartRoute
@@ -415,12 +406,11 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/auth'
+    | '/login'
     | '/privacy-policy'
     | '/terms-and-conditions'
     | '/admin'
-    | '/auth/login'
-    | '/auth/register'
+    | '/admin/login'
     | '/checkout'
     | '/account'
     | '/cart'
@@ -454,11 +444,10 @@ export interface FileRouteTypes {
     | '/admin/users/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/auth'
+    | '/login'
     | '/privacy-policy'
     | '/terms-and-conditions'
-    | '/auth/login'
-    | '/auth/register'
+    | '/admin/login'
     | '/checkout'
     | '/account'
     | '/cart'
@@ -491,15 +480,14 @@ export interface FileRouteTypes {
     | '/admin/users/$id'
   id:
     | '__root__'
-    | '/auth'
     | '/_authenticated'
+    | '/login'
     | '/privacy-policy'
     | '/terms-and-conditions'
     | '/_authenticated/admin'
     | '/_authenticated/_checkout'
     | '/_authenticated/_customer'
-    | '/auth/login'
-    | '/auth/register'
+    | '/admin/login'
     | '/_authenticated/_checkout/checkout'
     | '/_authenticated/_customer/account'
     | '/_authenticated/_customer/cart'
@@ -536,10 +524,11 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  AuthRouteRoute: typeof AuthRouteRouteWithChildren
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  LoginRoute: typeof LoginRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   TermsAndConditionsRoute: typeof TermsAndConditionsRoute
+  AdminLoginRoute: typeof AdminLoginRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -558,6 +547,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
@@ -565,26 +561,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteRouteImport
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/auth/register': {
-      id: '/auth/register'
-      path: '/register'
-      fullPath: '/auth/register'
-      preLoaderRoute: typeof AuthRegisterRouteImport
-      parentRoute: typeof AuthRouteRoute
-    }
-    '/auth/login': {
-      id: '/auth/login'
-      path: '/login'
-      fullPath: '/auth/login'
-      preLoaderRoute: typeof AuthLoginRouteImport
-      parentRoute: typeof AuthRouteRoute
     }
     '/_authenticated/_customer': {
       id: '/_authenticated/_customer'
@@ -841,20 +823,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthRouteRouteChildren {
-  AuthLoginRoute: typeof AuthLoginRoute
-  AuthRegisterRoute: typeof AuthRegisterRoute
-}
-
-const AuthRouteRouteChildren: AuthRouteRouteChildren = {
-  AuthLoginRoute: AuthLoginRoute,
-  AuthRegisterRoute: AuthRegisterRoute,
-}
-
-const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
-  AuthRouteRouteChildren,
-)
-
 interface AuthenticatedAdminListingRouteChildren {
   AuthenticatedAdminListingBatchesRoute: typeof AuthenticatedAdminListingBatchesRoute
   AuthenticatedAdminListingColorLeaguesRoute: typeof AuthenticatedAdminListingColorLeaguesRoute
@@ -1027,10 +995,11 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 )
 
 const rootRouteChildren: RootRouteChildren = {
-  AuthRouteRoute: AuthRouteRouteWithChildren,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  LoginRoute: LoginRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
   TermsAndConditionsRoute: TermsAndConditionsRoute,
+  AdminLoginRoute: AdminLoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -10,7 +10,16 @@ export interface UpdateProfileParams {
   phone?: string;
 }
 
+interface UpdateProfileResponse {
+  data: User;
+}
+
 export const useUpdateProfile = createMutation({
-  mutationFn: (params: UpdateProfileParams): Promise<User> =>
-    api.patch('users/profile', params),
+  mutationFn: async (params: UpdateProfileParams): Promise<User> => {
+    const response: UpdateProfileResponse = await api.patch(
+      'users/profile',
+      params
+    );
+    return response.data;
+  },
 });
