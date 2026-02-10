@@ -71,7 +71,7 @@ export function CustomerHeader() {
       <MobileMenu
         opened={mobileMenuOpened}
         onClose={closeMobileMenu}
-        isAdmin={user?.isAdmin}
+        isAdmin={!!user?.isAdmin}
       />
     </>
   );

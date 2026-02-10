@@ -7,7 +7,7 @@ import { NavLinks } from './nav-links';
 interface MobileMenuProps {
   opened: boolean;
   onClose: () => void;
-  isAdmin?: boolean;
+  isAdmin: boolean;
 }
 
 export function MobileMenu({ opened, onClose, isAdmin }: MobileMenuProps) {
