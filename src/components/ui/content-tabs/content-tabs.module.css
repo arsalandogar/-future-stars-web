@@ -15,7 +15,7 @@
   text-decoration: none;
   font-weight: 500;
   font-size: var(--mantine-font-size-md);
-  color: var(--mantine-color-white);
+  color: var(--mantine-color-dark-2);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -25,10 +25,12 @@
 }
 
 .tab:hover {
+  color: var(--mantine-color-white);
   font-weight: 800;
 }
 
 .tab[data-active='true'] {
+  color: var(--mantine-color-white);
   font-weight: 800;
 }
 

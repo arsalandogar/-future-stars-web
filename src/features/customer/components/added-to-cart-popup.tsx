@@ -67,45 +67,49 @@ export function AddedToCartPopup({ cartItem, onClose }: AddedToCartPopupProps) {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <Check size={28} className={styles.checkIcon} />
-          <Title order={4} c="white" m={0}>
-            Added to cart!
-          </Title>
+        <div className={styles.header}>
+          <div className={styles.headerLeft}>
+            <Check size={28} className={styles.checkIcon} />
+            <Title order={4} c="white" m={0}>
+              Added to cart!
+            </Title>
+          </div>
+          <button
+            type="button"
+            className={styles.closeButton}
+            onClick={onClose}
+          >
+            <X size={24} />
+          </button>
         </div>
-        <button type="button" className={styles.closeButton} onClick={onClose}>
-          <X size={24} />
-        </button>
-      </div>
 
-      <div className={styles.content}>
-        <CartItem item={cartItem} readOnly />
-      </div>
+        <div className={styles.content}>
+          <CartItem item={cartItem} readOnly />
+        </div>
 
-      <div className={styles.footer}>
-        <Button
-          variant="outline"
-          size="md"
-          radius="xl"
-          leftSection={<ShoppingCart size={20} />}
-          onClick={handleViewCart}
-          className={styles.viewCartButton}
-        >
-          View Cart
-        </Button>
-        <Button
-          variant="filled"
-          size="md"
-          radius="xl"
-          leftSection={<CreditCard size={20} />}
-          onClick={handleCheckout}
-          className={styles.checkoutButton}
-        >
-          Checkout
-        </Button>
+        <div className={styles.footer}>
+          <Button
+            variant="outline"
+            size="md"
+            radius="xl"
+            leftSection={<ShoppingCart size={20} />}
+            onClick={handleViewCart}
+            className={styles.viewCartButton}
+          >
+            View Cart
+          </Button>
+          <Button
+            variant="filled"
+            size="md"
+            radius="xl"
+            leftSection={<CreditCard size={20} />}
+            onClick={handleCheckout}
+            className={styles.checkoutButton}
+          >
+            Checkout
+          </Button>
+        </div>
       </div>
-    </div>
     </div>
   );
 }

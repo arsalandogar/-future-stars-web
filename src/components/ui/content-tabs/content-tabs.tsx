@@ -12,13 +12,21 @@ interface ContentTabsProps {
   activeValue: string;
   onChange: (value: string) => void;
   gap?: string | number;
+  size?: 'sm' | 'md' | 'lg';
 }
+
+const SIZE_MAP = {
+  sm: 'var(--mantine-font-size-sm)',
+  md: 'var(--mantine-font-size-md)',
+  lg: 'var(--mantine-font-size-lg)',
+};
 
 export function ContentTabs({
   items,
   activeValue,
   onChange,
   gap = 'var(--mantine-spacing-xl)',
+  size = 'md',
 }: ContentTabsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
@@ -50,7 +58,8 @@ export function ContentTabs({
             }}
             type="button"
             className={styles.tab}
-            data-active={isActive ? 'true' : undefined}
+            data-active={isActive || undefined}
+            style={{ fontSize: SIZE_MAP[size] }}
             onClick={() => onChange(item.value)}
           >
             {item.label}

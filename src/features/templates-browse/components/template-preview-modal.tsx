@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { Carousel } from '@mantine/carousel';
 import type { EmblaCarouselType } from 'embla-carousel';
 import {
@@ -21,10 +21,9 @@ import type {
   BrowseTemplate,
   TagWithTemplates,
 } from '../types';
+import styles from './template-preview-modal.module.css';
 
 const ALL_TAGS = 'all' as const;
-
-import styles from './template-preview-modal.module.css';
 
 interface TemplatePreviewModalProps {
   template: BrowseTemplate | null;
@@ -62,28 +61,21 @@ export function TemplatePreviewModal({
 }: TemplatePreviewModalProps) {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
+  const navigate = useNavigate();
   const [activeTagId, setActiveTagId] = useState<ActiveTagFilter>(ALL_TAGS);
   const [embla, setEmbla] = useState<EmblaCarouselType | null>(null);
 
   const carouselTemplates = getUniqueTemplates(allTags, activeTagId);
 
-  const selectedTemplate = template;
-
-  const currentIndex = selectedTemplate
-    ? carouselTemplates.findIndex((tpl) => tpl.id === selectedTemplate.id)
+  const currentIndex = template
+    ? carouselTemplates.findIndex((tpl) => tpl.id === template.id)
     : 0;
 
   // Scroll carousel to match selected template
   useEffect(() => {
     if (!embla || currentIndex < 0) return;
-    const indicesInView = embla.slidesInView();
-    if (currentIndex >= 0 && indicesInView.includes(currentIndex)) {
-      return;
-    }
-    const emblaIndex = embla.selectedScrollSnap();
-    if (emblaIndex !== currentIndex) {
-      embla.scrollTo(currentIndex, false);
-    }
+    if (embla.slidesInView().includes(currentIndex)) return;
+    embla.scrollTo(currentIndex, false);
   }, [embla, currentIndex]);
 
   function handleThumbnailClick(tpl: BrowseTemplate): void {
@@ -108,7 +100,7 @@ export function TemplatePreviewModal({
   const canGoPrev = currentIndex > 0;
   const canGoNext = currentIndex < carouselTemplates.length - 1;
 
-  if (!selectedTemplate) return null;
+  if (!template) return null;
 
   const content = (
     <>
@@ -127,10 +119,14 @@ export function TemplatePreviewModal({
         <Text className={styles.title}>TEMPLATE PREVIEW</Text>
 
         <Button
-          component={Link}
-          to="/create-card"
           size="sm"
           leftSection={<Plus size={16} />}
+          onClick={() =>
+            void navigate({
+              to: '/create-card',
+              search: { templateId: template.id },
+            })
+          }
         >
           Create Card
         </Button>
@@ -141,18 +137,18 @@ export function TemplatePreviewModal({
         <div className={styles.previewCard}>
           <AspectRatio ratio={3 / 4}>
             <Image
-              src={selectedTemplate.templateImage}
-              alt={`${selectedTemplate.label} front`}
+              src={template.templateImage}
+              alt={`${template.label} front`}
             />
           </AspectRatio>
         </div>
 
-        {selectedTemplate.backTemplate && (
+        {template.backTemplate && (
           <div className={styles.previewCard}>
             <AspectRatio ratio={3 / 4}>
               <Image
-                src={selectedTemplate.backTemplate.templateImage}
-                alt={`${selectedTemplate.label} back`}
+                src={template.backTemplate.templateImage}
+                alt={`${template.label} back`}
               />
             </AspectRatio>
           </div>
@@ -204,7 +200,7 @@ export function TemplatePreviewModal({
           classNames={{ root: styles.carousel }}
         >
           {carouselTemplates.map((tpl) => {
-            const isSelected = tpl.id === selectedTemplate.id;
+            const isSelected = tpl.id === template.id;
             return (
               <Carousel.Slide key={tpl.id}>
                 <button

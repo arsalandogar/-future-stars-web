@@ -8,9 +8,5 @@ interface ContentPanelProps {
 }
 
 export function ContentPanel({ children, className }: ContentPanelProps) {
-  return (
-    <div className={`${styles.panel} ${className ?? ''}`}>
-      {children}
-    </div>
-  );
+  return <div className={`${styles.panel} ${className ?? ''}`}>{children}</div>;
 }

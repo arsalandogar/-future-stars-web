@@ -1,0 +1,17 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: var(--mantine-spacing-lg) var(--mantine-spacing-xl)
+    var(--mantine-spacing-lg) var(--mantine-spacing-lg);
+}
+
+.tabs {
+  flex-shrink: 0;
+  margin-bottom: var(--mantine-spacing-lg);
+}
+
+.content {
+  flex: 1;
+  min-height: 0;
+}

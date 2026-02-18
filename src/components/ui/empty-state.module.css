@@ -3,7 +3,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--mantine-spacing-3xl) var(--mantine-spacing-md) var(--mantine-spacing-4xl);
+  padding: var(--mantine-spacing-3xl) var(--mantine-spacing-md)
+    var(--mantine-spacing-4xl);
   text-align: center;
   gap: var(--mantine-spacing-lg);
 }

@@ -20,50 +20,48 @@ interface CreatePackModalState {
   close: () => void;
 }
 
-export const useCreatePackModalStore = create<CreatePackModalState>(
-  (set) => ({
-    opened: false,
-    mode: 'create',
-    editingPack: undefined,
-    initialSelectedCards: undefined,
+export const useCreatePackModalStore = create<CreatePackModalState>((set) => ({
+  opened: false,
+  mode: 'create',
+  editingPack: undefined,
+  initialSelectedCards: undefined,
 
-    openCreate: () =>
-      set({
-        opened: true,
-        mode: 'create',
-        editingPack: undefined,
-        initialSelectedCards: undefined,
-      }),
+  openCreate: () =>
+    set({
+      opened: true,
+      mode: 'create',
+      editingPack: undefined,
+      initialSelectedCards: undefined,
+    }),
 
-    openEdit: (pack) =>
-      set({
-        opened: true,
-        mode: 'edit',
-        editingPack: pack,
-        initialSelectedCards: undefined,
-      }),
+  openEdit: (pack) =>
+    set({
+      opened: true,
+      mode: 'edit',
+      editingPack: pack,
+      initialSelectedCards: undefined,
+    }),
 
-    openCopy: (pack) =>
-      set({
-        opened: true,
-        mode: 'copy',
-        editingPack: undefined,
-        initialSelectedCards: convertPackCardsToMap(pack.packCards),
-      }),
+  openCopy: (pack) =>
+    set({
+      opened: true,
+      mode: 'copy',
+      editingPack: undefined,
+      initialSelectedCards: convertPackCardsToMap(pack.packCards),
+    }),
 
-    openBuy: (cardId, quantity) =>
-      set({
-        opened: true,
-        mode: 'buy',
-        editingPack: undefined,
-        initialSelectedCards: new Map([[cardId, quantity]]),
-      }),
+  openBuy: (cardId, quantity) =>
+    set({
+      opened: true,
+      mode: 'buy',
+      editingPack: undefined,
+      initialSelectedCards: new Map([[cardId, quantity]]),
+    }),
 
-    close: () =>
-      set({
-        opened: false,
-        editingPack: undefined,
-        initialSelectedCards: undefined,
-      }),
-  })
-);
+  close: () =>
+    set({
+      opened: false,
+      editingPack: undefined,
+      initialSelectedCards: undefined,
+    }),
+}));

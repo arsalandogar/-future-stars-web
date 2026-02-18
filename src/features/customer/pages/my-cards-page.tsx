@@ -1,17 +1,14 @@
+import { useCallback, useState } from 'react';
 import { Button, Container, Text, Title } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { Images, Plus } from 'lucide-react';
 import { MdOutlineShoppingCart } from 'react-icons/md';
-import { useCallback, useState } from 'react';
-
-const routeApi = getRouteApi('/_authenticated/_customer/my-cards');
 
 import { Head } from '@/components/seo/head';
 import { ContentPanel } from '@/components/ui/content-panel';
+import { ContentTabs } from '@/components/ui/content-tabs';
 import { EmptyState } from '@/components/ui/empty-state';
-
-import { ContentTabs } from '../components/content-tabs';
 
 import type { Pack } from '@/types';
 import { MAX_PACK_CARDS } from '@/types';
@@ -40,10 +37,121 @@ import { usePackAutofillModalStore } from '../stores/pack-autofill-modal-store';
 import { getTotalCards } from '../utils/get-total-cards';
 import styles from './my-cards-page.module.css';
 
+const routeApi = getRouteApi('/_authenticated/_customer/my-cards');
+
 const TAB_ITEMS = [
   { label: 'CARDS', value: 'cards' },
   { label: 'PACKS', value: 'packs' },
 ];
+
+interface CardsTabContentProps {
+  isLoading: boolean;
+  cards: Card[];
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  onFetchNextPage: () => void;
+  onCreateCard: () => void;
+  onCardClick: (card: Card) => void;
+}
+
+function CardsTabContent({
+  isLoading,
+  cards,
+  hasNextPage,
+  isFetchingNextPage,
+  onFetchNextPage,
+  onCreateCard,
+  onCardClick,
+}: CardsTabContentProps) {
+  if (isLoading) return <CardsSkeleton />;
+
+  if (cards.length === 0) {
+    return (
+      <div className={styles.emptyStateWrapper}>
+        <EmptyState
+          shape="rectangle"
+          icon={<Images size={48} />}
+          title="No Cards Yet!"
+          subtitle="Click below to create your first card"
+          actionLabel="Create Card"
+          actionIcon={<Plus size={18} />}
+          onAction={onCreateCard}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <CardsGrid
+      cards={cards}
+      hasNextPage={hasNextPage}
+      isFetchingNextPage={isFetchingNextPage}
+      fetchNextPage={onFetchNextPage}
+      onCreateCard={onCreateCard}
+      onCardClick={onCardClick}
+    />
+  );
+}
+
+interface PacksTabContentProps {
+  isLoading: boolean;
+  packs: Pack[];
+  view: ViewMode;
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  onFetchNextPage: () => void;
+  onAddToCart: (pack: Pack) => void;
+  onPreview: (pack: Pack) => void;
+  onEdit: (pack: Pack) => void;
+  onCopy: (pack: Pack) => void;
+  onCreate: () => void;
+}
+
+function PacksTabContent({
+  isLoading,
+  packs,
+  view,
+  hasNextPage,
+  isFetchingNextPage,
+  onFetchNextPage,
+  onAddToCart,
+  onPreview,
+  onEdit,
+  onCopy,
+  onCreate,
+}: PacksTabContentProps) {
+  if (isLoading) return <CardsSkeleton />;
+
+  if (packs.length === 0) {
+    return (
+      <div className={styles.emptyStateWrapper}>
+        <EmptyState
+          shape="rectangle"
+          icon={<Images size={48} />}
+          title="No Packs Yet!"
+          subtitle="Tap below to create your first pack"
+          actionLabel="Create a Pack"
+          actionIcon={<Plus size={18} />}
+          onAction={onCreate}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <PacksList
+      packs={packs}
+      view={view}
+      hasNextPage={hasNextPage}
+      isFetchingNextPage={isFetchingNextPage}
+      fetchNextPage={onFetchNextPage}
+      onAddToCart={onAddToCart}
+      onPreview={onPreview}
+      onEdit={onEdit}
+      onCopy={onCopy}
+    />
+  );
+}
 
 export function MyCardsPage() {
   const { tab: activeTab } = routeApi.useSearch();
@@ -226,64 +334,31 @@ export function MyCardsPage() {
         >
           <div key={activeTab} className={styles.tabContent}>
             {activeTab === 'cards' && (
-              <>
-                {isLoadingCards ? (
-                  <CardsSkeleton />
-                ) : visibleCards.length === 0 ? (
-                  <div className={styles.emptyStateWrapper}>
-                    <EmptyState
-                      shape="rectangle"
-                      icon={<Images size={48} />}
-                      title="No Cards Yet!"
-                      subtitle="Click below to create your first card"
-                      actionLabel="Create Card"
-                      actionIcon={<Plus size={18} />}
-                      onAction={handleCreateCard}
-                    />
-                  </div>
-                ) : (
-                  <CardsGrid
-                    cards={visibleCards}
-                    hasNextPage={hasNextCardsPage ?? false}
-                    isFetchingNextPage={isFetchingNextCardsPage}
-                    fetchNextPage={() => void fetchNextCardsPage()}
-                    onCreateCard={handleCreateCard}
-                    onCardClick={handleCardClick}
-                  />
-                )}
-              </>
+              <CardsTabContent
+                isLoading={isLoadingCards}
+                cards={visibleCards}
+                hasNextPage={hasNextCardsPage ?? false}
+                isFetchingNextPage={isFetchingNextCardsPage}
+                onFetchNextPage={() => void fetchNextCardsPage()}
+                onCreateCard={handleCreateCard}
+                onCardClick={handleCardClick}
+              />
             )}
 
             {activeTab === 'packs' && (
-              <>
-                {isLoadingPacks ? (
-                  <CardsSkeleton />
-                ) : allPacks.length === 0 ? (
-                  <div className={styles.emptyStateWrapper}>
-                    <EmptyState
-                      shape="rectangle"
-                      icon={<Images size={48} />}
-                      title="No Packs Yet!"
-                      subtitle="Tap below to create your first pack"
-                      actionLabel="Create a Pack"
-                      actionIcon={<Plus size={18} />}
-                      onAction={openCreate}
-                    />
-                  </div>
-                ) : (
-                  <PacksList
-                    packs={allPacks}
-                    view={packsView}
-                    hasNextPage={hasNextPacksPage ?? false}
-                    isFetchingNextPage={isFetchingNextPacksPage}
-                    fetchNextPage={() => void fetchNextPacksPage()}
-                    onAddToCart={handleAddPackToCart}
-                    onPreview={handlePackPreview}
-                    onEdit={handleEditPack}
-                    onCopy={handleCopyPack}
-                  />
-                )}
-              </>
+              <PacksTabContent
+                isLoading={isLoadingPacks}
+                packs={allPacks}
+                view={packsView}
+                hasNextPage={hasNextPacksPage ?? false}
+                isFetchingNextPage={isFetchingNextPacksPage}
+                onFetchNextPage={() => void fetchNextPacksPage()}
+                onAddToCart={handleAddPackToCart}
+                onPreview={handlePackPreview}
+                onEdit={handleEditPack}
+                onCopy={handleCopyPack}
+                onCreate={openCreate}
+              />
             )}
           </div>
         </ContentPanel>

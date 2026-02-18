@@ -10,7 +10,10 @@ interface OrderPackItemProps {
 }
 
 function getTotalCardCount(item: OrderLineItem): number {
-  return item.packSnapshot.cardSnapshots.reduce((sum, cs) => sum + cs.quantity, 0);
+  return item.packSnapshot.cardSnapshots.reduce(
+    (sum, cs) => sum + cs.quantity,
+    0
+  );
 }
 
 export function OrderPackItem({ item }: OrderPackItemProps) {

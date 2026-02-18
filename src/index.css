@@ -9,25 +9,25 @@
   --customer-title-spacing: 0.05em;
 
   /* Account page colors */
-  --customer-input-bg: #323C4C;
-  --customer-card-bg: #1A222F;
-  --customer-active-item-bg: #1D293B;
+  --customer-input-bg: #323c4c;
+  --customer-card-bg: #1a222f;
+  --customer-active-item-bg: #1d293b;
   --customer-button-secondary-bg: #333849;
 
   /* Order confirmation colors */
-  --customer-order-card-bg: #141B24;
-  --customer-order-details-bg: #1D2633;
-  --customer-order-steps-bg: #19212C;
-  --customer-order-icon-bg: #313B4A;
-  --customer-order-icon-color: #9CA3AF;
+  --customer-order-card-bg: #141b24;
+  --customer-order-details-bg: #1d2633;
+  --customer-order-steps-bg: #19212c;
+  --customer-order-icon-bg: #313b4a;
+  --customer-order-icon-color: #9ca3af;
 
   /* Typography colors */
-  --text-primary: #FFFFFF;
-  --text-secondary: #E5E7EB;
-  --text-muted: #9CA3AF;
+  --text-primary: #ffffff;
+  --text-secondary: #e5e7eb;
+  --text-muted: #9ca3af;
 
   /* Icon colors */
-  --icon-default: #E5E7EB;
+  --icon-default: #e5e7eb;
 
   /* Typography weights */
   --font-weight-regular: 400;
@@ -37,7 +37,12 @@
 }
 
 /* Global typography */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: var(--text-primary);
   margin: 0;
 }

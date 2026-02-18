@@ -88,7 +88,7 @@ export function PackPreviewModal({
     if (!currentPackCard) return;
     void navigate({
       to: '/create-card',
-      search: { cardId: currentPackCard.cardId },
+      search: { templateId: currentPackCard.card.templateId },
     });
     onClose();
   };
@@ -118,10 +118,6 @@ export function PackPreviewModal({
     if (!pack) return;
     onEditPack?.(pack);
     onClose();
-  };
-
-  const handleDeleteCard = () => {
-    openDeleteCardModal();
   };
 
   const handleCardDeleted = () => {
@@ -215,7 +211,7 @@ export function PackPreviewModal({
             </Menu.Item>
             <Menu.Item
               leftSection={<Trash2 size={14} />}
-              onClick={handleDeleteCard}
+              onClick={openDeleteCardModal}
             >
               Delete Card
             </Menu.Item>

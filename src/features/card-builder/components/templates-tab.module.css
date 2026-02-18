@@ -1,0 +1,26 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #151a26;
+  border-radius: var(--mantine-radius-md);
+  padding: var(--mantine-spacing-lg);
+}
+
+.filters {
+  flex-shrink: 0;
+  margin-bottom: var(--mantine-spacing-md);
+}
+
+.grid {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: var(--mantine-spacing-lg);
+}
+
+.loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--mantine-spacing-xl) 0;
+}

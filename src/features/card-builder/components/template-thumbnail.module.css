@@ -1,0 +1,28 @@
+.thumbnail {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  border: none;
+  outline: 3px solid transparent;
+  outline-offset: -3px;
+  cursor: pointer;
+  transition: outline-color 200ms ease;
+}
+
+.thumbnail:hover {
+  outline-color: rgba(255, 255, 255, 0.3);
+}
+
+.thumbnail[data-selected] {
+  outline-color: var(--mantine-color-primary-4);
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+}

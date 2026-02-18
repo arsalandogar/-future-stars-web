@@ -1,0 +1,13 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: var(--mantine-spacing-lg);
+}
+
+.title {
+  color: var(--mantine-color-white);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}

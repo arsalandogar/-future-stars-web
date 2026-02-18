@@ -1,0 +1,30 @@
+.container {
+  padding-top: var(--mantine-spacing-xl);
+  padding-bottom: var(--mantine-spacing-xl);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 33% 1fr;
+  min-height: 600px;
+  background: var(--mantine-color-black);
+  border-radius: var(--mantine-radius-lg);
+}
+
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .preview {
+    min-height: 350px;
+  }
+}
+
+.preview {
+  padding: var(--mantine-spacing-lg);
+}
+
+.panel {
+  min-height: 0;
+}

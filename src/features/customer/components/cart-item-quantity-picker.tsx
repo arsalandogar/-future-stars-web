@@ -38,7 +38,11 @@ export function CartItemQuantityPicker({
         onClick={handleDecrement}
         className={styles.button}
       >
-        {value === 1 ? <Trash2 size={20} strokeWidth={2.5} /> : <Minus size={20} strokeWidth={3} />}
+        {value === 1 ? (
+          <Trash2 size={20} strokeWidth={2.5} />
+        ) : (
+          <Minus size={20} strokeWidth={3} />
+        )}
       </ActionIcon>
       <span className={styles.value}>{value}</span>
       <ActionIcon

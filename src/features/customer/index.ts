@@ -5,7 +5,6 @@ export { GlobalPackAutofillModal } from './components/global-pack-autofill-modal
 export { AccountPage } from './pages/account-page';
 export { CartPage } from './pages/cart-page';
 export { CheckoutPage } from './pages/checkout-page';
-export { CreateCardPage } from './pages/create-card-page';
 export { HomePage } from './pages/home-page';
 export { MyCardsPage } from './pages/my-cards-page';
 export { OrderSuccessPage } from './pages/order-success-page';
