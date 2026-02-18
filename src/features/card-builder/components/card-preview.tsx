@@ -12,8 +12,12 @@ interface CardPreviewProps {
 export function CardPreview({ template }: CardPreviewProps) {
   return (
     <div className={styles.container}>
-      <div className={styles.outerFrame}>
-        <div className={styles.innerFrame}>
+      <div
+        className={`${styles.outerFrame} ${template ? styles.frameless : ''}`}
+      >
+        <div
+          className={`${styles.innerFrame} ${template ? styles.frameless : ''}`}
+        >
           <AspectRatio ratio={2.5 / 3.5}>
             {template ? (
               <img

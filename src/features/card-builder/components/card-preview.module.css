@@ -22,6 +22,18 @@
   overflow: hidden;
 }
 
+.outerFrame.frameless {
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  max-width: none;
+}
+
+.innerFrame.frameless {
+  border: none;
+  border-radius: 0;
+}
+
 .image {
   display: block;
   width: 100%;
