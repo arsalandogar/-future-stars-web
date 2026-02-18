@@ -1,4 +1,5 @@
 import { Loader, SimpleGrid, Text } from '@mantine/core';
+import { getRouteApi } from '@tanstack/react-router';
 
 import { ContentTabs } from '@/components/ui/content-tabs';
 
@@ -11,6 +12,8 @@ import { useCardBuilderStore } from '../stores/card-builder-store';
 import { TemplateThumbnail } from './template-thumbnail';
 
 import styles from './templates-tab.module.css';
+
+const routeApi = getRouteApi('/_authenticated/_customer/create-card');
 
 interface TemplatesTabProps {
   tags: TagWithTemplates[];
@@ -44,7 +47,7 @@ function TemplatesGridContent({
 }: {
   isLoading: boolean;
   templates: BrowseTemplate[];
-  selectedTemplateId: number | null;
+  selectedTemplateId?: number;
   onSelect: (id: number) => void;
 }) {
   if (isLoading) {
@@ -79,12 +82,16 @@ function TemplatesGridContent({
 }
 
 export function TemplatesTab({ tags, isLoading }: TemplatesTabProps) {
-  const {
-    selectedTemplateId,
-    activeTagFilter,
-    selectTemplate,
-    setActiveTagFilter,
-  } = useCardBuilderStore();
+  const { templateId } = routeApi.useSearch();
+  const navigate = routeApi.useNavigate();
+  const { activeTagFilter, setActiveTagFilter } = useCardBuilderStore();
+
+  const selectTemplate = (id: number) => {
+    void navigate({
+      search: (prev) => ({ ...prev, templateId: id }),
+      replace: true,
+    });
+  };
 
   const tabItems = [
     { label: 'All', value: '' },
@@ -108,7 +115,7 @@ export function TemplatesTab({ tags, isLoading }: TemplatesTabProps) {
         <TemplatesGridContent
           isLoading={isLoading}
           templates={templates}
-          selectedTemplateId={selectedTemplateId}
+          selectedTemplateId={templateId}
           onSelect={selectTemplate}
         />
       </div>

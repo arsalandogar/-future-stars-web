@@ -18,17 +18,10 @@ const routeApi = getRouteApi('/_authenticated/_customer/create-card');
 
 export function CreateCardPage() {
   const { templateId } = routeApi.useSearch();
-  const { selectedTemplateId, selectTemplate, reset } = useCardBuilderStore();
+  const reset = useCardBuilderStore((s) => s.reset);
 
   const { data, isLoading } = useBuilderTemplates();
   const tags = useMemo(() => data?.data ?? [], [data]);
-
-  // Pre-select template from URL search param
-  useEffect(() => {
-    if (templateId && !selectedTemplateId) {
-      selectTemplate(templateId);
-    }
-  }, [templateId, selectedTemplateId, selectTemplate]);
 
   // Reset store on unmount
   useEffect(() => {
@@ -36,19 +29,19 @@ export function CreateCardPage() {
   }, [reset]);
 
   const selectedTemplate = useMemo<BrowseTemplate | null>(() => {
-    if (!selectedTemplateId) return null;
+    if (!templateId) return null;
     for (const tag of tags) {
-      const found = tag.templates.find((t) => t.id === selectedTemplateId);
+      const found = tag.templates.find((t) => t.id === templateId);
       if (found) return found;
     }
     return null;
-  }, [selectedTemplateId, tags]);
+  }, [templateId, tags]);
 
   return (
     <>
       <Head title="Create Card" description="Create your custom sports card" />
       <Container size="xl" className={styles.container}>
-        <BuilderHeader canSave={!!selectedTemplateId} />
+        <BuilderHeader canSave={!!templateId} />
 
         <div className={styles.layout}>
           <div className={styles.preview}>
