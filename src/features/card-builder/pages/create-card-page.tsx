@@ -4,8 +4,6 @@ import { getRouteApi } from '@tanstack/react-router';
 
 import { Head } from '@/components/seo/head';
 
-import type { BrowseTemplate } from '@/features/templates-browse';
-
 import { useBuilderTemplates } from '../api/browse-templates';
 import { BuilderHeader } from '../components/builder-header';
 import { BuilderTabsPanel } from '../components/builder-tabs-panel';
@@ -28,15 +26,6 @@ export function CreateCardPage() {
     return () => reset();
   }, [reset]);
 
-  const selectedTemplate = useMemo<BrowseTemplate | null>(() => {
-    if (!templateId) return null;
-    for (const tag of tags) {
-      const found = tag.templates.find((t) => t.id === templateId);
-      if (found) return found;
-    }
-    return null;
-  }, [templateId, tags]);
-
   return (
     <>
       <Head title="Create Card" description="Create your custom sports card" />
@@ -45,7 +34,7 @@ export function CreateCardPage() {
 
         <div className={styles.layout}>
           <div className={styles.preview}>
-            <CardPreview template={selectedTemplate} />
+            <CardPreview templateId={templateId ?? null} />
           </div>
 
           <div className={styles.panel}>
