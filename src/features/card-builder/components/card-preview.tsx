@@ -1,23 +1,45 @@
-import { AspectRatio, Button, Loader } from '@mantine/core';
-import { ArrowRight, Plus } from 'lucide-react';
+import { AspectRatio, Button, Loader, Text } from '@mantine/core';
+import { ArrowRight, Plus, RefreshCw } from 'lucide-react';
 
 import type { SvgJsonNode } from '../types';
-import { useTemplateSvgJson } from '../api/get-template-svg-json';
 
 import { SvgRenderer } from './svg-renderer';
 import styles from './card-preview.module.css';
 
 interface CardPreviewProps {
-  templateId: number | null;
+  svgNode: SvgJsonNode | null;
+  isLoading: boolean;
+  isError: boolean;
+  onRetry: () => void;
+  hasTemplate: boolean;
 }
+
+type CardContentProps = Omit<CardPreviewProps, 'hasTemplate'>;
 
 function CardContent({
   svgNode,
   isLoading,
-}: {
-  svgNode?: SvgJsonNode;
-  isLoading: boolean;
-}) {
+  isError,
+  onRetry,
+}: CardContentProps) {
+  if (isError) {
+    return (
+      <div className={styles.placeholder}>
+        <Text c="dimmed" size="sm">
+          Failed to load template
+        </Text>
+        <Button
+          variant="subtle"
+          size="xs"
+          leftSection={<RefreshCw size={14} />}
+          onClick={onRetry}
+        >
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
   if (isLoading || !svgNode) {
     return (
       <div className={styles.placeholder}>
@@ -29,13 +51,13 @@ function CardContent({
   return <SvgRenderer node={svgNode} className={styles.svg} />;
 }
 
-export function CardPreview({ templateId }: CardPreviewProps) {
-  const { data: svgNode, isLoading } = useTemplateSvgJson({
-    variables: templateId!,
-    enabled: !!templateId,
-  });
-
-  const hasTemplate = !!templateId;
+export function CardPreview({
+  svgNode,
+  isLoading,
+  isError,
+  onRetry,
+  hasTemplate,
+}: CardPreviewProps) {
   const frameClass = hasTemplate ? styles.frameless : '';
 
   return (
@@ -44,7 +66,12 @@ export function CardPreview({ templateId }: CardPreviewProps) {
         <div className={`${styles.innerFrame} ${frameClass}`}>
           <AspectRatio ratio={2.5 / 3.5}>
             {hasTemplate ? (
-              <CardContent svgNode={svgNode} isLoading={isLoading} />
+              <CardContent
+                svgNode={svgNode}
+                isLoading={isLoading}
+                isError={isError}
+                onRetry={onRetry}
+              />
             ) : (
               <div className={styles.placeholder}>
                 <Plus size={56} strokeWidth={1.5} color="#3a4258" />

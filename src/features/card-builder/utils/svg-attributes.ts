@@ -52,7 +52,7 @@ const ATTR_MAP: Record<string, string> = {
 
 function toReactAttributeName(attr: string): string {
   if (ATTR_MAP[attr]) return ATTR_MAP[attr];
-  if (attr.startsWith('data-') || attr.startsWith('aria-')) return attr;
+  if (attr.startsWith('aria-')) return attr;
   return attr;
 }
 
@@ -67,9 +67,9 @@ function parseStyleString(str: string): CSSProperties {
     if (colonIndex === -1) continue;
     const prop = trimmed.slice(0, colonIndex).trim();
     const value = trimmed.slice(colonIndex + 1).trim();
-    const camelProp = prop.replace(KEBAB_REGEX, (_, c: string) =>
-      c.toUpperCase()
-    );
+    const camelProp = prop.startsWith('--')
+      ? prop
+      : prop.replace(KEBAB_REGEX, (_, c: string) => c.toUpperCase());
     style[camelProp] = value;
   }
   return style as CSSProperties;
@@ -80,6 +80,7 @@ export function toReactAttributes(
 ): Record<string, unknown> {
   const props: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(attributes)) {
+    if (key.startsWith('data-') || key === '__nodeId') continue;
     if (key === 'style') {
       props.style = parseStyleString(value);
     } else {
