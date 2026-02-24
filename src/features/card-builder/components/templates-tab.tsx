@@ -1,4 +1,5 @@
 import { Loader, SimpleGrid, Text } from '@mantine/core';
+import { useQueryClient } from '@tanstack/react-query';
 import { getRouteApi } from '@tanstack/react-router';
 
 import { ContentTabs } from '@/components/ui/content-tabs';
@@ -8,6 +9,7 @@ import type {
   TagWithTemplates,
 } from '@/features/templates-browse';
 
+import { useTemplateSvgJson } from '../api/get-template-svg-json';
 import { useCardBuilderStore } from '../stores/card-builder-store';
 import { TemplateThumbnail } from './template-thumbnail';
 
@@ -50,6 +52,12 @@ function TemplatesGridContent({
   selectedTemplateId?: number;
   onSelect: (id: number) => void;
 }) {
+  const queryClient = useQueryClient();
+
+  const prefetchTemplate = (id: number) => {
+    void queryClient.prefetchQuery(useTemplateSvgJson.getOptions(id));
+  };
+
   if (isLoading) {
     return (
       <div className={styles.loader}>
@@ -75,6 +83,7 @@ function TemplatesGridContent({
           label={template.label}
           selected={selectedTemplateId === template.id}
           onClick={() => onSelect(template.id)}
+          onPrefetch={() => prefetchTemplate(template.id)}
         />
       ))}
     </SimpleGrid>

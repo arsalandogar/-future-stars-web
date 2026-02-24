@@ -7,6 +7,7 @@ interface TemplateThumbnailProps {
   label: string;
   selected: boolean;
   onClick: () => void;
+  onPrefetch?: () => void;
 }
 
 export function TemplateThumbnail({
@@ -14,6 +15,7 @@ export function TemplateThumbnail({
   label,
   selected,
   onClick,
+  onPrefetch,
 }: TemplateThumbnailProps) {
   return (
     <button
@@ -21,6 +23,8 @@ export function TemplateThumbnail({
       className={styles.thumbnail}
       data-selected={selected || undefined}
       onClick={onClick}
+      onPointerEnter={onPrefetch}
+      onFocus={onPrefetch}
     >
       <AspectRatio ratio={2.5 / 3.5}>
         <img
