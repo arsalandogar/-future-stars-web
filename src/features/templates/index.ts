@@ -14,3 +14,5 @@ export { useSetDefaultBack } from './api/set-default-back';
 
 // Types
 export type { Template, TemplateSide } from './types';
+export { EDITABLE_FIELDS } from './types';
+export type { EditableFieldId, EditableFieldType } from './types';

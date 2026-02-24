@@ -1,5 +1,8 @@
 import type { Tag, PaginationMeta } from '@/types';
 
+export { EDITABLE_FIELDS } from './template-vocabulary';
+export type { EditableFieldId, EditableFieldType } from './template-vocabulary';
+
 export type TemplateSide = 'front' | 'back';
 export type TemplateAttributeType = 'color' | 'image' | 'string';
 
