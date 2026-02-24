@@ -6,13 +6,13 @@ import {
   Checkbox,
   Group,
   Menu,
-  Skeleton,
   Stack,
   Table,
   Text,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import {
   ChevronDown,
@@ -55,17 +55,19 @@ export function BatchDetailPage({ batchId }: BatchDetailPageProps) {
   const [nameModalOpened, { open: openNameModal, close: closeNameModal }] =
     useDisclosure(false);
 
-  const batchQuery = usePrintBatch({ variables: batchId });
+  const { data: batchResponse } = useSuspenseQuery(
+    usePrintBatch.getOptions(batchId)
+  );
+  const batch = batchResponse.data;
   const removeFromBatch = useRemoveOrdersFromBatch();
   const { open: openAddToBatchModal } = useAddToBatchModalStore();
 
-  const batch = batchQuery.data?.data;
-  const orders = batch?.orders ?? [];
+  const orders = batch.orders ?? [];
 
   usePageHeader({
-    title: batch?.name ?? 'Batch Details',
+    title: batch.name ?? 'Batch Details',
     description: 'View and manage batch details',
-    dynamicBreadcrumb: batch?.name,
+    dynamicBreadcrumb: batch.name,
   });
 
   const selectedCount = selectedOrderIds.size;
@@ -160,23 +162,6 @@ export function BatchDetailPage({ batchId }: BatchDetailPageProps) {
       color: 'blue',
     });
   };
-
-  if (batchQuery.isLoading) {
-    return (
-      <div className={styles.container}>
-        <Skeleton height={200} />
-        <Skeleton height={400} />
-      </div>
-    );
-  }
-
-  if (!batch) {
-    return (
-      <div className={styles.container}>
-        <Text c="dimmed">Batch not found</Text>
-      </div>
-    );
-  }
 
   const createdByName = batch.creator
     ? `${batch.creator.firstName} ${batch.creator.lastName}`

@@ -1,4 +1,4 @@
-import { Loader, Text } from '@mantine/core';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useDisclosure } from '@mantine/hooks';
 import { useNavigate } from '@tanstack/react-router';
 
@@ -19,22 +19,20 @@ export function TagViewPage({ id }: TagViewPageProps) {
   const navigate = useNavigate();
   const [opened, { open, close }] = useDisclosure(false);
 
-  const { data: tagResponse, isLoading } = useTag({
-    variables: id,
-  });
-  const tag = tagResponse?.data;
+  const { data: tagResponse } = useSuspenseQuery(useTag.getOptions(id));
+  const tag = tagResponse.data;
 
   const deleteTag = useDeleteTag();
 
   usePageHeader({
-    title: tag?.name ?? 'Tag',
-    dynamicBreadcrumb: tag?.name,
+    title: tag.name,
+    dynamicBreadcrumb: tag.name,
   });
 
   const handleDelete = () => {
     openDeleteModal({
       entityType: 'Tag',
-      itemName: tag?.name ?? 'this tag',
+      itemName: tag.name,
       onConfirm: () => {
         deleteTag.mutate(id, {
           onSuccess: () => {
@@ -44,22 +42,6 @@ export function TagViewPage({ id }: TagViewPageProps) {
       },
     });
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-8">
-        <Loader />
-      </div>
-    );
-  }
-
-  if (!tag) {
-    return (
-      <div className="flex justify-center py-8">
-        <Text c="dimmed">Tag not found</Text>
-      </div>
-    );
-  }
 
   return (
     <>

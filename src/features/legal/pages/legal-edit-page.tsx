@@ -1,4 +1,5 @@
-import { Card, Loader, Text } from '@mantine/core';
+import { Card, Text } from '@mantine/core';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 
 import { Head } from '@/components/seo/head';
@@ -20,16 +21,16 @@ export function LegalEditPage({ type, id }: LegalEditPageProps) {
   const config = getLegalDocumentConfig(type);
   const basePath = `/admin/${type}`;
 
-  const { data: documentResponse, isLoading } = useLegalDocument({
-    variables: id,
-  });
-  const document = documentResponse?.data;
+  const { data: documentResponse } = useSuspenseQuery(
+    useLegalDocument.getOptions(id)
+  );
+  const document = documentResponse.data;
 
   const updateDocument = useUpdateLegalDocument();
 
   usePageHeader({
     title: `Edit ${config.title}`,
-    dynamicBreadcrumb: document?.version,
+    dynamicBreadcrumb: document.version,
   });
 
   const handleSubmit = (values: { version: string; content: string }) => {
@@ -46,22 +47,6 @@ export function LegalEditPage({ type, id }: LegalEditPageProps) {
       }
     );
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-8">
-        <Loader />
-      </div>
-    );
-  }
-
-  if (!document) {
-    return (
-      <div className="flex justify-center py-8">
-        <Text c="dimmed">Document not found</Text>
-      </div>
-    );
-  }
 
   if (!document.isDraft) {
     return (

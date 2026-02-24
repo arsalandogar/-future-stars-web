@@ -1,4 +1,4 @@
-import { Loader, Text } from '@mantine/core';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 
 import { Head } from '@/components/seo/head';
@@ -16,22 +16,22 @@ export interface TemplateViewPageProps {
 export function TemplateViewPage({ id }: TemplateViewPageProps) {
   const navigate = useNavigate();
 
-  const { data: templateResponse, isLoading } = useTemplate({
-    variables: id,
-  });
-  const template = templateResponse?.data;
+  const { data: templateResponse } = useSuspenseQuery(
+    useTemplate.getOptions(id)
+  );
+  const template = templateResponse.data;
 
   const deleteTemplate = useDeleteTemplate();
 
   usePageHeader({
-    title: template?.label ?? 'Template',
-    dynamicBreadcrumb: template?.label,
+    title: template.label,
+    dynamicBreadcrumb: template.label,
   });
 
   const handleDelete = () => {
     openDeleteModal({
       entityType: 'Template',
-      itemName: template?.label ?? 'this template',
+      itemName: template.label,
       onConfirm: () => {
         deleteTemplate.mutate(id, {
           onSuccess: () => {
@@ -41,22 +41,6 @@ export function TemplateViewPage({ id }: TemplateViewPageProps) {
       },
     });
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-8">
-        <Loader />
-      </div>
-    );
-  }
-
-  if (!template) {
-    return (
-      <div className="flex justify-center py-8">
-        <Text c="dimmed">Template not found</Text>
-      </div>
-    );
-  }
 
   return (
     <>

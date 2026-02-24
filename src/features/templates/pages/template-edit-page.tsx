@@ -1,4 +1,4 @@
-import { Loader, Text } from '@mantine/core';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 
 import { Head } from '@/components/seo/head';
@@ -17,16 +17,16 @@ export interface TemplateEditPageProps {
 export function TemplateEditPage({ id }: TemplateEditPageProps) {
   const navigate = useNavigate();
 
-  const { data: templateResponse, isLoading } = useTemplate({
-    variables: id,
-  });
-  const template = templateResponse?.data;
+  const { data: templateResponse } = useSuspenseQuery(
+    useTemplate.getOptions(id)
+  );
+  const template = templateResponse.data;
 
   const updateTemplate = useUpdateTemplate();
 
   usePageHeader({
     title: 'Edit Template',
-    dynamicBreadcrumb: template?.label,
+    dynamicBreadcrumb: template.label,
   });
 
   const handleSubmit = async (values: TemplateFormValues) => {
@@ -36,22 +36,6 @@ export function TemplateEditPage({ id }: TemplateEditPageProps) {
     });
     void navigate({ to: `/admin/templates/${id}` });
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-8">
-        <Loader />
-      </div>
-    );
-  }
-
-  if (!template) {
-    return (
-      <div className="flex justify-center py-8">
-        <Text c="dimmed">Template not found</Text>
-      </div>
-    );
-  }
 
   const backTemplateMode =
     template.side === 'front' && template.backTemplateId == null

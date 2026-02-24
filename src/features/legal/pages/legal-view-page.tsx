@@ -1,5 +1,5 @@
-import { Loader, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 
 import { Head } from '@/components/seo/head';
@@ -24,10 +24,10 @@ export function LegalViewPage({ type, id }: LegalViewPageProps) {
   const config = getLegalDocumentConfig(type);
   const basePath = `/admin/${type}`;
 
-  const { data: documentResponse, isLoading } = useLegalDocument({
-    variables: id,
-  });
-  const document = documentResponse?.data;
+  const { data: documentResponse } = useSuspenseQuery(
+    useLegalDocument.getOptions(id)
+  );
+  const document = documentResponse.data;
 
   const publishDocument = usePublishLegalDocument();
   const deleteDocument = useDeleteLegalDocument();
@@ -39,7 +39,7 @@ export function LegalViewPage({ type, id }: LegalViewPageProps) {
 
   usePageHeader({
     title: config.title,
-    dynamicBreadcrumb: document?.version,
+    dynamicBreadcrumb: document.version,
   });
 
   const handlePublishConfirm = (requiresAcceptance: boolean) => {
@@ -56,7 +56,7 @@ export function LegalViewPage({ type, id }: LegalViewPageProps) {
   const handleDelete = () => {
     openDeleteModal({
       entityType: 'Document',
-      itemName: `version ${document?.version ?? ''}`,
+      itemName: `version ${document.version}`,
       onConfirm: () => {
         deleteDocument.mutate(id, {
           onSuccess: () => {
@@ -66,22 +66,6 @@ export function LegalViewPage({ type, id }: LegalViewPageProps) {
       },
     });
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-8">
-        <Loader />
-      </div>
-    );
-  }
-
-  if (!document) {
-    return (
-      <div className="flex justify-center py-8">
-        <Text c="dimmed">Document not found</Text>
-      </div>
-    );
-  }
 
   return (
     <>

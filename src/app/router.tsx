@@ -1,13 +1,25 @@
 import { RouterProvider, createRouter } from '@tanstack/react-router';
+import { Center, Loader } from '@mantine/core';
 import { routeTree } from '@/routeTree.gen';
 import { useAuthStore } from '@/stores/auth-store';
 import { queryClient } from '@/lib/react-query';
+import { MainErrorFallback } from '@/components/errors/main';
 import type { RouterContext } from '@/routes/__root';
+
+function DefaultPendingComponent() {
+  return (
+    <Center py="xl">
+      <Loader />
+    </Center>
+  );
+}
 
 const router = createRouter({
   routeTree,
   defaultPreload: 'intent',
   defaultPreloadStaleTime: 0,
+  defaultErrorComponent: MainErrorFallback,
+  defaultPendingComponent: DefaultPendingComponent,
   scrollRestoration: true,
   context: {
     auth: {
