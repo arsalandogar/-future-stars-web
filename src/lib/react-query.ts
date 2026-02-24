@@ -1,9 +1,10 @@
-import type {
-  DefaultOptions,
-  MutationFunctionContext,
-  QueryKey,
+import {
+  QueryClient,
+  useQueryClient,
+  type DefaultOptions,
+  type MutationFunctionContext,
+  type QueryKey,
 } from '@tanstack/react-query';
-import { useQueryClient } from '@tanstack/react-query';
 import type { Middleware, MutationHook } from 'react-query-kit';
 
 export {
@@ -22,6 +23,8 @@ export const queryConfig = {
     staleTime: 1000 * 60,
   },
 } satisfies DefaultOptions;
+
+export const queryClient = new QueryClient({ defaultOptions: queryConfig });
 
 interface GuardedInvalidation<TData, TVariables, TOnMutateResult> {
   queryKey: QueryKey;

@@ -12,4 +12,5 @@ export const useColorLeagues = createQuery({
     params: ColorLeaguesListParams
   ): Promise<ColorLeaguesListResponse> =>
     api.get('admin/color-leagues', { params }),
+  staleTime: 1000 * 60 * 30,
 });

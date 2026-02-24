@@ -94,6 +94,8 @@ export function FeaturedItemsList() {
       const previousData =
         queryClient.getQueryData<FeaturedItemsListResponse>(queryKey);
 
+      void queryClient.cancelQueries({ queryKey });
+
       queryClient.setQueryData<FeaturedItemsListResponse>(queryKey, (old) => {
         if (!old) return old;
         return { ...old, data: newOrder };
@@ -104,6 +106,9 @@ export function FeaturedItemsList() {
         {
           onError: () => {
             queryClient.setQueryData(queryKey, previousData);
+          },
+          onSettled: () => {
+            void queryClient.invalidateQueries({ queryKey });
           },
         }
       );

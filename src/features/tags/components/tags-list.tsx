@@ -91,6 +91,8 @@ export function TagsList() {
 
       const previousData = queryClient.getQueryData<TagsListResponse>(queryKey);
 
+      void queryClient.cancelQueries({ queryKey });
+
       queryClient.setQueryData<TagsListResponse>(queryKey, (old) => {
         if (!old) return old;
         return { ...old, data: newOrder };
@@ -101,6 +103,9 @@ export function TagsList() {
         {
           onError: () => {
             queryClient.setQueryData(queryKey, previousData);
+          },
+          onSettled: () => {
+            void queryClient.invalidateQueries({ queryKey });
           },
         }
       );

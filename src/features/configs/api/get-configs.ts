@@ -6,4 +6,5 @@ import type { ConfigsListResponse } from '../types';
 export const useConfigs = createQuery({
   queryKey: ['admin', 'configs'],
   fetcher: (): Promise<ConfigsListResponse> => api.get('admin/configs'),
+  staleTime: 1000 * 60 * 30,
 });

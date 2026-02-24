@@ -9,4 +9,5 @@ export { AddToBatchModal } from './components/add-to-batch-modal';
 export { useAddToBatchModalStore } from './stores/add-to-batch-modal-store';
 
 // API
+export { usePrintBatch } from './api/get-print-batch';
 export { useRemoveOrdersFromBatch } from './api/remove-orders-from-batch';

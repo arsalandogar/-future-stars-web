@@ -65,6 +65,8 @@ export function TagTemplatesList({ tag, templates }: TagTemplatesListProps) {
       const previousData =
         queryClient.getQueryData<TagDetailResponse>(queryKey);
 
+      void queryClient.cancelQueries({ queryKey });
+
       // Preserve back templates, only reorder front templates
       const backTemplates = tag.templates.filter((t) => t.side === 'back');
       const newOrder = [...reorderedFront, ...backTemplates];
@@ -79,6 +81,9 @@ export function TagTemplatesList({ tag, templates }: TagTemplatesListProps) {
         {
           onError: () => {
             queryClient.setQueryData(queryKey, previousData);
+          },
+          onSettled: () => {
+            void queryClient.invalidateQueries({ queryKey });
           },
         }
       );

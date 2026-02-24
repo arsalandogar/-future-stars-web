@@ -1,8 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { TemplateViewPage } from '@/features/templates';
+import { TemplateViewPage, useTemplate } from '@/features/templates';
 
 export const Route = createFileRoute('/_authenticated/admin/templates/$id/')({
+  loader: ({ context: { queryClient }, params: { id } }) =>
+    queryClient.ensureQueryData(useTemplate.getOptions(Number(id))),
   component: RouteComponent,
 });
 

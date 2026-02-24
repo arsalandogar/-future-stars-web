@@ -1,15 +1,20 @@
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { routeTree } from '@/routeTree.gen';
 import { useAuthStore } from '@/stores/auth-store';
+import { queryClient } from '@/lib/react-query';
 import type { RouterContext } from '@/routes/__root';
 
 const router = createRouter({
   routeTree,
+  defaultPreload: 'intent',
+  defaultPreloadStaleTime: 0,
+  scrollRestoration: true,
   context: {
     auth: {
       isAuthenticated: false,
       user: null,
     },
+    queryClient,
   },
 });
 
@@ -31,6 +36,7 @@ export function AppRouter() {
             isAuthenticated,
             user,
           },
+          queryClient,
         } satisfies RouterContext
       }
     />

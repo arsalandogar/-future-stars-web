@@ -1,24 +1,20 @@
-import { Suspense, useState, type ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import { HelmetProvider } from '@dr.pogodin/react-helmet';
 import { Center, Loader, MantineProvider } from '@mantine/core';
 import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { theme } from '@/config/theme';
 import { cssVariableResolver } from '@/lib/css-variable-resolver';
-import { queryConfig } from '@/lib/react-query';
+import { queryClient } from '@/lib/react-query';
 
 type AppProviderProps = {
   children: ReactNode;
 };
 
 export function AppProvider({ children }: AppProviderProps) {
-  const [queryClient] = useState(
-    () => new QueryClient({ defaultOptions: queryConfig })
-  );
-
   return (
     <Suspense
       fallback={

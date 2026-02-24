@@ -8,6 +8,7 @@ export { TemplateEditPage } from './pages/template-edit-page';
 export { TemplateRow } from './components/template-row';
 
 // API
+export { useTemplate } from './api/get-template';
 export { useTemplates } from './api/get-templates';
 export { useSetDefaultBack } from './api/set-default-back';
 
