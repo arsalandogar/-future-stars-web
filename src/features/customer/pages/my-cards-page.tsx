@@ -1,13 +1,13 @@
 import { useCallback, useState } from 'react';
 import { Button, Container, Text, Title } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
-import { getRouteApi, useNavigate } from '@tanstack/react-router';
+import { getRouteApi } from '@tanstack/react-router';
 import { Images, Plus } from 'lucide-react';
 import { MdOutlineShoppingCart } from 'react-icons/md';
 
 import { Head } from '@/components/seo/head';
 import { ContentPanel } from '@/components/ui/content-panel';
-import { ContentTabs } from '@/components/ui/content-tabs';
+import { type ContentTabItem, ContentTabs } from '@/components/ui/content-tabs';
 import { EmptyState } from '@/components/ui/empty-state';
 
 import type { Pack } from '@/types';
@@ -39,9 +39,17 @@ import styles from './my-cards-page.module.css';
 
 const routeApi = getRouteApi('/_authenticated/_customer/my-cards');
 
-const TAB_ITEMS = [
-  { label: 'CARDS', value: 'cards' },
-  { label: 'PACKS', value: 'packs' },
+const TAB_ITEMS: ContentTabItem[] = [
+  {
+    label: 'CARDS',
+    value: 'cards',
+    linkProps: { to: '/my-cards', search: { tab: 'cards' } },
+  },
+  {
+    label: 'PACKS',
+    value: 'packs',
+    linkProps: { to: '/my-cards', search: { tab: 'packs' } },
+  },
 ];
 
 interface CardsTabContentProps {
@@ -50,7 +58,6 @@ interface CardsTabContentProps {
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   onFetchNextPage: () => void;
-  onCreateCard: () => void;
   onCardClick: (card: Card) => void;
 }
 
@@ -60,7 +67,6 @@ function CardsTabContent({
   hasNextPage,
   isFetchingNextPage,
   onFetchNextPage,
-  onCreateCard,
   onCardClick,
 }: CardsTabContentProps) {
   if (isLoading) return <CardsSkeleton />;
@@ -75,7 +81,7 @@ function CardsTabContent({
           subtitle="Click below to create your first card"
           actionLabel="Create Card"
           actionIcon={<Plus size={18} />}
-          onAction={onCreateCard}
+          actionTo="/create-card"
         />
       </div>
     );
@@ -87,7 +93,6 @@ function CardsTabContent({
       hasNextPage={hasNextPage}
       isFetchingNextPage={isFetchingNextPage}
       fetchNextPage={onFetchNextPage}
-      onCreateCard={onCreateCard}
       onCardClick={onCardClick}
     />
   );
@@ -163,7 +168,6 @@ export function MyCardsPage() {
     packPreviewOpened,
     { open: openPackPreview, close: closePackPreview },
   ] = useDisclosure(false);
-  const navigate = useNavigate();
   const isMobile = useMediaQuery('(max-width: 576px)');
   const [packsView, setPacksView] = useState<ViewMode>('list');
 
@@ -171,13 +175,6 @@ export function MyCardsPage() {
   const openAddedToCartPopup = useAddedToCartPopupStore((s) => s.open);
   const openAutofillModal = usePackAutofillModalStore((s) => s.open);
   const addCartItem = useAddCartItem();
-
-  const setActiveTab = (tab: string) => {
-    void navigate({
-      to: '/my-cards',
-      search: { tab: tab as 'cards' | 'packs' },
-    });
-  };
 
   const {
     data: cardsData,
@@ -190,6 +187,7 @@ export function MyCardsPage() {
       page: USER_CARDS_INITIAL_PAGE,
       limit: USER_CARDS_DEFAULT_LIMIT,
     },
+    enabled: activeTab === 'cards',
   });
 
   const {
@@ -211,10 +209,6 @@ export function MyCardsPage() {
 
   const allPacks = packsData?.pages.flatMap((page) => page.data) ?? [];
   const totalPacksCount = packsData?.pages[0]?.meta.total ?? 0;
-
-  const handleCreateCard = () => {
-    void navigate({ to: '/create-card' });
-  };
 
   const handleCardClick = (card: Card) => {
     const index = visibleCards.findIndex((c) => c.id === card.id);
@@ -285,11 +279,7 @@ export function MyCardsPage() {
         </Title>
 
         <div className={styles.tabsRow}>
-          <ContentTabs
-            items={TAB_ITEMS}
-            activeValue={activeTab}
-            onChange={setActiveTab}
-          />
+          <ContentTabs items={TAB_ITEMS} activeValue={activeTab} />
 
           {activeTab === 'cards' ? (
             <Button
@@ -340,7 +330,6 @@ export function MyCardsPage() {
                 hasNextPage={hasNextCardsPage ?? false}
                 isFetchingNextPage={isFetchingNextCardsPage}
                 onFetchNextPage={() => void fetchNextCardsPage()}
-                onCreateCard={handleCreateCard}
                 onCardClick={handleCardClick}
               />
             )}

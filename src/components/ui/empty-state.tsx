@@ -1,5 +1,6 @@
 import { Button, Text, Title } from '@mantine/core';
-import type { ReactNode } from 'react';
+import { Link } from '@tanstack/react-router';
+import type { ComponentProps, ReactNode } from 'react';
 
 import styles from './empty-state.module.css';
 
@@ -13,6 +14,7 @@ interface EmptyStateProps {
   actionLabel?: string;
   actionIcon?: ReactNode;
   onAction?: () => void;
+  actionTo?: ComponentProps<typeof Link>['to'];
 }
 
 export function EmptyState({
@@ -23,6 +25,7 @@ export function EmptyState({
   actionLabel,
   actionIcon,
   onAction,
+  actionTo,
 }: EmptyStateProps) {
   return (
     <div className={styles.container}>
@@ -42,7 +45,19 @@ export function EmptyState({
         )}
       </div>
 
-      {actionLabel && onAction && (
+      {actionLabel && actionTo && (
+        <Button
+          component={Link}
+          to={actionTo}
+          size="lg"
+          radius="xl"
+          leftSection={actionIcon}
+        >
+          {actionLabel}
+        </Button>
+      )}
+
+      {actionLabel && !actionTo && onAction && (
         <Button
           size="lg"
           radius="xl"

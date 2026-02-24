@@ -1,5 +1,4 @@
 import { Carousel } from '@mantine/carousel';
-import { Skeleton } from '@mantine/core';
 import Autoplay from 'embla-carousel-autoplay';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRef } from 'react';
@@ -11,15 +10,10 @@ import styles from './featured-carousel.module.css';
 
 interface FeaturedCarouselProps {
   items: FeaturedItem[];
-  isLoading?: boolean;
 }
 
-export function FeaturedCarousel({ items, isLoading }: FeaturedCarouselProps) {
+export function FeaturedCarousel({ items }: FeaturedCarouselProps) {
   const autoplay = useRef(Autoplay({ delay: 5000 }));
-
-  if (isLoading) {
-    return <FeaturedCarouselSkeleton />;
-  }
 
   if (items.length === 0) {
     return null;
@@ -52,17 +46,6 @@ export function FeaturedCarousel({ items, isLoading }: FeaturedCarouselProps) {
           </Carousel.Slide>
         ))}
       </Carousel>
-    </div>
-  );
-}
-
-function FeaturedCarouselSkeleton() {
-  return (
-    <div className={styles.skeleton}>
-      <Skeleton height={48} width={400} radius="md" />
-      <Skeleton height={350} width={280} radius="md" />
-      <Skeleton height={48} width={180} radius="xl" />
-      <Skeleton height={60} width={500} radius="md" />
     </div>
   );
 }

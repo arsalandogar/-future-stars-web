@@ -115,14 +115,3 @@
     background-color: var(--mantine-color-primary-4);
   }
 }
-
-/* Loading Skeleton */
-.skeleton {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--mantine-spacing-xl) var(--mantine-spacing-md);
-  min-height: 70vh;
-  gap: var(--mantine-spacing-xl);
-}

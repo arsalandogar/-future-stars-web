@@ -160,7 +160,10 @@ export function CustomerFooter() {
   return (
     <Box
       component="footer"
-      style={{ borderTop: '1px solid var(--mantine-color-primaryAlt-4)' }}
+      style={{
+        borderTop: '1px solid var(--mantine-color-primaryAlt-4)',
+        backgroundColor: 'var(--mantine-color-body)',
+      }}
     >
       <Container size="xxl" py="xl">
         <div className={classes.footerGrid}>

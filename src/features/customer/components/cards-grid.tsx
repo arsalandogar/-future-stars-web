@@ -13,7 +13,6 @@ interface CardsGridProps {
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   fetchNextPage: () => void;
-  onCreateCard: () => void;
   onCardClick: (card: Card) => void;
 }
 
@@ -22,7 +21,6 @@ export function CardsGrid({
   hasNextPage,
   isFetchingNextPage,
   fetchNextPage,
-  onCreateCard,
   onCardClick,
 }: CardsGridProps) {
   const { ref, entry } = useIntersection({
@@ -50,7 +48,7 @@ export function CardsGrid({
             onClick={() => onCardClick(card)}
           />
         ))}
-        <CreateCardButton onClick={onCreateCard} />
+        <CreateCardButton />
       </SimpleGrid>
 
       {hasNextPage && (

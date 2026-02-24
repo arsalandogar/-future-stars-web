@@ -1,16 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
+import { type ComponentProps, useEffect, useRef, useState } from 'react';
+import { Link } from '@tanstack/react-router';
 
 import styles from './content-tabs.module.css';
 
 export interface ContentTabItem {
   label: string;
   value: string;
+  linkProps?: {
+    to: ComponentProps<typeof Link>['to'];
+    search?: Record<string, unknown>;
+  };
 }
 
 interface ContentTabsProps {
   items: ContentTabItem[];
   activeValue: string;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
   gap?: string | number;
   size?: 'sm' | 'md' | 'lg';
 }
@@ -29,7 +34,7 @@ export function ContentTabs({
   size = 'md',
 }: ContentTabsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const tabRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const tabRefs = useRef<Map<string, HTMLElement>>(new Map());
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
 
   useEffect(() => {
@@ -45,27 +50,40 @@ export function ContentTabs({
     }
   }, [activeValue, items]);
 
+  function getTabProps(item: ContentTabItem) {
+    return {
+      ref: (el: HTMLElement | null) => {
+        if (el) tabRefs.current.set(item.value, el);
+      },
+      className: styles.tab,
+      'data-active': activeValue === item.value || undefined,
+      style: { fontSize: SIZE_MAP[size] },
+    } as const;
+  }
+
   return (
     <div ref={containerRef} className={styles.container} style={{ gap }}>
-      {items.map((item) => {
-        const isActive = activeValue === item.value;
-
-        return (
+      {items.map((item) =>
+        item.linkProps ? (
+          <Link
+            key={item.value}
+            {...getTabProps(item)}
+            to={item.linkProps.to}
+            search={item.linkProps.search as never}
+          >
+            {item.label}
+          </Link>
+        ) : (
           <button
             key={item.value}
-            ref={(el) => {
-              if (el) tabRefs.current.set(item.value, el);
-            }}
+            {...getTabProps(item)}
             type="button"
-            className={styles.tab}
-            data-active={isActive || undefined}
-            style={{ fontSize: SIZE_MAP[size] }}
-            onClick={() => onChange(item.value)}
+            onClick={() => onChange?.(item.value)}
           >
             {item.label}
           </button>
-        );
-      })}
+        )
+      )}
       <div
         className={styles.indicator}
         style={{

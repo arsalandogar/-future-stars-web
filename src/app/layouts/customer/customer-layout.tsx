@@ -27,11 +27,13 @@ export function CustomerLayout() {
           fontFamily:
             'Montserrat, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
         },
+        header: {
+          backgroundColor: 'var(--mantine-color-body)',
+          borderBottomColor: 'var(--mantine-color-primaryAlt-4)',
+        },
       }}
     >
-      <AppShell.Header
-        style={{ borderBottomColor: 'var(--mantine-color-primaryAlt-4)' }}
-      >
+      <AppShell.Header>
         <CustomerHeader />
       </AppShell.Header>
 
