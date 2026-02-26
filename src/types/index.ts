@@ -25,4 +25,5 @@ export type {
 export type { Pack, PackCard } from './pack';
 export { MAX_PACK_CARDS } from './pack';
 export type { PaginationMeta } from './pagination';
+export type { SvgJsonNode } from './svg';
 export type { Tag } from './tag';

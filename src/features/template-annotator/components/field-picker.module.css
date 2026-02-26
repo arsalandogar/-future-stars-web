@@ -1,0 +1,53 @@
+.fieldItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--mantine-radius-xs);
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease;
+}
+
+.fieldItem:hover:not([data-disabled='true']) {
+  background-color: var(--mantine-color-gray-1);
+  border-color: var(--mantine-color-gray-3);
+}
+
+:global([data-mantine-color-scheme='dark'])
+  .fieldItem:hover:not([data-disabled='true']) {
+  background-color: var(--mantine-color-dark-6);
+  border-color: var(--mantine-color-dark-5);
+}
+
+/* Assigned state */
+.fieldItem[data-assigned='true'] {
+  background-color: rgba(80, 70, 255, 0.06);
+  border-left: 2px solid var(--mantine-color-primary-4);
+}
+
+:global([data-mantine-color-scheme='dark']) .fieldItem[data-assigned='true'] {
+  background-color: rgba(80, 70, 255, 0.1);
+}
+
+/* Disabled state */
+.fieldItem[data-disabled='true'] {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+:global([data-mantine-color-scheme='dark']) .fieldItem[data-disabled='true'] {
+  background-color: var(--mantine-color-dark-7);
+}
+
+.groupLabel {
+  border-bottom: 1px solid var(--mantine-color-default-border);
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+}
+
+:global([data-mantine-color-scheme='dark']) .groupLabel {
+  border-bottom-color: var(--mantine-color-dark-5);
+}

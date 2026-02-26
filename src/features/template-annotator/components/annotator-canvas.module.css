@@ -1,0 +1,46 @@
+.canvas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--mantine-spacing-md);
+  cursor: default;
+  overflow: auto;
+  height: 100%;
+
+  /* Dot grid background */
+  background-color: var(--mantine-color-gray-1);
+  background-image: radial-gradient(
+    circle,
+    var(--mantine-color-gray-3) 1px,
+    transparent 1px
+  );
+  background-size: 20px 20px;
+
+  /* Subtle inset vignette */
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.04);
+}
+
+:global([data-mantine-color-scheme='dark']) .canvas {
+  background-color: var(--mantine-color-dark-9);
+  background-image: radial-gradient(
+    circle,
+    var(--mantine-color-dark-6) 1px,
+    transparent 1px
+  );
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.3);
+}
+
+.svgWrapper {
+  max-width: 500px;
+  width: 100%;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.08),
+    0 1px 4px rgba(0, 0, 0, 0.04);
+  border-radius: 2px;
+}
+
+:global([data-mantine-color-scheme='dark']) .svgWrapper {
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.4),
+    0 1px 4px rgba(0, 0, 0, 0.2);
+}

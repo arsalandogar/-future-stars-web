@@ -1,0 +1,101 @@
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr 320px;
+  grid-template-rows: auto 1fr;
+  height: calc(100vh - 60px);
+}
+
+.toolbar {
+  grid-column: 1 / -1;
+  background-color: var(--mantine-color-body);
+  border-bottom: 1px solid var(--mantine-color-default-border);
+}
+
+:global([data-mantine-color-scheme='dark']) .toolbar {
+  background-color: var(--mantine-color-dark-7);
+  border-bottom-color: var(--mantine-color-dark-5);
+}
+
+.tree {
+  grid-row: 2;
+  overflow-y: auto;
+  background-color: var(--mantine-color-body);
+  border-right: 1px solid var(--mantine-color-default-border);
+}
+
+:global([data-mantine-color-scheme='dark']) .tree {
+  background-color: var(--mantine-color-dark-7);
+  border-right-color: var(--mantine-color-dark-5);
+}
+
+.canvas {
+  grid-row: 2;
+  overflow: auto;
+}
+
+.panel {
+  grid-row: 2;
+  overflow-y: auto;
+  background-color: var(--mantine-color-body);
+  border-left: 1px solid var(--mantine-color-default-border);
+}
+
+:global([data-mantine-color-scheme='dark']) .panel {
+  background-color: var(--mantine-color-dark-7);
+  border-left-color: var(--mantine-color-dark-5);
+}
+
+.uploadContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 60px);
+}
+
+/* IDE-style tab bar */
+.tabBar {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--mantine-color-default-border);
+  padding: 0 var(--mantine-spacing-md);
+}
+
+:global([data-mantine-color-scheme='dark']) .tabBar {
+  border-bottom-color: var(--mantine-color-dark-5);
+}
+
+.tab {
+  all: unset;
+  position: relative;
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--mantine-color-dimmed);
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+
+.tab::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: var(--mantine-spacing-sm);
+  right: var(--mantine-spacing-sm);
+  height: 2px;
+  background-color: transparent;
+  transition: background-color 150ms ease;
+}
+
+.tab:hover {
+  color: var(--mantine-color-text);
+}
+
+.tab[data-active='true'] {
+  color: var(--mantine-color-primary-4);
+}
+
+.tab[data-active='true']::after {
+  background-color: var(--mantine-color-primary-4);
+}

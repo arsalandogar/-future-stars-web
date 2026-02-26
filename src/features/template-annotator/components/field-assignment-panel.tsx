@@ -1,0 +1,36 @@
+import { ScrollArea, Stack, Text } from '@mantine/core';
+
+import { useAnnotatorStore } from '../stores/annotator-store';
+import { FieldPicker } from './field-picker';
+
+export function FieldAssignmentPanel() {
+  const selectedNodeId = useAnnotatorStore((s) => s.selectedNodeId);
+  const nodeIndex = useAnnotatorStore((s) => s.nodeIndex);
+
+  const meta = selectedNodeId ? nodeIndex.get(selectedNodeId) : undefined;
+
+  return (
+    <ScrollArea h="100%">
+      <Stack gap="md" p="md">
+        {!meta ? (
+          <Text size="sm" c="dimmed" ta="center" py="xl">
+            Select an element to assign fields
+          </Text>
+        ) : (
+          <>
+            <div>
+              <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
+                Selected Element
+              </Text>
+              <Text size="sm" fw={500} mt={2}>
+                &lt;{meta.tagName}&gt; {meta.label}
+              </Text>
+            </div>
+
+            <FieldPicker nodeMeta={meta} />
+          </>
+        )}
+      </Stack>
+    </ScrollArea>
+  );
+}

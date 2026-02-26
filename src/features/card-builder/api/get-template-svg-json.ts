@@ -1,7 +1,7 @@
 import { api } from '@/lib/api-client';
 import { createQuery } from '@/lib/react-query';
 
-import type { SvgJsonNode } from '../types';
+import type { SvgJsonNode } from '@/types/svg';
 
 export const useTemplateSvgJson = createQuery({
   queryKey: ['card-builder', 'template-svg-json'],

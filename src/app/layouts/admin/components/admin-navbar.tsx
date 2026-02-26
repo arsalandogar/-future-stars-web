@@ -50,6 +50,7 @@ const menuItems: NavItem[] = [
     label: 'Templates',
     icon: Layers2,
     children: [
+      { label: 'Annotator', href: '/admin/templates/annotator' },
       { label: 'Tags', href: '/admin/tags' },
       { label: 'Template Types', href: '/admin/template-types' },
       { label: 'Templates', href: '/admin/templates' },
@@ -122,7 +123,7 @@ function NavSection({ items, collapsed, onItemClick }: NavSectionProps) {
               key={child.href}
               component={Link}
               to={child.href}
-              activeOptions={{ exact: false }}
+              activeOptions={{ exact: true, includeSearch: false }}
               activeProps={{ 'aria-current': 'page' }}
               label={child.label}
               onClick={onItemClick}
@@ -145,7 +146,7 @@ function NavSection({ items, collapsed, onItemClick }: NavSectionProps) {
           <Menu.Dropdown>
             <Menu.Label>{item.label}</Menu.Label>
             {item.children.map((child) => {
-              const isActive = child.href && pathname.startsWith(child.href);
+              const isActive = child.href && pathname === child.href;
               return (
                 <Menu.Item
                   key={child.href ?? child.label}

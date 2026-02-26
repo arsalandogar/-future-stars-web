@@ -1,7 +1,7 @@
 import { AspectRatio, Button, Loader, Text } from '@mantine/core';
 import { ArrowRight, Plus, RefreshCw } from 'lucide-react';
 
-import type { SvgJsonNode } from '../types';
+import type { SvgJsonNode } from '@/types/svg';
 
 import { SvgRenderer } from './svg-renderer';
 import styles from './card-preview.module.css';

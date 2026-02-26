@@ -10,31 +10,18 @@ export const EDITABLE_FIELDS = {
   number: { type: 'text', label: 'Number' },
 
   // Images
-  imageOne: { type: 'image', label: 'Photo 1' },
-  imageTwo: { type: 'image', label: 'Photo 2' },
-  imageThree: { type: 'image', label: 'Photo 3' },
+  imageOne: { type: 'image', label: 'Image 1' },
+  imageTwo: { type: 'image', label: 'Image 2' },
+  imageThree: { type: 'image', label: 'Image 3' },
+  imageFour: { type: 'image', label: 'Image 4' },
+  imageFive: { type: 'image', label: 'Image 5' },
 
   // Colors
-  colorOne: { type: 'color', label: 'Primary Color' },
-  colorTwo: { type: 'color', label: 'Secondary Color' },
-  colorThree: { type: 'color', label: 'Accent Color' },
-
-  // Text on Colors
-  textOnColorOne: {
-    type: 'color',
-    label: 'Primary Text Color',
-    pairedWith: 'colorOne',
-  },
-  textOnColorTwo: {
-    type: 'color',
-    label: 'Secondary Text Color',
-    pairedWith: 'colorTwo',
-  },
-  textOnColorThree: {
-    type: 'color',
-    label: 'Accent Text Color',
-    pairedWith: 'colorThree',
-  },
+  colorOne: { type: 'color', label: 'Color 1' },
+  colorTwo: { type: 'color', label: 'Color 2' },
+  colorThree: { type: 'color', label: 'Color 3' },
+  colorFour: { type: 'color', label: 'Color 4' },
+  colorFive: { type: 'color', label: 'Color 5' },
 } as const;
 
 export type EditableFieldId = keyof typeof EDITABLE_FIELDS;
