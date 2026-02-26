@@ -2,11 +2,11 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 
 import { Head } from '@/components/seo/head';
 
-import { useCustomerFeaturedItems } from '../api/get-featured-items';
+import { customerFeaturedItemsQuery } from '../api/get-featured-items';
 import { FeaturedCarousel } from '../components/featured-carousel';
 
 export function HomePage() {
-  const { data } = useSuspenseQuery(useCustomerFeaturedItems.getOptions());
+  const { data } = useSuspenseQuery(customerFeaturedItemsQuery.getOptions());
 
   return (
     <>

@@ -7,8 +7,9 @@ interface PrintBatchResponse {
   data: PrintBatch;
 }
 
-export const usePrintBatch = createQuery({
+export const printBatchQuery = createQuery({
   queryKey: ['admin', 'print-batches', 'detail'],
   fetcher: (batchId: number): Promise<PrintBatchResponse> =>
     api.get(`admin/print-batches/${batchId}`),
 });
+export const usePrintBatch = printBatchQuery;

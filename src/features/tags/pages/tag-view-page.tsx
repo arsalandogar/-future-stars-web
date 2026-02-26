@@ -7,7 +7,7 @@ import { usePageHeader } from '@/hooks/use-page-header';
 import { openDeleteModal } from '@/utils/open-delete-modal';
 
 import { useDeleteTag } from '../api/delete-tag';
-import { useTag } from '../api/get-tag';
+import { tagQuery } from '../api/get-tag';
 import { TagModal } from '../components/tag-modal';
 import { TagView } from '../components/tag-view';
 
@@ -19,7 +19,7 @@ export function TagViewPage({ id }: TagViewPageProps) {
   const navigate = useNavigate();
   const [opened, { open, close }] = useDisclosure(false);
 
-  const { data: tagResponse } = useSuspenseQuery(useTag.getOptions(id));
+  const { data: tagResponse } = useSuspenseQuery(tagQuery.getOptions(id));
   const tag = tagResponse.data;
 
   const deleteTag = useDeleteTag();

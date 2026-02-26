@@ -4,7 +4,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { Head } from '@/components/seo/head';
 import { usePageHeader } from '@/hooks/use-page-header';
 
-import { useTemplate } from '../api/get-template';
+import { templateQuery } from '../api/get-template';
 import { useUpdateTemplate } from '../api/update-template';
 import { TemplateForm } from '../components/template-form';
 import type { TemplateFormValues } from '../types';
@@ -18,7 +18,7 @@ export function TemplateEditPage({ id }: TemplateEditPageProps) {
   const navigate = useNavigate();
 
   const { data: templateResponse } = useSuspenseQuery(
-    useTemplate.getOptions(id)
+    templateQuery.getOptions(id)
   );
   const template = templateResponse.data;
 

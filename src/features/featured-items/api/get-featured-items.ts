@@ -5,10 +5,11 @@ import type {
   FeaturedItemsListResponse,
 } from '../types';
 
-export const useFeaturedItems = createQuery({
+export const featuredItemsQuery = createQuery({
   queryKey: ['admin', 'featured-items'],
   fetcher: (
     params: FeaturedItemsListParams
   ): Promise<FeaturedItemsListResponse> =>
     api.get('featured-items', { params }),
 });
+export const useFeaturedItems = featuredItemsQuery;

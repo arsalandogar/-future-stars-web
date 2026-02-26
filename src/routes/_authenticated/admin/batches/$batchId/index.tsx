@@ -1,11 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { BatchDetailPage, usePrintBatch } from '@/features/print-batches';
+import { BatchDetailPage, printBatchQuery } from '@/features/print-batches';
 
 export const Route = createFileRoute('/_authenticated/admin/batches/$batchId/')(
   {
     loader: ({ context: { queryClient }, params: { batchId } }) =>
-      queryClient.ensureQueryData(usePrintBatch.getOptions(Number(batchId))),
+      queryClient.ensureQueryData(printBatchQuery.getOptions(Number(batchId))),
     component: RouteComponent,
   }
 );

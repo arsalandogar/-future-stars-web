@@ -9,7 +9,7 @@ export { LegalDocumentList } from './components/legal-document-list';
 export { PublicLegalPage } from './components/public-legal-page';
 
 // API
-export { useLegalDocument } from './api/get-legal-document';
+export { legalDocumentQuery, useLegalDocument } from './api/get-legal-document';
 export { usePublicLegalDocument } from './api/get-public-legal-document';
 
 // Types

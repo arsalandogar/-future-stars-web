@@ -31,7 +31,7 @@ import { usePageHeader } from '@/hooks/use-page-header';
 import { formatCurrency } from '@/utils/currency';
 import { formatDate, formatDateTime } from '@/utils/date';
 
-import { usePrintBatch } from '../api/get-print-batch';
+import { printBatchQuery } from '../api/get-print-batch';
 import { useRemoveOrdersFromBatch } from '../api/remove-orders-from-batch';
 import { BATCH_STATUS_COLORS } from '../constants';
 import { BatchStatusModal } from '../components/batch-status-modal';
@@ -56,7 +56,7 @@ export function BatchDetailPage({ batchId }: BatchDetailPageProps) {
     useDisclosure(false);
 
   const { data: batchResponse } = useSuspenseQuery(
-    usePrintBatch.getOptions(batchId)
+    printBatchQuery.getOptions(batchId)
   );
   const batch = batchResponse.data;
   const removeFromBatch = useRemoveOrdersFromBatch();

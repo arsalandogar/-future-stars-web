@@ -7,8 +7,9 @@ export interface CustomerFeaturedItemsResponse {
   data: FeaturedItem[];
 }
 
-export const useCustomerFeaturedItems = createQuery({
+export const customerFeaturedItemsQuery = createQuery({
   queryKey: ['customer', 'featured-items'],
   fetcher: (): Promise<CustomerFeaturedItemsResponse> =>
     api.get('featured-items'),
 });
+export const useCustomerFeaturedItems = customerFeaturedItemsQuery;

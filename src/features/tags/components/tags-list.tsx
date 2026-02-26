@@ -23,7 +23,7 @@ import { ListingShell, useListingContext } from '@/components/ui/listing';
 import { usePageHeader } from '@/hooks/use-page-header';
 import type { Tag } from '@/types';
 
-import { useTags } from '../api/get-tags';
+import { tagsQuery, useTags } from '../api/get-tags';
 import { useReorderTags } from '../api/reorder-tags';
 import type { TagsListResponse } from '../types';
 
@@ -68,7 +68,7 @@ export function TagsList() {
     open();
   };
 
-  const queryKey = useTags.getKey({ search: search || undefined });
+  const queryKey = tagsQuery.getKey({ search: search || undefined });
 
   const queryResult = useTags({
     variables: {

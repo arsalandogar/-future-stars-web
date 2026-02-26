@@ -7,7 +7,7 @@ import { openDeleteModal } from '@/utils/open-delete-modal';
 import { usePageHeader } from '@/hooks/use-page-header';
 
 import { useDeleteLegalDocument } from '../api/delete-legal-document';
-import { useLegalDocument } from '../api/get-legal-document';
+import { legalDocumentQuery } from '../api/get-legal-document';
 import { usePublishLegalDocument } from '../api/publish-legal-document';
 import { LegalDocumentView } from '../components/legal-document-view';
 import { PublishModal } from '../components/publish-modal';
@@ -25,7 +25,7 @@ export function LegalViewPage({ type, id }: LegalViewPageProps) {
   const basePath = `/admin/${type}`;
 
   const { data: documentResponse } = useSuspenseQuery(
-    useLegalDocument.getOptions(id)
+    legalDocumentQuery.getOptions(id)
   );
   const document = documentResponse.data;
 

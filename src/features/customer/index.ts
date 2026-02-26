@@ -1,5 +1,8 @@
 export { useCartItems } from './api/get-cart-items';
-export { useCustomerFeaturedItems } from './api/get-featured-items';
+export {
+  customerFeaturedItemsQuery,
+  useCustomerFeaturedItems,
+} from './api/get-featured-items';
 export {
   useUserCards,
   USER_CARDS_DEFAULT_LIMIT,

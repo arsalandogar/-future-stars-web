@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { TagViewPage, useTag } from '@/features/tags';
+import { TagViewPage, tagQuery } from '@/features/tags';
 
 export const Route = createFileRoute('/_authenticated/admin/tags/$id/')({
   loader: ({ context: { queryClient }, params: { id } }) =>
-    queryClient.ensureQueryData(useTag.getOptions(Number(id))),
+    queryClient.ensureQueryData(tagQuery.getOptions(Number(id))),
   component: RouteComponent,
 });
 

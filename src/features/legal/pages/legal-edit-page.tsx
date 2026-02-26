@@ -5,7 +5,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { Head } from '@/components/seo/head';
 import { usePageHeader } from '@/hooks/use-page-header';
 
-import { useLegalDocument } from '../api/get-legal-document';
+import { legalDocumentQuery } from '../api/get-legal-document';
 import { useUpdateLegalDocument } from '../api/update-legal-document';
 import { LegalDocumentForm } from '../components/legal-document-form';
 import { getLegalDocumentConfig, type LegalDocumentType } from '../types';
@@ -22,7 +22,7 @@ export function LegalEditPage({ type, id }: LegalEditPageProps) {
   const basePath = `/admin/${type}`;
 
   const { data: documentResponse } = useSuspenseQuery(
-    useLegalDocument.getOptions(id)
+    legalDocumentQuery.getOptions(id)
   );
   const document = documentResponse.data;
 

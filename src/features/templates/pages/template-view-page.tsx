@@ -6,7 +6,7 @@ import { openDeleteModal } from '@/utils/open-delete-modal';
 import { usePageHeader } from '@/hooks/use-page-header';
 
 import { useDeleteTemplate } from '../api/delete-template';
-import { useTemplate } from '../api/get-template';
+import { templateQuery } from '../api/get-template';
 import { TemplateView } from '../components/template-view';
 
 export interface TemplateViewPageProps {
@@ -17,7 +17,7 @@ export function TemplateViewPage({ id }: TemplateViewPageProps) {
   const navigate = useNavigate();
 
   const { data: templateResponse } = useSuspenseQuery(
-    useTemplate.getOptions(id)
+    templateQuery.getOptions(id)
   );
   const template = templateResponse.data;
 

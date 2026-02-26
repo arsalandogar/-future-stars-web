@@ -7,7 +7,10 @@ import { type Column } from '@/components/ui/data-table';
 import { ListingShell, useListingContext } from '@/components/ui/listing';
 import { usePageHeader } from '@/hooks/use-page-header';
 
-import { useFeaturedItems } from '../api/get-featured-items';
+import {
+  featuredItemsQuery,
+  useFeaturedItems,
+} from '../api/get-featured-items';
 import type { FeaturedItem, FeaturedItemsListResponse } from '../types';
 
 import { SortableFeaturedItemRow } from './sortable-featured-item-row';
@@ -80,7 +83,7 @@ export function FeaturedItemsList() {
 
   const featuredItems = queryResult.data?.data ?? [];
 
-  const queryKey = useFeaturedItems.getKey({ search: search || undefined });
+  const queryKey = featuredItemsQuery.getKey({ search: search || undefined });
   const isDragDisabled = Boolean(search);
 
   const handleDragEnd = (event: DragEndEvent) => {

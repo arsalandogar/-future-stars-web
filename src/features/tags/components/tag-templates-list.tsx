@@ -16,7 +16,7 @@ import {
 import { Paper, Table, Text } from '@mantine/core';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { useTag } from '../api/get-tag';
+import { tagQuery } from '../api/get-tag';
 import { useReorderTagTemplates } from '../api/reorder-tag-templates';
 import type {
   TagDetailResponse,
@@ -44,7 +44,7 @@ interface TagTemplatesListProps {
 
 export function TagTemplatesList({ tag, templates }: TagTemplatesListProps) {
   const queryClient = useQueryClient();
-  const queryKey = useTag.getKey(tag.id);
+  const queryKey = tagQuery.getKey(tag.id);
   const reorderMutation = useReorderTagTemplates();
 
   const sensors = useSensors(
