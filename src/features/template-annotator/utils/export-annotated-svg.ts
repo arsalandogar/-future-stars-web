@@ -38,9 +38,16 @@ export function buildAnnotatedSvg(
       const nodeAssignments = assignmentsByNode.get(nodeId);
       if (nodeAssignments) {
         for (const assignment of nodeAssignments) {
-          node.attributes['data-field'] = assignment.fieldId;
-
           const field = EDITABLE_FIELDS[assignment.fieldId];
+
+          const attrKey =
+            field.type === 'color'
+              ? 'data-color-field'
+              : field.type === 'image'
+                ? 'data-image-field'
+                : 'data-text-field';
+          node.attributes[attrKey] = assignment.fieldId;
+
           if (field.type === 'color' && assignment.colorTarget) {
             node.attributes['data-color-target'] = assignment.colorTarget;
           }

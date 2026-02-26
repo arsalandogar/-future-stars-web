@@ -2,7 +2,9 @@ import { AspectRatio, Button, Loader, Text } from '@mantine/core';
 import { ArrowRight, Plus, RefreshCw } from 'lucide-react';
 
 import type { SvgJsonNode } from '@/types/svg';
+import type { SvgRenderOptions } from '@/components/svg-renderer/svg-renderer';
 
+import { useCardEditorStore } from '../stores/card-editor-store';
 import { SvgRenderer } from './svg-renderer';
 import styles from './card-preview.module.css';
 
@@ -12,6 +14,7 @@ interface CardPreviewProps {
   isError: boolean;
   onRetry: () => void;
   hasTemplate: boolean;
+  options?: SvgRenderOptions;
 }
 
 type CardContentProps = Omit<CardPreviewProps, 'hasTemplate'>;
@@ -21,7 +24,13 @@ function CardContent({
   isLoading,
   isError,
   onRetry,
+  options,
 }: CardContentProps) {
+  // Used as key on SvgRenderer to force React to rebuild the SVG tree
+  // after in-place text node mutations (React Compiler skips re-render
+  // when only the interior of an unchanged object reference is mutated).
+  const revision = useCardEditorStore((s) => s.revision);
+
   if (isError) {
     return (
       <div className={styles.placeholder}>
@@ -48,7 +57,14 @@ function CardContent({
     );
   }
 
-  return <SvgRenderer node={svgNode} className={styles.svg} />;
+  return (
+    <SvgRenderer
+      key={revision}
+      node={svgNode}
+      className={styles.svg}
+      options={options}
+    />
+  );
 }
 
 export function CardPreview({
@@ -57,6 +73,7 @@ export function CardPreview({
   isError,
   onRetry,
   hasTemplate,
+  options,
 }: CardPreviewProps) {
   const frameClass = hasTemplate ? styles.frameless : '';
 
@@ -71,6 +88,7 @@ export function CardPreview({
                 isLoading={isLoading}
                 isError={isError}
                 onRetry={onRetry}
+                options={options}
               />
             ) : (
               <div className={styles.placeholder}>
