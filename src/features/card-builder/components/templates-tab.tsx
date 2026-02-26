@@ -93,7 +93,8 @@ function TemplatesGridContent({
 export function TemplatesTab({ tags, isLoading }: TemplatesTabProps) {
   const { templateId } = routeApi.useSearch();
   const navigate = routeApi.useNavigate();
-  const { activeTagFilter, setActiveTagFilter } = useCardBuilderStore();
+  const activeTagFilter = useCardBuilderStore((s) => s.activeTagFilter);
+  const setActiveTagFilter = useCardBuilderStore((s) => s.setActiveTagFilter);
 
   const selectTemplate = (id: number) => {
     void navigate({

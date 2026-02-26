@@ -14,7 +14,7 @@ interface ContentFieldProps {
 export function ContentField({ field }: ContentFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [focused, setFocused] = useState(false);
-  const edits = useCardEditorStore((s) => s.edits);
+  const editedValue = useCardEditorStore((s) => s.edits[field.fieldId]);
   const updateTextField = useCardEditorStore((s) => s.updateTextField);
   const resetField = useCardEditorStore((s) => s.resetField);
   const isFocusTarget = useCardEditorStore(
@@ -29,8 +29,8 @@ export function ContentField({ field }: ContentFieldProps) {
     }
   }, [isFocusTarget, setFocusedFieldId]);
 
-  const currentValue = edits[field.fieldId] ?? field.originalValue;
-  const isEdited = field.fieldId in edits;
+  const currentValue = editedValue ?? field.originalValue;
+  const isEdited = editedValue !== undefined;
 
   return (
     <div className={styles.field} data-focused={focused || undefined}>

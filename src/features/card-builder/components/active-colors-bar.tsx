@@ -22,12 +22,13 @@ function normalizeHex(raw: string): string | null {
 }
 
 interface ColorCircleProps {
-  color: string;
   fieldId: EditableFieldId;
+  originalColor: string;
   label: string;
 }
 
-function ColorCircle({ color, fieldId, label }: ColorCircleProps) {
+function ColorCircle({ fieldId, originalColor, label }: ColorCircleProps) {
+  const color = useCardEditorStore((s) => s.edits[fieldId] ?? originalColor);
   const [opened, setOpened] = useState(false);
   const [hexInput, setHexInput] = useState(color);
   const updateColorField = useCardEditorStore((s) => s.updateColorField);
@@ -116,7 +117,6 @@ function ColorCircle({ color, fieldId, label }: ColorCircleProps) {
 
 export function ActiveColorsBar() {
   const editableColorFields = useCardEditorStore((s) => s.editableColorFields);
-  const edits = useCardEditorStore((s) => s.edits);
   const appliedPresetId = useCardEditorStore((s) => s.appliedPresetId);
   const swapColors = useCardEditorStore((s) => s.swapColors);
   const resetToPreset = useCardEditorStore((s) => s.resetToPreset);
@@ -143,34 +143,28 @@ export function ActiveColorsBar() {
   return (
     <div className={styles.bar}>
       <div className={styles.colors}>
-        {editableColorFields.map((field, i) => {
-          const currentColor = edits[field.fieldId] ?? field.originalValue;
-          return (
-            <Fragment key={field.fieldId}>
-              {i > 0 && (
-                <button
-                  type="button"
-                  className={styles.swapButton}
-                  onClick={() =>
-                    swapColors(
-                      editableColorFields[i - 1].fieldId,
-                      field.fieldId
-                    )
-                  }
-                  aria-label={`Swap ${editableColorFields[i - 1].label} and ${field.label} colors`}
-                  title="Swap colors"
-                >
-                  <ArrowLeftRight size={14} />
-                </button>
-              )}
-              <ColorCircle
-                color={currentColor}
-                fieldId={field.fieldId}
-                label={field.label}
-              />
-            </Fragment>
-          );
-        })}
+        {editableColorFields.map((field, i) => (
+          <Fragment key={field.fieldId}>
+            {i > 0 && (
+              <button
+                type="button"
+                className={styles.swapButton}
+                onClick={() =>
+                  swapColors(editableColorFields[i - 1].fieldId, field.fieldId)
+                }
+                aria-label={`Swap ${editableColorFields[i - 1].label} and ${field.label} colors`}
+                title="Swap colors"
+              >
+                <ArrowLeftRight size={14} />
+              </button>
+            )}
+            <ColorCircle
+              fieldId={field.fieldId}
+              originalColor={field.originalValue}
+              label={field.label}
+            />
+          </Fragment>
+        ))}
       </div>
 
       <div className={styles.actions}>

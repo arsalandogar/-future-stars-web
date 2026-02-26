@@ -63,11 +63,12 @@ function EmptyState({ message }: { message: string }) {
 
 function OriginalSwatch() {
   const editableColorFields = useCardEditorStore((s) => s.editableColorFields);
-  const edits = useCardEditorStore((s) => s.edits);
+  const isOriginal = useCardEditorStore((s) =>
+    s.editableColorFields.every((f) => s.edits[f.fieldId] == null)
+  );
   const resetAllColors = useCardEditorStore((s) => s.resetAllColors);
 
   const originalColors = editableColorFields.map((f) => f.originalValue);
-  const isOriginal = editableColorFields.every((f) => edits[f.fieldId] == null);
 
   return (
     <button
