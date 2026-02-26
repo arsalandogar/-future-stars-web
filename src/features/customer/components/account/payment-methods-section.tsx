@@ -45,7 +45,6 @@ export function PaymentMethodsSection() {
     { open: openDeleteModal, close: closeDeleteModal },
   ] = useDisclosure(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [isLoadingSetupIntent, setIsLoadingSetupIntent] = useState(false);
   const [methodToDelete, setMethodToDelete] = useState<PaymentMethod | null>(
     null
   );
@@ -57,13 +56,9 @@ export function PaymentMethodsSection() {
   // Fetch SetupIntent when modal opens
   useEffect(() => {
     if (modalOpened && !clientSecret) {
-      setIsLoadingSetupIntent(true);
       createSetupIntent.mutate(undefined, {
         onSuccess: (response) => {
           setClientSecret(response.data.setupIntentSecret);
-        },
-        onSettled: () => {
-          setIsLoadingSetupIntent(false);
         },
       });
     }
@@ -180,7 +175,7 @@ export function PaymentMethodsSection() {
           header: paymentModalStyles.header,
         }}
       >
-        {isLoadingSetupIntent ? (
+        {createSetupIntent.isPending ? (
           <div
             style={{
               display: 'flex',
