@@ -49,7 +49,10 @@ export function isNonInteractive(node: SvgJsonNode): boolean {
   return NON_INTERACTIVE_TAGS.has(node.name);
 }
 
-function getStyleProp(node: SvgJsonNode, prop: string): string | undefined {
+export function getStyleProp(
+  node: SvgJsonNode,
+  prop: string
+): string | undefined {
   if (node.attributes.style) {
     const parsed = parseStyleString(node.attributes.style);
     const value = (parsed as Record<string, string>)[prop];

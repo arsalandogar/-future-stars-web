@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ClipboardCheck } from 'lucide-react';
@@ -9,11 +9,13 @@ import { useAnnotatorStore } from '../stores/annotator-store';
 import { AnnotatorCanvas } from '../components/annotator-canvas';
 import { AnnotatorToolbar } from '../components/annotator-toolbar';
 import { AssignmentSummaryTable } from '../components/assignment-summary-table';
+import { ColorDetectionModal } from '../components/color-detection-modal';
 import { ElementTree } from '../components/element-tree';
 import { ExportModal } from '../components/export-modal';
 import { FieldAssignmentPanel } from '../components/field-assignment-panel';
 import { SvgUploadDropzone } from '../components/svg-upload-dropzone';
 import { ValidationResults } from '../components/validation-results';
+import { extractSvgColors } from '../utils/extract-svg-colors';
 
 import styles from './annotator-page.module.css';
 
@@ -32,10 +34,25 @@ export function AnnotatorPage() {
   });
 
   const svgTree = useAnnotatorStore((s) => s.svgTree);
+  const nodeMap = useAnnotatorStore((s) => s.nodeMap);
   const validate = useAnnotatorStore((s) => s.validate);
   const [exportOpened, { open: openExport, close: closeExport }] =
     useDisclosure(false);
   const [rightTab, setRightTab] = useState<RightPanelTab>('assign');
+
+  // Track which nodeMap the user has dismissed the modal for (reference identity)
+  const [dismissedForMap, setDismissedForMap] = useState<typeof nodeMap | null>(
+    null
+  );
+
+  const detectedColors = useMemo(() => extractSvgColors(nodeMap), [nodeMap]);
+
+  const colorModalOpened =
+    detectedColors.length > 0 && dismissedForMap !== nodeMap;
+
+  function closeColorModal() {
+    setDismissedForMap(nodeMap);
+  }
 
   if (!svgTree) {
     return (
@@ -105,6 +122,13 @@ export function AnnotatorPage() {
       </div>
 
       <ExportModal opened={exportOpened} onClose={closeExport} />
+      {detectedColors.length > 0 && (
+        <ColorDetectionModal
+          opened={colorModalOpened}
+          onClose={closeColorModal}
+          detectedColors={detectedColors}
+        />
+      )}
     </>
   );
 }

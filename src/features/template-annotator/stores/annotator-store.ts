@@ -5,6 +5,7 @@ import type { SvgJsonNode } from '@/types/svg';
 import { EDITABLE_FIELDS, type EditableFieldId } from '@/features/templates';
 
 import type {
+  ColorOccurrence,
   ColorTarget,
   FieldAssignment,
   NodeMeta,
@@ -62,6 +63,9 @@ interface AnnotatorState {
     nodeId: string,
     fieldId: EditableFieldId,
     maxWidth: number
+  ) => void;
+  bulkAssignColors: (
+    mappings: { fieldId: EditableFieldId; occurrences: ColorOccurrence[] }[]
   ) => void;
   validate: () => void;
   undo: () => void;
@@ -205,6 +209,39 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
       a.nodeId === nodeId && a.fieldId === fieldId ? { ...a, maxWidth } : a
     );
     set({ assignments: newAssignments });
+  },
+
+  bulkAssignColors: (mappings) => {
+    const { assignments, undoStack } = get();
+
+    const affectedNodeIds = new Set<string>();
+    const newAssignments: FieldAssignment[] = [];
+
+    for (const mapping of mappings) {
+      for (const occ of mapping.occurrences) {
+        affectedNodeIds.add(occ.nodeId);
+        newAssignments.push({
+          nodeId: occ.nodeId,
+          fieldId: mapping.fieldId,
+          colorTarget: occ.colorTarget,
+        });
+      }
+    }
+
+    // Remove existing color assignments on affected nodes, then append new ones
+    const preserved = assignments.filter(
+      (a) =>
+        !(
+          affectedNodeIds.has(a.nodeId) &&
+          EDITABLE_FIELDS[a.fieldId].type === 'color'
+        )
+    );
+
+    set({
+      assignments: [...preserved, ...newAssignments],
+      undoStack: [...undoStack.slice(-(MAX_UNDO - 1)), assignments],
+      redoStack: [],
+    });
   },
 
   validate: () => {

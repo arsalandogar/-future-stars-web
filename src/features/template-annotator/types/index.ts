@@ -22,6 +22,16 @@ export interface NodeMeta {
   depth: number;
 }
 
+export interface ColorOccurrence {
+  nodeId: string;
+  colorTarget: ColorTarget;
+}
+
+export interface DetectedColor {
+  hex: string; // normalized 6-digit lowercase hex
+  occurrences: ColorOccurrence[];
+}
+
 export type ValidationSeverity = 'error' | 'warning';
 
 export interface ValidationResult {
