@@ -43,6 +43,7 @@ export function ContentField({ field }: ContentFieldProps) {
         className={styles.input}
         type="text"
         placeholder={field.label}
+        aria-label={field.label}
         value={currentValue}
         onChange={(e) => updateTextField(field.fieldId, e.target.value)}
         onFocus={() => setFocused(true)}

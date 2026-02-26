@@ -15,6 +15,8 @@
   min-height: 0;
   overflow-y: auto;
   padding-right: var(--mantine-spacing-xs);
+  scrollbar-width: thin;
+  scrollbar-color: var(--mantine-color-dark-4) transparent;
 
   &::-webkit-scrollbar {
     width: 6px;

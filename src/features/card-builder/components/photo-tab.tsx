@@ -1,6 +1,6 @@
 import { Text } from '@mantine/core';
 
-import styles from './templates-tab.module.css';
+import styles from './photo-tab.module.css';
 
 export function PhotoTab() {
   return (

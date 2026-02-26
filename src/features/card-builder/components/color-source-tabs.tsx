@@ -74,14 +74,15 @@ function OriginalSwatch() {
       type="button"
       className={swatchStyles.wrapper}
       onClick={resetAllColors}
+      aria-label="Reset to original colors"
     >
       <div
         className={swatchStyles.swatch}
         data-selected={isOriginal || undefined}
       >
-        {originalColors.map((color) => (
+        {originalColors.map((color, i) => (
           <div
-            key={color}
+            key={i}
             className={swatchStyles.band}
             style={{ backgroundColor: color }}
           />
@@ -148,6 +149,8 @@ function TeamContent() {
             className={styles.leaguePill}
             data-active={selectedLeagueId === league.id || undefined}
             onClick={() => setActiveLeagueId(league.id)}
+            aria-label={`Filter by ${league.label}`}
+            aria-pressed={selectedLeagueId === league.id}
           >
             {league.label}
           </button>
@@ -182,7 +185,10 @@ function MyColorsContent() {
 }
 
 export function ColorSourceTabs() {
-  const { activeColorSubTab, setActiveColorSubTab } = useCardBuilderStore();
+  const activeColorSubTab = useCardBuilderStore((s) => s.activeColorSubTab);
+  const setActiveColorSubTab = useCardBuilderStore(
+    (s) => s.setActiveColorSubTab
+  );
 
   return (
     <div className={styles.wrapper}>

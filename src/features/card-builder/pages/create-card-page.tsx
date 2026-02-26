@@ -85,6 +85,10 @@ export function CreateCardPage() {
   }, [resetBuilder, resetEditor]);
 
   const handleRetry = useCallback(() => void refetch(), [refetch]);
+  const handleSelectTemplate = useCallback(
+    () => setActiveTab('templates'),
+    [setActiveTab]
+  );
 
   const hasTemplate = templateId != null;
 
@@ -102,6 +106,7 @@ export function CreateCardPage() {
               isError={isError}
               onRetry={handleRetry}
               hasTemplate={hasTemplate}
+              onSelectTemplate={handleSelectTemplate}
               options={renderOptions}
             />
           </div>

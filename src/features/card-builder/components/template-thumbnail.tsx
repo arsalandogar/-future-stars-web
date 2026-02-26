@@ -25,6 +25,7 @@ export function TemplateThumbnail({
       onClick={onClick}
       onPointerEnter={onPrefetch}
       onFocus={onPrefetch}
+      aria-label={`Select ${label} template`}
     >
       <AspectRatio ratio={2.5 / 3.5}>
         <img

@@ -27,7 +27,8 @@ export function BuilderTabsPanel({
   tags,
   isLoadingTemplates,
 }: BuilderTabsPanelProps) {
-  const { activeTab, setActiveTab } = useCardBuilderStore();
+  const activeTab = useCardBuilderStore((s) => s.activeTab);
+  const setActiveTab = useCardBuilderStore((s) => s.setActiveTab);
 
   return (
     <div className={styles.panel}>

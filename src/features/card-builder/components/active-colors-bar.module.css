@@ -77,6 +77,7 @@
     color: #ff6b6b;
   }
 
+  &:disabled,
   &[data-disabled] {
     opacity: 0.3;
     cursor: default;

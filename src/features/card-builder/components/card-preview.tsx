@@ -14,6 +14,7 @@ interface CardPreviewProps {
   isError: boolean;
   onRetry: () => void;
   hasTemplate: boolean;
+  onSelectTemplate?: () => void;
   options?: SvgRenderOptions;
 }
 
@@ -73,6 +74,7 @@ export function CardPreview({
   isError,
   onRetry,
   hasTemplate,
+  onSelectTemplate,
   options,
 }: CardPreviewProps) {
   const frameClass = hasTemplate ? styles.frameless : '';
@@ -91,8 +93,17 @@ export function CardPreview({
                 options={options}
               />
             ) : (
-              <div className={styles.placeholder}>
-                <Plus size={56} strokeWidth={1.5} color="#3a4258" />
+              <div
+                className={styles.placeholder}
+                role="img"
+                aria-label="No template selected"
+              >
+                <Plus
+                  size={56}
+                  strokeWidth={1.5}
+                  color="#3a4258"
+                  aria-hidden="true"
+                />
               </div>
             )}
           </AspectRatio>
@@ -105,6 +116,7 @@ export function CardPreview({
           size="md"
           radius="xl"
           rightSection={<ArrowRight size={18} />}
+          onClick={onSelectTemplate}
         >
           Select a Template to start
         </Button>

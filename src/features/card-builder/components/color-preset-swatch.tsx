@@ -22,6 +22,7 @@ export function ColorPresetSwatch({
       type="button"
       className={styles.wrapper}
       onClick={() => applyColorPreset(preset.colors, preset.id)}
+      aria-label={`Apply ${preset.name} colors`}
     >
       <div className={styles.swatch} data-selected={selected || undefined}>
         {preset.colors.map((color, i) => (

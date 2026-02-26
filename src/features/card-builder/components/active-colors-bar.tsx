@@ -24,9 +24,10 @@ function normalizeHex(raw: string): string | null {
 interface ColorCircleProps {
   color: string;
   fieldId: EditableFieldId;
+  label: string;
 }
 
-function ColorCircle({ color, fieldId }: ColorCircleProps) {
+function ColorCircle({ color, fieldId, label }: ColorCircleProps) {
   const [opened, setOpened] = useState(false);
   const [hexInput, setHexInput] = useState(color);
   const updateColorField = useCardEditorStore((s) => s.updateColorField);
@@ -72,6 +73,7 @@ function ColorCircle({ color, fieldId }: ColorCircleProps) {
           type="button"
           className={styles.colorButton}
           onClick={() => handleOpen(!opened)}
+          aria-label={`Edit ${label} color`}
         >
           <ColorSwatch color={color} size={32} />
         </button>
@@ -155,12 +157,17 @@ export function ActiveColorsBar() {
                       field.fieldId
                     )
                   }
+                  aria-label={`Swap ${editableColorFields[i - 1].label} and ${field.label} colors`}
                   title="Swap colors"
                 >
                   <ArrowLeftRight size={14} />
                 </button>
               )}
-              <ColorCircle color={currentColor} fieldId={field.fieldId} />
+              <ColorCircle
+                color={currentColor}
+                fieldId={field.fieldId}
+                label={field.label}
+              />
             </Fragment>
           );
         })}
@@ -171,6 +178,7 @@ export function ActiveColorsBar() {
           type="button"
           className={styles.iconButton}
           onClick={resetToPreset}
+          aria-label="Reset colors"
           title="Reset colors"
         >
           <RotateCcw size={16} />
@@ -180,7 +188,11 @@ export function ActiveColorsBar() {
           className={styles.iconButton}
           data-active={isFavorited || undefined}
           data-disabled={!appliedPresetId || undefined}
+          disabled={!appliedPresetId}
           onClick={handleFavoriteToggle}
+          aria-label={
+            isFavorited ? 'Remove from favorites' : 'Add to favorites'
+          }
           title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
         >
           <Heart size={16} fill={isFavorited ? 'currentColor' : 'none'} />
