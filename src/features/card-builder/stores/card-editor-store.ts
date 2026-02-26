@@ -15,10 +15,12 @@ interface CardEditorState {
   editableFields: EditableTextField[];
   edits: Partial<Record<EditableFieldId, string>>;
   revision: number;
+  focusedFieldId: EditableFieldId | null;
 
   initializeFromSvg: (svgNode: SvgJsonNode) => void;
   updateTextField: (fieldId: EditableFieldId, value: string) => void;
   resetField: (fieldId: EditableFieldId) => void;
+  setFocusedFieldId: (fieldId: EditableFieldId | null) => void;
   reset: () => void;
 }
 
@@ -27,6 +29,7 @@ const initialState = {
   editableFields: [] as EditableTextField[],
   edits: {} as Partial<Record<EditableFieldId, string>>,
   revision: 0,
+  focusedFieldId: null as EditableFieldId | null,
 };
 
 export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
@@ -92,6 +95,8 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
 
     set({ edits: newEdits, revision: revision + 1 });
   },
+
+  setFocusedFieldId: (fieldId) => set({ focusedFieldId: fieldId }),
 
   reset: () => set(initialState),
 }));

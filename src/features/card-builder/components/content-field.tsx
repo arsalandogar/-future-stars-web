@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActionIcon } from '@mantine/core';
 import { X } from 'lucide-react';
 
@@ -12,10 +12,22 @@ interface ContentFieldProps {
 }
 
 export function ContentField({ field }: ContentFieldProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [focused, setFocused] = useState(false);
   const edits = useCardEditorStore((s) => s.edits);
   const updateTextField = useCardEditorStore((s) => s.updateTextField);
   const resetField = useCardEditorStore((s) => s.resetField);
+  const isFocusTarget = useCardEditorStore(
+    (s) => s.focusedFieldId === field.fieldId
+  );
+  const setFocusedFieldId = useCardEditorStore((s) => s.setFocusedFieldId);
+
+  useEffect(() => {
+    if (isFocusTarget) {
+      inputRef.current?.focus();
+      setFocusedFieldId(null);
+    }
+  }, [isFocusTarget, setFocusedFieldId]);
 
   const currentValue = edits[field.fieldId] ?? field.originalValue;
   const isEdited = field.fieldId in edits;
@@ -27,6 +39,7 @@ export function ContentField({ field }: ContentFieldProps) {
         data-filled={currentValue.trim().length > 0 || undefined}
       />
       <input
+        ref={inputRef}
         className={styles.input}
         type="text"
         placeholder={field.label}
