@@ -14,7 +14,10 @@ interface ContentFieldProps {
 export function ContentField({ field }: ContentFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [focused, setFocused] = useState(false);
-  const editedValue = useCardEditorStore((s) => s.edits[field.fieldId]);
+  const editedValue = useCardEditorStore((s) => {
+    const v = s.edits[field.fieldId];
+    return typeof v === 'string' ? v : undefined;
+  });
   const updateTextField = useCardEditorStore((s) => s.updateTextField);
   const resetField = useCardEditorStore((s) => s.resetField);
   const isFocusTarget = useCardEditorStore(

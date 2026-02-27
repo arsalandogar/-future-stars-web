@@ -28,7 +28,10 @@ interface ColorCircleProps {
 }
 
 function ColorCircle({ fieldId, originalColor, label }: ColorCircleProps) {
-  const color = useCardEditorStore((s) => s.edits[fieldId] ?? originalColor);
+  const color = useCardEditorStore((s) => {
+    const v = s.edits[fieldId];
+    return typeof v === 'string' ? v : originalColor;
+  });
   const [opened, setOpened] = useState(false);
   const [hexInput, setHexInput] = useState(color);
   const updateColorField = useCardEditorStore((s) => s.updateColorField);
