@@ -6,8 +6,13 @@
 }
 
 .title {
-  color: var(--mantine-color-white);
   font-weight: 800;
+  font-size: var(--mantine-font-size-xl);
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  color: transparent;
+  background: linear-gradient(135deg, #fff 0%, #a0a8c0 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

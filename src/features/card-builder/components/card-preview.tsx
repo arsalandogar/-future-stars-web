@@ -104,6 +104,9 @@ export function CardPreview({
                   color="#3a4258"
                   aria-hidden="true"
                 />
+                <Text size="xs" c="dark.3">
+                  Choose a template
+                </Text>
               </div>
             )}
           </AspectRatio>

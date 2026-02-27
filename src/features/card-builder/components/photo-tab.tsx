@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Text } from '@mantine/core';
+import { ImageIcon } from 'lucide-react';
 
 import { ContentTabs, type ContentTabItem } from '@/components/ui/content-tabs';
 
@@ -24,8 +24,10 @@ import type { PhotoSubTab } from '../types';
 import { ImageActions } from './image-actions';
 import { ImageFieldsList } from './image-fields-list';
 import { PositionControls } from './position-controls';
+import { TabEmptyState } from './tab-empty-state';
 
-import styles from './photo-tab.module.css';
+import photoStyles from './photo-tab.module.css';
+import styles from './tab-panel.module.css';
 
 const CropModal = lazy(() =>
   import('./crop-modal').then((m) => ({ default: m.CropModal }))
@@ -208,11 +210,10 @@ export function PhotoTab() {
   if (editableImageFields.length === 0) {
     return (
       <div className={styles.container}>
-        <div className={styles.empty}>
-          <Text c="dimmed" ta="center">
-            Select a template to upload photos
-          </Text>
-        </div>
+        <TabEmptyState
+          icon={<ImageIcon size={40} />}
+          message="Select a template to upload photos"
+        />
       </div>
     );
   }
@@ -223,7 +224,7 @@ export function PhotoTab() {
     <div className={styles.container}>
       <ImageFieldsList />
 
-      <div className={styles.subTabs}>
+      <div className={photoStyles.subTabs}>
         <ContentTabs
           items={SUB_TAB_ITEMS}
           activeValue={activePhotoSubTab}
@@ -255,7 +256,7 @@ export function PhotoTab() {
         ref={fileInputRef}
         type="file"
         accept="image/jpeg,image/png,image/webp"
-        className={styles.hiddenInput}
+        className={photoStyles.hiddenInput}
         onChange={handleFileChange}
       />
 

@@ -1,9 +1,11 @@
-import { Text } from '@mantine/core';
+import { Type } from 'lucide-react';
 
 import { useCardEditorStore } from '../stores/card-editor-store';
 import { ContentField } from './content-field';
+import { TabEmptyState } from './tab-empty-state';
 
-import styles from './content-tab.module.css';
+import contentStyles from './content-tab.module.css';
+import styles from './tab-panel.module.css';
 
 export function ContentTab() {
   const editableFields = useCardEditorStore((s) => s.editableFields);
@@ -11,18 +13,17 @@ export function ContentTab() {
   if (editableFields.length === 0) {
     return (
       <div className={styles.container}>
-        <div className={styles.empty}>
-          <Text c="dimmed" ta="center">
-            Select a template to edit content
-          </Text>
-        </div>
+        <TabEmptyState
+          icon={<Type size={40} />}
+          message="Select a template to edit content"
+        />
       </div>
     );
   }
 
   return (
     <div className={styles.container}>
-      <div className={styles.fields}>
+      <div className={contentStyles.fields}>
         {editableFields.map((field) => (
           <ContentField key={field.fieldId} field={field} />
         ))}

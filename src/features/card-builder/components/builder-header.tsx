@@ -1,4 +1,5 @@
 import { Button, Title } from '@mantine/core';
+import { Save } from 'lucide-react';
 
 import { useSaveCard } from '../api/save-card';
 import {
@@ -41,8 +42,9 @@ export function BuilderHeader({ canSave, templateId }: BuilderHeaderProps) {
       </Title>
       <Button
         variant="filled"
-        color="dark.5"
+        color="primary"
         radius="xl"
+        leftSection={<Save size={16} />}
         disabled={!canSave || uploading}
         loading={saveCard.isPending}
         onClick={handleSave}

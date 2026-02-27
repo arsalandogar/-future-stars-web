@@ -21,6 +21,14 @@
   &[data-selected] .thumbnail {
     border-color: var(--mantine-color-primary-4);
   }
+
+  &:not([data-selected]):hover .thumbnail {
+    border-color: var(--mantine-color-dark-3);
+  }
+
+  &:hover .thumbnail img {
+    transform: scale(1.05);
+  }
 }
 
 .thumbnail {
@@ -35,6 +43,10 @@
   align-items: center;
   justify-content: center;
   transition: border-color 150ms ease;
+
+  & img {
+    transition: transform 150ms ease;
+  }
 }
 
 .placeholderIcon {
