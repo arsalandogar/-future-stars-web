@@ -1,4 +1,10 @@
-import { type ComponentProps, useEffect, useRef, useState } from 'react';
+import {
+  type ComponentProps,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { Link } from '@tanstack/react-router';
 
 import styles from './content-tabs.module.css';
@@ -37,7 +43,7 @@ export function ContentTabs({
   const tabRefs = useRef<Map<string, HTMLElement>>(new Map());
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
 
-  useEffect(() => {
+  const updateIndicator = useCallback(() => {
     const activeTab = tabRefs.current.get(activeValue);
     const container = containerRef.current;
     if (activeTab && container) {
@@ -48,7 +54,19 @@ export function ContentTabs({
         width: tabRect.width,
       });
     }
-  }, [activeValue, items]);
+  }, [activeValue]);
+
+  useEffect(() => {
+    updateIndicator();
+  }, [updateIndicator]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const observer = new ResizeObserver(updateIndicator);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [updateIndicator]);
 
   function getTabProps(item: ContentTabItem) {
     return {
