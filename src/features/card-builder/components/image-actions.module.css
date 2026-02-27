@@ -1,0 +1,40 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--mantine-spacing-md);
+}
+
+.actions {
+  display: flex;
+  gap: var(--mantine-spacing-sm);
+}
+
+.actionCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--mantine-spacing-xs);
+  flex: 1;
+  padding: var(--mantine-spacing-md);
+  border: 1px solid #2a3045;
+  border-radius: var(--mantine-radius-md);
+  background: #0d1117;
+  color: var(--mantine-color-gray-4);
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+
+  &:hover:not(:disabled) {
+    background: #1a1f2e;
+    border-color: #3a4055;
+    color: var(--mantine-color-white);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+}

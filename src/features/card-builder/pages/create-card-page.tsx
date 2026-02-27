@@ -12,8 +12,13 @@ import { useTemplateSvgJson } from '../api/get-template-svg-json';
 import { BuilderHeader } from '../components/builder-header';
 import { BuilderTabsPanel } from '../components/builder-tabs-panel';
 import { CardPreview } from '../components/card-preview';
+import {
+  IMAGE_FIELD_ATTR,
+  usePreviewGestures,
+} from '../hooks/use-preview-gestures';
 import { useCardBuilderStore } from '../stores/card-builder-store';
 import { useCardEditorStore } from '../stores/card-editor-store';
+import { useImageUploadStore } from '../stores/image-upload-store';
 
 import styles from './create-card-page.module.css';
 
@@ -23,39 +28,60 @@ export function CreateCardPage() {
   const { templateId } = routeApi.useSearch();
   const resetBuilder = useCardBuilderStore((s) => s.reset);
   const setActiveTab = useCardBuilderStore((s) => s.setActiveTab);
+  const setSelectedImageFieldId = useCardBuilderStore(
+    (s) => s.setSelectedImageFieldId
+  );
   const initializeFromSvg = useCardEditorStore((s) => s.initializeFromSvg);
   const resetEditor = useCardEditorStore((s) => s.reset);
   const setFocusedFieldId = useCardEditorStore((s) => s.setFocusedFieldId);
   const workingCopy = useCardEditorStore((s) => s.workingCopy);
 
+  const { previewRef, wasDragRef } = usePreviewGestures();
+
   const renderOptions = useMemo<SvgRenderOptions>(
     () => ({
       getNodeProps: (node: SvgJsonNode) => {
-        if (node.name !== 'text') return undefined;
-
-        const props: Record<string, unknown> = {};
-
-        const maxWidth = node.attributes['data-max-width'];
-        if (maxWidth) {
-          props.textLength = maxWidth;
-          props.lengthAdjust = 'spacingAndGlyphs';
-        }
-
-        const fieldId = node.attributes['data-text-field'] as
+        const imageFieldId = node.attributes['data-image-field'] as
           | string
           | undefined;
-        if (fieldId) {
-          props.style = { cursor: 'pointer' };
-          props.onClick = () => {
-            setActiveTab('content');
-            setFocusedFieldId(fieldId as EditableFieldId);
+
+        if (imageFieldId) {
+          return {
+            [IMAGE_FIELD_ATTR]: imageFieldId,
+            style: { cursor: 'pointer', touchAction: 'none' },
+            onClick: () => {
+              if (wasDragRef.current) return;
+              setActiveTab('photo');
+              setSelectedImageFieldId(imageFieldId as EditableFieldId);
+            },
           };
         }
 
-        return Object.keys(props).length > 0 ? props : undefined;
+        if (node.name !== 'text') return undefined;
+
+        const maxWidth = node.attributes['data-max-width'];
+        const fieldId = node.attributes['data-text-field'] as
+          | string
+          | undefined;
+
+        if (!maxWidth && !fieldId) return undefined;
+
+        return {
+          ...(maxWidth && {
+            textLength: maxWidth,
+            lengthAdjust: 'spacingAndGlyphs',
+          }),
+          ...(fieldId && {
+            style: { cursor: 'pointer' },
+            onClick: () => {
+              setActiveTab('content');
+              setFocusedFieldId(fieldId as EditableFieldId);
+            },
+          }),
+        };
       },
     }),
-    [setActiveTab, setFocusedFieldId]
+    [setActiveTab, setFocusedFieldId, setSelectedImageFieldId, wasDragRef]
   );
 
   const { data, isLoading: isLoadingTemplates } = useBuilderTemplates();
@@ -81,6 +107,7 @@ export function CreateCardPage() {
     return () => {
       resetBuilder();
       resetEditor();
+      useImageUploadStore.getState().reset();
     };
   }, [resetBuilder, resetEditor]);
 
@@ -99,7 +126,7 @@ export function CreateCardPage() {
         <BuilderHeader canSave={hasTemplate} templateId={templateId} />
 
         <div className={styles.layout}>
-          <div className={styles.preview}>
+          <div ref={previewRef} className={styles.preview}>
             <CardPreview
               svgNode={workingCopy}
               isLoading={hasTemplate && isLoadingSvg}

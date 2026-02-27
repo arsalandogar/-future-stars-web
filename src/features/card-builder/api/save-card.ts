@@ -2,9 +2,11 @@ import { api } from '@/lib/api-client';
 import { createMutation } from '@/lib/react-query';
 import type { Card } from '@/types';
 
+import type { EditValue } from '../stores/card-editor-store';
+
 interface SaveCardParams {
   templateId: number;
-  editsJson: Record<string, string>;
+  editsJson: Record<string, EditValue>;
 }
 
 export const useSaveCard = createMutation({

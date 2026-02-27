@@ -1,7 +1,12 @@
 import { Button, Title } from '@mantine/core';
 
 import { useSaveCard } from '../api/save-card';
-import { useCardEditorStore } from '../stores/card-editor-store';
+import {
+  type EditValue,
+  getEditUrl,
+  useCardEditorStore,
+} from '../stores/card-editor-store';
+import { useImageUploadStore } from '../stores/image-upload-store';
 
 import styles from './builder-header.module.css';
 
@@ -12,11 +17,21 @@ interface BuilderHeaderProps {
 
 export function BuilderHeader({ canSave, templateId }: BuilderHeaderProps) {
   const edits = useCardEditorStore((s) => s.edits);
+  const uploading = useImageUploadStore((s) =>
+    Object.values(s.uploads).some((e) => e.status === 'uploading')
+  );
   const saveCard = useSaveCard();
 
   const handleSave = () => {
     if (!templateId) return;
-    saveCard.mutate({ templateId, editsJson: edits as Record<string, string> });
+
+    const cleanEdits = Object.fromEntries(
+      Object.entries(edits).filter(
+        ([, value]) => value && !getEditUrl(value)?.startsWith('blob:')
+      )
+    ) as Record<string, EditValue>;
+
+    saveCard.mutate({ templateId, editsJson: cleanEdits });
   };
 
   return (
@@ -28,7 +43,7 @@ export function BuilderHeader({ canSave, templateId }: BuilderHeaderProps) {
         variant="filled"
         color="dark.5"
         radius="xl"
-        disabled={!canSave}
+        disabled={!canSave || uploading}
         loading={saveCard.isPending}
         onClick={handleSave}
       >

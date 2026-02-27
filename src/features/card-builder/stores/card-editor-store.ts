@@ -6,19 +6,43 @@ import { cloneWithStableIds } from '@/utils/svg-tree';
 
 import {
   applyColorEdit,
+  applyImageEdit,
   applyTextEdit,
   discoverEditableColorFields,
+  discoverEditableImageFields,
   discoverEditableTextFields,
   type EditableColorField,
+  type EditableImageField,
   type EditableTextField,
 } from '../utils/svg-editable-fields';
 
-type Edits = Partial<Record<EditableFieldId, string>>;
+export interface ImageEdit {
+  url: string;
+  zoom: number;
+  offsetX: number;
+  offsetY: number;
+}
+
+export type EditValue = string | ImageEdit;
+type Edits = Partial<Record<EditableFieldId, EditValue>>;
+
+export function isImageEdit(value: EditValue | undefined): value is ImageEdit {
+  return typeof value === 'object' && value !== null && 'url' in value;
+}
+
+/** Extract the display URL from an edit value (string or ImageEdit). */
+export function getEditUrl(value: EditValue | undefined): string | undefined {
+  if (!value) return undefined;
+  return isImageEdit(value) ? value.url : value;
+}
+
+export const DEFAULT_IMAGE_POSITION = { zoom: 1, offsetX: 0, offsetY: 0 };
 
 interface CardEditorState {
   workingCopy: SvgJsonNode | null;
   editableFields: EditableTextField[];
   editableColorFields: EditableColorField[];
+  editableImageFields: EditableImageField[];
   edits: Edits;
   revision: number;
   focusedFieldId: EditableFieldId | null;
@@ -28,6 +52,19 @@ interface CardEditorState {
   initializeFromSvg: (svgNode: SvgJsonNode) => void;
   updateTextField: (fieldId: EditableFieldId, value: string) => void;
   updateColorField: (fieldId: EditableFieldId, color: string) => void;
+  updateImageField: (fieldId: EditableFieldId, imageUrl: string) => void;
+  removeImageField: (fieldId: EditableFieldId) => void;
+  adjustImageZoom: (
+    fieldId: EditableFieldId,
+    zoom: number,
+    offsetX: number,
+    offsetY: number
+  ) => void;
+  nudgeImagePosition: (
+    fieldId: EditableFieldId,
+    dx: number,
+    dy: number
+  ) => void;
   applyColorPreset: (colors: string[], presetId: number) => void;
   swapColors: (fieldIdA: EditableFieldId, fieldIdB: EditableFieldId) => void;
   resetAllColors: () => void;
@@ -55,6 +92,7 @@ const initialState = {
   workingCopy: null as SvgJsonNode | null,
   editableFields: [] as EditableTextField[],
   editableColorFields: [] as EditableColorField[],
+  editableImageFields: [] as EditableImageField[],
   edits: {} as Edits,
   revision: 0,
   focusedFieldId: null as EditableFieldId | null,
@@ -69,12 +107,14 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
     const clone = cloneWithStableIds(svgNode);
     const fields = discoverEditableTextFields(clone);
     const colorFields = discoverEditableColorFields(clone);
+    const imageFields = discoverEditableImageFields(clone);
 
     // Preserve existing edits that match new template's fields
     const prevEdits = get().edits;
     const newFieldIds = new Set([
       ...fields.map((f) => f.fieldId),
       ...colorFields.map((f) => f.fieldId),
+      ...imageFields.map((f) => f.fieldId),
     ]);
     const preservedEdits: Edits = {};
 
@@ -87,7 +127,7 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
     // Re-apply preserved text edits to the new working copy
     for (const field of fields) {
       const editedValue = preservedEdits[field.fieldId];
-      if (editedValue != null) {
+      if (typeof editedValue === 'string') {
         applyTextEdit(field, editedValue);
       }
     }
@@ -95,8 +135,17 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
     // Re-apply preserved color edits to the new working copy
     for (const colorField of colorFields) {
       const editedValue = preservedEdits[colorField.fieldId];
-      if (editedValue != null) {
+      if (typeof editedValue === 'string') {
         applyColorEdit(colorField, editedValue);
+      }
+    }
+
+    // Re-apply preserved image edits to the new working copy
+    for (const imageField of imageFields) {
+      const editedValue = preservedEdits[imageField.fieldId];
+      const url = getEditUrl(editedValue);
+      if (url) {
+        applyImageEdit(imageField, url);
       }
     }
 
@@ -104,6 +153,7 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
       workingCopy: clone,
       editableFields: fields,
       editableColorFields: colorFields,
+      editableImageFields: imageFields,
       edits: preservedEdits,
       revision: get().revision + 1,
       appliedPresetId: null,
@@ -160,8 +210,8 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
     const fieldB = editableColorFields.find((f) => f.fieldId === fieldIdB);
     if (!fieldA || !fieldB) return;
 
-    const colorA = edits[fieldIdA] ?? fieldA.originalValue;
-    const colorB = edits[fieldIdB] ?? fieldB.originalValue;
+    const colorA = getEditUrl(edits[fieldIdA]) ?? fieldA.originalValue;
+    const colorB = getEditUrl(edits[fieldIdB]) ?? fieldB.originalValue;
 
     const newEdits = { ...edits };
     setColorEdit(newEdits, fieldA, colorB);
@@ -207,6 +257,106 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
       revision: revision + 1,
       appliedPresetId: appliedPresetColors ? appliedPresetId : null,
     });
+  },
+
+  updateImageField: (fieldId, imageUrl) => {
+    const { editableImageFields, edits, revision } = get();
+    const field = editableImageFields.find((f) => f.fieldId === fieldId);
+    if (!field) return;
+
+    applyImageEdit(field, imageUrl);
+
+    const newEdits = { ...edits };
+    if (imageUrl === field.originalValue) {
+      delete newEdits[fieldId];
+    } else {
+      // Preserve existing position if just swapping URLs (e.g. local -> CDN)
+      const prev = edits[fieldId];
+      const position = isImageEdit(prev) ? prev : DEFAULT_IMAGE_POSITION;
+      newEdits[fieldId] = { ...position, url: imageUrl };
+    }
+
+    set({ edits: newEdits, revision: revision + 1 });
+  },
+
+  removeImageField: (fieldId) => {
+    const { editableImageFields, edits, revision } = get();
+    const field = editableImageFields.find((f) => f.fieldId === fieldId);
+    if (!field) return;
+
+    applyImageEdit(field, field.originalValue);
+
+    const newEdits = { ...edits };
+    delete newEdits[fieldId];
+
+    set({ edits: newEdits, revision: revision + 1 });
+  },
+
+  adjustImageZoom: (fieldId, zoom, offsetX, offsetY) => {
+    const { editableImageFields, edits, revision } = get();
+    const field = editableImageFields.find((f) => f.fieldId === fieldId);
+    if (!field) return;
+
+    for (const node of field.elementNodes) {
+      // Store original dimensions on first use
+      if (!node.attributes['data-orig-width']) {
+        node.attributes['data-orig-width'] = node.attributes.width;
+        node.attributes['data-orig-height'] = node.attributes.height;
+        node.attributes['data-orig-x'] = node.attributes.x ?? '0';
+        node.attributes['data-orig-y'] = node.attributes.y ?? '0';
+      }
+
+      const origW = parseFloat(node.attributes['data-orig-width']);
+      const origH = parseFloat(node.attributes['data-orig-height']);
+      const origX = parseFloat(node.attributes['data-orig-x']);
+      const origY = parseFloat(node.attributes['data-orig-y']);
+
+      const newW = origW * zoom;
+      const newH = origH * zoom;
+      node.attributes.width = String(newW);
+      node.attributes.height = String(newH);
+      node.attributes.x = String(origX - (newW - origW) / 2 + offsetX);
+      node.attributes.y = String(origY - (newH - origH) / 2 + offsetY);
+    }
+
+    // Update position in the image edit entry
+    const prev = edits[fieldId];
+    const url = getEditUrl(prev) ?? '';
+    const newEdits = { ...edits };
+    if (url) {
+      newEdits[fieldId] = { url, zoom, offsetX, offsetY };
+    }
+
+    set({ edits: newEdits, revision: revision + 1 });
+  },
+
+  nudgeImagePosition: (fieldId, dx, dy) => {
+    const { editableImageFields, edits, revision } = get();
+    const field = editableImageFields.find((f) => f.fieldId === fieldId);
+    if (!field) return;
+
+    for (const node of field.elementNodes) {
+      const curX = parseFloat(node.attributes.x ?? '0');
+      const curY = parseFloat(node.attributes.y ?? '0');
+      node.attributes.x = String(curX + dx);
+      node.attributes.y = String(curY + dy);
+    }
+
+    // Update position in the image edit entry
+    const prev = edits[fieldId];
+    const url = getEditUrl(prev) ?? '';
+    const pos = isImageEdit(prev) ? prev : DEFAULT_IMAGE_POSITION;
+    const newEdits = { ...edits };
+    if (url) {
+      newEdits[fieldId] = {
+        url,
+        zoom: pos.zoom,
+        offsetX: pos.offsetX + dx,
+        offsetY: pos.offsetY + dy,
+      };
+    }
+
+    set({ edits: newEdits, revision: revision + 1 });
   },
 
   resetField: (fieldId) => {

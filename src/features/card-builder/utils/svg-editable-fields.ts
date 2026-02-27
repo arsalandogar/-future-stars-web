@@ -2,17 +2,16 @@ import type { SvgJsonNode } from '@/types/svg';
 
 import { EDITABLE_FIELDS, type EditableFieldId } from '@/features/templates';
 
-const TEXT_FIELD_IDS = Object.entries(EDITABLE_FIELDS)
-  .filter(([, field]) => field.type === 'text')
-  .map(([id]) => id as EditableFieldId);
+function buildFieldOrder(type: string): Map<EditableFieldId, number> {
+  const ids = Object.entries(EDITABLE_FIELDS)
+    .filter(([, field]) => field.type === type)
+    .map(([id]) => id as EditableFieldId);
+  return new Map(ids.map((id, i) => [id, i]));
+}
 
-const TEXT_FIELD_ORDER = new Map(TEXT_FIELD_IDS.map((id, i) => [id, i]));
-
-const COLOR_FIELD_IDS = Object.entries(EDITABLE_FIELDS)
-  .filter(([, field]) => field.type === 'color')
-  .map(([id]) => id as EditableFieldId);
-
-const COLOR_FIELD_ORDER = new Map(COLOR_FIELD_IDS.map((id, i) => [id, i]));
+const TEXT_FIELD_ORDER = buildFieldOrder('text');
+const COLOR_FIELD_ORDER = buildFieldOrder('color');
+const IMAGE_FIELD_ORDER = buildFieldOrder('image');
 
 export interface EditableTextField {
   fieldId: EditableFieldId;
@@ -210,5 +209,162 @@ export function discoverEditableColorFields(
 export function applyColorEdit(field: EditableColorField, color: string): void {
   for (const element of field.elements) {
     writeColorValue(element.node, element.colorTarget, color);
+  }
+}
+
+export interface ImageClipBounds {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface EditableImageField {
+  fieldId: EditableFieldId;
+  label: string;
+  originalValue: string;
+  originalBounds: ImageClipBounds;
+  elementNodes: SvgJsonNode[];
+  aspectRatio: number | null;
+  clipBounds: ImageClipBounds | null;
+}
+
+/** Build a map of clipPath id -> bounding rect from <defs>. */
+function buildClipBoundsMap(root: SvgJsonNode): Map<string, ImageClipBounds> {
+  const map = new Map<string, ImageClipBounds>();
+
+  function walk(node: SvgJsonNode) {
+    if (node.type === 'text') return;
+
+    if (node.name === 'clipPath' && node.attributes.id) {
+      const child = node.children.find(
+        (c) => c.name === 'rect' || c.name === 'polygon'
+      );
+      if (child?.name === 'rect') {
+        map.set(node.attributes.id, {
+          x: parseFloat(child.attributes.x ?? '0'),
+          y: parseFloat(child.attributes.y ?? '0'),
+          width: parseFloat(child.attributes.width ?? '0'),
+          height: parseFloat(child.attributes.height ?? '0'),
+        });
+      }
+    }
+
+    for (const c of node.children) walk(c);
+  }
+
+  walk(root);
+  return map;
+}
+
+/** Extract the clip-path id from a url(#...) reference. */
+function parseClipPathId(value: string | undefined): string | null {
+  if (!value) return null;
+  const match = value.match(/url\(#([^)]+)\)/);
+  return match ? match[1] : null;
+}
+
+export function discoverEditableImageFields(
+  root: SvgJsonNode
+): EditableImageField[] {
+  const clipBoundsMap = buildClipBoundsMap(root);
+
+  // Map image field id -> { nodes, parentNode (the <g> wrapping the <image>) }
+  const fieldMap = new Map<
+    EditableFieldId,
+    { nodes: SvgJsonNode[]; parent: SvgJsonNode | null }
+  >();
+
+  function walk(node: SvgJsonNode, parent: SvgJsonNode | null) {
+    if (node.type === 'text') return;
+
+    const dataField = node.attributes['data-image-field'] as string | undefined;
+    if (dataField && IMAGE_FIELD_ORDER.has(dataField as EditableFieldId)) {
+      const fieldId = dataField as EditableFieldId;
+      const existing = fieldMap.get(fieldId);
+      if (existing) {
+        existing.nodes.push(node);
+      } else {
+        fieldMap.set(fieldId, { nodes: [node], parent });
+      }
+    }
+
+    for (const child of node.children) {
+      walk(child, node);
+    }
+  }
+
+  walk(root, null);
+
+  const fields: EditableImageField[] = [];
+
+  for (const [fieldId, { nodes: elementNodes, parent }] of fieldMap) {
+    const fieldDef = EDITABLE_FIELDS[fieldId];
+    const first = elementNodes[0];
+    const originalValue =
+      first.attributes.href ?? first.attributes['xlink:href'] ?? '';
+
+    // Resolve clip bounds: check parent <g>'s clip-path, then the image's own
+    const parentClipId = parseClipPathId(parent?.attributes['clip-path']);
+    const selfClipId = parseClipPathId(first.attributes['clip-path']);
+    const clipBounds =
+      (parentClipId ? clipBoundsMap.get(parentClipId) : null) ??
+      (selfClipId ? clipBoundsMap.get(selfClipId) : null) ??
+      null;
+
+    const originalBounds: ImageClipBounds = {
+      x: parseFloat(first.attributes.x ?? '0'),
+      y: parseFloat(first.attributes.y ?? '0'),
+      width: parseFloat(first.attributes.width ?? '0'),
+      height: parseFloat(first.attributes.height ?? '0'),
+    };
+
+    const w = clipBounds?.width ?? originalBounds.width;
+    const h = clipBounds?.height ?? originalBounds.height;
+    const aspectRatio = w > 0 && h > 0 ? w / h : null;
+
+    fields.push({
+      fieldId,
+      label: fieldDef.label,
+      originalValue,
+      originalBounds,
+      elementNodes,
+      aspectRatio,
+      clipBounds,
+    });
+  }
+
+  fields.sort(
+    (a, b) =>
+      (IMAGE_FIELD_ORDER.get(a.fieldId) ?? 0) -
+      (IMAGE_FIELD_ORDER.get(b.fieldId) ?? 0)
+  );
+
+  return fields;
+}
+
+export function applyImageEdit(
+  field: EditableImageField,
+  imageUrl: string
+): void {
+  const isOriginal = imageUrl === field.originalValue;
+
+  for (const node of field.elementNodes) {
+    node.attributes.href = imageUrl;
+    node.attributes['xlink:href'] = imageUrl;
+
+    if (isOriginal) {
+      // Restore original position/size
+      node.attributes.x = String(field.originalBounds.x);
+      node.attributes.y = String(field.originalBounds.y);
+      node.attributes.width = String(field.originalBounds.width);
+      node.attributes.height = String(field.originalBounds.height);
+    } else if (field.clipBounds) {
+      // Expand image to fill the clip rect so no background bleeds through
+      node.attributes.x = String(field.clipBounds.x);
+      node.attributes.y = String(field.clipBounds.y);
+      node.attributes.width = String(field.clipBounds.width);
+      node.attributes.height = String(field.clipBounds.height);
+    }
   }
 }

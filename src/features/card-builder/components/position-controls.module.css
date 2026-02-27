@@ -1,0 +1,93 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-lg);
+  padding-top: var(--mantine-spacing-md);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+}
+
+.zoomRow {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+}
+
+.zoomButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--mantine-radius-sm);
+  border: 1px solid #2a3045;
+  background: #0d1117;
+  color: var(--mantine-color-gray-4);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 150ms ease;
+
+  &:hover:not(:disabled) {
+    background: #1a1f2e;
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+}
+
+.zoomSlider {
+  flex: 1;
+}
+
+.dpad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  align-self: center;
+}
+
+.dpadMiddle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dpadCenter {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #0d1117;
+  border: 1px solid #2a3045;
+}
+
+.dpadButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--mantine-radius-sm);
+  border: 1px solid #2a3045;
+  background: #0d1117;
+  color: var(--mantine-color-gray-4);
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+
+  &:hover:not(:disabled) {
+    background: #1a1f2e;
+    color: var(--mantine-color-white);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+}
