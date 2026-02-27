@@ -17,7 +17,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { MdOutlineShoppingCart } from 'react-icons/md';
 
 import type { Pack } from '@/types';
@@ -61,21 +61,18 @@ export function PackItem({
     deleteModalOpened,
     { open: openDeleteModal, close: closeDeleteModal },
   ] = useDisclosure(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const editInputRef = useCallback((node: HTMLInputElement | null) => {
+    if (node) {
+      node.focus();
+      node.select();
+    }
+  }, []);
 
   const updatePack = useUpdatePack();
 
   const firstCard = pack.packCards[0]?.card;
   const hasMultipleCards = pack.packCards.length > 1;
   const totalQuantity = getTotalQuantity(pack);
-
-  // Focus input when editing starts
-  useEffect(() => {
-    if (isEditing) {
-      inputRef.current?.focus();
-      inputRef.current?.select();
-    }
-  }, [isEditing]);
 
   const handleStartEditing = () => {
     setEditingName(pack.name);
@@ -141,7 +138,7 @@ export function PackItem({
             {isEditing && !readOnly ? (
               <>
                 <TextInput
-                  ref={inputRef}
+                  ref={editInputRef}
                   value={editingName}
                   onChange={(e) => setEditingName(e.currentTarget.value)}
                   onKeyDown={handleKeyDown}

@@ -20,17 +20,19 @@ export function ContentField({ field }: ContentFieldProps) {
   });
   const updateTextField = useCardEditorStore((s) => s.updateTextField);
   const resetField = useCardEditorStore((s) => s.resetField);
-  const isFocusTarget = useCardEditorStore(
-    (s) => s.focusedFieldId === field.fieldId
-  );
-  const setFocusedFieldId = useCardEditorStore((s) => s.setFocusedFieldId);
 
   useEffect(() => {
-    if (isFocusTarget) {
-      inputRef.current?.focus();
-      setFocusedFieldId(null);
+    function handleFocusChange() {
+      const { focusedFieldId, setFocusedFieldId } =
+        useCardEditorStore.getState();
+      if (focusedFieldId === field.fieldId) {
+        inputRef.current?.focus();
+        setFocusedFieldId(null);
+      }
     }
-  }, [isFocusTarget, setFocusedFieldId]);
+    handleFocusChange(); // handle focus target set before mount
+    return useCardEditorStore.subscribe(handleFocusChange);
+  }, [field.fieldId]);
 
   const currentValue = editedValue ?? field.originalValue;
   const isEdited = editedValue !== undefined;

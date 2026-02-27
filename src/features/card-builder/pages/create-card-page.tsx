@@ -98,9 +98,7 @@ export function CreateCardPage() {
   });
 
   useEffect(() => {
-    if (originalSvgNode) {
-      initializeFromSvg(originalSvgNode);
-    }
+    initializeFromSvg(originalSvgNode);
   }, [originalSvgNode, initializeFromSvg]);
 
   useEffect(() => {

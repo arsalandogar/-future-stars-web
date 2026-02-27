@@ -49,7 +49,7 @@ interface CardEditorState {
   appliedPresetId: number | null;
   appliedPresetColors: string[] | null;
 
-  initializeFromSvg: (svgNode: SvgJsonNode) => void;
+  initializeFromSvg: (svgNode: SvgJsonNode | undefined) => void;
   updateTextField: (fieldId: EditableFieldId, value: string) => void;
   updateColorField: (fieldId: EditableFieldId, color: string) => void;
   updateImageField: (fieldId: EditableFieldId, imageUrl: string) => void;
@@ -104,6 +104,7 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
   ...initialState,
 
   initializeFromSvg: (svgNode) => {
+    if (!svgNode) return;
     const clone = cloneWithStableIds(svgNode);
     const fields = discoverEditableTextFields(clone);
     const colorFields = discoverEditableColorFields(clone);
