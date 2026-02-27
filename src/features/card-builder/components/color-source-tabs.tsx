@@ -81,9 +81,9 @@ function OriginalSwatch() {
         className={swatchStyles.swatch}
         data-selected={isOriginal || undefined}
       >
-        {originalColors.map((color, i) => (
+        {originalColors.map((color) => (
           <div
-            key={i}
+            key={color}
             className={swatchStyles.band}
             style={{ backgroundColor: color }}
           />

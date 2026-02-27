@@ -25,9 +25,9 @@ export function ColorPresetSwatch({
       aria-label={`Apply ${preset.name} colors`}
     >
       <div className={styles.swatch} data-selected={selected || undefined}>
-        {preset.colors.map((color, i) => (
+        {preset.colors.map((color) => (
           <div
-            key={i}
+            key={color}
             className={styles.band}
             style={{ backgroundColor: color }}
           />
