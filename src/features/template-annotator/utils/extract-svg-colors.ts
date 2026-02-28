@@ -1,4 +1,5 @@
 import type { SvgJsonNode } from '@/types/svg';
+import { clusterColors, type ColorCluster } from '@/utils/color-math';
 
 import type { ColorOccurrence, ColorTarget, DetectedColor } from '../types';
 import { getStyleProp } from './svg-node-helpers';
@@ -131,4 +132,12 @@ export function extractSvgColors(
     hex,
     occurrences,
   })).sort((a, b) => b.occurrences.length - a.occurrences.length);
+}
+
+export function extractColorClusters(
+  nodeMap: Map<string, SvgJsonNode>,
+  threshold?: number
+): ColorCluster[] {
+  const detectedColors = extractSvgColors(nodeMap);
+  return clusterColors(detectedColors, threshold);
 }

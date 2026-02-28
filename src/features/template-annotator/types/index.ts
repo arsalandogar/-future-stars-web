@@ -1,11 +1,16 @@
 import type { EditableFieldId } from '@/features/templates';
 
-export type ColorTarget = 'fill' | 'stroke' | 'stop-color';
+import type { ColorTarget } from '@/types/svg';
+import type { OklabOffset } from '@/utils/color-math';
+
+export type { ColorTarget } from '@/types/svg';
+export type { ClusterMember } from '@/utils/color-math';
 
 export interface FieldAssignment {
   nodeId: string;
   fieldId: EditableFieldId;
   colorTarget?: ColorTarget;
+  colorOffset?: OklabOffset;
   maxWidth?: number;
 }
 

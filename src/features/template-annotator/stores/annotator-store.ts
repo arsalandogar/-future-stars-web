@@ -1,11 +1,12 @@
 import { create } from 'zustand';
 
 import type { SvgJsonNode } from '@/types/svg';
+import { isZeroOffset } from '@/utils/color-math';
 
 import { EDITABLE_FIELDS, type EditableFieldId } from '@/features/templates';
 
 import type {
-  ColorOccurrence,
+  ClusterMember,
   ColorTarget,
   FieldAssignment,
   NodeMeta,
@@ -65,7 +66,7 @@ interface AnnotatorState {
     maxWidth: number
   ) => void;
   bulkAssignColors: (
-    mappings: { fieldId: EditableFieldId; occurrences: ColorOccurrence[] }[]
+    mappings: { fieldId: EditableFieldId; members: ClusterMember[] }[]
   ) => void;
   validate: () => void;
   undo: () => void;
@@ -218,13 +219,18 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
     const newAssignments: FieldAssignment[] = [];
 
     for (const mapping of mappings) {
-      for (const occ of mapping.occurrences) {
-        affectedNodeIds.add(occ.nodeId);
-        newAssignments.push({
-          nodeId: occ.nodeId,
-          fieldId: mapping.fieldId,
-          colorTarget: occ.colorTarget,
-        });
+      for (const member of mapping.members) {
+        for (const occ of member.occurrences) {
+          affectedNodeIds.add(occ.nodeId);
+          newAssignments.push({
+            nodeId: occ.nodeId,
+            fieldId: mapping.fieldId,
+            colorTarget: occ.colorTarget,
+            ...(!isZeroOffset(member.offset) && {
+              colorOffset: member.offset,
+            }),
+          });
+        }
       }
     }
 

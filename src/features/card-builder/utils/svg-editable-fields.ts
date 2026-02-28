@@ -1,4 +1,9 @@
-import type { SvgJsonNode } from '@/types/svg';
+import type { ColorTarget, SvgJsonNode } from '@/types/svg';
+import {
+  applyOklabOffset,
+  parseOffset,
+  type OklabOffset,
+} from '@/utils/color-math';
 
 import { EDITABLE_FIELDS, type EditableFieldId } from '@/features/templates';
 
@@ -92,11 +97,10 @@ export function applyTextEdit(field: EditableTextField, value: string): void {
   }
 }
 
-export type ColorTarget = 'fill' | 'stroke' | 'stop-color';
-
 export interface ColorFieldElement {
   node: SvgJsonNode;
   colorTarget: ColorTarget;
+  colorOffset?: OklabOffset;
 }
 
 export interface EditableColorField {
@@ -104,6 +108,18 @@ export interface EditableColorField {
   label: string;
   originalValue: string;
   elements: ColorFieldElement[];
+}
+
+function findBaseColor(
+  elements: ColorFieldElement[],
+  includeOffset: boolean
+): string | null {
+  for (const el of elements) {
+    if (!includeOffset && el.colorOffset) continue;
+    const val = readColorValue(el.node, el.colorTarget);
+    if (val && !val.startsWith('url(')) return val;
+  }
+  return null;
 }
 
 function readColorValue(node: SvgJsonNode, target: ColorTarget): string {
@@ -156,7 +172,13 @@ export function discoverEditableColorFields(
       const fieldId = dataField as EditableFieldId;
       const target =
         (node.attributes['data-color-target'] as ColorTarget) ?? 'fill';
-      const element: ColorFieldElement = { node, colorTarget: target };
+      const offsetRaw = node.attributes['data-color-offset'];
+      const colorOffset = offsetRaw ? parseOffset(offsetRaw) : null;
+      const element: ColorFieldElement = {
+        node,
+        colorTarget: target,
+        ...(colorOffset && { colorOffset }),
+      };
 
       const existing = fieldMap.get(fieldId);
       if (existing) {
@@ -178,16 +200,10 @@ export function discoverEditableColorFields(
   for (const [fieldId, elements] of fieldMap) {
     const fieldDef = EDITABLE_FIELDS[fieldId];
 
-    // Pick originalValue from the first element with a concrete color
-    // (skip gradient references like "url(#...)")
-    let originalValue = '';
-    for (const el of elements) {
-      const val = readColorValue(el.node, el.colorTarget);
-      if (val && !val.startsWith('url(')) {
-        originalValue = val;
-        break;
-      }
-    }
+    // Pick originalValue from an element WITHOUT an offset (the true base
+    // color). Fall back to any element if all have offsets.
+    const originalValue =
+      findBaseColor(elements, false) ?? findBaseColor(elements, true) ?? '';
 
     fields.push({
       fieldId,
@@ -208,7 +224,10 @@ export function discoverEditableColorFields(
 
 export function applyColorEdit(field: EditableColorField, color: string): void {
   for (const element of field.elements) {
-    writeColorValue(element.node, element.colorTarget, color);
+    const derivedColor = element.colorOffset
+      ? applyOklabOffset(color, element.colorOffset)
+      : color;
+    writeColorValue(element.node, element.colorTarget, derivedColor);
   }
 }
 

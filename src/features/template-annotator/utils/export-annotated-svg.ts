@@ -1,7 +1,14 @@
 import type { SvgJsonNode } from '@/types/svg';
 import { EDITABLE_FIELDS } from '@/features/templates';
+import { isZeroOffset, serializeOffset } from '@/utils/color-math';
 
 import type { FieldAssignment } from '../types';
+
+const DATA_ATTR_BY_TYPE: Record<string, string> = {
+  color: 'data-color-field',
+  image: 'data-image-field',
+  text: 'data-text-field',
+};
 
 function stripNodeIds(node: SvgJsonNode): SvgJsonNode {
   if (node.type === 'text') return node;
@@ -40,16 +47,20 @@ export function buildAnnotatedSvg(
         for (const assignment of nodeAssignments) {
           const field = EDITABLE_FIELDS[assignment.fieldId];
 
-          const attrKey =
-            field.type === 'color'
-              ? 'data-color-field'
-              : field.type === 'image'
-                ? 'data-image-field'
-                : 'data-text-field';
-          node.attributes[attrKey] = assignment.fieldId;
+          node.attributes[DATA_ATTR_BY_TYPE[field.type]] = assignment.fieldId;
 
           if (field.type === 'color' && assignment.colorTarget) {
             node.attributes['data-color-target'] = assignment.colorTarget;
+          }
+
+          if (
+            field.type === 'color' &&
+            assignment.colorOffset &&
+            !isZeroOffset(assignment.colorOffset)
+          ) {
+            node.attributes['data-color-offset'] = serializeOffset(
+              assignment.colorOffset
+            );
           }
 
           if (field.type === 'text' && assignment.maxWidth != null) {

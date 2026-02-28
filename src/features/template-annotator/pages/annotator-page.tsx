@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Button, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ClipboardCheck } from 'lucide-react';
@@ -15,7 +15,6 @@ import { ExportModal } from '../components/export-modal';
 import { FieldAssignmentPanel } from '../components/field-assignment-panel';
 import { SvgUploadDropzone } from '../components/svg-upload-dropzone';
 import { ValidationResults } from '../components/validation-results';
-import { extractSvgColors } from '../utils/extract-svg-colors';
 
 import styles from './annotator-page.module.css';
 
@@ -45,10 +44,7 @@ export function AnnotatorPage() {
     null
   );
 
-  const detectedColors = useMemo(() => extractSvgColors(nodeMap), [nodeMap]);
-
-  const colorModalOpened =
-    detectedColors.length > 0 && dismissedForMap !== nodeMap;
+  const colorModalOpened = nodeMap.size > 0 && dismissedForMap !== nodeMap;
 
   function closeColorModal() {
     setDismissedForMap(nodeMap);
@@ -122,11 +118,11 @@ export function AnnotatorPage() {
       </div>
 
       <ExportModal opened={exportOpened} onClose={closeExport} />
-      {detectedColors.length > 0 && (
+      {nodeMap.size > 0 && (
         <ColorDetectionModal
           opened={colorModalOpened}
           onClose={closeColorModal}
-          detectedColors={detectedColors}
+          nodeMap={nodeMap}
         />
       )}
     </>

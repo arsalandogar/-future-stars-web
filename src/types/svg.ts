@@ -10,3 +10,5 @@ export interface SvgJsonNode {
   attributes: Record<string, string>;
   children: SvgJsonNode[];
 }
+
+export type ColorTarget = 'fill' | 'stroke' | 'stop-color';
