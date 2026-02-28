@@ -96,17 +96,22 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
     const colorFields = discoverEditableColorFields(clone);
     const imageFields = discoverEditableImageFields(clone);
 
-    // Preserve existing edits that match new template's fields
+    // Preserve existing non-color edits that match new template's fields.
+    // Color edits are excluded because they're positional (tied to a
+    // template's color field order) and would leak incorrect values when
+    // switching templates. If a color preset was active, it gets re-applied
+    // positionally below.
     const prevEdits = get().edits;
-    const newFieldIds = new Set([
+    const appliedPresetColors = get().appliedPresetColors;
+    const appliedPresetId = get().appliedPresetId;
+    const nonColorFieldIds = new Set([
       ...fields.map((f) => f.fieldId),
-      ...colorFields.map((f) => f.fieldId),
       ...imageFields.map((f) => f.fieldId),
     ]);
     const preservedEdits: Edits = {};
 
     for (const [fieldId, value] of Object.entries(prevEdits)) {
-      if (newFieldIds.has(fieldId as EditableFieldId)) {
+      if (nonColorFieldIds.has(fieldId as EditableFieldId)) {
         preservedEdits[fieldId as EditableFieldId] = value;
       }
     }
@@ -119,11 +124,14 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
       }
     }
 
-    // Re-apply preserved color edits to the new working copy
-    for (const colorField of colorFields) {
-      const editedValue = preservedEdits[colorField.fieldId];
-      if (typeof editedValue === 'string') {
-        applyColorEdit(colorField, editedValue);
+    // Re-apply color preset positionally to the new template's color fields
+    if (appliedPresetColors) {
+      for (let i = 0; i < colorFields.length; i++) {
+        const color =
+          i < appliedPresetColors.length
+            ? appliedPresetColors[i]
+            : colorFields[i].originalValue;
+        setColorEdit(preservedEdits, colorFields[i], color);
       }
     }
 
@@ -143,7 +151,8 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
       editableImageFields: imageFields,
       edits: preservedEdits,
       revision: get().revision + 1,
-      appliedPresetId: null,
+      appliedPresetId: appliedPresetColors ? appliedPresetId : null,
+      appliedPresetColors,
     });
   },
 
