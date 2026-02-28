@@ -65,6 +65,9 @@
       "prettier --write"
     ]
   },
+  "volta": {
+    "node": "24.13.0"
+  },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@tanstack/eslint-plugin-router": "^1.141.0",
