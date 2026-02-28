@@ -1,42 +1,28 @@
 import { create } from 'zustand';
 
-import type { SvgJsonNode } from '@/types/svg';
-import type { EditableFieldId } from '@/features/templates';
-import { cloneWithStableIds } from '@/utils/svg-tree';
-
 import {
+  type SvgJsonNode,
+  type EditableFieldId,
+  type EditValue,
+  type EditableColorField,
+  type EditableImageField,
+  type EditableTextField,
+  isImageEdit,
+  getEditUrl,
+  DEFAULT_IMAGE_POSITION,
   applyColorEdit,
   applyImageEdit,
   applyTextEdit,
   discoverEditableColorFields,
   discoverEditableImageFields,
   discoverEditableTextFields,
-  type EditableColorField,
-  type EditableImageField,
-  type EditableTextField,
-} from '../utils/svg-editable-fields';
+} from '@future-stars/card-engine';
+import { cloneWithStableIds } from '@/utils/svg-tree';
 
-export interface ImageEdit {
-  url: string;
-  zoom: number;
-  offsetX: number;
-  offsetY: number;
-}
+export type { ImageEdit, EditValue } from '@future-stars/card-engine';
+export { isImageEdit, getEditUrl, DEFAULT_IMAGE_POSITION };
 
-export type EditValue = string | ImageEdit;
 type Edits = Partial<Record<EditableFieldId, EditValue>>;
-
-export function isImageEdit(value: EditValue | undefined): value is ImageEdit {
-  return typeof value === 'object' && value !== null && 'url' in value;
-}
-
-/** Extract the display URL from an edit value (string or ImageEdit). */
-export function getEditUrl(value: EditValue | undefined): string | undefined {
-  if (!value) return undefined;
-  return isImageEdit(value) ? value.url : value;
-}
-
-export const DEFAULT_IMAGE_POSITION = { zoom: 1, offsetX: 0, offsetY: 0 };
 
 interface CardEditorState {
   workingCopy: SvgJsonNode | null;
