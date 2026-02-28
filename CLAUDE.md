@@ -29,6 +29,8 @@ This is a React 19 + TypeScript + Vite application with the React Compiler enabl
 - Icons use [Lucide React](https://lucide.dev/icons/) - import from `lucide-react`
 - **Backend API**: Fetch the OpenAPI spec at https://api.futurestarsapp.com/api.json when creating or modifying API hooks to get accurate endpoints, request/response schemas, and validation rules
 
+**Monorepo:** npm workspaces with `packages/card-engine` (`@arsalandogar/fs-card-engine`) — a shared card editing engine. In dev, the Vite alias `@fs-card-engine` resolves directly to its source at `packages/card-engine/src/index.ts`.
+
 **Entry point:** `src/main.tsx` renders `<AppProvider>` and `<AppRouter>` inside `<StrictMode>`
 
 ### Routing
@@ -117,7 +119,7 @@ Uses **TanStack Form** with **Valibot** for schema validation and form compositi
 
 - Use `useAppForm` from `@/lib/form` instead of `useForm` for pre-bound field components
 - Use `form.AppField` with field components like `<field.TextField label="Name" />`
-- Available field components: `TextField`, `PasswordField`, `SelectField`, `TextareaField`, `FloatingTextField`, `FloatingPasswordField`, `NumberInputField`, `ImageUploadCardField`, `CheckboxField`, `ColorInputField`, `TemplateSelectField`
+- Available field components: `TextField`, `PasswordField`, `SelectField`, `TextareaField`, `FloatingTextField`, `FloatingPasswordField`, `NumberInputField`, `ImageUploadCardField`, `CheckboxField`, `ColorInputField`, `TemplateSelectField`, `PhoneField`, `RadioGroupField`
 - `SelectField` supports `multi` prop for multi-select and `valueAs` prop (`'string'` | `'number'`) for value type coercion
 - Available form components: `Form`, `SubmitButton` (wrap with `<form.AppForm>` to use)
 
@@ -246,6 +248,7 @@ Uses **Tailwind CSS v4** with **Mantine v7** via `tailwind-preset-mantine`. See 
 Environment variables are accessed via `src/config/env.ts`:
 
 - `VITE_API_URL` - Backend API base URL (required)
+- `VITE_STRIPE_PUBLISHABLE_KEY` - Stripe publishable key for payment integration
 - Access via `import { env } from '@/config/env'`
 
 ## Project Structure
