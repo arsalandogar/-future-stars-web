@@ -123,17 +123,15 @@ function findBaseColor(
 }
 
 function readColorValue(node: SvgJsonNode, target: ColorTarget): string {
-  if (target === 'stop-color') {
-    // Check direct attribute first, then style string
-    if (node.attributes['stop-color']) {
-      return node.attributes['stop-color'];
-    }
-    const style = node.attributes.style;
-    if (!style) return '';
-    const match = style.match(/stop-color:\s*([^;]+)/);
-    return match ? match[1].trim() : '';
+  // Direct attribute takes precedence
+  if (node.attributes[target]) {
+    return node.attributes[target];
   }
-  return node.attributes[target] ?? '';
+  // Fall back to style string
+  const style = node.attributes.style;
+  if (!style) return '';
+  const match = style.match(new RegExp(`${target}:\\s*([^;]+)`));
+  return match ? match[1].trim() : '';
 }
 
 function writeColorValue(
@@ -141,22 +139,22 @@ function writeColorValue(
   target: ColorTarget,
   color: string
 ): void {
-  if (target === 'stop-color') {
-    // Write to direct attribute if it exists, otherwise update style string
-    if (node.attributes['stop-color'] != null) {
-      node.attributes['stop-color'] = color;
-    } else {
-      const style = node.attributes.style;
-      if (style) {
-        node.attributes.style = style.replace(
-          /stop-color:\s*[^;]+/,
-          `stop-color: ${color}`
-        );
-      }
-    }
-  } else {
+  // If direct attribute exists, write there
+  if (node.attributes[target] != null) {
     node.attributes[target] = color;
+    return;
   }
+  // Otherwise update style string
+  const style = node.attributes.style;
+  if (style && style.includes(`${target}:`)) {
+    node.attributes.style = style.replace(
+      new RegExp(`${target}:\\s*[^;]+`),
+      `${target}: ${color}`
+    );
+    return;
+  }
+  // No existing value — set as direct attribute
+  node.attributes[target] = color;
 }
 
 export function discoverEditableColorFields(
