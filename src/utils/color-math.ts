@@ -80,12 +80,37 @@ function clamp(value: number, min: number, max: number): number {
 
 export function applyOklabOffset(baseHex: string, offset: OklabOffset): string {
   const base = hexToOklab(baseHex);
-  const result: Oklab = {
-    mode: 'oklab',
-    l: clamp(base.l + offset.deltaL, 0, 1),
-    a: clamp((base.a ?? 0) + offset.deltaA, -0.4, 0.4),
-    b: clamp((base.b ?? 0) + offset.deltaB, -0.4, 0.4),
-  };
+  const baseA = base.a ?? 0;
+  const baseB = base.b ?? 0;
+  const baseChroma = Math.sqrt(baseA * baseA + baseB * baseB);
+
+  // Lightness shifts are hue-independent — always apply directly.
+  const newL = clamp(base.l + offset.deltaL, 0, 1);
+
+  let newA: number;
+  let newB: number;
+
+  if (baseChroma > 1e-4) {
+    // Project the a/b offset onto the base color's chromaticity direction.
+    // This preserves chroma changes (saturation shifts for lighter/darker
+    // shades) while discarding hue shifts baked into the original palette.
+    const ua = baseA / baseChroma;
+    const ub = baseB / baseChroma;
+    const proj = offset.deltaA * ua + offset.deltaB * ub;
+
+    // Smoothly attenuate chromatic shifts for near-achromatic colors so
+    // grays / whites / blacks don't pick up unwanted color tints.
+    const chromaFactor = Math.min(baseChroma / 0.03, 1);
+
+    newA = clamp(baseA + proj * ua * chromaFactor, -0.4, 0.4);
+    newB = clamp(baseB + proj * ub * chromaFactor, -0.4, 0.4);
+  } else {
+    // Purely achromatic — only lightness matters.
+    newA = baseA;
+    newB = baseB;
+  }
+
+  const result: Oklab = { mode: 'oklab', l: newL, a: newA, b: newB };
   return oklabToHex(result);
 }
 

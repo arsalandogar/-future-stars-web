@@ -193,8 +193,10 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
     const { editableColorFields, edits, revision } = get();
     const newEdits = { ...edits };
 
-    for (let i = 0; i < editableColorFields.length && i < colors.length; i++) {
-      setColorEdit(newEdits, editableColorFields[i], colors[i]);
+    for (let i = 0; i < editableColorFields.length; i++) {
+      const color =
+        i < colors.length ? colors[i] : editableColorFields[i].originalValue;
+      setColorEdit(newEdits, editableColorFields[i], color);
     }
 
     set({
