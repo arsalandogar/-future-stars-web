@@ -4,7 +4,8 @@ import { AlertCircle, Check, ImageIcon } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { useCardBuilderStore } from '../stores/card-builder-store';
-import { getEditUrl, useCardEditorStore } from '../stores/card-editor-store';
+import { useCardEditorStore } from '../stores/card-editor-store';
+import { getEditUrl } from '@future-stars/card-engine';
 import { useImageUploadStore } from '../stores/image-upload-store';
 
 import styles from './image-fields-list.module.css';

@@ -2,7 +2,7 @@ import { api } from '@/lib/api-client';
 import { createMutation } from '@/lib/react-query';
 import type { Card } from '@/types';
 
-import type { EditValue } from '../stores/card-editor-store';
+import type { EditValue } from '@future-stars/card-engine';
 
 interface SaveCardParams {
   templateId: number;

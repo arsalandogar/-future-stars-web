@@ -2,11 +2,8 @@ import { Button, Title } from '@mantine/core';
 import { Save } from 'lucide-react';
 
 import { useSaveCard } from '../api/save-card';
-import {
-  type EditValue,
-  getEditUrl,
-  useCardEditorStore,
-} from '../stores/card-editor-store';
+import { useCardEditorStore } from '../stores/card-editor-store';
+import { type EditValue, getEditUrl } from '@future-stars/card-engine';
 import { useImageUploadStore } from '../stores/image-upload-store';
 
 import styles from './builder-header.module.css';

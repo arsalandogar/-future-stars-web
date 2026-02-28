@@ -3,12 +3,12 @@ import { useEffect, useRef } from 'react';
 import type { EditableFieldId } from '@/features/templates';
 
 import { useCardBuilderStore } from '../stores/card-builder-store';
+import { useCardEditorStore } from '../stores/card-editor-store';
 import {
   DEFAULT_IMAGE_POSITION,
   getEditUrl,
   isImageEdit,
-  useCardEditorStore,
-} from '../stores/card-editor-store';
+} from '@future-stars/card-engine';
 
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 2;

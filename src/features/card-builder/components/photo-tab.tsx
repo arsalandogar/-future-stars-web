@@ -12,13 +12,13 @@ import { ContentTabs, type ContentTabItem } from '@/components/ui/content-tabs';
 
 import { useUploadCardImage } from '../api/upload-card-image';
 import { useCardBuilderStore } from '../stores/card-builder-store';
+import { useCardEditorStore } from '../stores/card-editor-store';
 import {
   DEFAULT_IMAGE_POSITION,
   type EditValue,
   getEditUrl,
   isImageEdit,
-  useCardEditorStore,
-} from '../stores/card-editor-store';
+} from '@future-stars/card-engine';
 import { useImageUploadStore } from '../stores/image-upload-store';
 import type { PhotoSubTab } from '../types';
 import { ImageActions } from './image-actions';

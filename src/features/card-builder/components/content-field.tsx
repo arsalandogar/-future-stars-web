@@ -3,7 +3,7 @@ import { ActionIcon } from '@mantine/core';
 import { X } from 'lucide-react';
 
 import { useCardEditorStore } from '../stores/card-editor-store';
-import type { EditableTextField } from '../utils/svg-editable-fields';
+import type { EditableTextField } from '@future-stars/card-engine';
 
 import styles from './content-tab.module.css';
 

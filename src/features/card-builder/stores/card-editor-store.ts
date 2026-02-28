@@ -7,20 +7,17 @@ import {
   type EditableColorField,
   type EditableImageField,
   type EditableTextField,
-  isImageEdit,
-  getEditUrl,
-  DEFAULT_IMAGE_POSITION,
   applyColorEdit,
   applyImageEdit,
   applyTextEdit,
   discoverEditableColorFields,
   discoverEditableImageFields,
   discoverEditableTextFields,
+  isImageEdit,
+  getEditUrl,
+  DEFAULT_IMAGE_POSITION,
 } from '@future-stars/card-engine';
 import { cloneWithStableIds } from '@/utils/svg-tree';
-
-export type { ImageEdit, EditValue } from '@future-stars/card-engine';
-export { isImageEdit, getEditUrl, DEFAULT_IMAGE_POSITION };
 
 type Edits = Partial<Record<EditableFieldId, EditValue>>;
 
