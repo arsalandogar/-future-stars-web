@@ -3,7 +3,7 @@ import { Save } from 'lucide-react';
 
 import { useSaveCard } from '../api/save-card';
 import { useCardEditorStore } from '../stores/card-editor-store';
-import { type EditValue, getEditUrl } from '@future-stars/card-engine';
+import { type EditValue, getEditUrl } from '@fs-card-engine';
 import { useImageUploadStore } from '../stores/image-upload-store';
 
 import styles from './builder-header.module.css';

@@ -1,8 +1,4 @@
-export type {
-  OklabOffset,
-  ColorCluster,
-  ClusterMember,
-} from '@future-stars/card-engine';
+export type { OklabOffset, ColorCluster, ClusterMember } from '@fs-card-engine';
 
 export {
   applyOklabOffset,
@@ -12,4 +8,4 @@ export {
   parseOffset,
   serializeOffset,
   isZeroOffset,
-} from '@future-stars/card-engine';
+} from '@fs-card-engine';

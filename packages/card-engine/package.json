@@ -1,12 +1,34 @@
 {
-  "name": "@future-stars/card-engine",
+  "name": "@arsalandogar/fs-card-engine",
   "version": "0.1.0",
-  "private": true,
+  "description": "Shared card editing engine for Future Stars",
+  "license": "UNLICENSED",
   "type": "module",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arsalandogar/future-stars-web",
+    "directory": "packages/card-engine"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepack": "npm run build"
   },
   "dependencies": {
     "culori": "^4.0.2",

@@ -1,1 +1,1 @@
-export { parseSvgSync as parseSvgString } from '@future-stars/card-engine';
+export { parseSvgSync as parseSvgString } from '@fs-card-engine';

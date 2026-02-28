@@ -8,7 +8,7 @@ import {
   DEFAULT_IMAGE_POSITION,
   getEditUrl,
   isImageEdit,
-} from '@future-stars/card-engine';
+} from '@fs-card-engine';
 
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 2;

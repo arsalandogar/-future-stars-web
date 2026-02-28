@@ -16,7 +16,7 @@ import {
   isImageEdit,
   getEditUrl,
   DEFAULT_IMAGE_POSITION,
-} from '@future-stars/card-engine';
+} from '@fs-card-engine';
 import { cloneWithStableIds } from '@/utils/svg-tree';
 
 type Edits = Partial<Record<EditableFieldId, EditValue>>;

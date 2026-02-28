@@ -18,7 +18,7 @@ import {
   type EditValue,
   getEditUrl,
   isImageEdit,
-} from '@future-stars/card-engine';
+} from '@fs-card-engine';
 import { useImageUploadStore } from '../stores/image-upload-store';
 import type { PhotoSubTab } from '../types';
 import { ImageActions } from './image-actions';

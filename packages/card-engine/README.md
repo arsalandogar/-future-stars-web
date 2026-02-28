@@ -1,4 +1,4 @@
-# @future-stars/card-engine
+# @arslandogar/fs-card-engine
 
 Shared card editing engine for Future Stars.
 

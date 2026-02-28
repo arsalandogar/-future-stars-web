@@ -11,7 +11,7 @@ import prettier from 'eslint-config-prettier';
 import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
-  globalIgnores(['dist', 'src/routeTree.gen.ts']),
+  globalIgnores(['dist', 'src/routeTree.gen.ts', 'packages/*/dist']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -32,7 +32,11 @@ export default defineConfig([
       sourceType: 'module',
       globals: globals.browser,
       parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        project: [
+          './tsconfig.node.json',
+          './tsconfig.app.json',
+          './packages/card-engine/tsconfig.json',
+        ],
         tsconfigRootDir: import.meta.dirname,
       },
     },

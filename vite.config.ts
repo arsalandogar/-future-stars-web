@@ -29,6 +29,11 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // Short alias for @arslandogar/fs-card-engine; resolves to source for dev/build
+      '@fs-card-engine': path.resolve(
+        __dirname,
+        './packages/card-engine/src/index.ts'
+      ),
     },
   },
   build: {
