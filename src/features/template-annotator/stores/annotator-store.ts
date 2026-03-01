@@ -12,6 +12,7 @@ import type {
   NodeMeta,
   ValidationResult,
 } from '../types';
+import { measureTextWidth } from '../utils/measure-text-width';
 import { runValidation } from '../utils/validation-engine';
 
 interface AnnotatorState {
@@ -68,6 +69,12 @@ interface AnnotatorState {
   bulkAssignColors: (
     mappings: { fieldId: EditableFieldId; members: ClusterMember[] }[]
   ) => void;
+  bulkAssignTexts: (
+    mappings: { fieldId: EditableFieldId; nodeId: string }[]
+  ) => void;
+  bulkAssignImages: (
+    mappings: { fieldId: EditableFieldId; nodeId: string }[]
+  ) => void;
   validate: () => void;
   undo: () => void;
   redo: () => void;
@@ -87,6 +94,34 @@ function getAncestorIds(
 }
 
 const MAX_UNDO = 50;
+
+function bulkAssignByType(
+  assignments: FieldAssignment[],
+  undoStack: FieldAssignment[][],
+  type: 'text' | 'image',
+  mappings: { fieldId: EditableFieldId; nodeId: string }[],
+  buildAssignment: (m: {
+    fieldId: EditableFieldId;
+    nodeId: string;
+  }) => FieldAssignment
+) {
+  const affectedNodeIds = new Set(mappings.map((m) => m.nodeId));
+  const affectedFieldIds = new Set(mappings.map((m) => m.fieldId));
+
+  const preserved = assignments.filter(
+    (a) =>
+      !(
+        affectedNodeIds.has(a.nodeId) &&
+        EDITABLE_FIELDS[a.fieldId].type === type
+      ) && !affectedFieldIds.has(a.fieldId)
+  );
+
+  return {
+    assignments: [...preserved, ...mappings.map(buildAssignment)],
+    undoStack: [...undoStack.slice(-(MAX_UNDO - 1)), assignments],
+    redoStack: [] as FieldAssignment[][],
+  };
+}
 
 const initialState = {
   svgTree: null as SvgJsonNode | null,
@@ -248,6 +283,36 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
       undoStack: [...undoStack.slice(-(MAX_UNDO - 1)), assignments],
       redoStack: [],
     });
+  },
+
+  bulkAssignTexts: (mappings) => {
+    const { assignments, undoStack, nodeMap, svgTree } = get();
+    set(
+      bulkAssignByType(assignments, undoStack, 'text', mappings, (m) => {
+        const assignment: FieldAssignment = {
+          nodeId: m.nodeId,
+          fieldId: m.fieldId,
+        };
+        if (svgTree) {
+          const textNode = nodeMap.get(m.nodeId);
+          if (textNode) {
+            const width = measureTextWidth(textNode, svgTree);
+            if (width != null) assignment.maxWidth = width;
+          }
+        }
+        return assignment;
+      })
+    );
+  },
+
+  bulkAssignImages: (mappings) => {
+    const { assignments, undoStack } = get();
+    set(
+      bulkAssignByType(assignments, undoStack, 'image', mappings, (m) => ({
+        nodeId: m.nodeId,
+        fieldId: m.fieldId,
+      }))
+    );
   },
 
   validate: () => {

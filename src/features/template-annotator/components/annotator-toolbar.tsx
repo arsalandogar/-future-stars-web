@@ -1,13 +1,17 @@
 import { ActionIcon, Badge, Group, Text, Tooltip } from '@mantine/core';
-import { Download, Redo2, RotateCcw, Undo2 } from 'lucide-react';
+import { Download, Redo2, RotateCcw, Undo2, Wand2 } from 'lucide-react';
 
 import { useAnnotatorStore } from '../stores/annotator-store';
 
 interface AnnotatorToolbarProps {
   onExport: () => void;
+  onDetect: () => void;
 }
 
-export function AnnotatorToolbar({ onExport }: AnnotatorToolbarProps) {
+export function AnnotatorToolbar({
+  onExport,
+  onDetect,
+}: AnnotatorToolbarProps) {
   const fileName = useAnnotatorStore((s) => s.fileName);
   const assignments = useAnnotatorStore((s) => s.assignments);
   const undoStack = useAnnotatorStore((s) => s.undoStack);
@@ -48,6 +52,12 @@ export function AnnotatorToolbar({ onExport }: AnnotatorToolbarProps) {
             size="sm"
           >
             <Redo2 size={14} />
+          </ActionIcon>
+        </Tooltip>
+
+        <Tooltip label="Auto-Detect">
+          <ActionIcon variant="subtle" onClick={onDetect} size="sm">
+            <Wand2 size={14} />
           </ActionIcon>
         </Tooltip>
 

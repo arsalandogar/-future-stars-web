@@ -102,7 +102,7 @@ export function getNodeLabel(node: SvgJsonNode): string {
   return tag;
 }
 
-function collectTextContent(node: SvgJsonNode): string {
+export function collectTextContent(node: SvgJsonNode): string {
   if (node.type === 'text') return node.value;
   return node.children.map(collectTextContent).join('');
 }

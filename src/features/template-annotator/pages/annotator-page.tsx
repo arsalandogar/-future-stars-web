@@ -9,7 +9,7 @@ import { useAnnotatorStore } from '../stores/annotator-store';
 import { AnnotatorCanvas } from '../components/annotator-canvas';
 import { AnnotatorToolbar } from '../components/annotator-toolbar';
 import { AssignmentSummaryTable } from '../components/assignment-summary-table';
-import { ColorDetectionModal } from '../components/color-detection-modal';
+import { DetectionWizardModal } from '../components/detection-wizard-modal';
 import { ElementTree } from '../components/element-tree';
 import { ExportModal } from '../components/export-modal';
 import { FieldAssignmentPanel } from '../components/field-assignment-panel';
@@ -37,17 +37,18 @@ export function AnnotatorPage() {
   const validate = useAnnotatorStore((s) => s.validate);
   const [exportOpened, { open: openExport, close: closeExport }] =
     useDisclosure(false);
+  const [wizardOpened, { open: openWizard, close: closeWizard }] =
+    useDisclosure(false);
   const [rightTab, setRightTab] = useState<RightPanelTab>('assign');
 
-  // Track which nodeMap the user has dismissed the modal for (reference identity)
-  const [dismissedForMap, setDismissedForMap] = useState<typeof nodeMap | null>(
-    null
-  );
+  // Auto-open wizard when a new SVG is loaded (reference identity check)
+  const [autoOpenedForMap, setAutoOpenedForMap] = useState<
+    typeof nodeMap | null
+  >(null);
 
-  const colorModalOpened = nodeMap.size > 0 && dismissedForMap !== nodeMap;
-
-  function closeColorModal() {
-    setDismissedForMap(nodeMap);
+  if (nodeMap.size > 0 && autoOpenedForMap !== nodeMap) {
+    setAutoOpenedForMap(nodeMap);
+    openWizard();
   }
 
   if (!svgTree) {
@@ -62,7 +63,7 @@ export function AnnotatorPage() {
     <>
       <div className={styles.layout}>
         <div className={styles.toolbar}>
-          <AnnotatorToolbar onExport={openExport} />
+          <AnnotatorToolbar onExport={openExport} onDetect={openWizard} />
         </div>
 
         <div className={styles.tree}>
@@ -118,10 +119,11 @@ export function AnnotatorPage() {
       </div>
 
       <ExportModal opened={exportOpened} onClose={closeExport} />
+
       {nodeMap.size > 0 && (
-        <ColorDetectionModal
-          opened={colorModalOpened}
-          onClose={closeColorModal}
+        <DetectionWizardModal
+          opened={wizardOpened}
+          onClose={closeWizard}
           nodeMap={nodeMap}
         />
       )}

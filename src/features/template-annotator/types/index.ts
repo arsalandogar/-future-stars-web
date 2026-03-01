@@ -37,6 +37,19 @@ export interface DetectedColor {
   occurrences: ColorOccurrence[];
 }
 
+export interface DetectedText {
+  nodeId: string;
+  textContent: string;
+  tagName: string;
+}
+
+export interface DetectedImage {
+  nodeId: string;
+  href: string;
+  width: string | undefined;
+  height: string | undefined;
+}
+
 export type ValidationSeverity = 'error' | 'warning';
 
 export interface ValidationResult {
