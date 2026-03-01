@@ -86,6 +86,9 @@ export function PhotoTab() {
   const editableImageFields = useCardEditorStore(
     (s) => s.sides[s.activeSide].editableImageFields
   );
+  const hasTemplate = useCardEditorStore(
+    (s) => s.sides[s.activeSide].workingCopy !== null
+  );
   const updateImageField = useCardEditorStore((s) => s.updateImageField);
   const removeImageField = useCardEditorStore((s) => s.removeImageField);
   const adjustImageZoom = useCardEditorStore((s) => s.adjustImageZoom);
@@ -271,7 +274,16 @@ export function PhotoTab() {
       <div className={styles.container}>
         <TabEmptyState
           icon={<ImageIcon size={40} />}
-          message="Select a template to upload photos"
+          message={
+            hasTemplate
+              ? 'This template has no editable photo fields'
+              : 'Select a template to upload photos'
+          }
+          hint={
+            hasTemplate
+              ? 'Choose a different template to upload photos.'
+              : 'Browse the Templates tab to get started'
+          }
         />
       </div>
     );

@@ -11,13 +11,25 @@ export function ColorsTab() {
   const editableColorFields = useCardEditorStore(
     (s) => s.sides[s.activeSide].editableColorFields
   );
+  const hasTemplate = useCardEditorStore(
+    (s) => s.sides[s.activeSide].workingCopy !== null
+  );
 
   if (editableColorFields.length === 0) {
     return (
       <div className={styles.container}>
         <TabEmptyState
           icon={<Palette size={40} />}
-          message="Select a template to customize colors"
+          message={
+            hasTemplate
+              ? 'This template has no editable color fields'
+              : 'Select a template to customize colors'
+          }
+          hint={
+            hasTemplate
+              ? 'Choose a different template to edit colors.'
+              : 'Browse the Templates tab to get started'
+          }
         />
       </div>
     );

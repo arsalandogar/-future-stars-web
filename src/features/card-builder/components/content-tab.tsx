@@ -11,13 +11,25 @@ export function ContentTab() {
   const editableFields = useCardEditorStore(
     (s) => s.sides[s.activeSide].editableFields
   );
+  const hasTemplate = useCardEditorStore(
+    (s) => s.sides[s.activeSide].workingCopy !== null
+  );
 
   if (editableFields.length === 0) {
     return (
       <div className={styles.container}>
         <TabEmptyState
           icon={<Type size={40} />}
-          message="Select a template to edit content"
+          message={
+            hasTemplate
+              ? 'This template has no editable content fields'
+              : 'Select a template to edit content'
+          }
+          hint={
+            hasTemplate
+              ? 'Choose a different template to edit content.'
+              : 'Browse the Templates tab to get started'
+          }
         />
       </div>
     );
