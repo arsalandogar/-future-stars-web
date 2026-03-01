@@ -33,8 +33,6 @@ export function BuilderHeader({
   templateId,
   backTemplateId,
 }: BuilderHeaderProps) {
-  const getEditsForSave = useCardEditorStore((s) => s.getEditsForSave);
-  const sides = useCardEditorStore((s) => s.sides);
   const uploading = useImageUploadStore((s) =>
     Object.values(s.uploads).some((e) => e.status === 'uploading')
   );
@@ -43,7 +41,9 @@ export function BuilderHeader({
   const handleSave = () => {
     if (!templateId) return;
 
-    const { frontEdits, backEdits } = getEditsForSave();
+    const store = useCardEditorStore.getState();
+    const { frontEdits, backEdits } = store.getEditsForSave();
+    const { sides } = store;
 
     const frontFields: DiscoveredFields = {
       textFields: sides.front.editableFields,

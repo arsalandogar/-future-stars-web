@@ -22,16 +22,20 @@ export function ContentField({ field }: ContentFieldProps) {
   const resetField = useCardEditorStore((s) => s.resetField);
 
   useEffect(() => {
-    function handleFocusChange() {
-      const { focusedFieldId, setFocusedFieldId } =
-        useCardEditorStore.getState();
+    function handleFocus(focusedFieldId: string | null) {
       if (focusedFieldId === field.fieldId) {
         inputRef.current?.focus();
-        setFocusedFieldId(null);
+        useCardEditorStore.getState().setFocusedFieldId(null);
       }
     }
-    handleFocusChange(); // handle focus target set before mount
-    return useCardEditorStore.subscribe(handleFocusChange);
+
+    // Handle focus target set before mount
+    handleFocus(useCardEditorStore.getState().focusedFieldId);
+
+    return useCardEditorStore.subscribe((state, previousState) => {
+      if (state.focusedFieldId === previousState.focusedFieldId) return;
+      handleFocus(state.focusedFieldId);
+    });
   }, [field.fieldId]);
 
   const currentValue = editedValue ?? field.originalValue;
