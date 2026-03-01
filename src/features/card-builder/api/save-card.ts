@@ -13,12 +13,7 @@ interface SaveCardParams {
 
 export const useSaveCard = createMutation({
   mutationFn: async (params: SaveCardParams): Promise<Card> => {
-    const response: { data: Card } = await api.post('cards/v2', {
-      template_id: params.templateId,
-      edits_json: params.editsJson,
-      back_template_id: params.backTemplateId,
-      back_edits_json: params.backEditsJson,
-    });
+    const response: { data: Card } = await api.post('cards/v2', params);
     return response.data;
   },
 });
