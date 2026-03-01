@@ -99,11 +99,31 @@ function createEmptySideState(): SideState {
   };
 }
 
+/** Apply preset colors positionally to color fields, falling back to original values. */
+function applyPresetColors(
+  edits: Edits,
+  colorFields: EditableColorField[],
+  presetColors: string[]
+): Edits {
+  let result: Edits = { ...edits };
+  for (let i = 0; i < colorFields.length; i++) {
+    const field = colorFields[i];
+    const color =
+      i < presetColors.length ? presetColors[i] : field.originalValue;
+    result = withColorEdit(result, field, color);
+  }
+  return result;
+}
+
 /** Rebuild a side from SVG while re-applying matching editable state. */
 function initializeSideSnapshot(svgNode: SvgJsonNode, previous: SideState) {
   const { workingCopy, fields } = prepareTemplate(svgNode);
 
   const preservedEdits: Edits = { ...previous.edits };
+
+  if (previous.appliedPresetColors) {
+    applyPresetColors({}, fields.colorFields, previous.appliedPresetColors);
+  }
   applyEdits(fields, preservedEdits);
 
   return {
@@ -224,19 +244,11 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
   applyColorPreset: (colors, presetId, side) => {
     const state = get();
     const [target, sideState] = getSide(state, side);
-    let newEdits = { ...sideState.edits };
-
-    for (let i = 0; i < sideState.editableColorFields.length; i++) {
-      const color =
-        i < colors.length
-          ? colors[i]
-          : sideState.editableColorFields[i].originalValue;
-      newEdits = withColorEdit(
-        newEdits,
-        sideState.editableColorFields[i],
-        color
-      );
-    }
+    const newEdits = applyPresetColors(
+      sideState.edits,
+      sideState.editableColorFields,
+      colors
+    );
 
     set(
       commitSide(state, target, {
@@ -291,14 +303,11 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
   resetToPreset: (side) => {
     const state = get();
     const [target, sideState] = getSide(state, side);
-    let newEdits = { ...sideState.edits };
-
-    for (let i = 0; i < sideState.editableColorFields.length; i++) {
-      const field = sideState.editableColorFields[i];
-      const targetColor =
-        sideState.appliedPresetColors?.[i] ?? field.originalValue;
-      newEdits = withColorEdit(newEdits, field, targetColor);
-    }
+    const newEdits = applyPresetColors(
+      sideState.edits,
+      sideState.editableColorFields,
+      sideState.appliedPresetColors ?? []
+    );
 
     set(
       commitSide(state, target, {
