@@ -3,25 +3,24 @@ import { create } from 'zustand';
 import {
   type SvgJsonNode,
   type EditableFieldId,
-  type EditValue,
   type EditableColorField,
   type EditableImageField,
   type EditableTextField,
-  applyColorEdit,
-  applyImageEdit,
+  type Edits,
   applyTextEdit,
-  discoverEditableColorFields,
-  discoverEditableImageFields,
-  discoverEditableTextFields,
-  isImageEdit,
+  applyImageEdit,
   getEditUrl,
-  DEFAULT_IMAGE_POSITION,
+  prepareTemplate,
+  applyEdits,
+  withColorEdit,
+  withImageEdit,
+  applyImageZoom,
+  nudgeImageNodes,
+  withZoomEdit,
+  withNudgeEdit,
 } from '@fs-card-engine';
-import { cloneWithStableIds } from '@/utils/svg-tree';
 
 export type Side = 'front' | 'back';
-
-type Edits = Partial<Record<EditableFieldId, EditValue>>;
 
 interface SideState {
   workingCopy: SvgJsonNode | null;
@@ -87,49 +86,6 @@ interface CardEditorState {
   reset: () => void;
 }
 
-/** Apply a color to the SVG node and update the edits record accordingly. */
-function setColorEdit(
-  edits: Edits,
-  field: EditableColorField,
-  color: string
-): void {
-  applyColorEdit(field, color);
-  if (color === field.originalValue) {
-    delete edits[field.fieldId];
-  } else {
-    edits[field.fieldId] = color;
-  }
-}
-
-/** Parse an SVG node into a cloned working copy and its discovered editable fields. */
-function parseSvgTemplate(svgNode: SvgJsonNode) {
-  const workingCopy = cloneWithStableIds(svgNode);
-  return {
-    workingCopy,
-    editableFields: discoverEditableTextFields(workingCopy),
-    editableColorFields: discoverEditableColorFields(workingCopy),
-    editableImageFields: discoverEditableImageFields(workingCopy),
-  };
-}
-
-function nextImageEdits(
-  edits: Edits,
-  field: EditableImageField,
-  fieldId: EditableFieldId,
-  imageUrl: string
-): Edits {
-  const newEdits = { ...edits };
-  if (imageUrl === field.originalValue) {
-    delete newEdits[fieldId];
-  } else {
-    // Preserve existing position if just swapping URLs (e.g. local -> CDN)
-    const prev = edits[fieldId];
-    const position = isImageEdit(prev) ? prev : DEFAULT_IMAGE_POSITION;
-    newEdits[fieldId] = { ...position, url: imageUrl };
-  }
-  return newEdits;
-}
-
 function createEmptySideState(): SideState {
   return {
     workingCopy: null,
@@ -145,47 +101,16 @@ function createEmptySideState(): SideState {
 
 /** Rebuild a side from SVG while re-applying matching editable state. */
 function initializeSideSnapshot(svgNode: SvgJsonNode, previous: SideState) {
-  const {
-    workingCopy,
-    editableFields,
-    editableColorFields,
-    editableImageFields,
-  } = parseSvgTemplate(svgNode);
+  const { workingCopy, fields } = prepareTemplate(svgNode);
 
-  // Keep all previous edits in store state and re-apply only the edits
-  // that map to fields present in the current template snapshot.
   const preservedEdits: Edits = { ...previous.edits };
-
-  // Re-apply preserved text edits to the new working copy.
-  for (const field of editableFields) {
-    const editedValue = preservedEdits[field.fieldId];
-    if (typeof editedValue === 'string') {
-      applyTextEdit(field, editedValue);
-    }
-  }
-
-  // Re-apply matching direct color edits by field id.
-  for (const field of editableColorFields) {
-    const editedValue = preservedEdits[field.fieldId];
-    if (typeof editedValue === 'string') {
-      applyColorEdit(field, editedValue);
-    }
-  }
-
-  // Re-apply preserved image edits to the new working copy.
-  for (const imageField of editableImageFields) {
-    const editedValue = preservedEdits[imageField.fieldId];
-    const url = getEditUrl(editedValue);
-    if (url) {
-      applyImageEdit(imageField, url);
-    }
-  }
+  applyEdits(fields, preservedEdits);
 
   return {
     workingCopy,
-    editableFields,
-    editableColorFields,
-    editableImageFields,
+    editableFields: fields.textFields,
+    editableColorFields: fields.colorFields,
+    editableImageFields: fields.imageFields,
     edits: preservedEdits,
     revision: previous.revision + 1,
     appliedPresetId: previous.appliedPresetColors
@@ -291,8 +216,7 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
     );
     if (!field) return;
 
-    const newEdits = { ...sideState.edits };
-    setColorEdit(newEdits, field, color);
+    const newEdits = withColorEdit(sideState.edits, field, color);
 
     set(commitSide(state, target, { edits: newEdits, appliedPresetId: null }));
   },
@@ -300,14 +224,18 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
   applyColorPreset: (colors, presetId, side) => {
     const state = get();
     const [target, sideState] = getSide(state, side);
-    const newEdits = { ...sideState.edits };
+    let newEdits = { ...sideState.edits };
 
     for (let i = 0; i < sideState.editableColorFields.length; i++) {
       const color =
         i < colors.length
           ? colors[i]
           : sideState.editableColorFields[i].originalValue;
-      setColorEdit(newEdits, sideState.editableColorFields[i], color);
+      newEdits = withColorEdit(
+        newEdits,
+        sideState.editableColorFields[i],
+        color
+      );
     }
 
     set(
@@ -335,9 +263,9 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
     const colorB =
       getEditUrl(sideState.edits[fieldIdB]) ?? fieldB.originalValue;
 
-    const newEdits = { ...sideState.edits };
-    setColorEdit(newEdits, fieldA, colorB);
-    setColorEdit(newEdits, fieldB, colorA);
+    let newEdits = { ...sideState.edits };
+    newEdits = withColorEdit(newEdits, fieldA, colorB);
+    newEdits = withColorEdit(newEdits, fieldB, colorA);
 
     set(commitSide(state, target, { edits: newEdits, appliedPresetId: null }));
   },
@@ -345,10 +273,10 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
   resetAllColors: (side) => {
     const state = get();
     const [target, sideState] = getSide(state, side);
-    const newEdits = { ...sideState.edits };
+    let newEdits = { ...sideState.edits };
 
     for (const field of sideState.editableColorFields) {
-      setColorEdit(newEdits, field, field.originalValue);
+      newEdits = withColorEdit(newEdits, field, field.originalValue);
     }
 
     set(
@@ -363,13 +291,13 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
   resetToPreset: (side) => {
     const state = get();
     const [target, sideState] = getSide(state, side);
-    const newEdits = { ...sideState.edits };
+    let newEdits = { ...sideState.edits };
 
     for (let i = 0; i < sideState.editableColorFields.length; i++) {
       const field = sideState.editableColorFields[i];
       const targetColor =
         sideState.appliedPresetColors?.[i] ?? field.originalValue;
-      setColorEdit(newEdits, field, targetColor);
+      newEdits = withColorEdit(newEdits, field, targetColor);
     }
 
     set(
@@ -394,7 +322,7 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
 
     set(
       commitSide(state, target, {
-        edits: nextImageEdits(sideState.edits, field, fieldId, imageUrl),
+        edits: withImageEdit(sideState.edits, field, fieldId, imageUrl),
       })
     );
   },
@@ -423,37 +351,13 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
     );
     if (!field) return;
 
-    for (const node of field.elementNodes) {
-      // Store original dimensions on first use
-      if (!node.attributes['data-orig-width']) {
-        node.attributes['data-orig-width'] = node.attributes.width;
-        node.attributes['data-orig-height'] = node.attributes.height;
-        node.attributes['data-orig-x'] = node.attributes.x ?? '0';
-        node.attributes['data-orig-y'] = node.attributes.y ?? '0';
-      }
+    applyImageZoom(field.elementNodes, zoom, offsetX, offsetY);
 
-      const origW = parseFloat(node.attributes['data-orig-width']);
-      const origH = parseFloat(node.attributes['data-orig-height']);
-      const origX = parseFloat(node.attributes['data-orig-x']);
-      const origY = parseFloat(node.attributes['data-orig-y']);
-
-      const newW = origW * zoom;
-      const newH = origH * zoom;
-      node.attributes.width = String(newW);
-      node.attributes.height = String(newH);
-      node.attributes.x = String(origX - (newW - origW) / 2 + offsetX);
-      node.attributes.y = String(origY - (newH - origH) / 2 + offsetY);
-    }
-
-    // Update position in the image edit entry
-    const prev = sideState.edits[fieldId];
-    const url = getEditUrl(prev) ?? '';
-    const newEdits = { ...sideState.edits };
-    if (url) {
-      newEdits[fieldId] = { url, zoom, offsetX, offsetY };
-    }
-
-    set(commitSide(state, target, { edits: newEdits }));
+    set(
+      commitSide(state, target, {
+        edits: withZoomEdit(sideState.edits, fieldId, zoom, offsetX, offsetY),
+      })
+    );
   },
 
   nudgeImagePosition: (fieldId, dx, dy, side) => {
@@ -464,28 +368,13 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
     );
     if (!field) return;
 
-    for (const node of field.elementNodes) {
-      const curX = parseFloat(node.attributes.x ?? '0');
-      const curY = parseFloat(node.attributes.y ?? '0');
-      node.attributes.x = String(curX + dx);
-      node.attributes.y = String(curY + dy);
-    }
+    nudgeImageNodes(field.elementNodes, dx, dy);
 
-    // Update position in the image edit entry
-    const prev = sideState.edits[fieldId];
-    const url = getEditUrl(prev) ?? '';
-    const pos = isImageEdit(prev) ? prev : DEFAULT_IMAGE_POSITION;
-    const newEdits = { ...sideState.edits };
-    if (url) {
-      newEdits[fieldId] = {
-        url,
-        zoom: pos.zoom,
-        offsetX: pos.offsetX + dx,
-        offsetY: pos.offsetY + dy,
-      };
-    }
-
-    set(commitSide(state, target, { edits: newEdits }));
+    set(
+      commitSide(state, target, {
+        edits: withNudgeEdit(sideState.edits, fieldId, dx, dy),
+      })
+    );
   },
 
   resetField: (fieldId, side) => {

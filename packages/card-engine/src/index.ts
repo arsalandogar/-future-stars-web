@@ -45,3 +45,21 @@ export {
 
 // SVG parsing
 export { parseSvgSync, parseSvg, stringifySvg } from './parse-svg.ts';
+
+// SVG cloning
+export { cloneWithStableIds } from './svg-clone.ts';
+
+// Edit operations
+export {
+  prepareTemplate,
+  applyEdits,
+  cleanEditsForSave,
+  withColorEdit,
+  withImageEdit,
+  applyImageZoom,
+  nudgeImageNodes,
+  withZoomEdit,
+  withNudgeEdit,
+  type Edits,
+  type DiscoveredFields,
+} from './edit-operations.ts';

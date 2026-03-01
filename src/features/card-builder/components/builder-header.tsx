@@ -3,7 +3,13 @@ import { Save } from 'lucide-react';
 
 import { useSaveCard } from '../api/save-card';
 import { useCardEditorStore } from '../stores/card-editor-store';
-import { type EditValue, getEditUrl } from '@fs-card-engine';
+import {
+  type EditValue,
+  type DiscoveredFields,
+  type Edits,
+  getEditUrl,
+  cleanEditsForSave,
+} from '@fs-card-engine';
 import { useImageUploadStore } from '../stores/image-upload-store';
 
 import styles from './builder-header.module.css';
@@ -14,9 +20,7 @@ interface BuilderHeaderProps {
   backTemplateId: number | null;
 }
 
-function cleanBlobEdits(
-  edits: Partial<Record<string, EditValue>>
-): Record<string, EditValue> {
+function cleanBlobEdits(edits: Edits): Record<string, EditValue> {
   return Object.fromEntries(
     Object.entries(edits).filter(
       ([, value]) => value && !getEditUrl(value)?.startsWith('blob:')
@@ -30,6 +34,7 @@ export function BuilderHeader({
   backTemplateId,
 }: BuilderHeaderProps) {
   const getEditsForSave = useCardEditorStore((s) => s.getEditsForSave);
+  const sides = useCardEditorStore((s) => s.sides);
   const uploading = useImageUploadStore((s) =>
     Object.values(s.uploads).some((e) => e.status === 'uploading')
   );
@@ -39,8 +44,22 @@ export function BuilderHeader({
     if (!templateId) return;
 
     const { frontEdits, backEdits } = getEditsForSave();
-    const cleanFront = cleanBlobEdits(frontEdits);
-    const cleanBack = cleanBlobEdits(backEdits);
+
+    const frontFields: DiscoveredFields = {
+      textFields: sides.front.editableFields,
+      colorFields: sides.front.editableColorFields,
+      imageFields: sides.front.editableImageFields,
+    };
+    const backFields: DiscoveredFields = {
+      textFields: sides.back.editableFields,
+      colorFields: sides.back.editableColorFields,
+      imageFields: sides.back.editableImageFields,
+    };
+
+    const cleanFront = cleanBlobEdits(
+      cleanEditsForSave(frontEdits, frontFields)
+    );
+    const cleanBack = cleanBlobEdits(cleanEditsForSave(backEdits, backFields));
 
     saveCard.mutate({
       templateId,

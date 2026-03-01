@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 
-import { cloneWithStableIds } from '@/utils/svg-tree';
+import { cloneWithStableIds } from '@fs-card-engine';
 
 import { useAnnotatorStore } from '../stores/annotator-store';
 import { parseSvgString } from '../utils/parse-svg';

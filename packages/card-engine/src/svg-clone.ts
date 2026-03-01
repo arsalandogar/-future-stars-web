@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
 
-import type { SvgJsonNode } from '@/types/svg';
+import type { SvgJsonNode } from './types.ts';
 
 function assignNodeIds(node: SvgJsonNode): void {
   if (node.type === 'text') return;
