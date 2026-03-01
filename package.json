@@ -46,7 +46,6 @@
     "react-dom": "^19.2.0",
     "react-easy-crop": "^5.5.6",
     "react-icons": "^5.5.0",
-    "react-is": "^19.2.3",
     "react-query-kit": "^3.3.2",
     "recharts": "^3.5.1",
     "tailwind-preset-mantine": "^3.0.3",
