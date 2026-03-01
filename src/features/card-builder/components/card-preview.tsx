@@ -1,6 +1,7 @@
-import { AspectRatio, Button, Loader, Text } from '@mantine/core';
+import { AspectRatio, Button, Skeleton, Text } from '@mantine/core';
 import { ArrowRight, Plus, RefreshCw } from 'lucide-react';
 
+import { FlipIcon } from '@/components/icons/flip-icon';
 import type { SvgJsonNode } from '@/types/svg';
 import type { SvgRenderOptions } from '@/components/svg-renderer/svg-renderer';
 
@@ -18,7 +19,10 @@ interface CardPreviewProps {
   options?: SvgRenderOptions;
 }
 
-type CardContentProps = Omit<CardPreviewProps, 'hasTemplate'>;
+type CardContentProps = Omit<
+  CardPreviewProps,
+  'hasTemplate' | 'onSelectTemplate'
+>;
 
 function CardContent({
   svgNode,
@@ -30,7 +34,7 @@ function CardContent({
   // Used as key on SvgRenderer to force React to rebuild the SVG tree
   // after in-place text node mutations (React Compiler skips re-render
   // when only the interior of an unchanged object reference is mutated).
-  const revision = useCardEditorStore((s) => s.revision);
+  const revision = useCardEditorStore((s) => s.sides[s.activeSide].revision);
 
   if (isError) {
     return (
@@ -52,8 +56,8 @@ function CardContent({
 
   if (isLoading || !svgNode) {
     return (
-      <div className={styles.placeholder}>
-        <Loader color="gray" size="lg" />
+      <div className={styles.skeletonContainer} aria-hidden="true">
+        <Skeleton radius={0} className={styles.skeletonFill} />
       </div>
     );
   }
@@ -78,9 +82,24 @@ export function CardPreview({
   options,
 }: CardPreviewProps) {
   const frameClass = hasTemplate ? styles.frameless : '';
+  const activeSide = useCardEditorStore((s) => s.activeSide);
+  const hasBackWorkingCopy = useCardEditorStore(
+    (s) => s.sides.back.workingCopy !== null
+  );
+  const setActiveSide = useCardEditorStore((s) => s.setActiveSide);
+
+  const canFlip = hasTemplate && hasBackWorkingCopy && !isLoading;
+
+  const handleFlip = () => {
+    setActiveSide(activeSide === 'front' ? 'back' : 'front');
+  };
 
   return (
     <div className={styles.container}>
+      <Text className={styles.sideLabel}>
+        {activeSide === 'front' ? 'FRONT' : 'BACK'}
+      </Text>
+
       <div className={`${styles.outerFrame} ${frameClass}`}>
         <div className={`${styles.innerFrame} ${frameClass}`}>
           <AspectRatio ratio={2.5 / 3.5}>
@@ -112,6 +131,17 @@ export function CardPreview({
           </AspectRatio>
         </div>
       </div>
+
+      {canFlip && (
+        <button
+          type="button"
+          className={styles.flipButton}
+          onClick={handleFlip}
+        >
+          <FlipIcon size={18} />
+          Flip
+        </button>
+      )}
 
       {!hasTemplate && (
         <Button

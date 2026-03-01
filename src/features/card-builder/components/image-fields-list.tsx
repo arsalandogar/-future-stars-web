@@ -6,7 +6,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useCardBuilderStore } from '../stores/card-builder-store';
 import { useCardEditorStore } from '../stores/card-editor-store';
 import { getEditUrl } from '@fs-card-engine';
-import { useImageUploadStore } from '../stores/image-upload-store';
+import { toUploadKey, useImageUploadStore } from '../stores/image-upload-store';
 
 import styles from './image-fields-list.module.css';
 
@@ -17,12 +17,16 @@ const STATUS_ICONS: Record<string, ReactNode> = {
 };
 
 export function ImageFieldsList() {
-  const editableImageFields = useCardEditorStore((s) => s.editableImageFields);
+  const editableImageFields = useCardEditorStore(
+    (s) => s.sides[s.activeSide].editableImageFields
+  );
+  const activeSide = useCardEditorStore((s) => s.activeSide);
   const imageEditUrls = useCardEditorStore(
     useShallow((s) => {
       const result: Record<string, string | undefined> = {};
-      for (const field of s.editableImageFields) {
-        result[field.fieldId] = getEditUrl(s.edits[field.fieldId]);
+      const active = s.sides[s.activeSide];
+      for (const field of active.editableImageFields) {
+        result[field.fieldId] = getEditUrl(active.edits[field.fieldId]);
       }
       return result;
     })
@@ -39,7 +43,8 @@ export function ImageFieldsList() {
     <div className={styles.list}>
       {editableImageFields.map((field) => {
         const currentUrl = imageEditUrls[field.fieldId] ?? field.originalValue;
-        const upload = uploads[field.fieldId];
+        const uploadKey = toUploadKey(activeSide, field.fieldId);
+        const upload = uploads[uploadKey];
         const isSelected = selectedImageFieldId === field.fieldId;
         const hasImage = currentUrl && !currentUrl.startsWith('data:');
 

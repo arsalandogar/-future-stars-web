@@ -7,6 +7,8 @@ import type { EditValue } from '@fs-card-engine';
 interface SaveCardParams {
   templateId: number;
   editsJson: Record<string, EditValue>;
+  backTemplateId: number | null;
+  backEditsJson: Record<string, EditValue>;
 }
 
 export const useSaveCard = createMutation({
@@ -14,6 +16,8 @@ export const useSaveCard = createMutation({
     const response: { data: Card } = await api.post('cards', {
       template_id: params.templateId,
       edits_json: params.editsJson,
+      back_template_id: params.backTemplateId,
+      back_edits_json: params.backEditsJson,
     });
     return response.data;
   },

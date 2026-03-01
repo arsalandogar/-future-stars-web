@@ -62,9 +62,13 @@ function EmptyState({ message }: { message: string }) {
 }
 
 function OriginalSwatch() {
-  const editableColorFields = useCardEditorStore((s) => s.editableColorFields);
+  const editableColorFields = useCardEditorStore(
+    (s) => s.sides[s.activeSide].editableColorFields
+  );
   const isOriginal = useCardEditorStore((s) =>
-    s.editableColorFields.every((f) => s.edits[f.fieldId] == null)
+    s.sides[s.activeSide].editableColorFields.every(
+      (f) => s.sides[s.activeSide].edits[f.fieldId] == null
+    )
   );
   const resetAllColors = useCardEditorStore((s) => s.resetAllColors);
 
@@ -74,7 +78,7 @@ function OriginalSwatch() {
     <button
       type="button"
       className={swatchStyles.wrapper}
-      onClick={resetAllColors}
+      onClick={() => resetAllColors()}
       aria-label="Reset to original colors"
     >
       <div
@@ -96,7 +100,9 @@ function OriginalSwatch() {
 
 function PopularContent() {
   const { data, isLoading } = useBrowseColorPresets();
-  const appliedPresetId = useCardEditorStore((s) => s.appliedPresetId);
+  const appliedPresetId = useCardEditorStore(
+    (s) => s.sides[s.activeSide].appliedPresetId
+  );
 
   if (isLoading) return <LoadingState />;
 
@@ -121,7 +127,9 @@ function TeamContent() {
     useBrowseColorLeagues();
   const { data: presetsData, isLoading: presetsLoading } =
     useBrowseColorPresets();
-  const appliedPresetId = useCardEditorStore((s) => s.appliedPresetId);
+  const appliedPresetId = useCardEditorStore(
+    (s) => s.sides[s.activeSide].appliedPresetId
+  );
   const [activeLeagueId, setActiveLeagueId] = useState<number | null>(null);
 
   if (leaguesLoading || presetsLoading) return <LoadingState />;
@@ -172,7 +180,9 @@ function TeamContent() {
 
 function MyColorsContent() {
   const { data, isLoading } = useColorFavorites();
-  const appliedPresetId = useCardEditorStore((s) => s.appliedPresetId);
+  const appliedPresetId = useCardEditorStore(
+    (s) => s.sides[s.activeSide].appliedPresetId
+  );
 
   if (isLoading) return <LoadingState />;
 

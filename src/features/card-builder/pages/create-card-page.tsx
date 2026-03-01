@@ -31,10 +31,15 @@ export function CreateCardPage() {
   const setSelectedImageFieldId = useCardBuilderStore(
     (s) => s.setSelectedImageFieldId
   );
-  const initializeFromSvg = useCardEditorStore((s) => s.initializeFromSvg);
+  const initializeSideFromSvg = useCardEditorStore(
+    (s) => s.initializeSideFromSvg
+  );
   const resetEditor = useCardEditorStore((s) => s.reset);
   const setFocusedFieldId = useCardEditorStore((s) => s.setFocusedFieldId);
-  const workingCopy = useCardEditorStore((s) => s.workingCopy);
+  const activeSide = useCardEditorStore((s) => s.activeSide);
+  const workingCopy = useCardEditorStore(
+    (s) => s.sides[s.activeSide].workingCopy
+  );
 
   const { previewRef, wasDragRef } = usePreviewGestures();
 
@@ -85,21 +90,46 @@ export function CreateCardPage() {
   );
 
   const { data, isLoading: isLoadingTemplates } = useBuilderTemplates();
-  const tags = data?.data ?? [];
+  const tags = useMemo(() => data?.data ?? [], [data]);
+
+  // Resolve backTemplateId from browse data
+  const backTemplateId = useMemo(() => {
+    if (!templateId) return null;
+    for (const tag of tags) {
+      const match = tag.templates.find((t) => t.id === templateId);
+      if (match?.backTemplateId) return match.backTemplateId;
+    }
+    return null;
+  }, [templateId, tags]);
 
   const {
     data: originalSvgNode,
     isLoading: isLoadingSvg,
-    isError,
-    refetch,
+    isError: isErrorSvg,
+    refetch: refetchFrontSvg,
   } = useTemplateSvgJson({
     variables: templateId ?? 0,
     enabled: templateId != null,
   });
 
+  const {
+    data: backSvgNode,
+    isLoading: isLoadingBackSvg,
+    isError: isErrorBackSvg,
+    refetch: refetchBackSvg,
+  } = useTemplateSvgJson({
+    variables: backTemplateId ?? 0,
+    enabled: backTemplateId != null,
+  });
+
   useEffect(() => {
-    initializeFromSvg(originalSvgNode);
-  }, [originalSvgNode, initializeFromSvg]);
+    initializeSideFromSvg('front', originalSvgNode);
+  }, [originalSvgNode, initializeSideFromSvg]);
+
+  useEffect(() => {
+    if (!backTemplateId || !backSvgNode) return;
+    initializeSideFromSvg('back', backSvgNode);
+  }, [backTemplateId, backSvgNode, initializeSideFromSvg]);
 
   useEffect(() => {
     return () => {
@@ -109,26 +139,41 @@ export function CreateCardPage() {
     };
   }, [resetBuilder, resetEditor]);
 
-  const handleRetry = useCallback(() => void refetch(), [refetch]);
+  const handleRetry = useCallback(() => {
+    if (activeSide === 'front') {
+      void refetchFrontSvg();
+      return;
+    }
+
+    void refetchBackSvg();
+  }, [activeSide, refetchFrontSvg, refetchBackSvg]);
   const handleSelectTemplate = useCallback(
     () => setActiveTab('templates'),
     [setActiveTab]
   );
 
   const hasTemplate = templateId != null;
+  const isPreviewLoading =
+    hasTemplate && (activeSide === 'front' ? isLoadingSvg : isLoadingBackSvg);
+  const isPreviewError =
+    hasTemplate && (activeSide === 'front' ? isErrorSvg : isErrorBackSvg);
 
   return (
     <>
       <Head title="Create Card" description="Create your custom sports card" />
       <Container size="xl" className={styles.container}>
-        <BuilderHeader canSave={hasTemplate} templateId={templateId} />
+        <BuilderHeader
+          canSave={hasTemplate}
+          templateId={templateId}
+          backTemplateId={backTemplateId}
+        />
 
         <div className={styles.layout}>
           <div ref={previewRef} className={styles.preview}>
             <CardPreview
               svgNode={workingCopy}
-              isLoading={hasTemplate && isLoadingSvg}
-              isError={isError}
+              isLoading={isPreviewLoading}
+              isError={isPreviewError}
               onRetry={handleRetry}
               hasTemplate={hasTemplate}
               onSelectTemplate={handleSelectTemplate}

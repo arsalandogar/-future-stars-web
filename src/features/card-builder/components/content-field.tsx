@@ -15,7 +15,7 @@ export function ContentField({ field }: ContentFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [focused, setFocused] = useState(false);
   const editedValue = useCardEditorStore((s) => {
-    const v = s.edits[field.fieldId];
+    const v = s.sides[s.activeSide].edits[field.fieldId];
     return typeof v === 'string' ? v : undefined;
   });
   const updateTextField = useCardEditorStore((s) => s.updateTextField);

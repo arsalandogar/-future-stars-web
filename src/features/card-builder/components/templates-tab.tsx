@@ -1,4 +1,4 @@
-import { Loader, SimpleGrid, Text } from '@mantine/core';
+import { AspectRatio, SimpleGrid, Skeleton, Text } from '@mantine/core';
 import { useQueryClient } from '@tanstack/react-query';
 import { getRouteApi } from '@tanstack/react-router';
 
@@ -11,6 +11,7 @@ import type {
 
 import { useTemplateSvgJson } from '../api/get-template-svg-json';
 import { useCardBuilderStore } from '../stores/card-builder-store';
+import { useCardEditorStore } from '../stores/card-editor-store';
 import { TemplateThumbnail } from './template-thumbnail';
 
 import styles from './templates-tab.module.css';
@@ -21,6 +22,14 @@ interface TemplatesTabProps {
   tags: TagWithTemplates[];
   isLoading: boolean;
 }
+
+const TEMPLATE_GRID_COLS = { base: 2, xs: 3, sm: 4, md: 5 } as const;
+const TEMPLATE_GRID_SPACING = 'md';
+const TEMPLATE_SKELETON_COUNT = 10;
+const TEMPLATE_SKELETON_KEYS = Array.from(
+  { length: TEMPLATE_SKELETON_COUNT },
+  (_, index) => `template-skeleton-${index + 1}`
+);
 
 function getFilteredTemplates(
   tags: TagWithTemplates[],
@@ -60,9 +69,17 @@ function TemplatesGridContent({
 
   if (isLoading) {
     return (
-      <div className={styles.loader}>
-        <Loader color="white" size="md" />
-      </div>
+      <SimpleGrid cols={TEMPLATE_GRID_COLS} spacing={TEMPLATE_GRID_SPACING}>
+        {TEMPLATE_SKELETON_KEYS.map((skeletonKey) => (
+          <AspectRatio
+            key={skeletonKey}
+            ratio={2.5 / 3.5}
+            className={styles.skeletonCard}
+          >
+            <Skeleton radius={0} className={styles.skeletonFill} />
+          </AspectRatio>
+        ))}
+      </SimpleGrid>
     );
   }
 
@@ -75,7 +92,7 @@ function TemplatesGridContent({
   }
 
   return (
-    <SimpleGrid cols={{ base: 2, xs: 3, sm: 4, md: 5 }} spacing="md">
+    <SimpleGrid cols={TEMPLATE_GRID_COLS} spacing={TEMPLATE_GRID_SPACING}>
       {templates.map((template) => (
         <TemplateThumbnail
           key={template.id}
@@ -95,8 +112,10 @@ export function TemplatesTab({ tags, isLoading }: TemplatesTabProps) {
   const navigate = routeApi.useNavigate();
   const activeTagFilter = useCardBuilderStore((s) => s.activeTagFilter);
   const setActiveTagFilter = useCardBuilderStore((s) => s.setActiveTagFilter);
+  const setActiveSide = useCardEditorStore((s) => s.setActiveSide);
 
   const selectTemplate = (id: number) => {
+    setActiveSide('front');
     void navigate({
       search: (prev) => ({ ...prev, templateId: id }),
       replace: true,

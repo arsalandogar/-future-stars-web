@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import type { EditableFieldId } from '@/features/templates';
 
 import { useCardBuilderStore } from '../stores/card-builder-store';
-import { useCardEditorStore } from '../stores/card-editor-store';
+import { type Side, useCardEditorStore } from '../stores/card-editor-store';
 import {
   DEFAULT_IMAGE_POSITION,
   getEditUrl,
@@ -37,10 +37,13 @@ function resolveFieldId(
 
 /** Check whether the given image field has a user-uploaded image. */
 function fieldHasUpload(fieldId: string): boolean {
-  const { editableImageFields, edits } = useCardEditorStore.getState();
-  const field = editableImageFields.find((f) => f.fieldId === fieldId);
+  const store = useCardEditorStore.getState();
+  const sideState = store.sides[store.activeSide];
+  const field = sideState.editableImageFields.find(
+    (f) => f.fieldId === fieldId
+  );
   if (!field) return false;
-  const url = getEditUrl(edits[fieldId as EditableFieldId]);
+  const url = getEditUrl(sideState.edits[fieldId as EditableFieldId]);
   return Boolean(url && url !== field.originalValue);
 }
 
@@ -57,7 +60,8 @@ function getSvgScale(container: HTMLElement): number {
 /** Apply a zoom delta to a field and select it in the builder panel. */
 function applyZoomDelta(fieldId: string, delta: number): void {
   const store = useCardEditorStore.getState();
-  const edit = store.edits[fieldId as EditableFieldId];
+  const side = store.activeSide;
+  const edit = store.sides[side].edits[fieldId as EditableFieldId];
   const pos = isImageEdit(edit) ? edit : DEFAULT_IMAGE_POSITION;
   const newZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, pos.zoom + delta));
 
@@ -65,7 +69,8 @@ function applyZoomDelta(fieldId: string, delta: number): void {
     fieldId as EditableFieldId,
     newZoom,
     pos.offsetX,
-    pos.offsetY
+    pos.offsetY,
+    side
   );
 
   useCardBuilderStore
@@ -75,6 +80,7 @@ function applyZoomDelta(fieldId: string, delta: number): void {
 
 interface DragState {
   fieldId: string;
+  side: Side;
   lastX: number;
   lastY: number;
   hasMoved: boolean;
@@ -116,9 +122,11 @@ export function usePreviewGestures() {
       if (e.button !== 0) return;
       const fieldId = resolveFieldId(e.target, el!);
       if (!fieldId || !fieldHasUpload(fieldId)) return;
+      const side = useCardEditorStore.getState().activeSide;
 
       dragRef.current = {
         fieldId,
+        side,
         lastX: e.clientX,
         lastY: e.clientY,
         hasMoved: false,
@@ -147,7 +155,8 @@ export function usePreviewGestures() {
         .nudgeImagePosition(
           drag.fieldId as EditableFieldId,
           dx * scale,
-          dy * scale
+          dy * scale,
+          drag.side
         );
     }
 

@@ -1,9 +1,16 @@
 import { create } from 'zustand';
 
 import type { EditableFieldId } from '@/features/templates';
+import type { Side } from './card-editor-store';
+
+export type UploadKey = `${Side}:${string}`;
+
+export function toUploadKey(side: Side, fieldId: EditableFieldId): UploadKey {
+  return `${side}:${fieldId}` as UploadKey;
+}
 
 interface ImageUploadEntry {
-  fieldId: EditableFieldId;
+  uploadKey: UploadKey;
   localPreviewUrl: string;
   status: 'uploading' | 'success' | 'error';
   cdnUrl: string | null;
@@ -11,21 +18,21 @@ interface ImageUploadEntry {
 }
 
 interface ImageUploadState {
-  uploads: Record<string, ImageUploadEntry>;
-  addUpload: (fieldId: EditableFieldId, previewUrl: string) => void;
-  setUploadSuccess: (fieldId: EditableFieldId, cdnUrl: string) => void;
-  setUploadError: (fieldId: EditableFieldId, error: string) => void;
-  removeUpload: (fieldId: EditableFieldId) => void;
+  uploads: Record<UploadKey, ImageUploadEntry>;
+  addUpload: (uploadKey: UploadKey, previewUrl: string) => void;
+  setUploadSuccess: (uploadKey: UploadKey, cdnUrl: string) => void;
+  setUploadError: (uploadKey: UploadKey, error: string) => void;
+  removeUpload: (uploadKey: UploadKey) => void;
   hasUnfinishedUploads: () => boolean;
   revokeAllUrls: () => void;
   reset: () => void;
 }
 
 export const useImageUploadStore = create<ImageUploadState>()((set, get) => ({
-  uploads: {},
+  uploads: {} as Record<UploadKey, ImageUploadEntry>,
 
-  addUpload: (fieldId, previewUrl) => {
-    const prev = get().uploads[fieldId];
+  addUpload: (uploadKey, previewUrl) => {
+    const prev = get().uploads[uploadKey];
     if (prev?.localPreviewUrl) {
       URL.revokeObjectURL(prev.localPreviewUrl);
     }
@@ -33,8 +40,8 @@ export const useImageUploadStore = create<ImageUploadState>()((set, get) => ({
     set((state) => ({
       uploads: {
         ...state.uploads,
-        [fieldId]: {
-          fieldId,
+        [uploadKey]: {
+          uploadKey,
           localPreviewUrl: previewUrl,
           status: 'uploading' as const,
           cdnUrl: null,
@@ -44,8 +51,8 @@ export const useImageUploadStore = create<ImageUploadState>()((set, get) => ({
     }));
   },
 
-  setUploadSuccess: (fieldId, cdnUrl) => {
-    const entry = get().uploads[fieldId];
+  setUploadSuccess: (uploadKey, cdnUrl) => {
+    const entry = get().uploads[uploadKey];
     if (!entry) return;
 
     if (entry.localPreviewUrl) {
@@ -55,7 +62,7 @@ export const useImageUploadStore = create<ImageUploadState>()((set, get) => ({
     set((state) => ({
       uploads: {
         ...state.uploads,
-        [fieldId]: {
+        [uploadKey]: {
           ...entry,
           status: 'success' as const,
           cdnUrl,
@@ -65,28 +72,28 @@ export const useImageUploadStore = create<ImageUploadState>()((set, get) => ({
     }));
   },
 
-  setUploadError: (fieldId, error) => {
+  setUploadError: (uploadKey, error) => {
     set((state) => {
-      const entry = state.uploads[fieldId];
+      const entry = state.uploads[uploadKey];
       if (!entry) return state;
       return {
         uploads: {
           ...state.uploads,
-          [fieldId]: { ...entry, status: 'error' as const, error },
+          [uploadKey]: { ...entry, status: 'error' as const, error },
         },
       };
     });
   },
 
-  removeUpload: (fieldId) => {
-    const entry = get().uploads[fieldId];
+  removeUpload: (uploadKey) => {
+    const entry = get().uploads[uploadKey];
     if (entry?.localPreviewUrl) {
       URL.revokeObjectURL(entry.localPreviewUrl);
     }
 
     set((state) => {
       const next = { ...state.uploads };
-      delete next[fieldId];
+      delete next[uploadKey];
       return { uploads: next };
     });
   },

@@ -8,7 +8,9 @@ import { TabEmptyState } from './tab-empty-state';
 import styles from './tab-panel.module.css';
 
 export function ColorsTab() {
-  const editableColorFields = useCardEditorStore((s) => s.editableColorFields);
+  const editableColorFields = useCardEditorStore(
+    (s) => s.sides[s.activeSide].editableColorFields
+  );
 
   if (editableColorFields.length === 0) {
     return (

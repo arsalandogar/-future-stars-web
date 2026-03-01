@@ -19,7 +19,7 @@ import {
   getEditUrl,
   isImageEdit,
 } from '@fs-card-engine';
-import { useImageUploadStore } from '../stores/image-upload-store';
+import { toUploadKey, useImageUploadStore } from '../stores/image-upload-store';
 import type { PhotoSubTab } from '../types';
 import { ImageActions } from './image-actions';
 import { ImageFieldsList } from './image-fields-list';
@@ -39,6 +39,7 @@ const SUB_TAB_ITEMS: ContentTabItem[] = [
 ];
 
 const NUDGE_STEP = 5;
+const CDN_PRELOAD_TIMEOUT_MS = 5000;
 
 const NUDGE_DELTAS: Record<string, [dx: number, dy: number]> = {
   left: [-NUDGE_STEP, 0],
@@ -47,8 +48,44 @@ const NUDGE_DELTAS: Record<string, [dx: number, dy: number]> = {
   down: [0, NUDGE_STEP],
 };
 
+function preloadImage(url: string, timeoutMs = CDN_PRELOAD_TIMEOUT_MS) {
+  return new Promise<void>((resolve, reject) => {
+    const img = new Image();
+    let settled = false;
+
+    const cleanup = () => {
+      img.onload = null;
+      img.onerror = null;
+      clearTimeout(timeoutId);
+    };
+
+    const settle = (fn: () => void) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      fn();
+    };
+
+    const timeoutId = setTimeout(() => {
+      settle(() => reject(new Error('Timed out preloading uploaded image')));
+    }, timeoutMs);
+
+    img.onload = () => settle(resolve);
+    img.onerror = () =>
+      settle(() => reject(new Error('Failed to preload uploaded image')));
+
+    img.src = url;
+
+    if (img.complete) {
+      settle(resolve);
+    }
+  });
+}
+
 export function PhotoTab() {
-  const editableImageFields = useCardEditorStore((s) => s.editableImageFields);
+  const editableImageFields = useCardEditorStore(
+    (s) => s.sides[s.activeSide].editableImageFields
+  );
   const updateImageField = useCardEditorStore((s) => s.updateImageField);
   const removeImageField = useCardEditorStore((s) => s.removeImageField);
   const adjustImageZoom = useCardEditorStore((s) => s.adjustImageZoom);
@@ -64,6 +101,8 @@ export function PhotoTab() {
   const setSelectedImageFieldId = useCardBuilderStore(
     (s) => s.setSelectedImageFieldId
   );
+
+  const activeSide = useCardEditorStore((s) => s.activeSide);
 
   const addUpload = useImageUploadStore((s) => s.addUpload);
   const setUploadSuccess = useImageUploadStore((s) => s.setUploadSuccess);
@@ -88,7 +127,9 @@ export function PhotoTab() {
   );
 
   const selectedEdit: EditValue | undefined = useCardEditorStore((s) =>
-    selectedImageFieldId ? s.edits[selectedImageFieldId] : undefined
+    selectedImageFieldId
+      ? s.sides[s.activeSide].edits[selectedImageFieldId]
+      : undefined
   );
   const currentUrl = selectedField
     ? (getEditUrl(selectedEdit) ?? selectedField.originalValue)
@@ -133,8 +174,10 @@ export function PhotoTab() {
       const previewUrl = URL.createObjectURL(blob);
 
       // Store upload entry and apply local preview
-      addUpload(selectedImageFieldId, previewUrl);
-      updateImageField(selectedImageFieldId, previewUrl);
+      const sideAtUploadStart = activeSide;
+      const key = toUploadKey(sideAtUploadStart, selectedImageFieldId);
+      addUpload(key, previewUrl);
+      updateImageField(selectedImageFieldId, previewUrl, sideAtUploadStart);
 
       // Upload in background
       const fieldId = selectedImageFieldId;
@@ -142,12 +185,18 @@ export function PhotoTab() {
         { image: blob, name: `card-${fieldId}`, category: 'user-card' },
         {
           onSuccess: (cdnUrl) => {
-            setUploadSuccess(fieldId, cdnUrl);
-            updateImageField(fieldId, cdnUrl);
+            void preloadImage(cdnUrl)
+              .catch(() => {
+                // Best effort: still persist the CDN URL even if preload fails.
+              })
+              .finally(() => {
+                updateImageField(fieldId, cdnUrl, sideAtUploadStart);
+                setUploadSuccess(key, cdnUrl);
+              });
           },
           onError: (error) => {
             setUploadError(
-              fieldId,
+              key,
               error instanceof Error ? error.message : 'Upload failed'
             );
           },
@@ -156,6 +205,7 @@ export function PhotoTab() {
     },
     [
       selectedImageFieldId,
+      activeSide,
       addUpload,
       updateImageField,
       uploadMutation,
@@ -183,28 +233,37 @@ export function PhotoTab() {
 
   const handleDelete = useCallback(() => {
     if (!selectedImageFieldId) return;
-    removeImageField(selectedImageFieldId);
-    removeUpload(selectedImageFieldId);
-  }, [selectedImageFieldId, removeImageField, removeUpload]);
+    removeImageField(selectedImageFieldId, activeSide);
+    removeUpload(toUploadKey(activeSide, selectedImageFieldId));
+  }, [selectedImageFieldId, activeSide, removeImageField, removeUpload]);
 
   const handleZoomChange = useCallback(
     (zoom: number) => {
       if (!selectedImageFieldId) return;
 
-      const edit = useCardEditorStore.getState().edits[selectedImageFieldId];
+      const edit =
+        useCardEditorStore.getState().sides[activeSide].edits[
+          selectedImageFieldId
+        ];
       const pos = isImageEdit(edit) ? edit : DEFAULT_IMAGE_POSITION;
-      adjustImageZoom(selectedImageFieldId, zoom, pos.offsetX, pos.offsetY);
+      adjustImageZoom(
+        selectedImageFieldId,
+        zoom,
+        pos.offsetX,
+        pos.offsetY,
+        activeSide
+      );
     },
-    [selectedImageFieldId, adjustImageZoom]
+    [selectedImageFieldId, activeSide, adjustImageZoom]
   );
 
   const handleNudge = useCallback(
     (direction: 'up' | 'down' | 'left' | 'right') => {
       if (!selectedImageFieldId) return;
       const [dx, dy] = NUDGE_DELTAS[direction];
-      nudgeImagePosition(selectedImageFieldId, dx, dy);
+      nudgeImagePosition(selectedImageFieldId, dx, dy, activeSide);
     },
-    [selectedImageFieldId, nudgeImagePosition]
+    [selectedImageFieldId, activeSide, nudgeImagePosition]
   );
 
   if (editableImageFields.length === 0) {

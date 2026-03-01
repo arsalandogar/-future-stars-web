@@ -8,7 +8,9 @@ import contentStyles from './content-tab.module.css';
 import styles from './tab-panel.module.css';
 
 export function ContentTab() {
-  const editableFields = useCardEditorStore((s) => s.editableFields);
+  const editableFields = useCardEditorStore(
+    (s) => s.sides[s.activeSide].editableFields
+  );
 
   if (editableFields.length === 0) {
     return (

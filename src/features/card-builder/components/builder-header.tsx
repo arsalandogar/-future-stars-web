@@ -11,10 +11,25 @@ import styles from './builder-header.module.css';
 interface BuilderHeaderProps {
   canSave: boolean;
   templateId?: number;
+  backTemplateId: number | null;
 }
 
-export function BuilderHeader({ canSave, templateId }: BuilderHeaderProps) {
-  const edits = useCardEditorStore((s) => s.edits);
+function cleanBlobEdits(
+  edits: Partial<Record<string, EditValue>>
+): Record<string, EditValue> {
+  return Object.fromEntries(
+    Object.entries(edits).filter(
+      ([, value]) => value && !getEditUrl(value)?.startsWith('blob:')
+    )
+  ) as Record<string, EditValue>;
+}
+
+export function BuilderHeader({
+  canSave,
+  templateId,
+  backTemplateId,
+}: BuilderHeaderProps) {
+  const getEditsForSave = useCardEditorStore((s) => s.getEditsForSave);
   const uploading = useImageUploadStore((s) =>
     Object.values(s.uploads).some((e) => e.status === 'uploading')
   );
@@ -23,13 +38,16 @@ export function BuilderHeader({ canSave, templateId }: BuilderHeaderProps) {
   const handleSave = () => {
     if (!templateId) return;
 
-    const cleanEdits = Object.fromEntries(
-      Object.entries(edits).filter(
-        ([, value]) => value && !getEditUrl(value)?.startsWith('blob:')
-      )
-    ) as Record<string, EditValue>;
+    const { frontEdits, backEdits } = getEditsForSave();
+    const cleanFront = cleanBlobEdits(frontEdits);
+    const cleanBack = cleanBlobEdits(backEdits);
 
-    saveCard.mutate({ templateId, editsJson: cleanEdits });
+    saveCard.mutate({
+      templateId,
+      editsJson: cleanFront,
+      backTemplateId,
+      backEditsJson: cleanBack,
+    });
   };
 
   return (

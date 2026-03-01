@@ -29,7 +29,7 @@ interface ColorCircleProps {
 
 function ColorCircle({ fieldId, originalColor, label }: ColorCircleProps) {
   const color = useCardEditorStore((s) => {
-    const v = s.edits[fieldId];
+    const v = s.sides[s.activeSide].edits[fieldId];
     return typeof v === 'string' ? v : originalColor;
   });
   const [opened, setOpened] = useState(false);
@@ -119,8 +119,12 @@ function ColorCircle({ fieldId, originalColor, label }: ColorCircleProps) {
 }
 
 export function ActiveColorsBar() {
-  const editableColorFields = useCardEditorStore((s) => s.editableColorFields);
-  const appliedPresetId = useCardEditorStore((s) => s.appliedPresetId);
+  const editableColorFields = useCardEditorStore(
+    (s) => s.sides[s.activeSide].editableColorFields
+  );
+  const appliedPresetId = useCardEditorStore(
+    (s) => s.sides[s.activeSide].appliedPresetId
+  );
   const swapColors = useCardEditorStore((s) => s.swapColors);
   const resetToPreset = useCardEditorStore((s) => s.resetToPreset);
 
@@ -174,7 +178,7 @@ export function ActiveColorsBar() {
         <button
           type="button"
           className={styles.iconButton}
-          onClick={resetToPreset}
+          onClick={() => resetToPreset()}
           aria-label="Reset colors"
           title="Reset colors"
         >
