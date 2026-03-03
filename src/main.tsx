@@ -5,6 +5,7 @@ import '@mantine/carousel/styles.css';
 import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.css';
 import '@mantine/charts/styles.css';
+import '@mantine/nprogress/styles.css';
 import '@/index.css';
 import { AuthInitializer } from '@/app/auth-initializer';
 import { AppProvider } from '@/app/provider';

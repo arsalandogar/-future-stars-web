@@ -1,5 +1,6 @@
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { Center, Loader } from '@mantine/core';
+import { nprogress } from '@mantine/nprogress';
 import { routeTree } from '@/routeTree.gen';
 import { useAuthStore } from '@/stores/auth-store';
 import { queryClient } from '@/lib/react-query';
@@ -20,6 +21,7 @@ const router = createRouter({
   defaultPreloadStaleTime: 0,
   defaultErrorComponent: MainErrorFallback,
   defaultPendingComponent: DefaultPendingComponent,
+
   scrollRestoration: true,
   context: {
     auth: {
@@ -28,6 +30,14 @@ const router = createRouter({
     },
     queryClient,
   },
+});
+
+router.subscribe('onBeforeLoad', ({ pathChanged }) => {
+  if (pathChanged) nprogress.start();
+});
+
+router.subscribe('onLoad', ({ pathChanged }) => {
+  if (pathChanged) nprogress.complete();
 });
 
 declare module '@tanstack/react-router' {

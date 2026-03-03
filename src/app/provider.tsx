@@ -2,6 +2,7 @@ import { Suspense, type ReactNode } from 'react';
 import { HelmetProvider } from '@dr.pogodin/react-helmet';
 import { Center, Loader, MantineProvider } from '@mantine/core';
 import { ModalsProvider } from '@mantine/modals';
+import { NavigationProgress } from '@mantine/nprogress';
 import { Notifications } from '@mantine/notifications';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -30,6 +31,7 @@ export function AppProvider({ children }: AppProviderProps) {
             forceColorScheme="dark"
             cssVariablesResolver={cssVariableResolver}
           >
+            <NavigationProgress />
             <ModalsProvider>
               <Notifications />
               {children}
