@@ -1,0 +1,27 @@
+.actionButton {
+  border: 0;
+  background: transparent;
+  color: rgba(234, 240, 255, 0.8);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: clamp(1rem, 1.9vw, 1.35rem);
+  font-weight: 500;
+  padding: 8px 10px;
+  border-radius: 999px;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease;
+  cursor: pointer;
+}
+
+.actionButton:hover:not(:disabled) {
+  color: #fff;
+  background-color: rgba(111, 124, 255, 0.16);
+}
+
+.actionButton:disabled {
+  opacity: 0.45;
+  cursor: default;
+}

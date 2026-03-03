@@ -141,25 +141,6 @@
   width: 100%;
 }
 
-.actionButton {
-  display: flex;
-  align-items: center;
-  gap: var(--mantine-spacing-xs);
-  background: none;
-  border: none;
-  color: var(--mantine-color-white);
-  font-size: var(--mantine-font-size-md);
-  font-weight: 500;
-  cursor: pointer;
-  padding: var(--mantine-spacing-xs) 0;
-  border-radius: var(--mantine-radius-sm);
-  transition: background-color 150ms ease;
-}
-
-.actionButton:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
 .cardsRow {
   display: flex;
   justify-content: center;
@@ -191,10 +172,6 @@
   padding: var(--mantine-spacing-lg);
   border-top: 2px solid var(--mantine-color-primary-4);
   animation: fadeSlideUp 300ms ease-out 200ms backwards;
-}
-
-.buyButton {
-  font-weight: 600;
 }
 
 /* Mobile flip card styles */

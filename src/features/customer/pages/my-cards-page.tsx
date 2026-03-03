@@ -171,7 +171,7 @@ export function MyCardsPage() {
   const isMobile = useMediaQuery('(max-width: 576px)');
   const [packsView, setPacksView] = useState<ViewMode>('list');
 
-  const { openCreate, openEdit, openCopy, openBuy } = useCreatePackModalStore();
+  const { openCreate, openEdit, openCopy } = useCreatePackModalStore();
   const openAddedToCartPopup = useAddedToCartPopupStore((s) => s.open);
   const openAutofillModal = usePackAutofillModalStore((s) => s.open);
   const addCartItem = useAddCartItem();
@@ -253,14 +253,6 @@ export function MyCardsPage() {
       openCopy(pack);
     },
     [openCopy]
-  );
-
-  const handleBuyCard = useCallback(
-    (cardId: number, quantity: number) => {
-      closeModal();
-      openBuy(cardId, quantity);
-    },
-    [closeModal, openBuy]
   );
 
   return (
@@ -359,7 +351,6 @@ export function MyCardsPage() {
           initialIndex={selectedCardIndex}
           opened={modalOpened}
           onClose={closeModal}
-          onBuyCard={handleBuyCard}
           hasNextPage={hasNextCardsPage}
           onLoadMore={() => void fetchNextCardsPage()}
         />

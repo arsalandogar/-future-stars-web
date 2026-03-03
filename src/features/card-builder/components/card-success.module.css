@@ -1,0 +1,87 @@
+.panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 36px;
+  padding: 54px clamp(18px, 5vw, 64px) 48px;
+  overflow: hidden;
+}
+
+.title {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  font-size: clamp(1.95rem, 3.4vw, 3.4rem);
+  line-height: 1.08;
+  font-weight: 800;
+  color: #f4f7ff;
+  text-align: center;
+}
+
+.checkBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #2fd18d;
+}
+
+.cardsStage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 340px;
+  filter: drop-shadow(0 0 20px rgba(80, 70, 255, 0.4))
+    drop-shadow(0 0 40px rgba(80, 70, 255, 0.2));
+}
+
+.cardImage {
+  position: absolute;
+  height: 260px;
+  width: auto;
+  aspect-ratio: 2.5 / 3.5;
+  object-fit: cover;
+  border-radius: 0;
+}
+
+.frontCard {
+  transform: rotate(-8deg) translateX(-28%);
+  z-index: 2;
+}
+
+.backCard {
+  transform: rotate(8deg) translateX(28%);
+  z-index: 1;
+}
+
+.actionsRow {
+  display: flex;
+  justify-content: center;
+  gap: clamp(48px, 10vw, 140px);
+}
+
+.buyButton {
+  height: 62px;
+  padding-inline: 48px;
+  font-size: var(--mantine-font-size-lg);
+  border-radius: 9999px;
+}
+
+@media (max-width: 768px) {
+  .panel {
+    gap: 28px;
+    padding: 30px 16px 24px;
+  }
+
+  .cardsStage {
+    height: 240px;
+  }
+
+  .cardImage {
+    height: 180px;
+  }
+}

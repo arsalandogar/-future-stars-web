@@ -1,6 +1,5 @@
 import {
   ActionIcon,
-  Button,
   Drawer,
   Image,
   Menu,
@@ -21,10 +20,15 @@ import {
   X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { MdOutlineShoppingCart } from 'react-icons/md';
 
 import { FlipIcon } from '@/components/icons/flip-icon';
+import {
+  BuyCardButton,
+  EditCardButton,
+  ShareCardButton,
+} from '@/components/ui/card-actions';
 import type { Card } from '../api/get-user-cards';
+import { useCreatePackModalStore } from '../stores/create-pack-modal-store';
 import { formatDate } from '../utils/format-date';
 
 import styles from './card-preview-modal.module.css';
@@ -36,7 +40,6 @@ interface CardPreviewModalProps {
   initialIndex: number;
   opened: boolean;
   onClose: () => void;
-  onBuyCard?: (cardId: number, quantity: number) => void;
   hasNextPage?: boolean;
   onLoadMore?: () => void;
 }
@@ -46,7 +49,6 @@ export function CardPreviewModal({
   initialIndex,
   opened,
   onClose,
-  onBuyCard,
   hasNextPage,
   onLoadMore,
 }: CardPreviewModalProps) {
@@ -92,6 +94,14 @@ export function CardPreviewModal({
     }
   }, [currentIndex, cards.length, hasNextPage, onLoadMore]);
 
+  // Close preview when the pack modal opens (triggered by BuyCardButton)
+  const packModalOpened = useCreatePackModalStore((s) => s.opened);
+  useEffect(() => {
+    if (packModalOpened && opened) {
+      onClose();
+    }
+  }, [packModalOpened, opened, onClose]);
+
   const card = cards[currentIndex];
   const totalCards = cards.length;
   const canGoPrev = currentIndex > 0;
@@ -108,12 +118,6 @@ export function CardPreviewModal({
     if (currentIndex < totalCards - 1) {
       setCurrentIndex((prev) => prev + 1);
       setIsFlipped(false);
-    }
-  };
-
-  const handleBuyCard = () => {
-    if (onBuyCard && card) {
-      onBuyCard(card.id, quantity);
     }
   };
 
@@ -193,14 +197,8 @@ export function CardPreviewModal({
 
           <div className={styles.cardsContent}>
             <div className={styles.actionsRow}>
-              <button type="button" className={styles.actionButton}>
-                <Share2 size={18} />
-                <span>Share Card</span>
-              </button>
-              <button type="button" className={styles.actionButton}>
-                <Pencil size={18} />
-                <span>Edit Card</span>
-              </button>
+              <ShareCardButton />
+              <EditCardButton cardId={card.id} />
             </div>
 
             {isMobile ? (
@@ -279,16 +277,11 @@ export function CardPreviewModal({
           onChange={setQuantity}
           size={isMobile ? 'sm' : 'lg'}
         />
-        <Button
-          variant="filled"
+        <BuyCardButton
+          cardId={card.id}
+          quantity={quantity}
           size={isMobile ? 'sm' : 'lg'}
-          radius="xl"
-          leftSection={<MdOutlineShoppingCart size={isMobile ? 16 : 20} />}
-          className={styles.buyButton}
-          onClick={handleBuyCard}
-        >
-          Buy this Card
-        </Button>
+        />
       </div>
     </>
   );

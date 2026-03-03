@@ -26,6 +26,7 @@ const routeApi = getRouteApi('/_authenticated/_customer/create-card');
 
 export function CreateCardPage() {
   const { templateId } = routeApi.useSearch();
+
   const resetBuilder = useCardBuilderStore((s) => s.reset);
   const setActiveTab = useCardBuilderStore((s) => s.setActiveTab);
   const setSelectedImageFieldId = useCardBuilderStore(
@@ -92,7 +93,6 @@ export function CreateCardPage() {
   const { data, isLoading: isLoadingTemplates } = useBuilderTemplates();
   const tags = useMemo(() => data?.data ?? [], [data]);
 
-  // Resolve backTemplateId from browse data
   const backTemplateId = useMemo(() => {
     if (!templateId) return null;
     for (const tag of tags) {

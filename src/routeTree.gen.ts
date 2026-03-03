@@ -38,6 +38,8 @@ import { Route as AuthenticatedAdminListingColorPresetsRouteImport } from './rou
 import { Route as AuthenticatedAdminListingColorLeaguesRouteImport } from './routes/_authenticated/admin/_listing/color-leagues'
 import { Route as AuthenticatedAdminListingBatchesRouteImport } from './routes/_authenticated/admin/_listing/batches'
 import { Route as AuthenticatedCustomerOrderSuccessOrderIdRouteImport } from './routes/_authenticated/_customer/order-success.$orderId'
+import { Route as AuthenticatedCustomerEditCardCardIdRouteImport } from './routes/_authenticated/_customer/edit-card.$cardId'
+import { Route as AuthenticatedCustomerCardCardIdRouteImport } from './routes/_authenticated/_customer/card.$cardId'
 import { Route as AuthenticatedAdmin_legalTypeRouteRouteImport } from './routes/_authenticated/admin/__legal/$type/route'
 import { Route as AuthenticatedAdminTemplatesIdIndexRouteImport } from './routes/_authenticated/admin/templates/$id/index'
 import { Route as AuthenticatedAdminTagsIdIndexRouteImport } from './routes/_authenticated/admin/tags/$id/index'
@@ -213,6 +215,18 @@ const AuthenticatedCustomerOrderSuccessOrderIdRoute =
     path: '/order-success/$orderId',
     getParentRoute: () => AuthenticatedCustomerRoute,
   } as any)
+const AuthenticatedCustomerEditCardCardIdRoute =
+  AuthenticatedCustomerEditCardCardIdRouteImport.update({
+    id: '/edit-card/$cardId',
+    path: '/edit-card/$cardId',
+    getParentRoute: () => AuthenticatedCustomerRoute,
+  } as any)
+const AuthenticatedCustomerCardCardIdRoute =
+  AuthenticatedCustomerCardCardIdRouteImport.update({
+    id: '/card/$cardId',
+    path: '/card/$cardId',
+    getParentRoute: () => AuthenticatedCustomerRoute,
+  } as any)
 const AuthenticatedAdmin_legalTypeRouteRoute =
   AuthenticatedAdmin_legalTypeRouteRouteImport.update({
     id: '/__legal/$type',
@@ -309,6 +323,8 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedCustomerIndexRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/$type': typeof AuthenticatedAdminListing_legalTypeRoute
+  '/card/$cardId': typeof AuthenticatedCustomerCardCardIdRoute
+  '/edit-card/$cardId': typeof AuthenticatedCustomerEditCardCardIdRoute
   '/order-success/$orderId': typeof AuthenticatedCustomerOrderSuccessOrderIdRoute
   '/admin/batches': typeof AuthenticatedAdminListingBatchesRoute
   '/admin/color-leagues': typeof AuthenticatedAdminListingColorLeaguesRoute
@@ -347,6 +363,8 @@ export interface FileRoutesByTo {
   '/admin/template-types': typeof AuthenticatedAdminTemplateTypesRoute
   '/': typeof AuthenticatedCustomerIndexRoute
   '/admin/$type': typeof AuthenticatedAdminListing_legalTypeRoute
+  '/card/$cardId': typeof AuthenticatedCustomerCardCardIdRoute
+  '/edit-card/$cardId': typeof AuthenticatedCustomerEditCardCardIdRoute
   '/order-success/$orderId': typeof AuthenticatedCustomerOrderSuccessOrderIdRoute
   '/admin/batches': typeof AuthenticatedAdminListingBatchesRoute
   '/admin/color-leagues': typeof AuthenticatedAdminListingColorLeaguesRoute
@@ -390,6 +408,8 @@ export interface FileRoutesById {
   '/_authenticated/_customer/': typeof AuthenticatedCustomerIndexRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/__legal/$type': typeof AuthenticatedAdmin_legalTypeRouteRouteWithChildren
+  '/_authenticated/_customer/card/$cardId': typeof AuthenticatedCustomerCardCardIdRoute
+  '/_authenticated/_customer/edit-card/$cardId': typeof AuthenticatedCustomerEditCardCardIdRoute
   '/_authenticated/_customer/order-success/$orderId': typeof AuthenticatedCustomerOrderSuccessOrderIdRoute
   '/_authenticated/admin/_listing/batches': typeof AuthenticatedAdminListingBatchesRoute
   '/_authenticated/admin/_listing/color-leagues': typeof AuthenticatedAdminListingColorLeaguesRoute
@@ -432,6 +452,8 @@ export interface FileRouteTypes {
     | '/'
     | '/admin/'
     | '/admin/$type'
+    | '/card/$cardId'
+    | '/edit-card/$cardId'
     | '/order-success/$orderId'
     | '/admin/batches'
     | '/admin/color-leagues'
@@ -470,6 +492,8 @@ export interface FileRouteTypes {
     | '/admin/template-types'
     | '/'
     | '/admin/$type'
+    | '/card/$cardId'
+    | '/edit-card/$cardId'
     | '/order-success/$orderId'
     | '/admin/batches'
     | '/admin/color-leagues'
@@ -512,6 +536,8 @@ export interface FileRouteTypes {
     | '/_authenticated/_customer/'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/__legal/$type'
+    | '/_authenticated/_customer/card/$cardId'
+    | '/_authenticated/_customer/edit-card/$cardId'
     | '/_authenticated/_customer/order-success/$orderId'
     | '/_authenticated/admin/_listing/batches'
     | '/_authenticated/admin/_listing/color-leagues'
@@ -749,6 +775,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCustomerOrderSuccessOrderIdRouteImport
       parentRoute: typeof AuthenticatedCustomerRoute
     }
+    '/_authenticated/_customer/edit-card/$cardId': {
+      id: '/_authenticated/_customer/edit-card/$cardId'
+      path: '/edit-card/$cardId'
+      fullPath: '/edit-card/$cardId'
+      preLoaderRoute: typeof AuthenticatedCustomerEditCardCardIdRouteImport
+      parentRoute: typeof AuthenticatedCustomerRoute
+    }
+    '/_authenticated/_customer/card/$cardId': {
+      id: '/_authenticated/_customer/card/$cardId'
+      path: '/card/$cardId'
+      fullPath: '/card/$cardId'
+      preLoaderRoute: typeof AuthenticatedCustomerCardCardIdRouteImport
+      parentRoute: typeof AuthenticatedCustomerRoute
+    }
     '/_authenticated/admin/__legal/$type': {
       id: '/_authenticated/admin/__legal/$type'
       path: '/$type'
@@ -982,6 +1022,8 @@ interface AuthenticatedCustomerRouteChildren {
   AuthenticatedCustomerMyCardsRoute: typeof AuthenticatedCustomerMyCardsRoute
   AuthenticatedCustomerTemplatesRoute: typeof AuthenticatedCustomerTemplatesRoute
   AuthenticatedCustomerIndexRoute: typeof AuthenticatedCustomerIndexRoute
+  AuthenticatedCustomerCardCardIdRoute: typeof AuthenticatedCustomerCardCardIdRoute
+  AuthenticatedCustomerEditCardCardIdRoute: typeof AuthenticatedCustomerEditCardCardIdRoute
   AuthenticatedCustomerOrderSuccessOrderIdRoute: typeof AuthenticatedCustomerOrderSuccessOrderIdRoute
 }
 
@@ -992,6 +1034,9 @@ const AuthenticatedCustomerRouteChildren: AuthenticatedCustomerRouteChildren = {
   AuthenticatedCustomerMyCardsRoute: AuthenticatedCustomerMyCardsRoute,
   AuthenticatedCustomerTemplatesRoute: AuthenticatedCustomerTemplatesRoute,
   AuthenticatedCustomerIndexRoute: AuthenticatedCustomerIndexRoute,
+  AuthenticatedCustomerCardCardIdRoute: AuthenticatedCustomerCardCardIdRoute,
+  AuthenticatedCustomerEditCardCardIdRoute:
+    AuthenticatedCustomerEditCardCardIdRoute,
   AuthenticatedCustomerOrderSuccessOrderIdRoute:
     AuthenticatedCustomerOrderSuccessOrderIdRoute,
 }

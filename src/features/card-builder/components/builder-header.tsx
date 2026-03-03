@@ -1,8 +1,7 @@
 import { Button, Title } from '@mantine/core';
+import { useNavigate } from '@tanstack/react-router';
 import { Save } from 'lucide-react';
 
-import { useSaveCard } from '../api/save-card';
-import { useCardEditorStore } from '../stores/card-editor-store';
 import {
   type EditValue,
   type DiscoveredFields,
@@ -10,6 +9,9 @@ import {
   getEditUrl,
   cleanEditsForSave,
 } from '@fs-card-engine';
+
+import { useSaveCard } from '../api/save-card';
+import { useCardEditorStore } from '../stores/card-editor-store';
 import { useImageUploadStore } from '../stores/image-upload-store';
 
 import styles from './builder-header.module.css';
@@ -33,6 +35,7 @@ export function BuilderHeader({
   templateId,
   backTemplateId,
 }: BuilderHeaderProps) {
+  const navigate = useNavigate();
   const uploading = useImageUploadStore((s) =>
     Object.values(s.uploads).some((e) => e.status === 'uploading')
   );
@@ -61,12 +64,22 @@ export function BuilderHeader({
     );
     const cleanBack = cleanBlobEdits(cleanEditsForSave(backEdits, backFields));
 
-    saveCard.mutate({
-      templateId,
-      editsJson: cleanFront,
-      backTemplateId,
-      backEditsJson: cleanBack,
-    });
+    saveCard.mutate(
+      {
+        templateId,
+        editsJson: cleanFront,
+        backTemplateId,
+        backEditsJson: cleanBack,
+      },
+      {
+        onSuccess: (card) => {
+          void navigate({
+            to: '/card/$cardId',
+            params: { cardId: String(card.id) },
+          });
+        },
+      }
+    );
   };
 
   return (

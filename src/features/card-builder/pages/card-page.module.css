@@ -1,0 +1,5 @@
+.wrapper {
+  background: var(--mantine-color-black);
+  border-radius: var(--mantine-radius-lg);
+  min-height: calc(100vh - 160px);
+}
