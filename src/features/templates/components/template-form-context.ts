@@ -3,7 +3,7 @@ import { revalidateLogic } from '@tanstack/react-form';
 import { useFormContext, useAppForm } from '@/lib/form';
 
 import { templateFormSchema } from '../utils/validation';
-import type { TemplateFormValues, TemplateAttributeFormValues } from '../types';
+import type { TemplateFormValues } from '../types';
 
 const DEFAULT_VALUES: TemplateFormValues = {
   side: 'front',
@@ -17,7 +17,6 @@ const DEFAULT_VALUES: TemplateFormValues = {
   isDefaultBack: false,
   isPublished: true,
   tagIds: [],
-  attributes: [],
 };
 
 export function useTemplateForm(
@@ -43,15 +42,4 @@ export type TemplateForm = ReturnType<typeof useTemplateForm>;
 export function useTemplateFormContext() {
   const form = useFormContext();
   return form as unknown as TemplateForm;
-}
-
-export function createDefaultAttribute(): TemplateAttributeFormValues {
-  return {
-    _formId: crypto.randomUUID(),
-    type: 'string',
-    name: '',
-    label: '',
-    defaultValue: '',
-    defaultColor: '',
-  };
 }

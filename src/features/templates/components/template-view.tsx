@@ -16,7 +16,6 @@ import { SvgPreview } from '@/components/svg-preview';
 import { formatDate } from '@/utils/date';
 
 import type { Template } from '../types';
-import { AttributesTable } from './attributes-table';
 
 const SVG_PREVIEW_PROPS = {
   className: 'rounded border p-2',
@@ -166,16 +165,6 @@ export function TemplateView({ template, onDelete }: TemplateViewProps) {
               </Badge>
             ))}
           </Group>
-        </Card>
-      )}
-
-      {/* Attributes Table */}
-      {template.attributes.length > 0 && (
-        <Card withBorder radius="md" p="lg">
-          <Title order={5} mb="md">
-            Attributes
-          </Title>
-          <AttributesTable mode="view" attributes={template.attributes} />
         </Card>
       )}
     </Stack>

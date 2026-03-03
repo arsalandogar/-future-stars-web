@@ -4,7 +4,6 @@ export { EDITABLE_FIELDS } from './template-vocabulary';
 export type { EditableFieldId, EditableFieldType } from './template-vocabulary';
 
 export type TemplateSide = 'front' | 'back';
-export type TemplateAttributeType = 'color' | 'image' | 'string';
 
 export interface TemplatesListParams {
   page?: number;
@@ -19,16 +18,6 @@ export interface TemplatesListResponse {
   data: Template[];
 }
 
-export interface TemplateAttribute {
-  id: number;
-  templateId: number;
-  type: TemplateAttributeType;
-  name: string;
-  label: string;
-  defaultValue?: string | null;
-  defaultColor?: string | null;
-}
-
 export interface TemplateTypeRef {
   id: number;
   name: string;
@@ -39,7 +28,6 @@ export interface TemplateBackTemplate {
   side: TemplateSide;
   name: string;
   svgString?: string;
-  attributes?: TemplateAttribute[];
 }
 
 export interface Template {
@@ -56,7 +44,6 @@ export interface Template {
   isDefaultBack?: boolean;
   isPublished?: boolean;
   createdAt: string;
-  attributes: TemplateAttribute[];
   backTemplate: TemplateBackTemplate | null;
   defaultBackTemplate?: TemplateBackTemplate;
   type: TemplateTypeRef;
@@ -80,14 +67,6 @@ export interface TemplateResponse {
 }
 
 // Create template params
-export interface CreateTemplateAttributeParams {
-  type: TemplateAttributeType;
-  name: string;
-  label: string;
-  defaultValue?: string;
-  defaultColor?: string;
-}
-
 export interface CreateTemplateParams {
   side: TemplateSide;
   name: string;
@@ -100,7 +79,6 @@ export interface CreateTemplateParams {
   backTemplateId?: number | null;
   isDefaultBack?: boolean;
   isPublished?: boolean;
-  attributes?: CreateTemplateAttributeParams[];
   tagIds?: number[];
 }
 
@@ -118,20 +96,10 @@ export interface UpdateTemplateParams {
   backTemplateId?: number | null;
   isDefaultBack?: boolean;
   isPublished?: boolean;
-  attributes?: CreateTemplateAttributeParams[];
   tagIds?: number[];
 }
 
 // Form values
-export interface TemplateAttributeFormValues {
-  _formId: string;
-  type: TemplateAttributeType;
-  name: string;
-  label: string;
-  defaultValue: string;
-  defaultColor: string;
-}
-
 export type BackTemplateMode = 'default' | 'custom';
 
 export interface TemplateFormValues {
@@ -146,5 +114,4 @@ export interface TemplateFormValues {
   isDefaultBack: boolean;
   isPublished: boolean;
   tagIds: number[];
-  attributes: TemplateAttributeFormValues[];
 }

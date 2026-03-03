@@ -54,14 +54,6 @@ export function TemplateEditPage({ id }: TemplateEditPageProps) {
     isDefaultBack: template.isDefaultBack ?? false,
     isPublished: template.isPublished ?? true,
     tagIds: template.tags.map((tag) => tag.id),
-    attributes: template.attributes.map((attr) => ({
-      _formId: crypto.randomUUID(),
-      type: attr.type,
-      name: attr.name,
-      label: attr.label,
-      defaultValue: attr.defaultValue ?? '',
-      defaultColor: attr.defaultColor ?? '',
-    })),
   };
 
   return (

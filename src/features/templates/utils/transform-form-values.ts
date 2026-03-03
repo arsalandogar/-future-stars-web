@@ -2,7 +2,7 @@ import type { CreateTemplateParams, TemplateFormValues } from '../types';
 
 /**
  * Transforms form values to API params for create/update operations.
- * Handles the logic for back template selection and attribute mapping.
+ * Handles the logic for back template selection.
  */
 export function transformFormValuesToParams(
   values: TemplateFormValues
@@ -24,12 +24,5 @@ export function transformFormValuesToParams(
     isDefaultBack: values.side === 'back' ? values.isDefaultBack : undefined,
     isPublished: values.isPublished,
     tagIds: values.tagIds,
-    attributes: values.attributes.map((attr) => ({
-      type: attr.type,
-      name: attr.name,
-      label: attr.label,
-      defaultValue: attr.defaultValue || undefined,
-      defaultColor: attr.defaultColor || undefined,
-    })),
   };
 }

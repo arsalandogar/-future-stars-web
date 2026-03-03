@@ -10,7 +10,6 @@ import {
   Text,
   Title,
 } from '@mantine/core';
-import { Plus } from 'lucide-react';
 
 import { SvgPreview } from '@/components/svg-preview';
 import { useTags } from '@/features/tags';
@@ -18,12 +17,8 @@ import { useTemplateTypes } from '@/features/template-types';
 
 import { useTemplates } from '../api/get-templates';
 import type { TemplateFormValues } from '../types';
-import { AttributesTable } from './attributes-table';
 import { TemplateCodeSection } from './template-code-section';
-import {
-  useTemplateForm,
-  createDefaultAttribute,
-} from './template-form-context';
+import { useTemplateForm } from './template-form-context';
 import { TemplatePreviewPanel } from './template-preview-panel';
 
 interface TemplateFormProps {
@@ -288,37 +283,6 @@ export function TemplateForm({
                   );
                 }}
               </form.Subscribe>
-
-              {/* Section 5: Attributes */}
-              <Card withBorder radius="md" p="lg">
-                <Group justify="space-between" mb="md">
-                  <Title order={5}>Attributes</Title>
-                  <form.Field name="attributes" mode="array">
-                    {(field) => (
-                      <Button
-                        variant="light"
-                        size="xs"
-                        leftSection={<Plus size={14} />}
-                        onClick={() =>
-                          field.pushValue(createDefaultAttribute())
-                        }
-                      >
-                        Add Attribute
-                      </Button>
-                    )}
-                  </form.Field>
-                </Group>
-
-                <form.Field name="attributes" mode="array">
-                  {(arrayField) => (
-                    <AttributesTable
-                      mode="edit"
-                      attributes={arrayField.state.value}
-                      onRemove={(index) => arrayField.removeValue(index)}
-                    />
-                  )}
-                </form.Field>
-              </Card>
 
               {/* Action buttons */}
               <Group justify="flex-end" gap="sm">
