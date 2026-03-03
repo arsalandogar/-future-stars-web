@@ -50,7 +50,6 @@ const menuItems: NavItem[] = [
     label: 'Templates',
     icon: Layers2,
     children: [
-      { label: 'Annotator', href: '/admin/templates/annotator' },
       { label: 'Tags', href: '/admin/tags' },
       { label: 'Template Types', href: '/admin/template-types' },
       { label: 'Templates', href: '/admin/templates' },

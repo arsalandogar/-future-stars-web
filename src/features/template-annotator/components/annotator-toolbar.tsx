@@ -1,16 +1,20 @@
 import { ActionIcon, Badge, Group, Text, Tooltip } from '@mantine/core';
-import { Download, Redo2, RotateCcw, Undo2, Wand2 } from 'lucide-react';
+import { Download, Redo2, RotateCcw, Save, Undo2, Wand2 } from 'lucide-react';
 
 import { useAnnotatorStore } from '../stores/annotator-store';
 
 interface AnnotatorToolbarProps {
   onExport: () => void;
   onDetect: () => void;
+  onSave?: () => void;
+  isSaving?: boolean;
 }
 
 export function AnnotatorToolbar({
   onExport,
   onDetect,
+  onSave,
+  isSaving,
 }: AnnotatorToolbarProps) {
   const fileName = useAnnotatorStore((s) => s.fileName);
   const assignments = useAnnotatorStore((s) => s.assignments);
@@ -60,6 +64,21 @@ export function AnnotatorToolbar({
             <Wand2 size={14} />
           </ActionIcon>
         </Tooltip>
+
+        {onSave && (
+          <Tooltip label="Save">
+            <ActionIcon
+              variant="filled"
+              color="primary"
+              onClick={onSave}
+              disabled={assignments.length === 0}
+              loading={isSaving}
+              size="sm"
+            >
+              <Save size={14} />
+            </ActionIcon>
+          </Tooltip>
+        )}
 
         <Tooltip label="Export JSON">
           <ActionIcon

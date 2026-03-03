@@ -43,13 +43,14 @@ interface AnnotatorState {
   redoStack: FieldAssignment[][];
 
   // Actions
-  loadSvg: (
-    tree: SvgJsonNode,
-    rawSvg: string,
-    fileName: string,
-    nodeIndex: Map<string, NodeMeta>,
-    nodeMap: Map<string, SvgJsonNode>
-  ) => void;
+  loadSvg: (opts: {
+    tree: SvgJsonNode;
+    nodeIndex: Map<string, NodeMeta>;
+    nodeMap: Map<string, SvgJsonNode>;
+    rawSvgString?: string;
+    fileName?: string;
+    assignments?: FieldAssignment[];
+  }) => void;
   reset: () => void;
   selectNode: (nodeId: string | null) => void;
   hoverNode: (nodeId: string | null) => void;
@@ -141,22 +142,22 @@ const initialState = {
 export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
   ...initialState,
 
-  loadSvg: (tree, rawSvg, fileName, nodeIndex, nodeMap) => {
+  loadSvg: (opts) => {
     // Auto-expand the root element
-    const rootId = tree.attributes['__nodeId'];
+    const rootId = opts.tree.attributes['__nodeId'];
     const expanded = new Set<string>();
     if (rootId) expanded.add(rootId);
 
     set({
-      svgTree: tree,
-      rawSvgString: rawSvg,
-      fileName,
-      nodeIndex,
-      nodeMap,
+      svgTree: opts.tree,
+      rawSvgString: opts.rawSvgString ?? null,
+      fileName: opts.fileName ?? null,
+      nodeIndex: opts.nodeIndex,
+      nodeMap: opts.nodeMap,
       selectedNodeId: null,
       hoveredNodeId: null,
       expandedNodeIds: expanded,
-      assignments: [],
+      assignments: opts.assignments ?? [],
       validationResults: [],
       undoStack: [],
       redoStack: [],

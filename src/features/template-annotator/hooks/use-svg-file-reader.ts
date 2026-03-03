@@ -16,7 +16,7 @@ export function useSvgFileReader() {
         const parsed = parseSvgString(raw);
         const tree = cloneWithStableIds(parsed);
         const { nodeIndex, nodeMap } = buildNodeIndex(tree);
-        loadSvg(tree, raw, fileName, nodeIndex, nodeMap);
+        loadSvg({ tree, rawSvgString: raw, fileName, nodeIndex, nodeMap });
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to parse SVG.');
       }

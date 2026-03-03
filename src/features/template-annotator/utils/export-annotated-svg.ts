@@ -4,11 +4,22 @@ import { isZeroOffset, serializeOffset } from '@/utils/color-math';
 
 import type { FieldAssignment } from '../types';
 
-const DATA_ATTR_BY_TYPE: Record<string, string> = {
+export const DATA_ATTR_BY_TYPE: Record<string, string> = {
   color: 'data-color-field',
   image: 'data-image-field',
   text: 'data-text-field',
 };
+
+export const DATA_ATTR_COLOR_TARGET = 'data-color-target';
+export const DATA_ATTR_COLOR_OFFSET = 'data-color-offset';
+export const DATA_ATTR_MAX_WIDTH = 'data-max-width';
+
+export const ALL_ANNOTATION_ATTRS = [
+  ...Object.values(DATA_ATTR_BY_TYPE),
+  DATA_ATTR_COLOR_TARGET,
+  DATA_ATTR_COLOR_OFFSET,
+  DATA_ATTR_MAX_WIDTH,
+];
 
 function stripNodeIds(node: SvgJsonNode): SvgJsonNode {
   if (node.type === 'text') return node;
@@ -50,7 +61,7 @@ export function buildAnnotatedSvg(
           node.attributes[DATA_ATTR_BY_TYPE[field.type]] = assignment.fieldId;
 
           if (field.type === 'color' && assignment.colorTarget) {
-            node.attributes['data-color-target'] = assignment.colorTarget;
+            node.attributes[DATA_ATTR_COLOR_TARGET] = assignment.colorTarget;
           }
 
           if (
@@ -58,13 +69,13 @@ export function buildAnnotatedSvg(
             assignment.colorOffset &&
             !isZeroOffset(assignment.colorOffset)
           ) {
-            node.attributes['data-color-offset'] = serializeOffset(
+            node.attributes[DATA_ATTR_COLOR_OFFSET] = serializeOffset(
               assignment.colorOffset
             );
           }
 
           if (field.type === 'text' && assignment.maxWidth != null) {
-            node.attributes['data-max-width'] = String(assignment.maxWidth);
+            node.attributes[DATA_ATTR_MAX_WIDTH] = String(assignment.maxWidth);
           }
         }
       }
@@ -77,6 +88,18 @@ export function buildAnnotatedSvg(
 
   injectAttributes(clone);
   return stripNodeIds(clone);
+}
+
+export function stripAnnotationAttrs(node: SvgJsonNode): void {
+  if (node.type === 'text') return;
+
+  for (const attr of ALL_ANNOTATION_ATTRS) {
+    delete node.attributes[attr];
+  }
+
+  for (const child of node.children) {
+    stripAnnotationAttrs(child);
+  }
 }
 
 export function exportToJson(

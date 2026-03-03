@@ -29,7 +29,6 @@ import { Route as AuthenticatedCustomerCartRouteImport } from './routes/_authent
 import { Route as AuthenticatedCustomerAccountRouteImport } from './routes/_authenticated/_customer/account'
 import { Route as AuthenticatedCheckoutCheckoutRouteImport } from './routes/_authenticated/_checkout/checkout'
 import { Route as AuthenticatedAdminTemplatesCreateRouteImport } from './routes/_authenticated/admin/templates/create'
-import { Route as AuthenticatedAdminTemplatesAnnotatorRouteImport } from './routes/_authenticated/admin/templates/annotator'
 import { Route as AuthenticatedAdminListingTemplatesRouteImport } from './routes/_authenticated/admin/_listing/templates'
 import { Route as AuthenticatedAdminListingTagsRouteImport } from './routes/_authenticated/admin/_listing/tags'
 import { Route as AuthenticatedAdminListingOrdersRouteImport } from './routes/_authenticated/admin/_listing/orders'
@@ -46,6 +45,7 @@ import { Route as AuthenticatedAdminTagsIdIndexRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminBatchesBatchIdIndexRouteImport } from './routes/_authenticated/admin/batches/$batchId/index'
 import { Route as AuthenticatedAdminListingUsersIndexRouteImport } from './routes/_authenticated/admin/_listing/users/index'
 import { Route as AuthenticatedAdminTemplatesIdEditRouteImport } from './routes/_authenticated/admin/templates/$id/edit'
+import { Route as AuthenticatedAdminTemplatesIdAnnotateRouteImport } from './routes/_authenticated/admin/templates/$id/annotate'
 import { Route as AuthenticatedAdminListing_legalTypeRouteImport } from './routes/_authenticated/admin/_listing/__legal.$type'
 import { Route as AuthenticatedAdmin_legalTypeVersionsRouteImport } from './routes/_authenticated/admin/__legal/$type/versions'
 import { Route as AuthenticatedAdmin_legalTypeCreateRouteImport } from './routes/_authenticated/admin/__legal/$type/create'
@@ -161,12 +161,6 @@ const AuthenticatedAdminTemplatesCreateRoute =
     path: '/templates/create',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
-const AuthenticatedAdminTemplatesAnnotatorRoute =
-  AuthenticatedAdminTemplatesAnnotatorRouteImport.update({
-    id: '/templates/annotator',
-    path: '/templates/annotator',
-    getParentRoute: () => AuthenticatedAdminRouteRoute,
-  } as any)
 const AuthenticatedAdminListingTemplatesRoute =
   AuthenticatedAdminListingTemplatesRouteImport.update({
     id: '/templates',
@@ -263,6 +257,12 @@ const AuthenticatedAdminTemplatesIdEditRoute =
     path: '/templates/$id/edit',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminTemplatesIdAnnotateRoute =
+  AuthenticatedAdminTemplatesIdAnnotateRouteImport.update({
+    id: '/templates/$id/annotate',
+    path: '/templates/$id/annotate',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminListing_legalTypeRoute =
   AuthenticatedAdminListing_legalTypeRouteImport.update({
     id: '/__legal/$type',
@@ -333,11 +333,11 @@ export interface FileRoutesByFullPath {
   '/admin/orders': typeof AuthenticatedAdminListingOrdersRoute
   '/admin/tags': typeof AuthenticatedAdminListingTagsRoute
   '/admin/templates': typeof AuthenticatedAdminListingTemplatesRoute
-  '/admin/templates/annotator': typeof AuthenticatedAdminTemplatesAnnotatorRoute
   '/admin/templates/create': typeof AuthenticatedAdminTemplatesCreateRoute
   '/admin/$type/$id': typeof AuthenticatedAdmin_legalTypeIdRouteRouteWithChildren
   '/admin/$type/create': typeof AuthenticatedAdmin_legalTypeCreateRoute
   '/admin/$type/versions': typeof AuthenticatedAdmin_legalTypeVersionsRoute
+  '/admin/templates/$id/annotate': typeof AuthenticatedAdminTemplatesIdAnnotateRoute
   '/admin/templates/$id/edit': typeof AuthenticatedAdminTemplatesIdEditRoute
   '/admin/users': typeof AuthenticatedAdminListingUsersIndexRoute
   '/admin/batches/$batchId': typeof AuthenticatedAdminBatchesBatchIdIndexRoute
@@ -373,10 +373,10 @@ export interface FileRoutesByTo {
   '/admin/orders': typeof AuthenticatedAdminListingOrdersRoute
   '/admin/tags': typeof AuthenticatedAdminListingTagsRoute
   '/admin/templates': typeof AuthenticatedAdminListingTemplatesRoute
-  '/admin/templates/annotator': typeof AuthenticatedAdminTemplatesAnnotatorRoute
   '/admin/templates/create': typeof AuthenticatedAdminTemplatesCreateRoute
   '/admin/$type/create': typeof AuthenticatedAdmin_legalTypeCreateRoute
   '/admin/$type/versions': typeof AuthenticatedAdmin_legalTypeVersionsRoute
+  '/admin/templates/$id/annotate': typeof AuthenticatedAdminTemplatesIdAnnotateRoute
   '/admin/templates/$id/edit': typeof AuthenticatedAdminTemplatesIdEditRoute
   '/admin/users': typeof AuthenticatedAdminListingUsersIndexRoute
   '/admin/batches/$batchId': typeof AuthenticatedAdminBatchesBatchIdIndexRoute
@@ -418,12 +418,12 @@ export interface FileRoutesById {
   '/_authenticated/admin/_listing/orders': typeof AuthenticatedAdminListingOrdersRoute
   '/_authenticated/admin/_listing/tags': typeof AuthenticatedAdminListingTagsRoute
   '/_authenticated/admin/_listing/templates': typeof AuthenticatedAdminListingTemplatesRoute
-  '/_authenticated/admin/templates/annotator': typeof AuthenticatedAdminTemplatesAnnotatorRoute
   '/_authenticated/admin/templates/create': typeof AuthenticatedAdminTemplatesCreateRoute
   '/_authenticated/admin/__legal/$type/$id': typeof AuthenticatedAdmin_legalTypeIdRouteRouteWithChildren
   '/_authenticated/admin/__legal/$type/create': typeof AuthenticatedAdmin_legalTypeCreateRoute
   '/_authenticated/admin/__legal/$type/versions': typeof AuthenticatedAdmin_legalTypeVersionsRoute
   '/_authenticated/admin/_listing/__legal/$type': typeof AuthenticatedAdminListing_legalTypeRoute
+  '/_authenticated/admin/templates/$id/annotate': typeof AuthenticatedAdminTemplatesIdAnnotateRoute
   '/_authenticated/admin/templates/$id/edit': typeof AuthenticatedAdminTemplatesIdEditRoute
   '/_authenticated/admin/_listing/users/': typeof AuthenticatedAdminListingUsersIndexRoute
   '/_authenticated/admin/batches/$batchId/': typeof AuthenticatedAdminBatchesBatchIdIndexRoute
@@ -462,11 +462,11 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/admin/tags'
     | '/admin/templates'
-    | '/admin/templates/annotator'
     | '/admin/templates/create'
     | '/admin/$type/$id'
     | '/admin/$type/create'
     | '/admin/$type/versions'
+    | '/admin/templates/$id/annotate'
     | '/admin/templates/$id/edit'
     | '/admin/users'
     | '/admin/batches/$batchId'
@@ -502,10 +502,10 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/admin/tags'
     | '/admin/templates'
-    | '/admin/templates/annotator'
     | '/admin/templates/create'
     | '/admin/$type/create'
     | '/admin/$type/versions'
+    | '/admin/templates/$id/annotate'
     | '/admin/templates/$id/edit'
     | '/admin/users'
     | '/admin/batches/$batchId'
@@ -546,12 +546,12 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/_listing/orders'
     | '/_authenticated/admin/_listing/tags'
     | '/_authenticated/admin/_listing/templates'
-    | '/_authenticated/admin/templates/annotator'
     | '/_authenticated/admin/templates/create'
     | '/_authenticated/admin/__legal/$type/$id'
     | '/_authenticated/admin/__legal/$type/create'
     | '/_authenticated/admin/__legal/$type/versions'
     | '/_authenticated/admin/_listing/__legal/$type'
+    | '/_authenticated/admin/templates/$id/annotate'
     | '/_authenticated/admin/templates/$id/edit'
     | '/_authenticated/admin/_listing/users/'
     | '/_authenticated/admin/batches/$batchId/'
@@ -712,13 +712,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTemplatesCreateRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
-    '/_authenticated/admin/templates/annotator': {
-      id: '/_authenticated/admin/templates/annotator'
-      path: '/templates/annotator'
-      fullPath: '/admin/templates/annotator'
-      preLoaderRoute: typeof AuthenticatedAdminTemplatesAnnotatorRouteImport
-      parentRoute: typeof AuthenticatedAdminRouteRoute
-    }
     '/_authenticated/admin/_listing/templates': {
       id: '/_authenticated/admin/_listing/templates'
       path: '/templates'
@@ -829,6 +822,13 @@ declare module '@tanstack/react-router' {
       path: '/templates/$id/edit'
       fullPath: '/admin/templates/$id/edit'
       preLoaderRoute: typeof AuthenticatedAdminTemplatesIdEditRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/templates/$id/annotate': {
+      id: '/_authenticated/admin/templates/$id/annotate'
+      path: '/templates/$id/annotate'
+      fullPath: '/admin/templates/$id/annotate'
+      preLoaderRoute: typeof AuthenticatedAdminTemplatesIdAnnotateRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/_listing/__legal/$type': {
@@ -968,8 +968,8 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminTemplateTypesRoute: typeof AuthenticatedAdminTemplateTypesRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdmin_legalTypeRouteRoute: typeof AuthenticatedAdmin_legalTypeRouteRouteWithChildren
-  AuthenticatedAdminTemplatesAnnotatorRoute: typeof AuthenticatedAdminTemplatesAnnotatorRoute
   AuthenticatedAdminTemplatesCreateRoute: typeof AuthenticatedAdminTemplatesCreateRoute
+  AuthenticatedAdminTemplatesIdAnnotateRoute: typeof AuthenticatedAdminTemplatesIdAnnotateRoute
   AuthenticatedAdminTemplatesIdEditRoute: typeof AuthenticatedAdminTemplatesIdEditRoute
   AuthenticatedAdminBatchesBatchIdIndexRoute: typeof AuthenticatedAdminBatchesBatchIdIndexRoute
   AuthenticatedAdminTagsIdIndexRoute: typeof AuthenticatedAdminTagsIdIndexRoute
@@ -984,10 +984,10 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
     AuthenticatedAdmin_legalTypeRouteRoute:
       AuthenticatedAdmin_legalTypeRouteRouteWithChildren,
-    AuthenticatedAdminTemplatesAnnotatorRoute:
-      AuthenticatedAdminTemplatesAnnotatorRoute,
     AuthenticatedAdminTemplatesCreateRoute:
       AuthenticatedAdminTemplatesCreateRoute,
+    AuthenticatedAdminTemplatesIdAnnotateRoute:
+      AuthenticatedAdminTemplatesIdAnnotateRoute,
     AuthenticatedAdminTemplatesIdEditRoute:
       AuthenticatedAdminTemplatesIdEditRoute,
     AuthenticatedAdminBatchesBatchIdIndexRoute:

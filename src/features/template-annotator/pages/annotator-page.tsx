@@ -26,7 +26,12 @@ const TABS: { value: RightPanelTab; label: string }[] = [
   { value: 'validate', label: 'Validate' },
 ];
 
-export function AnnotatorPage() {
+export interface AnnotatorPageProps {
+  onSave?: () => void;
+  isSaving?: boolean;
+}
+
+export function AnnotatorPage({ onSave, isSaving }: AnnotatorPageProps) {
   usePageHeader({
     title: 'Template Annotator',
     description: 'Annotate SVG templates with editable fields',
@@ -34,6 +39,7 @@ export function AnnotatorPage() {
 
   const svgTree = useAnnotatorStore((s) => s.svgTree);
   const nodeMap = useAnnotatorStore((s) => s.nodeMap);
+  const assignments = useAnnotatorStore((s) => s.assignments);
   const validate = useAnnotatorStore((s) => s.validate);
   const [exportOpened, { open: openExport, close: closeExport }] =
     useDisclosure(false);
@@ -48,7 +54,7 @@ export function AnnotatorPage() {
 
   if (nodeMap.size > 0 && autoOpenedForMap !== nodeMap) {
     setAutoOpenedForMap(nodeMap);
-    openWizard();
+    if (assignments.length === 0) openWizard();
   }
 
   if (!svgTree) {
@@ -63,7 +69,12 @@ export function AnnotatorPage() {
     <>
       <div className={styles.layout}>
         <div className={styles.toolbar}>
-          <AnnotatorToolbar onExport={openExport} onDetect={openWizard} />
+          <AnnotatorToolbar
+            onExport={openExport}
+            onDetect={openWizard}
+            onSave={onSave}
+            isSaving={isSaving}
+          />
         </div>
 
         <div className={styles.tree}>

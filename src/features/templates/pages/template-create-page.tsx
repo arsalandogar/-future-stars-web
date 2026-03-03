@@ -21,7 +21,7 @@ export function TemplateCreatePage() {
     const data = await createTemplate.mutateAsync(
       transformFormValuesToParams(values)
     );
-    void navigate({ to: `/admin/templates/${data.id}` });
+    void navigate({ to: `/admin/templates/${data.id}/annotate` });
   };
 
   return (

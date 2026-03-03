@@ -11,7 +11,7 @@ import {
   Title,
 } from '@mantine/core';
 import { Link } from '@tanstack/react-router';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, PenLine, Trash2 } from 'lucide-react';
 
 import { formatDate } from '@/utils/date';
 
@@ -39,13 +39,15 @@ function TemplatePreviewCard({
             <Text size="sm" fw={500} c="dimmed" mb="xs" tt="capitalize">
               {template.side}
             </Text>
-            <Image
-              src={template.templateImage}
-              alt={template.label}
-              h={208}
-              fit="contain"
-              className="rounded border p-2"
-            />
+            <div className="inline-flex">
+              <Image
+                src={template.templateImage}
+                alt={template.label}
+                h={208}
+                fit="contain"
+                className="rounded border p-2"
+              />
+            </div>
           </Box>
           <Box className="flex flex-col items-center">
             <Group gap="xs" mb="xs">
@@ -128,6 +130,14 @@ export function TemplateView({ template, onDelete }: TemplateViewProps) {
             )}
           </div>
           <Group gap="sm">
+            <Button
+              component={Link}
+              to={`/admin/templates/${template.id}/annotate`}
+              variant="default"
+              leftSection={<PenLine size={16} />}
+            >
+              Annotate
+            </Button>
             <Button
               component={Link}
               to={`/admin/templates/${template.id}/edit`}
