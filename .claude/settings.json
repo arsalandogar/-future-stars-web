@@ -4,7 +4,7 @@
       "WebFetch(domain:mantine.dev)",
       "WebFetch(domain:ui.mantine.dev)",
       "WebFetch(domain:lucide.dev)",
-      "WebFetch(domain:api.futurestarsapp.com)"
+      "WebFetch(domain:api-development.futurestars.cards)"
     ]
   },
   "enabledPlugins": {

@@ -27,7 +27,7 @@ This is a React 19 + TypeScript + Vite application with the React Compiler enabl
 - **Primary color**: When "primary" is mentioned, use `var(--mantine-color-primary-4)` (the value is `#5046FF`)
 - **Card images**: Card images should never have border-radius - always display with sharp corners
 - Icons use [Lucide React](https://lucide.dev/icons/) - import from `lucide-react`
-- **Backend API**: Fetch the OpenAPI spec at https://api.futurestarsapp.com/api.json when creating or modifying API hooks to get accurate endpoints, request/response schemas, and validation rules
+- **Backend API**: Fetch the OpenAPI spec at https://api-development.futurestars.cards/api.json when creating or modifying API hooks to get accurate endpoints, request/response schemas, and validation rules
 
 **Monorepo:** npm workspaces with `packages/card-engine` (`@arsalandogar/fs-card-engine`) — a shared card editing engine. In dev, the Vite alias `@fs-card-engine` resolves directly to its source at `packages/card-engine/src/index.ts`.
 

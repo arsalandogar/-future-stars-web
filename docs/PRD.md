@@ -327,7 +327,7 @@ Settings
 
 ### API Integration
 
-- Backend API at `api.futurestarsapp.com`
+- Backend API at `api-development.futurestars.cards`
 - OpenAPI spec available at `/api.json`
 
 ---
