@@ -27,7 +27,8 @@ export interface TemplateBackTemplate {
   id: number;
   side: TemplateSide;
   name: string;
-  svgString?: string;
+  templateImage: string;
+  templateImageMedium: string;
 }
 
 export interface Template {
@@ -36,7 +37,8 @@ export interface Template {
   name: string;
   label: string;
   description: string | null;
-  svgString: string;
+  templateImage: string;
+  templateImageMedium: string;
   templateTypeId: number;
   frontendComponentName?: string;
   frontendComponentFileName?: string;
@@ -73,7 +75,6 @@ export interface CreateTemplateParams {
   templateTypeId: number;
   label?: string;
   description?: string;
-  svgString?: string;
   frontendComponentName?: string;
   frontendComponentFileName?: string;
   backTemplateId?: number | null;
@@ -90,7 +91,6 @@ export interface UpdateTemplateParams {
   templateTypeId?: number;
   label?: string;
   description?: string;
-  svgString?: string;
   frontendComponentName?: string;
   frontendComponentFileName?: string;
   backTemplateId?: number | null;
@@ -107,7 +107,6 @@ export interface TemplateFormValues {
   name: string;
   label: string;
   description: string;
-  svgString: string;
   templateTypeId: number | null;
   backTemplateId: number | null;
   backTemplateMode: BackTemplateMode;

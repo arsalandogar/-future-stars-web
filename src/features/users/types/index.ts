@@ -28,8 +28,6 @@ export interface UserCard {
   userId: number;
   templateId: number;
   backTemplateId: number | null;
-  svgString: string;
-  backSvgString: string | null;
   frontCardImage: string | null;
   backCardImage: string | null;
   status: CardStatus;

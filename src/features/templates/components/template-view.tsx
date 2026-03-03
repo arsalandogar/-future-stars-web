@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   Group,
+  Image,
   SimpleGrid,
   Stack,
   Text,
@@ -12,16 +13,9 @@ import {
 import { Link } from '@tanstack/react-router';
 import { Edit, Trash2 } from 'lucide-react';
 
-import { SvgPreview } from '@/components/svg-preview';
 import { formatDate } from '@/utils/date';
 
 import type { Template } from '../types';
-
-const SVG_PREVIEW_PROPS = {
-  className: 'rounded border p-2',
-  svgClassName: '[&>svg]:h-52 [&>svg]:w-auto',
-  hideErrors: true,
-} as const;
 
 interface TemplatePreviewCardProps {
   template: Template;
@@ -45,7 +39,13 @@ function TemplatePreviewCard({
             <Text size="sm" fw={500} c="dimmed" mb="xs" tt="capitalize">
               {template.side}
             </Text>
-            <SvgPreview svgString={template.svgString} {...SVG_PREVIEW_PROPS} />
+            <Image
+              src={template.templateImage}
+              alt={template.label}
+              h={208}
+              fit="contain"
+              className="rounded border p-2"
+            />
           </Box>
           <Box className="flex flex-col items-center">
             <Group gap="xs" mb="xs">
@@ -63,9 +63,12 @@ function TemplatePreviewCard({
               params={{ id: String(backTemplate.id) }}
               className="inline-flex no-underline"
             >
-              <SvgPreview
-                svgString={backTemplate.svgString ?? ''}
-                {...SVG_PREVIEW_PROPS}
+              <Image
+                src={backTemplate.templateImage}
+                alt={backTemplate.name}
+                h={208}
+                fit="contain"
+                className="rounded border p-2"
               />
             </Link>
             <Text size="xs" c="dimmed" mt="xs">
@@ -75,7 +78,13 @@ function TemplatePreviewCard({
         </SimpleGrid>
       ) : (
         <Box className="flex flex-col items-center">
-          <SvgPreview svgString={template.svgString} {...SVG_PREVIEW_PROPS} />
+          <Image
+            src={template.templateImage}
+            alt={template.label}
+            h={208}
+            fit="contain"
+            className="rounded border p-2"
+          />
         </Box>
       )}
     </Card>

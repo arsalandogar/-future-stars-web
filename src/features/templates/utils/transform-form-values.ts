@@ -18,7 +18,6 @@ export function transformFormValuesToParams(
     name: values.name,
     label: values.label,
     description: values.description || undefined,
-    svgString: values.svgString || undefined,
     templateTypeId: values.templateTypeId!,
     backTemplateId,
     isDefaultBack: values.side === 'back' ? values.isDefaultBack : undefined,

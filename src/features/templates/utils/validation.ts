@@ -13,7 +13,6 @@ export const templateFormSchema = v.object({
     v.maxLength(255, 'Label must be at most 255 characters')
   ),
   description: v.string(),
-  svgString: v.string(),
   templateTypeId: v.pipe(
     v.nullable(v.number()),
     v.check((val) => val !== null, 'Template type is required')

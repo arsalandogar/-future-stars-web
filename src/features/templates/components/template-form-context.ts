@@ -10,7 +10,6 @@ const DEFAULT_VALUES: TemplateFormValues = {
   name: '',
   label: '',
   description: '',
-  svgString: '',
   templateTypeId: null,
   backTemplateId: null,
   backTemplateMode: 'default',

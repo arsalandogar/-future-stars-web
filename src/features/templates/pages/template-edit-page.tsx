@@ -47,7 +47,6 @@ export function TemplateEditPage({ id }: TemplateEditPageProps) {
     name: template.name,
     label: template.label,
     description: template.description ?? '',
-    svgString: template.svgString,
     templateTypeId: template.templateTypeId,
     backTemplateId: template.backTemplateId ?? null,
     backTemplateMode,

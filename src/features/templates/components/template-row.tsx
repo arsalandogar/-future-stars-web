@@ -4,6 +4,7 @@ import {
   Anchor,
   Badge,
   Group,
+  Image,
   Menu,
   Table,
   Text,
@@ -11,7 +12,6 @@ import {
 } from '@mantine/core';
 import { Edit, Eye, MoreHorizontal, Star, Tags } from 'lucide-react';
 
-import { SvgPreview } from '@/components/svg-preview';
 import { formatDate } from '@/utils/date';
 
 import type { Template, TemplateSide } from '../types';
@@ -24,18 +24,6 @@ interface TemplateRowProps {
   hideTags?: boolean;
   hideBack?: boolean;
 }
-
-const SVG_PREVIEW_PROPS = {
-  className: 'h-12 w-12 rounded border border-gray-200',
-  svgClassName: '[&>svg]:h-full [&>svg]:w-full',
-  hideErrors: true,
-} as const;
-
-const DEFAULT_BACK_PREVIEW_PROPS = {
-  className: 'h-12 w-12 rounded border-2 border-dashed border-yellow-500/50',
-  svgClassName: '[&>svg]:h-full [&>svg]:w-full',
-  hideErrors: true,
-} as const;
 
 interface BackTemplatePreviewProps {
   template: Template;
@@ -55,13 +43,21 @@ function BackTemplatePreview({
   }
 
   const isDefault = !template.backTemplate && template.defaultBackTemplate;
-  const previewProps = isDefault
-    ? DEFAULT_BACK_PREVIEW_PROPS
-    : SVG_PREVIEW_PROPS;
 
   return (
     <Anchor component={Link} to={`/admin/templates/${backTemplate.id}`}>
-      <SvgPreview svgString={backTemplate.svgString ?? ''} {...previewProps} />
+      <Image
+        src={backTemplate.templateImageMedium}
+        alt={backTemplate.name}
+        h={48}
+        w={48}
+        fit="contain"
+        className={
+          isDefault
+            ? 'rounded border-2 border-dashed border-yellow-500/50'
+            : 'rounded border border-gray-200'
+        }
+      />
     </Anchor>
   );
 }
@@ -77,7 +73,14 @@ export function TemplateRow({
   return (
     <>
       <Table.Td>
-        <SvgPreview svgString={template.svgString} {...SVG_PREVIEW_PROPS} />
+        <Image
+          src={template.templateImageMedium}
+          alt={template.label}
+          h={48}
+          w={48}
+          fit="contain"
+          className="rounded border border-gray-200"
+        />
       </Table.Td>
       {side === 'front' && !hideBack && (
         <Table.Td>
