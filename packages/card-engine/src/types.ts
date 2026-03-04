@@ -25,8 +25,8 @@ export function isImageEdit(value: EditValue | undefined): value is ImageEdit {
   return typeof value === 'object' && value !== null && 'url' in value;
 }
 
-/** Extract the display URL from an edit value (string or ImageEdit). */
-export function getEditUrl(value: EditValue | undefined): string | undefined {
+/** Extract the plain string from an edit value (string or ImageEdit). */
+export function getEditValue(value: EditValue | undefined): string | undefined {
   if (!value) return undefined;
   return isImageEdit(value) ? value.url : value;
 }

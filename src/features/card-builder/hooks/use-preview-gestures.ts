@@ -6,7 +6,7 @@ import { useCardBuilderStore } from '../stores/card-builder-store';
 import { type Side, useCardEditorStore } from '../stores/card-editor-store';
 import {
   DEFAULT_IMAGE_POSITION,
-  getEditUrl,
+  getEditValue,
   isImageEdit,
 } from '@fs-card-engine';
 
@@ -43,7 +43,7 @@ function fieldHasUpload(fieldId: string): boolean {
     (f) => f.fieldId === fieldId
   );
   if (!field) return false;
-  const url = getEditUrl(sideState.edits[fieldId as EditableFieldId]);
+  const url = getEditValue(sideState.edits[fieldId as EditableFieldId]);
   return Boolean(url && url !== field.originalValue);
 }
 

@@ -6,7 +6,7 @@ export type {
   ImageEdit,
   EditValue,
 } from './types.ts';
-export { isImageEdit, getEditUrl, DEFAULT_IMAGE_POSITION } from './types.ts';
+export { isImageEdit, getEditValue, DEFAULT_IMAGE_POSITION } from './types.ts';
 
 // Vocabulary
 export {
@@ -60,6 +60,12 @@ export {
   nudgeImageNodes,
   withZoomEdit,
   withNudgeEdit,
+  withTextEdit,
+  withPresetColors,
+  withSwappedColors,
+  withAllColorsReset,
+  withImageRemoved,
+  withTextFieldReset,
   type Edits,
   type DiscoveredFields,
 } from './edit-operations.ts';

@@ -6,7 +6,7 @@ import {
   type EditValue,
   type DiscoveredFields,
   type Edits,
-  getEditUrl,
+  getEditValue,
   cleanEditsForSave,
 } from '@fs-card-engine';
 
@@ -25,7 +25,7 @@ interface BuilderHeaderProps {
 function cleanBlobEdits(edits: Edits): Record<string, EditValue> {
   return Object.fromEntries(
     Object.entries(edits).filter(
-      ([, value]) => value && !getEditUrl(value)?.startsWith('blob:')
+      ([, value]) => value && !getEditValue(value)?.startsWith('blob:')
     )
   ) as Record<string, EditValue>;
 }

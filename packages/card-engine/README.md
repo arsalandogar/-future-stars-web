@@ -227,16 +227,15 @@ edits = withColorEdit(edits, fields.colorFields[0], '#E63946');
 edits = withImageEdit(
   edits,
   fields.imageFields[0],
-  'imageOne',
   'https://cdn.example.com/photo.jpg'
 );
 edits.firstName = 'Marcus';
 edits.team = 'Thunder FC';
 ```
 
-`withColorEdit` also mutates the SVG nodes in the color field to
-reflect the new color immediately, so your renderer picks up the
-change without a separate apply step.
+`withColorEdit`, `withImageEdit`, and `withTextEdit` mutate the SVG
+nodes in place, so your renderer picks up changes without a separate
+apply step.
 
 For image positioning, use `withZoomEdit` and `withNudgeEdit` to
 update the zoom level and pan offset. Apply the visual changes to
@@ -392,28 +391,17 @@ user is interacting with.
 
 #### Editing patterns
 
-Store methods wrap engine functions and commit the result. For text
-edits, the store calls `applyTextEdit` to mutate the SVG nodes
-and then builds a new `edits` record:
+Store methods wrap engine functions and commit the result. Each
+`with*` helper handles both the SVG mutation and the immutable edits
+update in one call:
 
 ```typescript
 updateTextField: (fieldId, value) => {
   const field = sideState.editableFields.find((f) => f.fieldId === fieldId);
-  applyTextEdit(field, value);
-  const newEdits = { ...sideState.edits };
-  if (value === field.originalValue) {
-    delete newEdits[fieldId];
-  } else {
-    newEdits[fieldId] = value;
-  }
+  const newEdits = withTextEdit(sideState.edits, field, value);
   // commit newEdits and bump revision
 };
-```
 
-For colors, `withColorEdit` handles both the SVG mutation and the
-immutable edits update in one call:
-
-```typescript
 updateColorField: (fieldId, color) => {
   const field = sideState.editableColorFields.find(
     (f) => f.fieldId === fieldId
@@ -430,17 +418,17 @@ responsive while the upload completes in the background:
 
 1. The user picks a file and crops it in a modal. The cropped blob
    gets a local `blob:` URL via `URL.createObjectURL`.
-2. The store calls `applyImageEdit` and `withImageEdit` with the
-   blob URL to show an instant local preview.
+2. The store calls `withImageEdit` with the blob URL to show an
+   instant local preview (it mutates the SVG nodes internally).
 3. The blob is uploaded to the CDN in the background.
-4. On success, the store calls `applyImageEdit` and `withImageEdit`
-   again with the CDN URL, replacing the blob URL.
+4. On success, the store calls `withImageEdit` again with the CDN
+   URL, replacing the blob URL.
 
 Before saving, the app strips any remaining blob URLs so only
 stable CDN URLs are persisted:
 
 ```typescript
-import { cleanEditsForSave, getEditUrl } from '@arsalandogar/fs-card-engine';
+import { cleanEditsForSave, getEditValue } from '@arsalandogar/fs-card-engine';
 
 // Remove edits for fields not in this template
 const cleaned = cleanEditsForSave(edits, fields);
@@ -448,7 +436,7 @@ const cleaned = cleanEditsForSave(edits, fields);
 // Remove edits that still reference local blob URLs
 const final = Object.fromEntries(
   Object.entries(cleaned).filter(
-    ([, value]) => value && !getEditUrl(value)?.startsWith('blob:')
+    ([, value]) => value && !getEditValue(value)?.startsWith('blob:')
   )
 );
 ```
@@ -568,7 +556,7 @@ Every public export is listed below, grouped by module.
 | `ImageEdit`              | type     | `{ url, zoom, offsetX, offsetY }`           |
 | `EditValue`              | type     | `string \| ImageEdit`                       |
 | `isImageEdit(value)`     | function | Type guard for `ImageEdit`                  |
-| `getEditUrl(value)`      | function | Extract URL from a string or `ImageEdit`    |
+| `getEditValue(value)`    | function | Extract string from a string or `ImageEdit` |
 | `DEFAULT_IMAGE_POSITION` | const    | `{ zoom: 1, offsetX: 0, offsetY: 0 }`       |
 
 ### Vocabulary (`vocabulary.ts`)
@@ -674,7 +662,13 @@ Higher-level functions for building and applying edits:
 | `applyEdits(fields, edits)`                            | `(fields: DiscoveredFields, edits: Edits) => void`                                                  |
 | `cleanEditsForSave(edits, fields)`                     | `(edits: Edits, fields: DiscoveredFields) => Edits`                                                 |
 | `withColorEdit(edits, field, color)`                   | `(edits: Edits, field: EditableColorField, color: string) => Edits`                                 |
-| `withImageEdit(edits, field, fieldId, imageUrl)`       | `(edits: Edits, field: EditableImageField, fieldId: EditableFieldId, imageUrl: string) => Edits`    |
+| `withImageEdit(edits, field, imageUrl)`                | `(edits: Edits, field: EditableImageField, imageUrl: string) => Edits`                              |
+| `withTextEdit(edits, field, value)`                    | `(edits: Edits, field: EditableTextField, value: string) => Edits`                                  |
+| `withPresetColors(edits, colorFields, presetColors)`   | `(edits: Edits, colorFields: EditableColorField[], presetColors: string[]) => Edits`                |
+| `withSwappedColors(edits, fieldA, fieldB)`             | `(edits: Edits, fieldA: EditableColorField, fieldB: EditableColorField) => Edits`                   |
+| `withAllColorsReset(edits, colorFields)`               | `(edits: Edits, colorFields: EditableColorField[]) => Edits`                                        |
+| `withImageRemoved(edits, field)`                       | `(edits: Edits, field: EditableImageField) => Edits`                                                |
+| `withTextFieldReset(edits, field)`                     | `(edits: Edits, field: EditableTextField) => Edits`                                                 |
 | `applyImageZoom(nodes, zoom, offsetX, offsetY)`        | `(nodes: SvgJsonNode[], zoom: number, offsetX: number, offsetY: number) => void`                    |
 | `nudgeImageNodes(nodes, dx, dy)`                       | `(nodes: SvgJsonNode[], dx: number, dy: number) => void`                                            |
 | `withZoomEdit(edits, fieldId, zoom, offsetX, offsetY)` | `(edits: Edits, fieldId: EditableFieldId, zoom: number, offsetX: number, offsetY: number) => Edits` |

@@ -7,9 +7,6 @@ import {
   type EditableImageField,
   type EditableTextField,
   type Edits,
-  applyTextEdit,
-  applyImageEdit,
-  getEditUrl,
   prepareTemplate,
   applyEdits,
   withColorEdit,
@@ -18,6 +15,12 @@ import {
   nudgeImageNodes,
   withZoomEdit,
   withNudgeEdit,
+  withTextEdit,
+  withPresetColors,
+  withSwappedColors,
+  withAllColorsReset,
+  withImageRemoved,
+  withTextFieldReset,
 } from '@fs-card-engine';
 
 export type Side = 'front' | 'back';
@@ -99,22 +102,6 @@ function createEmptySideState(): SideState {
   };
 }
 
-/** Apply preset colors positionally to color fields, falling back to original values. */
-function applyPresetColors(
-  edits: Edits,
-  colorFields: EditableColorField[],
-  presetColors: string[]
-): Edits {
-  let result: Edits = { ...edits };
-  for (let i = 0; i < colorFields.length; i++) {
-    const field = colorFields[i];
-    const color =
-      i < presetColors.length ? presetColors[i] : field.originalValue;
-    result = withColorEdit(result, field, color);
-  }
-  return result;
-}
-
 /** Rebuild a side from SVG while re-applying matching editable state. */
 function initializeSideSnapshot(svgNode: SvgJsonNode, previous: SideState) {
   const { workingCopy, fields } = prepareTemplate(svgNode);
@@ -122,7 +109,10 @@ function initializeSideSnapshot(svgNode: SvgJsonNode, previous: SideState) {
   const preservedEdits: Edits = { ...previous.edits };
 
   if (previous.appliedPresetColors) {
-    applyPresetColors({}, fields.colorFields, previous.appliedPresetColors);
+    // Reapply preset colors positionally on the new template before replaying
+    // explicit edits. This preserves preset intent across template changes even
+    // when some preset colors were not stored in edits on the previous template.
+    withPresetColors({}, fields.colorFields, previous.appliedPresetColors);
   }
   applyEdits(fields, preservedEdits);
 
@@ -216,16 +206,11 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
     const field = sideState.editableFields.find((f) => f.fieldId === fieldId);
     if (!field) return;
 
-    applyTextEdit(field, value);
-
-    const newEdits = { ...sideState.edits };
-    if (value === field.originalValue) {
-      delete newEdits[fieldId];
-    } else {
-      newEdits[fieldId] = value;
-    }
-
-    set(commitSide(state, target, { edits: newEdits }));
+    set(
+      commitSide(state, target, {
+        edits: withTextEdit(sideState.edits, field, value),
+      })
+    );
   },
 
   updateColorField: (fieldId, color, side) => {
@@ -244,7 +229,7 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
   applyColorPreset: (colors, presetId, side) => {
     const state = get();
     const [target, sideState] = getSide(state, side);
-    const newEdits = applyPresetColors(
+    const newEdits = withPresetColors(
       sideState.edits,
       sideState.editableColorFields,
       colors
@@ -270,14 +255,7 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
     );
     if (!fieldA || !fieldB) return;
 
-    const colorA =
-      getEditUrl(sideState.edits[fieldIdA]) ?? fieldA.originalValue;
-    const colorB =
-      getEditUrl(sideState.edits[fieldIdB]) ?? fieldB.originalValue;
-
-    let newEdits = { ...sideState.edits };
-    newEdits = withColorEdit(newEdits, fieldA, colorB);
-    newEdits = withColorEdit(newEdits, fieldB, colorA);
+    const newEdits = withSwappedColors(sideState.edits, fieldA, fieldB);
 
     set(commitSide(state, target, { edits: newEdits, appliedPresetId: null }));
   },
@@ -285,15 +263,13 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
   resetAllColors: (side) => {
     const state = get();
     const [target, sideState] = getSide(state, side);
-    let newEdits = { ...sideState.edits };
-
-    for (const field of sideState.editableColorFields) {
-      newEdits = withColorEdit(newEdits, field, field.originalValue);
-    }
 
     set(
       commitSide(state, target, {
-        edits: newEdits,
+        edits: withAllColorsReset(
+          sideState.edits,
+          sideState.editableColorFields
+        ),
         appliedPresetId: null,
         appliedPresetColors: null,
       })
@@ -303,7 +279,7 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
   resetToPreset: (side) => {
     const state = get();
     const [target, sideState] = getSide(state, side);
-    const newEdits = applyPresetColors(
+    const newEdits = withPresetColors(
       sideState.edits,
       sideState.editableColorFields,
       sideState.appliedPresetColors ?? []
@@ -327,11 +303,9 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
     );
     if (!field) return;
 
-    applyImageEdit(field, imageUrl);
-
     set(
       commitSide(state, target, {
-        edits: withImageEdit(sideState.edits, field, fieldId, imageUrl),
+        edits: withImageEdit(sideState.edits, field, imageUrl),
       })
     );
   },
@@ -344,12 +318,11 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
     );
     if (!field) return;
 
-    applyImageEdit(field, field.originalValue);
-
-    const newEdits = { ...sideState.edits };
-    delete newEdits[fieldId];
-
-    set(commitSide(state, target, { edits: newEdits }));
+    set(
+      commitSide(state, target, {
+        edits: withImageRemoved(sideState.edits, field),
+      })
+    );
   },
 
   adjustImageZoom: (fieldId, zoom, offsetX, offsetY, side) => {
@@ -392,12 +365,11 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
     const field = sideState.editableFields.find((f) => f.fieldId === fieldId);
     if (!field) return;
 
-    applyTextEdit(field, field.originalValue);
-
-    const newEdits = { ...sideState.edits };
-    delete newEdits[fieldId];
-
-    set(commitSide(state, target, { edits: newEdits }));
+    set(
+      commitSide(state, target, {
+        edits: withTextFieldReset(sideState.edits, field),
+      })
+    );
   },
 
   setFocusedFieldId: (fieldId) => set({ focusedFieldId: fieldId }),

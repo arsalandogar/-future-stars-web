@@ -16,7 +16,7 @@ import { useCardEditorStore } from '../stores/card-editor-store';
 import {
   DEFAULT_IMAGE_POSITION,
   type EditValue,
-  getEditUrl,
+  getEditValue,
   isImageEdit,
 } from '@fs-card-engine';
 import { toUploadKey, useImageUploadStore } from '../stores/image-upload-store';
@@ -135,7 +135,7 @@ export function PhotoTab() {
       : undefined
   );
   const currentUrl = selectedField
-    ? (getEditUrl(selectedEdit) ?? selectedField.originalValue)
+    ? (getEditValue(selectedEdit) ?? selectedField.originalValue)
     : '';
   const hasImage = Boolean(
     currentUrl && currentUrl !== selectedField?.originalValue

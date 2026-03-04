@@ -5,7 +5,7 @@ import { useShallow } from 'zustand/react/shallow';
 
 import { useCardBuilderStore } from '../stores/card-builder-store';
 import { useCardEditorStore } from '../stores/card-editor-store';
-import { getEditUrl } from '@fs-card-engine';
+import { getEditValue } from '@fs-card-engine';
 import { toUploadKey, useImageUploadStore } from '../stores/image-upload-store';
 
 import styles from './image-fields-list.module.css';
@@ -26,7 +26,7 @@ export function ImageFieldsList() {
       const result: Record<string, string | undefined> = {};
       const active = s.sides[s.activeSide];
       for (const field of active.editableImageFields) {
-        result[field.fieldId] = getEditUrl(active.edits[field.fieldId]);
+        result[field.fieldId] = getEditValue(active.edits[field.fieldId]);
       }
       return result;
     })

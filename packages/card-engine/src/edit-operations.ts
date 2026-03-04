@@ -1,5 +1,5 @@
 import type { SvgJsonNode, EditValue, ImageEdit } from './types.ts';
-import { isImageEdit, getEditUrl, DEFAULT_IMAGE_POSITION } from './types.ts';
+import { isImageEdit, getEditValue, DEFAULT_IMAGE_POSITION } from './types.ts';
 import type { EditableFieldId } from './vocabulary.ts';
 import {
   discoverEditableTextFields,
@@ -58,7 +58,7 @@ export function applyEdits(fields: DiscoveredFields, edits: Edits): void {
 
   for (const field of fields.imageFields) {
     const editedValue = edits[field.fieldId];
-    const url = getEditUrl(editedValue);
+    const url = getEditValue(editedValue);
     if (url) {
       applyImageEdit(field, url);
     }
@@ -84,10 +84,7 @@ export function cleanEditsForSave(
   return cleaned;
 }
 
-/**
- * Pure function: returns new Edits with a color edit applied.
- * Also mutates the SVG field nodes to reflect the color.
- */
+/** Returns new Edits with a color edit applied. Also mutates SVG nodes. */
 export function withColorEdit(
   edits: Edits,
   field: EditableColorField,
@@ -104,22 +101,22 @@ export function withColorEdit(
 }
 
 /**
- * Pure function: returns new Edits with an image URL change,
- * preserving existing zoom/offset position.
+ * Returns new Edits with an image URL change, preserving existing zoom/offset position.
+ * Also mutates SVG nodes to reflect the new image URL.
  */
 export function withImageEdit(
   edits: Edits,
   field: EditableImageField,
-  fieldId: EditableFieldId,
   imageUrl: string
 ): Edits {
+  applyImageEdit(field, imageUrl);
   const newEdits = { ...edits };
   if (imageUrl === field.originalValue) {
-    delete newEdits[fieldId];
+    delete newEdits[field.fieldId];
   } else {
-    const prev = edits[fieldId];
+    const prev = edits[field.fieldId];
     const position = isImageEdit(prev) ? prev : DEFAULT_IMAGE_POSITION;
-    newEdits[fieldId] = { ...position, url: imageUrl };
+    newEdits[field.fieldId] = { ...position, url: imageUrl };
   }
   return newEdits;
 }
@@ -176,7 +173,7 @@ export function withZoomEdit(
   offsetY: number
 ): Edits {
   const prev = edits[fieldId];
-  const url = getEditUrl(prev) ?? '';
+  const url = getEditValue(prev) ?? '';
   if (!url) return edits;
   const newEdits = { ...edits };
   newEdits[fieldId] = { url, zoom, offsetX, offsetY } satisfies ImageEdit;
@@ -191,7 +188,7 @@ export function withNudgeEdit(
   dy: number
 ): Edits {
   const prev = edits[fieldId];
-  const url = getEditUrl(prev) ?? '';
+  const url = getEditValue(prev) ?? '';
   if (!url) return edits;
   const pos = isImageEdit(prev) ? prev : DEFAULT_IMAGE_POSITION;
   const newEdits = { ...edits };
@@ -201,5 +198,84 @@ export function withNudgeEdit(
     offsetX: pos.offsetX + dx,
     offsetY: pos.offsetY + dy,
   } satisfies ImageEdit;
+  return newEdits;
+}
+
+/** Returns new Edits with a text edit applied. Also mutates SVG nodes. */
+export function withTextEdit(
+  edits: Edits,
+  field: EditableTextField,
+  value: string
+): Edits {
+  const newEdits = { ...edits };
+  applyTextEdit(field, value);
+  if (value === field.originalValue) {
+    delete newEdits[field.fieldId];
+  } else {
+    newEdits[field.fieldId] = value;
+  }
+  return newEdits;
+}
+
+/** Apply preset colors positionally to color fields, falling back to original values. */
+export function withPresetColors(
+  edits: Edits,
+  colorFields: EditableColorField[],
+  presetColors: string[]
+): Edits {
+  let result = edits;
+  for (let i = 0; i < colorFields.length; i++) {
+    const field = colorFields[i];
+    const color =
+      i < presetColors.length ? presetColors[i] : field.originalValue;
+    result = withColorEdit(result, field, color);
+  }
+  return result;
+}
+
+/** Swap the colors of two fields. */
+export function withSwappedColors(
+  edits: Edits,
+  fieldA: EditableColorField,
+  fieldB: EditableColorField
+): Edits {
+  const colorA = getEditValue(edits[fieldA.fieldId]) ?? fieldA.originalValue;
+  const colorB = getEditValue(edits[fieldB.fieldId]) ?? fieldB.originalValue;
+  let newEdits = withColorEdit(edits, fieldA, colorB);
+  newEdits = withColorEdit(newEdits, fieldB, colorA);
+  return newEdits;
+}
+
+/** Reset all color fields to their original values. */
+export function withAllColorsReset(
+  edits: Edits,
+  colorFields: EditableColorField[]
+): Edits {
+  let newEdits = edits;
+  for (const field of colorFields) {
+    newEdits = withColorEdit(newEdits, field, field.originalValue);
+  }
+  return newEdits;
+}
+
+/** Remove an image edit, restoring the original. Also mutates SVG nodes. */
+export function withImageRemoved(
+  edits: Edits,
+  field: EditableImageField
+): Edits {
+  applyImageEdit(field, field.originalValue);
+  const newEdits = { ...edits };
+  delete newEdits[field.fieldId];
+  return newEdits;
+}
+
+/** Reset a text field to its original value. Also mutates SVG nodes. */
+export function withTextFieldReset(
+  edits: Edits,
+  field: EditableTextField
+): Edits {
+  applyTextEdit(field, field.originalValue);
+  const newEdits = { ...edits };
+  delete newEdits[field.fieldId];
   return newEdits;
 }
