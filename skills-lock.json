@@ -1,6 +1,11 @@
 {
   "version": 1,
   "skills": {
+    "docs-writer": {
+      "source": "google-gemini/gemini-cli",
+      "sourceType": "github",
+      "computedHash": "77a46f9304582969e76ac40f21fbc0af1d1710c0bff6e9e1b29934a673b63917"
+    },
     "frontend-design": {
       "source": "anthropics/skills",
       "sourceType": "github",
