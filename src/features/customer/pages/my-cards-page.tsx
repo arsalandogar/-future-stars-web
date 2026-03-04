@@ -13,18 +13,15 @@ import { EmptyState } from '@/components/ui/empty-state';
 import type { Pack } from '@/types';
 import { MAX_PACK_CARDS } from '@/types';
 
+import {
+  DEFAULT_PAGE,
+  DEFAULT_PAGE_LIMIT,
+  flattenInfiniteData,
+} from '@/lib/react-query';
+
 import { useAddCartItem } from '../api/add-cart-item';
-import {
-  type Card,
-  useUserCards,
-  USER_CARDS_DEFAULT_LIMIT,
-  USER_CARDS_INITIAL_PAGE,
-} from '../api/get-user-cards';
-import {
-  useUserPacks,
-  USER_PACKS_DEFAULT_LIMIT,
-  USER_PACKS_INITIAL_PAGE,
-} from '../api/get-user-packs';
+import { type Card, useUserCards } from '../api/get-user-cards';
+import { useUserPacks } from '../api/get-user-packs';
 import { CardPreviewModal } from '../components/card-preview-modal';
 import { CardsGrid } from '../components/cards-grid';
 import { CardsSkeleton } from '../components/cards-skeleton';
@@ -184,8 +181,8 @@ export function MyCardsPage() {
     fetchNextPage: fetchNextCardsPage,
   } = useUserCards({
     variables: {
-      page: USER_CARDS_INITIAL_PAGE,
-      limit: USER_CARDS_DEFAULT_LIMIT,
+      page: DEFAULT_PAGE,
+      limit: DEFAULT_PAGE_LIMIT,
     },
     enabled: activeTab === 'cards',
   });
@@ -198,16 +195,16 @@ export function MyCardsPage() {
     fetchNextPage: fetchNextPacksPage,
   } = useUserPacks({
     variables: {
-      page: USER_PACKS_INITIAL_PAGE,
-      limit: USER_PACKS_DEFAULT_LIMIT,
+      page: DEFAULT_PAGE,
+      limit: DEFAULT_PAGE_LIMIT,
     },
     enabled: activeTab === 'packs',
   });
 
-  const allCards = cardsData?.pages.flatMap((page) => page.data) ?? [];
+  const allCards = flattenInfiniteData(cardsData);
   const visibleCards = allCards.filter((card) => !card.hiddenFromGallery);
 
-  const allPacks = packsData?.pages.flatMap((page) => page.data) ?? [];
+  const allPacks = flattenInfiniteData(packsData);
   const totalPacksCount = packsData?.pages[0]?.meta.total ?? 0;
 
   const handleCardClick = (card: Card) => {

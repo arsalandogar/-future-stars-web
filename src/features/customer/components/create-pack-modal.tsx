@@ -1,17 +1,19 @@
 import { Button, Loader, Modal, SimpleGrid, Text, Title } from '@mantine/core';
-import { useIntersection, useMediaQuery } from '@mantine/hooks';
+import { useMediaQuery } from '@mantine/hooks';
 import { Check, RefreshCw, X } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import type { Pack } from '@/types';
 import { MAX_PACK_CARDS } from '@/types';
+import { useInfiniteScroll } from '@/hooks';
+import {
+  DEFAULT_PAGE,
+  DEFAULT_PAGE_LIMIT,
+  flattenInfiniteData,
+} from '@/lib/react-query';
 
 import { useCreatePack } from '../api/create-pack';
-import {
-  useUserCards,
-  USER_CARDS_DEFAULT_LIMIT,
-  USER_CARDS_INITIAL_PAGE,
-} from '../api/get-user-cards';
+import { useUserCards } from '../api/get-user-cards';
 import { useUpdatePack } from '../api/update-pack';
 
 import { PackCreatedModal } from './pack-created-modal';
@@ -49,15 +51,11 @@ export function CreatePackModal({
     return editingPack.packCards.map((pc) => pc.cardId);
   }, [editingPack]);
 
-  const { ref: loadMoreRef, entry } = useIntersection({
-    threshold: 0.5,
-  });
-
   // Query for selected cards (only in edit mode)
   const { data: selectedCardsData, isLoading: isLoadingSelected } =
     useUserCards({
       variables: {
-        page: USER_CARDS_INITIAL_PAGE,
+        page: DEFAULT_PAGE,
         limit: MAX_PACK_CARDS,
         includeIds: editingCardIds,
       },
@@ -73,10 +71,16 @@ export function CreatePackModal({
     fetchNextPage,
   } = useUserCards({
     variables: {
-      page: USER_CARDS_INITIAL_PAGE,
-      limit: USER_CARDS_DEFAULT_LIMIT,
+      page: DEFAULT_PAGE,
+      limit: DEFAULT_PAGE_LIMIT,
       excludeIds: isEditMode ? editingCardIds : undefined,
     },
+  });
+
+  const { ref: loadMoreRef } = useInfiniteScroll({
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
   });
 
   // Track previous state for "adjust state during render" pattern
@@ -113,18 +117,10 @@ export function CreatePackModal({
     }
   }
 
-  useEffect(() => {
-    if (entry?.isIntersecting && hasNextPage && !isFetchingNextPage) {
-      void fetchNextPage();
-    }
-  }, [entry?.isIntersecting, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
   // Combine selected cards (at top) with remaining cards
   const visibleCards = useMemo(() => {
-    const selectedCardsArray =
-      selectedCardsData?.pages.flatMap((page) => page.data) ?? [];
-    const remainingCardsArray =
-      remainingCardsData?.pages.flatMap((page) => page.data) ?? [];
+    const selectedCardsArray = flattenInfiniteData(selectedCardsData);
+    const remainingCardsArray = flattenInfiniteData(remainingCardsData);
 
     // Filter out hidden cards
     const filteredSelected = selectedCardsArray.filter(

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import { useEffect, useMemo, useState } from 'react';
+import { Link } from '@tanstack/react-router';
 import { Carousel } from '@mantine/carousel';
 import type { EmblaCarouselType } from 'embla-carousel';
 import {
@@ -16,56 +16,53 @@ import {
 import { useMediaQuery } from '@mantine/hooks';
 import { ChevronLeft, ChevronRight, Plus, X } from 'lucide-react';
 
-import type {
-  ActiveTagFilter,
-  BrowseTemplate,
-  TagWithTemplates,
-} from '../types';
+import type { Tag } from '@/types';
+
+import type { BrowseTemplate } from '../types';
 import styles from './template-preview-modal.module.css';
 
+type ActiveTagFilter = 'all' | number;
 const ALL_TAGS = 'all' as const;
 
 interface TemplatePreviewModalProps {
   template: BrowseTemplate | null;
-  allTags: TagWithTemplates[];
+  tags: Tag[];
+  templates: BrowseTemplate[];
   opened: boolean;
   onClose: () => void;
   onTemplateChange?: (templateId: number) => void;
 }
 
 function getUniqueTemplates(
-  allTags: TagWithTemplates[],
+  templates: BrowseTemplate[],
   activeTagId: ActiveTagFilter
 ): BrowseTemplate[] {
-  const tagsToUse =
-    activeTagId === ALL_TAGS
-      ? allTags
-      : allTags.filter((tag) => tag.id === activeTagId);
+  if (activeTagId === ALL_TAGS) {
+    return templates;
+  }
 
-  const seen = new Set<number>();
-  return tagsToUse.flatMap((tag) =>
-    tag.templates.filter((template) => {
-      if (seen.has(template.id)) return false;
-      seen.add(template.id);
-      return true;
-    })
+  return templates.filter((template) =>
+    template.tags?.some((tag) => tag.id === activeTagId)
   );
 }
 
 export function TemplatePreviewModal({
   template,
-  allTags,
+  tags,
+  templates,
   opened,
   onClose,
   onTemplateChange,
 }: TemplatePreviewModalProps) {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
-  const navigate = useNavigate();
   const [activeTagId, setActiveTagId] = useState<ActiveTagFilter>(ALL_TAGS);
   const [embla, setEmbla] = useState<EmblaCarouselType | null>(null);
 
-  const carouselTemplates = getUniqueTemplates(allTags, activeTagId);
+  const carouselTemplates = useMemo(
+    () => getUniqueTemplates(templates, activeTagId),
+    [templates, activeTagId]
+  );
 
   const currentIndex = template
     ? carouselTemplates.findIndex((tpl) => tpl.id === template.id)
@@ -119,14 +116,11 @@ export function TemplatePreviewModal({
         <Text className={styles.title}>TEMPLATE PREVIEW</Text>
 
         <Button
+          component={Link}
+          to="/create-card"
+          search={{ templateId: template.id }}
           size="sm"
           leftSection={<Plus size={16} />}
-          onClick={() =>
-            void navigate({
-              to: '/create-card',
-              search: { templateId: template.id },
-            })
-          }
         >
           Create Card
         </Button>
@@ -170,7 +164,7 @@ export function TemplatePreviewModal({
         >
           <Tabs.List>
             <Tabs.Tab value={ALL_TAGS}>All</Tabs.Tab>
-            {allTags.map((tag) => (
+            {tags.map((tag) => (
               <Tabs.Tab key={tag.id} value={tag.id.toString()}>
                 {tag.label}
               </Tabs.Tab>

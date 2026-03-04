@@ -1,7 +1,11 @@
 import type { Pack, PaginationMeta } from '@/types';
 
 import { api } from '@/lib/api-client';
-import { createInfiniteQuery } from '@/lib/react-query';
+import {
+  createInfiniteQuery,
+  DEFAULT_PAGE,
+  getNextPageParam,
+} from '@/lib/react-query';
 
 interface UserPacksResponse {
   data: Pack[];
@@ -12,9 +16,6 @@ export interface UserPacksParams {
   page?: number;
   limit?: number;
 }
-
-export const USER_PACKS_INITIAL_PAGE = 1;
-export const USER_PACKS_DEFAULT_LIMIT = 20;
 
 export const useUserPacks = createInfiniteQuery({
   queryKey: ['customer', 'packs'],
@@ -34,11 +35,6 @@ export const useUserPacks = createInfiniteQuery({
       })),
     };
   },
-  getNextPageParam: (lastPage) => {
-    if (lastPage.meta.currentPage < lastPage.meta.lastPage) {
-      return lastPage.meta.currentPage + 1;
-    }
-    return undefined;
-  },
-  initialPageParam: USER_PACKS_INITIAL_PAGE,
+  getNextPageParam,
+  initialPageParam: DEFAULT_PAGE,
 });

@@ -1,3 +1,5 @@
+import type { Tag } from '@/types';
+
 export interface BrowseTemplate {
   id: number;
   name: string;
@@ -9,19 +11,5 @@ export interface BrowseTemplate {
   pivotDisplayOrder: number;
   backTemplateId?: number;
   backTemplate?: BrowseTemplate;
+  tags?: Tag[];
 }
-
-export interface TagWithTemplates {
-  id: number;
-  name: string;
-  label: string;
-  displayOrder: number;
-  totalTemplates: number;
-  templates: BrowseTemplate[];
-}
-
-export interface BrowseTemplatesResponse {
-  data: TagWithTemplates[];
-}
-
-export type ActiveTagFilter = 'all' | number;

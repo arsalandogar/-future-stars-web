@@ -2,10 +2,13 @@ import {
   QueryClient,
   useQueryClient,
   type DefaultOptions,
+  type InfiniteData,
   type MutationFunctionContext,
   type QueryKey,
 } from '@tanstack/react-query';
 import type { Middleware, MutationHook } from 'react-query-kit';
+
+import type { PaginationMeta } from '@/types';
 
 export {
   createQuery,
@@ -15,6 +18,22 @@ export {
   createSuspenseInfiniteQuery,
 } from 'react-query-kit';
 export type { inferData, inferVariables } from 'react-query-kit';
+
+export const DEFAULT_PAGE = 1;
+export const DEFAULT_PAGE_LIMIT = 20;
+
+export function flattenInfiniteData<T>(
+  data: InfiniteData<{ data: T[] }> | undefined
+): T[] {
+  return data?.pages.flatMap((page) => page.data) ?? [];
+}
+
+export function getNextPageParam(lastPage: { meta: PaginationMeta }) {
+  if (lastPage.meta.currentPage < lastPage.meta.lastPage) {
+    return lastPage.meta.currentPage + 1;
+  }
+  return undefined;
+}
 
 export const queryConfig = {
   queries: {

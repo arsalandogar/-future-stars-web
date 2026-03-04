@@ -1,8 +1,7 @@
 import { Loader, SimpleGrid } from '@mantine/core';
-import { useIntersection } from '@mantine/hooks';
-import { useEffect } from 'react';
 
 import type { Pack } from '@/types';
+import { useInfiniteScroll } from '@/hooks';
 
 import { PackItem } from './pack-item';
 import styles from './packs-list.module.css';
@@ -13,7 +12,7 @@ interface PacksListProps {
   view: ViewMode;
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
-  fetchNextPage: () => void;
+  fetchNextPage: () => unknown;
   onAddToCart: (pack: Pack) => void;
   onPreview: (pack: Pack) => void;
   onEdit: (pack: Pack) => void;
@@ -31,15 +30,11 @@ export function PacksList({
   onEdit,
   onCopy,
 }: PacksListProps) {
-  const { ref, entry } = useIntersection({
-    threshold: 0.5,
+  const { ref } = useInfiniteScroll({
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
   });
-
-  useEffect(() => {
-    if (entry?.isIntersecting && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [entry?.isIntersecting, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (view === 'grid') {
     return (

@@ -1,6 +1,6 @@
 import { Loader, SimpleGrid } from '@mantine/core';
-import { useIntersection } from '@mantine/hooks';
-import { useEffect } from 'react';
+
+import { useInfiniteScroll } from '@/hooks';
 
 import type { Card } from '../api/get-user-cards';
 
@@ -12,7 +12,7 @@ interface CardsGridProps {
   cards: Card[];
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
-  fetchNextPage: () => void;
+  fetchNextPage: () => unknown;
   onCardClick: (card: Card) => void;
 }
 
@@ -23,15 +23,11 @@ export function CardsGrid({
   fetchNextPage,
   onCardClick,
 }: CardsGridProps) {
-  const { ref, entry } = useIntersection({
-    threshold: 0.5,
+  const { ref } = useInfiniteScroll({
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
   });
-
-  useEffect(() => {
-    if (entry?.isIntersecting && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [entry?.isIntersecting, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <div className={styles.container}>

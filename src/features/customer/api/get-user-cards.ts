@@ -1,7 +1,11 @@
 import type { Card, PaginationMeta } from '@/types';
 
 import { api } from '@/lib/api-client';
-import { createInfiniteQuery } from '@/lib/react-query';
+import {
+  createInfiniteQuery,
+  DEFAULT_PAGE,
+  getNextPageParam,
+} from '@/lib/react-query';
 
 export type { Card };
 
@@ -17,9 +21,6 @@ export interface UserCardsParams {
   excludeIds?: number[];
 }
 
-export const USER_CARDS_INITIAL_PAGE = 1;
-export const USER_CARDS_DEFAULT_LIMIT = 20;
-
 export const useUserCards = createInfiniteQuery({
   queryKey: ['customer', 'cards'],
   fetcher: (
@@ -27,11 +28,6 @@ export const useUserCards = createInfiniteQuery({
     { pageParam }
   ): Promise<UserCardsResponse> =>
     api.get('cards', { params: { ...params, page: pageParam } }),
-  getNextPageParam: (lastPage) => {
-    if (lastPage.meta.currentPage < lastPage.meta.lastPage) {
-      return lastPage.meta.currentPage + 1;
-    }
-    return undefined;
-  },
-  initialPageParam: USER_CARDS_INITIAL_PAGE,
+  getNextPageParam,
+  initialPageParam: DEFAULT_PAGE,
 });

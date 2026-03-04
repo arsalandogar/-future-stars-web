@@ -4,10 +4,10 @@ import { getRouteApi } from '@tanstack/react-router';
 
 import { Head } from '@/components/seo/head';
 import type { EditableFieldId } from '@/features/templates';
+import { useTemplate } from '@/features/templates-browse';
 import type { SvgJsonNode } from '@/types/svg';
 import type { SvgRenderOptions } from '@/components/svg-renderer/svg-renderer';
 
-import { useBuilderTemplates } from '../api/browse-templates';
 import { useTemplateSvgJson } from '../api/get-template-svg-json';
 import { BuilderHeader } from '../components/builder-header';
 import { BuilderTabsPanel } from '../components/builder-tabs-panel';
@@ -90,17 +90,13 @@ export function CreateCardPage() {
     [setActiveTab, setFocusedFieldId, setSelectedImageFieldId, wasDragRef]
   );
 
-  const { data, isLoading: isLoadingTemplates } = useBuilderTemplates();
-  const tags = useMemo(() => data?.data ?? [], [data]);
+  // Fetch single template to resolve backTemplateId
+  const { data: selectedTemplate } = useTemplate({
+    variables: templateId ?? 0,
+    enabled: templateId != null,
+  });
 
-  const backTemplateId = useMemo(() => {
-    if (!templateId) return null;
-    for (const tag of tags) {
-      const match = tag.templates.find((t) => t.id === templateId);
-      if (match?.backTemplateId) return match.backTemplateId;
-    }
-    return null;
-  }, [templateId, tags]);
+  const backTemplateId = selectedTemplate?.backTemplateId ?? null;
 
   const {
     data: originalSvgNode,
@@ -182,10 +178,7 @@ export function CreateCardPage() {
           </div>
 
           <div className={styles.panel}>
-            <BuilderTabsPanel
-              tags={tags}
-              isLoadingTemplates={isLoadingTemplates}
-            />
+            <BuilderTabsPanel />
           </div>
         </div>
       </Container>

@@ -3,16 +3,8 @@ export {
   customerFeaturedItemsQuery,
   useCustomerFeaturedItems,
 } from './api/get-featured-items';
-export {
-  useUserCards,
-  USER_CARDS_DEFAULT_LIMIT,
-  USER_CARDS_INITIAL_PAGE,
-} from './api/get-user-cards';
-export {
-  useUserPacks,
-  USER_PACKS_DEFAULT_LIMIT,
-  USER_PACKS_INITIAL_PAGE,
-} from './api/get-user-packs';
+export { useUserCards } from './api/get-user-cards';
+export { useUserPacks } from './api/get-user-packs';
 export { GlobalAddedToCartPopup } from './components/global-added-to-cart-popup';
 export { GlobalCreatePackModal } from './components/global-create-pack-modal';
 export { GlobalPackAutofillModal } from './components/global-pack-autofill-modal';

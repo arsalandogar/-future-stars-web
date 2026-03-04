@@ -1,7 +1,5 @@
 import { ContentTabs, type ContentTabItem } from '@/components/ui/content-tabs';
 
-import type { TagWithTemplates } from '@/features/templates-browse';
-
 import type { BuilderTab } from '../types';
 import { useCardBuilderStore } from '../stores/card-builder-store';
 import { ColorsTab } from './colors-tab';
@@ -18,15 +16,7 @@ const TAB_ITEMS: ContentTabItem[] = [
   { label: 'Templates', value: 'templates' },
 ];
 
-interface BuilderTabsPanelProps {
-  tags: TagWithTemplates[];
-  isLoadingTemplates: boolean;
-}
-
-export function BuilderTabsPanel({
-  tags,
-  isLoadingTemplates,
-}: BuilderTabsPanelProps) {
+export function BuilderTabsPanel() {
   const activeTab = useCardBuilderStore((s) => s.activeTab);
   const setActiveTab = useCardBuilderStore((s) => s.setActiveTab);
 
@@ -46,9 +36,7 @@ export function BuilderTabsPanel({
         {activeTab === 'content' && <ContentTab />}
         {activeTab === 'colors' && <ColorsTab />}
         {activeTab === 'photo' && <PhotoTab />}
-        {activeTab === 'templates' && (
-          <TemplatesTab tags={tags} isLoading={isLoadingTemplates} />
-        )}
+        {activeTab === 'templates' && <TemplatesTab />}
       </div>
     </div>
   );

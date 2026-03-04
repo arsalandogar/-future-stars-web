@@ -1,14 +1,24 @@
+import { useMemo } from 'react';
 import { getRouteApi, useNavigate } from '@tanstack/react-router';
-import { Button, Skeleton, Text, Title } from '@mantine/core';
+import {
+  AspectRatio,
+  Button,
+  SimpleGrid,
+  Skeleton,
+  Text,
+  Title,
+} from '@mantine/core';
 
 import { Head } from '@/components/seo/head';
+import { DEFAULT_PAGE_LIMIT, flattenInfiniteData } from '@/lib/react-query';
 
-import { useBrowseTemplates } from '../api/browse-templates';
+import { useTemplateTags } from '../api/get-tags';
+import { useTemplate } from '../api/get-template';
+import { useTemplates } from '../api/get-templates';
 import { TagFilterChips } from '../components/tag-filter-chips';
-import { TemplateCarousel } from '../components/template-carousel';
 import { TemplatePreviewModal } from '../components/template-preview-modal';
 import { TemplatesGrid } from '../components/templates-grid';
-import type { BrowseTemplate, TagWithTemplates } from '../types';
+import type { BrowseTemplate } from '../types';
 
 const routeApi = getRouteApi('/_authenticated/_customer/templates');
 
@@ -16,14 +26,35 @@ export function TemplatesBrowsePage() {
   const { tag, preview } = routeApi.useSearch();
   const navigate = useNavigate();
 
-  const { data, isLoading, error } = useBrowseTemplates({});
+  const { data: tags, isLoading: isLoadingTags } = useTemplateTags({});
 
-  const handleTagChange = (newTag: string | null) => {
-    void navigate({
-      to: '.',
-      search: { tag: newTag ?? undefined, preview },
-    });
-  };
+  // Find the selected tag to get its ID for filtering
+  const selectedTag = useMemo(
+    () => (tag ? tags?.find((t) => t.name === tag) : undefined),
+    [tag, tags]
+  );
+
+  const {
+    data: templatesData,
+    isLoading: isLoadingTemplates,
+    error,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useTemplates({
+    variables: {
+      tagIds: selectedTag ? [selectedTag.id] : undefined,
+      limit: DEFAULT_PAGE_LIMIT,
+    },
+  });
+
+  // Always fetch the previewed template so it's available even before scrolled into view
+  const { data: previewedTemplate } = useTemplate({
+    variables: preview ?? 0,
+    enabled: preview != null,
+  });
+
+  const templates = flattenInfiniteData(templatesData);
 
   const handleTemplateClick = (template: BrowseTemplate) => {
     void navigate({
@@ -46,19 +77,12 @@ export function TemplatesBrowsePage() {
     });
   };
 
-  // Find the template to preview from URL param
-  const allTemplates = data?.data.flatMap((tagItem) => tagItem.templates) ?? [];
   const selectedTemplate = preview
-    ? (allTemplates.find((tpl) => tpl.id === preview) ?? null)
+    ? (templates.find((tpl) => tpl.id === preview) ?? previewedTemplate ?? null)
     : null;
   const modalOpened = !!selectedTemplate;
 
-  const filteredTags = tag
-    ? data?.data.filter((tagItem) => tagItem.name === tag)
-    : data?.data;
-
-  // If tag filter is active, show grid view
-  const showGrid = !!tag;
+  const isLoading = isLoadingTags || isLoadingTemplates;
 
   return (
     <>
@@ -71,7 +95,7 @@ export function TemplatesBrowsePage() {
       </Text>
 
       <div className="mb-8">
-        {isLoading ? (
+        {isLoadingTags ? (
           <div className="flex gap-2">
             {Array.from({ length: 5 }).map((_, i) => (
               <Skeleton
@@ -84,26 +108,25 @@ export function TemplatesBrowsePage() {
             ))}
           </div>
         ) : (
-          <TagFilterChips
-            tags={data?.data ?? []}
-            selected={tag ?? null}
-            onChange={handleTagChange}
-          />
+          <TagFilterChips tags={tags ?? []} selected={tag ?? null} />
         )}
       </div>
 
       <TemplateContent
         isLoading={isLoading}
         error={error}
-        showGrid={showGrid}
-        filteredTags={filteredTags}
+        templates={templates}
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        fetchNextPage={fetchNextPage}
         onTemplateClick={handleTemplateClick}
       />
 
       {modalOpened && selectedTemplate ? (
         <TemplatePreviewModal
           template={selectedTemplate}
-          allTags={data?.data ?? []}
+          tags={tags ?? []}
+          templates={templates}
           opened={modalOpened}
           onClose={handleCloseModal}
           onTemplateChange={handleTemplateChange}
@@ -115,25 +138,13 @@ export function TemplatesBrowsePage() {
 
 function LoadingSkeleton() {
   return (
-    <div className="flex flex-col gap-10">
-      {Array.from({ length: 3 }).map((_, i) => (
-        // eslint-disable-next-line react-x/no-array-index-key -- static skeleton placeholders
-        <div key={`row-skeleton-${i}`}>
-          <Skeleton height={28} width={200} mb="md" />
-          <div className="flex gap-4">
-            {Array.from({ length: 5 }).map((_, j) => (
-              <Skeleton
-                // eslint-disable-next-line react-x/no-array-index-key
-                key={`card-skeleton-${i}-${j}`}
-                height={240}
-                width={180}
-                radius="md"
-              />
-            ))}
-          </div>
-        </div>
+    <SimpleGrid cols={{ base: 2, xs: 3, sm: 4, md: 5, lg: 6 }} spacing="md">
+      {Array.from({ length: 12 }, (_, i) => (
+        <AspectRatio key={`skeleton-${i}`} ratio={2.5 / 3.5}>
+          <Skeleton radius={0} h="100%" />
+        </AspectRatio>
       ))}
-    </div>
+    </SimpleGrid>
   );
 }
 
@@ -153,16 +164,20 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
 interface TemplateContentProps {
   isLoading: boolean;
   error: Error | null;
-  showGrid: boolean;
-  filteredTags: TagWithTemplates[] | undefined;
+  templates: BrowseTemplate[];
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  fetchNextPage: () => unknown;
   onTemplateClick: (template: BrowseTemplate) => void;
 }
 
 function TemplateContent({
   isLoading,
   error,
-  showGrid,
-  filteredTags,
+  templates,
+  hasNextPage,
+  isFetchingNextPage,
+  fetchNextPage,
   onTemplateClick,
 }: TemplateContentProps) {
   if (isLoading) {
@@ -173,24 +188,13 @@ function TemplateContent({
     return <ErrorState onRetry={() => window.location.reload()} />;
   }
 
-  if (showGrid) {
-    return (
-      <TemplatesGrid
-        templates={filteredTags?.[0]?.templates ?? []}
-        onTemplateClick={onTemplateClick}
-      />
-    );
-  }
-
   return (
-    <>
-      {filteredTags?.map((tagItem) => (
-        <TemplateCarousel
-          key={tagItem.id}
-          tag={tagItem}
-          onTemplateClick={onTemplateClick}
-        />
-      ))}
-    </>
+    <TemplatesGrid
+      templates={templates}
+      onTemplateClick={onTemplateClick}
+      hasNextPage={hasNextPage}
+      isFetchingNextPage={isFetchingNextPage}
+      fetchNextPage={fetchNextPage}
+    />
   );
 }
