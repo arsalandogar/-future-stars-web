@@ -12,6 +12,8 @@ import { useTemplateSvgJson } from '../api/get-template-svg-json';
 import { BuilderHeader } from '../components/builder-header';
 import { BuilderTabsPanel } from '../components/builder-tabs-panel';
 import { CardPreview } from '../components/card-preview';
+import { TOUCH_TARGET_ATTR, TOUCH_TARGET_TYPE_ATTR } from '@fs-card-engine';
+
 import {
   IMAGE_FIELD_ATTR,
   usePreviewGestures,
@@ -47,6 +49,34 @@ export function CreateCardPage() {
   const renderOptions = useMemo<SvgRenderOptions>(
     () => ({
       getNodeProps: (node: SvgJsonNode) => {
+        // Touch target overlay rects injected by prepareTemplate
+        const touchTarget = node.attributes[TOUCH_TARGET_ATTR] as
+          | string
+          | undefined;
+        if (touchTarget) {
+          const targetType = node.attributes[TOUCH_TARGET_TYPE_ATTR];
+          if (targetType === 'image') {
+            return {
+              [IMAGE_FIELD_ATTR]: touchTarget,
+              style: { cursor: 'pointer', touchAction: 'none' },
+              onClick: () => {
+                if (wasDragRef.current) return;
+                setActiveTab('photo');
+                setSelectedImageFieldId(touchTarget as EditableFieldId);
+              },
+            };
+          }
+          if (targetType === 'text') {
+            return {
+              style: { cursor: 'pointer' },
+              onClick: () => {
+                setActiveTab('content');
+                setFocusedFieldId(touchTarget as EditableFieldId);
+              },
+            };
+          }
+        }
+
         const imageFieldId = node.attributes['data-image-field'] as
           | string
           | undefined;

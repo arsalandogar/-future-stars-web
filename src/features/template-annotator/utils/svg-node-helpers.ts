@@ -1,9 +1,21 @@
 import type { SvgJsonNode } from '@/types/svg';
 import { parseStyleString } from '@/utils/svg-attributes';
 
-import { EDITABLE_FIELDS, type EditableFieldId } from '@/features/templates';
+import {
+  EDITABLE_FIELDS,
+  type EditableFieldId,
+  type EditableFieldType,
+} from '@/features/templates';
 
 import type { NodeMeta } from '../types';
+
+/** CSS class applied to the SVG wrapper in the annotator canvas, used for DOM queries. */
+export const ANNOTATOR_SVG_WRAPPER_CLASS = 'annotator-svg-wrapper';
+
+/** Field types that support touch bounds configuration. */
+export function supportsTouchBounds(type: EditableFieldType): boolean {
+  return type === 'text' || type === 'image';
+}
 
 const TEXT_TAGS = new Set(['text', 'tspan']);
 const NON_INTERACTIVE_TAGS = new Set([

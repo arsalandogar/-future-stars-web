@@ -1,7 +1,10 @@
 import type { SvgJsonNode, ColorTarget } from '@/types/svg';
 import { parseOffset } from '@/utils/color-math';
+import { parseTouchBounds } from '@fs-card-engine';
 
 import { EDITABLE_FIELDS, type EditableFieldId } from '@/features/templates';
+
+import { supportsTouchBounds } from './svg-node-helpers';
 
 import type { FieldAssignment } from '../types';
 import {
@@ -9,6 +12,7 @@ import {
   DATA_ATTR_COLOR_TARGET,
   DATA_ATTR_COLOR_OFFSET,
   DATA_ATTR_MAX_WIDTH,
+  DATA_ATTR_TOUCH_BOUNDS,
 } from './export-annotated-svg';
 
 function isEditableFieldId(value: string): value is EditableFieldId {
@@ -51,6 +55,13 @@ export function extractAssignments(
           const maxWidth = Number(maxWidthStr);
           if (Number.isFinite(maxWidth)) assignment.maxWidth = maxWidth;
         }
+      }
+
+      if (supportsTouchBounds(field.type)) {
+        const touchBounds = parseTouchBounds(
+          node.attributes[DATA_ATTR_TOUCH_BOUNDS]
+        );
+        if (touchBounds) assignment.touchBounds = touchBounds;
       }
 
       assignments.push(assignment);

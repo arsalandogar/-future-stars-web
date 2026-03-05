@@ -3,6 +3,7 @@ import { EDITABLE_FIELDS } from '@/features/templates';
 import { isZeroOffset, serializeOffset } from '@/utils/color-math';
 
 import type { FieldAssignment } from '../types';
+import { supportsTouchBounds } from './svg-node-helpers';
 
 export const DATA_ATTR_BY_TYPE: Record<string, string> = {
   color: 'data-color-field',
@@ -13,12 +14,14 @@ export const DATA_ATTR_BY_TYPE: Record<string, string> = {
 export const DATA_ATTR_COLOR_TARGET = 'data-color-target';
 export const DATA_ATTR_COLOR_OFFSET = 'data-color-offset';
 export const DATA_ATTR_MAX_WIDTH = 'data-max-width';
+export const DATA_ATTR_TOUCH_BOUNDS = 'data-touch-bounds';
 
 export const ALL_ANNOTATION_ATTRS = [
   ...Object.values(DATA_ATTR_BY_TYPE),
   DATA_ATTR_COLOR_TARGET,
   DATA_ATTR_COLOR_OFFSET,
   DATA_ATTR_MAX_WIDTH,
+  DATA_ATTR_TOUCH_BOUNDS,
 ];
 
 function stripNodeIds(node: SvgJsonNode): SvgJsonNode {
@@ -76,6 +79,12 @@ export function buildAnnotatedSvg(
 
           if (field.type === 'text' && assignment.maxWidth != null) {
             node.attributes[DATA_ATTR_MAX_WIDTH] = String(assignment.maxWidth);
+          }
+
+          if (supportsTouchBounds(field.type) && assignment.touchBounds) {
+            const b = assignment.touchBounds;
+            node.attributes[DATA_ATTR_TOUCH_BOUNDS] =
+              `${b.x},${b.y},${b.width},${b.height}`;
           }
         }
       }

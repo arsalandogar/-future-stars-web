@@ -1,10 +1,16 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 
 import type { SvgJsonNode } from '@/types/svg';
 import { SvgRenderer } from '@/components/svg-renderer/svg-renderer';
+import { EDITABLE_FIELDS } from '@/features/templates';
 
 import { useAnnotatorStore } from '../stores/annotator-store';
-import { isNonInteractive } from '../utils/svg-node-helpers';
+import {
+  ANNOTATOR_SVG_WRAPPER_CLASS,
+  isNonInteractive,
+  supportsTouchBounds,
+} from '../utils/svg-node-helpers';
+import { TouchBoundsOverlay } from './touch-bounds-overlay';
 
 import styles from './annotator-canvas.module.css';
 
@@ -14,6 +20,12 @@ export function AnnotatorCanvas() {
   const hoveredNodeId = useAnnotatorStore((s) => s.hoveredNodeId);
   const selectNode = useAnnotatorStore((s) => s.selectNode);
   const hoverNode = useAnnotatorStore((s) => s.hoverNode);
+  const editingTouchBoundsNodeId = useAnnotatorStore(
+    (s) => s.editingTouchBoundsNodeId
+  );
+  const assignments = useAnnotatorStore((s) => s.assignments);
+
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const getNodeProps = useCallback(
     (node: SvgJsonNode) => {
@@ -42,6 +54,20 @@ export function AnnotatorCanvas() {
     [selectNode, hoverNode]
   );
 
+  // Find the touch bounds assignment being edited
+  const editingAssignment = useMemo(() => {
+    if (!editingTouchBoundsNodeId) return null;
+    const found = assignments.find((a) => {
+      if (a.nodeId !== editingTouchBoundsNodeId || !a.touchBounds) return false;
+      return supportsTouchBounds(EDITABLE_FIELDS[a.fieldId].type);
+    });
+    return found ?? null;
+  }, [editingTouchBoundsNodeId, assignments]);
+
+  // Get viewBox from svgTree root
+  const viewBox =
+    svgTree?.type === 'element' ? svgTree.attributes.viewBox : undefined;
+
   // Inject dynamic <style> for hover/selection highlights so getNodeProps stays stable
   const highlightStyle = useMemo(() => {
     const rules: string[] = [];
@@ -64,8 +90,19 @@ export function AnnotatorCanvas() {
   return (
     <div className={styles.canvas} onClick={() => selectNode(null)}>
       {highlightStyle}
-      <div className={styles.svgWrapper}>
+      <div
+        className={`${styles.svgWrapper} ${ANNOTATOR_SVG_WRAPPER_CLASS}`}
+        ref={wrapperRef}
+      >
         <SvgRenderer node={svgTree} options={{ getNodeProps }} />
+        {editingAssignment?.touchBounds && viewBox && (
+          <TouchBoundsOverlay
+            viewBox={viewBox}
+            bounds={editingAssignment.touchBounds}
+            nodeId={editingAssignment.nodeId}
+            fieldId={editingAssignment.fieldId}
+          />
+        )}
       </div>
     </div>
   );

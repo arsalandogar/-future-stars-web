@@ -12,6 +12,13 @@ export interface OklabOffset {
   deltaB: number;
 }
 
+export interface TouchBounds {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export interface ImageEdit {
   url: string;
   zoom: number;

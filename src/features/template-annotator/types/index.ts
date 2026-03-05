@@ -1,9 +1,9 @@
 import type { EditableFieldId } from '@/features/templates';
 
-import type { ColorTarget } from '@/types/svg';
+import type { ColorTarget, TouchBounds } from '@/types/svg';
 import type { OklabOffset } from '@/utils/color-math';
 
-export type { ColorTarget } from '@/types/svg';
+export type { ColorTarget, TouchBounds } from '@/types/svg';
 export type { ClusterMember } from '@/utils/color-math';
 
 export interface FieldAssignment {
@@ -12,6 +12,7 @@ export interface FieldAssignment {
   colorTarget?: ColorTarget;
   colorOffset?: OklabOffset;
   maxWidth?: number;
+  touchBounds?: TouchBounds;
 }
 
 export interface NodeMeta {

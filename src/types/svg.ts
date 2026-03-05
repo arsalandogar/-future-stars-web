@@ -1,1 +1,1 @@
-export type { SvgJsonNode, ColorTarget } from '@fs-card-engine';
+export type { SvgJsonNode, ColorTarget, TouchBounds } from '@fs-card-engine';

@@ -8,6 +8,8 @@ import {
   DEFAULT_IMAGE_POSITION,
   getEditValue,
   isImageEdit,
+  TOUCH_TARGET_ATTR,
+  TOUCH_TARGET_TYPE_ATTR,
 } from '@fs-card-engine';
 
 const ZOOM_MIN = 0.5;
@@ -30,6 +32,11 @@ function resolveFieldId(
   while (el && el !== container) {
     const id = el.getAttribute(IMAGE_FIELD_ATTR);
     if (id) return id;
+    // Also check touch target rects for image fields
+    const touchTarget = el.getAttribute(TOUCH_TARGET_ATTR);
+    if (touchTarget && el.getAttribute(TOUCH_TARGET_TYPE_ATTR) === 'image') {
+      return touchTarget;
+    }
     el = el.parentElement;
   }
   return null;

@@ -5,6 +5,7 @@ export type {
   OklabOffset,
   ImageEdit,
   EditValue,
+  TouchBounds,
 } from './types.ts';
 export { isImageEdit, getEditValue, DEFAULT_IMAGE_POSITION } from './types.ts';
 
@@ -36,6 +37,7 @@ export {
   applyColorEdit,
   discoverEditableImageFields,
   applyImageEdit,
+  parseTouchBounds,
   type EditableTextField,
   type ColorFieldElement,
   type EditableColorField,
@@ -51,6 +53,8 @@ export { cloneWithStableIds } from './svg-clone.ts';
 
 // Edit operations
 export {
+  TOUCH_TARGET_ATTR,
+  TOUCH_TARGET_TYPE_ATTR,
   prepareTemplate,
   applyEdits,
   cleanEditsForSave,

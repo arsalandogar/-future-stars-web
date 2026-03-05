@@ -1,4 +1,9 @@
-import type { ColorTarget, OklabOffset, SvgJsonNode } from './types.ts';
+import type {
+  ColorTarget,
+  OklabOffset,
+  SvgJsonNode,
+  TouchBounds,
+} from './types.ts';
 import { applyOklabOffset, parseOffset } from './color-math.ts';
 import { EDITABLE_FIELDS, type EditableFieldId } from './vocabulary.ts';
 
@@ -7,6 +12,15 @@ function buildFieldOrder(type: string): Map<EditableFieldId, number> {
     .filter(([, field]) => field.type === type)
     .map(([id]) => id as EditableFieldId);
   return new Map(ids.map((id, i) => [id, i]));
+}
+
+export function parseTouchBounds(
+  value: string | undefined
+): TouchBounds | undefined {
+  if (!value) return undefined;
+  const parts = value.split(',').map(Number);
+  if (parts.length !== 4 || !parts.every(Number.isFinite)) return undefined;
+  return { x: parts[0], y: parts[1], width: parts[2], height: parts[3] };
 }
 
 const TEXT_FIELD_ORDER = buildFieldOrder('text');
@@ -22,6 +36,7 @@ export interface EditableTextField {
   label: string;
   originalValue: string;
   elementNodes: SvgJsonNode[];
+  touchBounds?: TouchBounds;
 }
 
 function collectTextContent(node: SvgJsonNode): string {
@@ -69,12 +84,16 @@ export function discoverEditableTextFields(
   for (const [fieldId, elementNodes] of fieldMap) {
     const fieldDef = EDITABLE_FIELDS[fieldId];
     const originalValue = collectTextContent(elementNodes[0]);
+    const touchBounds = parseTouchBounds(
+      elementNodes[0].attributes['data-touch-bounds']
+    );
 
     fields.push({
       fieldId,
       label: fieldDef.label,
       originalValue,
       elementNodes,
+      ...(touchBounds && { touchBounds }),
     });
   }
 
@@ -251,6 +270,7 @@ export interface EditableImageField {
   elementNodes: SvgJsonNode[];
   aspectRatio: number | null;
   clipBounds: ImageClipBounds | null;
+  touchBounds?: TouchBounds;
 }
 
 /** Build a map of clipPath id -> bounding rect from <defs>. */
@@ -346,6 +366,7 @@ export function discoverEditableImageFields(
     const w = clipBounds?.width ?? originalBounds.width;
     const h = clipBounds?.height ?? originalBounds.height;
     const aspectRatio = w > 0 && h > 0 ? w / h : null;
+    const touchBounds = parseTouchBounds(first.attributes['data-touch-bounds']);
 
     fields.push({
       fieldId,
@@ -355,6 +376,7 @@ export function discoverEditableImageFields(
       elementNodes,
       aspectRatio,
       clipBounds,
+      ...(touchBounds && { touchBounds }),
     });
   }
 

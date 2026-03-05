@@ -1,4 +1,9 @@
-import type { SvgJsonNode, EditValue, ImageEdit } from './types.ts';
+import type {
+  SvgJsonNode,
+  EditValue,
+  ImageEdit,
+  TouchBounds,
+} from './types.ts';
 import { isImageEdit, getEditValue, DEFAULT_IMAGE_POSITION } from './types.ts';
 import type { EditableFieldId } from './vocabulary.ts';
 import {
@@ -24,20 +29,63 @@ export interface DiscoveredFields {
   imageFields: EditableImageField[];
 }
 
+/** Attribute used to mark touch target overlay rects. */
+export const TOUCH_TARGET_ATTR = 'data-touch-target';
+
+/** Attribute that stores the field type ('image' | 'text') on touch target rects. */
+export const TOUCH_TARGET_TYPE_ATTR = 'data-touch-target-type';
+
 /** Clone an SVG node and discover all editable fields in one call. */
 export function prepareTemplate(svgNode: SvgJsonNode): {
   workingCopy: SvgJsonNode;
   fields: DiscoveredFields;
 } {
   const workingCopy = cloneWithStableIds(svgNode);
-  return {
-    workingCopy,
-    fields: {
-      textFields: discoverEditableTextFields(workingCopy),
-      colorFields: discoverEditableColorFields(workingCopy),
-      imageFields: discoverEditableImageFields(workingCopy),
-    },
+  const fields: DiscoveredFields = {
+    textFields: discoverEditableTextFields(workingCopy),
+    colorFields: discoverEditableColorFields(workingCopy),
+    imageFields: discoverEditableImageFields(workingCopy),
   };
+
+  // Inject transparent touch target rects for fields with touch bounds.
+  // Image targets are pushed first so they sit below text targets in SVG
+  // paint order — otherwise a full-card image touch area blocks text clicks.
+  const touchTargets: SvgJsonNode[] = [];
+
+  const collectTouchTargets = (
+    fieldList: { fieldId: EditableFieldId; touchBounds?: TouchBounds }[],
+    type: string
+  ) => {
+    for (const field of fieldList) {
+      if (!field.touchBounds) continue;
+      const b = field.touchBounds;
+      touchTargets.push({
+        name: 'rect',
+        type: 'element',
+        value: '',
+        attributes: {
+          x: String(b.x),
+          y: String(b.y),
+          width: String(b.width),
+          height: String(b.height),
+          fill: 'transparent',
+          'pointer-events': 'all',
+          [TOUCH_TARGET_ATTR]: field.fieldId,
+          [TOUCH_TARGET_TYPE_ATTR]: type,
+        },
+        children: [],
+      });
+    }
+  };
+
+  collectTouchTargets(fields.imageFields, 'image');
+  collectTouchTargets(fields.textFields, 'text');
+
+  if (touchTargets.length > 0) {
+    workingCopy.children.push(...touchTargets);
+  }
+
+  return { workingCopy, fields };
 }
 
 /** Re-apply edits to discovered fields on a freshly cloned working copy. */

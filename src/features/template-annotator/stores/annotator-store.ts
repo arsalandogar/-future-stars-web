@@ -10,6 +10,7 @@ import type {
   ColorTarget,
   FieldAssignment,
   NodeMeta,
+  TouchBounds,
   ValidationResult,
 } from '../types';
 import { measureTextWidth } from '../utils/measure-text-width';
@@ -28,6 +29,9 @@ interface AnnotatorState {
   // Selection
   selectedNodeId: string | null;
   hoveredNodeId: string | null;
+
+  // Touch bounds editing
+  editingTouchBoundsNodeId: string | null;
 
   // Tree state
   expandedNodeIds: Set<string>;
@@ -76,6 +80,13 @@ interface AnnotatorState {
   bulkAssignImages: (
     mappings: { fieldId: EditableFieldId; nodeId: string }[]
   ) => void;
+  setEditingTouchBounds: (nodeId: string | null) => void;
+  commitTouchBounds: (
+    nodeId: string,
+    fieldId: EditableFieldId,
+    bounds: TouchBounds
+  ) => void;
+  removeTouchBounds: (nodeId: string, fieldId: EditableFieldId) => void;
   validate: () => void;
   undo: () => void;
   redo: () => void;
@@ -132,6 +143,7 @@ const initialState = {
   nodeMap: new Map<string, SvgJsonNode>(),
   selectedNodeId: null as string | null,
   hoveredNodeId: null as string | null,
+  editingTouchBoundsNodeId: null as string | null,
   expandedNodeIds: new Set<string>(),
   assignments: [] as FieldAssignment[],
   validationResults: [] as ValidationResult[],
@@ -172,9 +184,13 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
       const ancestors = getAncestorIds(nodeId, nodeIndex);
       const newExpanded = new Set(expandedNodeIds);
       for (const id of ancestors) newExpanded.add(id);
-      set({ selectedNodeId: nodeId, expandedNodeIds: newExpanded });
+      set({
+        selectedNodeId: nodeId,
+        expandedNodeIds: newExpanded,
+        editingTouchBoundsNodeId: null,
+      });
     } else {
-      set({ selectedNodeId: nodeId });
+      set({ selectedNodeId: nodeId, editingTouchBoundsNodeId: null });
     }
   },
 
@@ -314,6 +330,37 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
         fieldId: m.fieldId,
       }))
     );
+  },
+
+  setEditingTouchBounds: (nodeId) => set({ editingTouchBoundsNodeId: nodeId }),
+
+  commitTouchBounds: (nodeId, fieldId, bounds) => {
+    const { assignments, undoStack } = get();
+    const newAssignments = assignments.map((a) =>
+      a.nodeId === nodeId && a.fieldId === fieldId
+        ? { ...a, touchBounds: bounds }
+        : a
+    );
+    set({
+      assignments: newAssignments,
+      undoStack: [...undoStack.slice(-(MAX_UNDO - 1)), assignments],
+      redoStack: [],
+    });
+  },
+
+  removeTouchBounds: (nodeId, fieldId) => {
+    const { assignments, undoStack } = get();
+    const newAssignments = assignments.map((a) => {
+      if (a.nodeId !== nodeId || a.fieldId !== fieldId) return a;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { touchBounds: _omit, ...rest } = a;
+      return rest;
+    });
+    set({
+      assignments: newAssignments,
+      undoStack: [...undoStack.slice(-(MAX_UNDO - 1)), assignments],
+      redoStack: [],
+    });
   },
 
   validate: () => {
