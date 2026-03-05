@@ -16,6 +16,11 @@
       "sourceType": "github",
       "computedHash": "05088780c348108baaabdaf55c672a7967c2a82c4843c259343141f91a0da55a"
     },
+    "skill-creator": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "9b03bb78ec5c81c4e0546dbb78cfc970368c72dcae5482e8c59690175abbc8e7"
+    },
     "tanstack-integration-best-practices": {
       "source": "DeckardGer/tanstack-agent-skills",
       "sourceType": "github",
