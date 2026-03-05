@@ -10,6 +10,7 @@ import {
   isNonInteractive,
   supportsTouchBounds,
 } from '../utils/svg-node-helpers';
+import { ensureTouchBounds } from '../utils/touch-bounds-helpers';
 import { TouchBoundsOverlay } from './touch-bounds-overlay';
 import { TransformOverlay } from './transform-overlay';
 
@@ -30,7 +31,6 @@ export function AnnotatorCanvas() {
   const assignments = useAnnotatorStore((s) => s.assignments);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
-
   const getNodeProps = useCallback(
     (node: SvgJsonNode) => {
       if (node.type === 'text') return undefined;
@@ -44,6 +44,23 @@ export function AnnotatorCanvas() {
         onClick: (e: React.MouseEvent) => {
           e.stopPropagation();
           selectNode(nodeId);
+        },
+        onDoubleClick: (e: React.MouseEvent) => {
+          e.stopPropagation();
+          const {
+            assignments: currentAssignments,
+            selectNode: select,
+            setEditingTouchBounds,
+          } = useAnnotatorStore.getState();
+          const assignment = currentAssignments.find(
+            (a) =>
+              a.nodeId === nodeId &&
+              supportsTouchBounds(EDITABLE_FIELDS[a.fieldId].type)
+          );
+          if (!assignment) return;
+          ensureTouchBounds(nodeId, assignment.fieldId);
+          select(nodeId);
+          setEditingTouchBounds(nodeId);
         },
         onMouseEnter: () => hoverNode(nodeId),
         onMouseLeave: () => hoverNode(null),
@@ -72,10 +89,14 @@ export function AnnotatorCanvas() {
   const viewBox =
     svgTree?.type === 'element' ? svgTree.attributes.viewBox : undefined;
 
-  // Inject dynamic <style> for hover/selection highlights so getNodeProps stays stable
+  // Inject dynamic <style> for hover/selection highlights so getNodeProps stays stable.
+  // Hide the selection outline when an overlay (touch bounds or transform) is active
+  // to avoid visual clutter — the overlay already highlights the element.
+  const isOverlayActive =
+    !!editingTouchBoundsNodeId || !!editingTransformNodeId;
   const highlightStyle = useMemo(() => {
     const rules: string[] = [];
-    if (selectedNodeId) {
+    if (selectedNodeId && !isOverlayActive) {
       rules.push(
         `[data-node-id="${selectedNodeId}"] { outline: 2px solid var(--mantine-color-primary-4); }`
       );
@@ -87,7 +108,7 @@ export function AnnotatorCanvas() {
     }
     if (rules.length === 0) return null;
     return <style>{rules.join('\n')}</style>;
-  }, [selectedNodeId, hoveredNodeId]);
+  }, [selectedNodeId, hoveredNodeId, isOverlayActive]);
 
   if (!svgTree) return null;
 

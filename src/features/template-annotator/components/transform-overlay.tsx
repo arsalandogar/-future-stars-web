@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useCallback, useRef, useState } from 'react';
 
 import type { TouchBounds } from '../types';
 import { useAnnotatorStore } from '../stores/annotator-store';
-import { getElementBBoxInSvgRoot } from '../utils/get-element-bbox';
+import { useElementBounds } from '../hooks/use-element-bounds';
 import {
   collectSnapTargets,
   computeSnap,
@@ -57,27 +57,14 @@ interface TransformOverlayProps {
 
 export function TransformOverlay({ viewBox, nodeId }: TransformOverlayProps) {
   const commitNodeTransform = useAnnotatorStore((s) => s.commitNodeTransform);
-  const svgTree = useAnnotatorStore((s) => s.svgTree);
+  const setEditingTransform = useAnnotatorStore((s) => s.setEditingTransform);
 
-  const [baseBounds, setBaseBounds] = useState<TouchBounds | null>(null);
+  const baseBounds = useElementBounds(nodeId, true);
   const [preview, setPreview] = useState<TouchBounds | null>(null);
 
   const svgRef = useRef<SVGSVGElement>(null);
 
   const vb = useMemo<TouchBounds>(() => parseViewBox(viewBox), [viewBox]);
-
-  // Measure element bbox — re-run when svgTree changes (after transform commits).
-  // We use requestAnimationFrame to ensure DOM is laid out before measuring,
-  // and to avoid synchronous setState within the effect body.
-  useEffect(() => {
-    const rafId = requestAnimationFrame(() => {
-      const svgEl = querySvgElement();
-      if (!svgEl) return;
-      const bbox = getElementBBoxInSvgRoot(svgEl, nodeId);
-      if (bbox) setBaseBounds(bbox);
-    });
-    return () => cancelAnimationFrame(rafId);
-  }, [nodeId, svgTree]);
 
   const activeBounds = preview ?? baseBounds;
 
@@ -101,12 +88,6 @@ export function TransformOverlay({ viewBox, nodeId }: TransformOverlayProps) {
       }
     | null
   >(null);
-
-  const applyDelta = useCallback(
-    (handle: HandleId, startBounds: TouchBounds, dx: number, dy: number) =>
-      applyResizeDelta(handle, startBounds, dx, dy),
-    []
-  );
 
   const startDrag = useCallback(
     (e: React.PointerEvent, mode: 'move' | HandleId) => {
@@ -154,7 +135,7 @@ export function TransformOverlay({ viewBox, nodeId }: TransformOverlayProps) {
 
     const computeRawBounds = (dx: number, dy: number): TouchBounds => {
       if (dragging.mode === 'resize') {
-        return applyDelta(dragging.handle, dragging.startBounds, dx, dy);
+        return applyResizeDelta(dragging.handle, dragging.startBounds, dx, dy);
       }
       return {
         ...dragging.startBounds,
@@ -245,7 +226,7 @@ export function TransformOverlay({ viewBox, nodeId }: TransformOverlayProps) {
       window.removeEventListener('pointerup', onUp);
       window.removeEventListener('pointercancel', onCancel);
     };
-  }, [dragging, applyDelta, commitNodeTransform, nodeId, baseBounds, vb]);
+  }, [dragging, commitNodeTransform, nodeId, baseBounds, vb]);
 
   const handleSize = Math.min(vb.width, vb.height) * 0.015;
 
@@ -272,6 +253,10 @@ export function TransformOverlay({ viewBox, nodeId }: TransformOverlayProps) {
         height={vb.height}
         fill="transparent"
         style={{ pointerEvents: 'all' }}
+        onPointerDown={(e) => {
+          e.stopPropagation();
+          setEditingTransform(null);
+        }}
       />
 
       <rect

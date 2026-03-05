@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useCallback, useRef, useState } from 'react';
 
 import type { EditableFieldId } from '@/features/templates';
 
@@ -28,6 +28,9 @@ export function TouchBoundsOverlay({
   fieldId,
 }: TouchBoundsOverlayProps) {
   const commitTouchBounds = useAnnotatorStore((s) => s.commitTouchBounds);
+  const setEditingTouchBounds = useAnnotatorStore(
+    (s) => s.setEditingTouchBounds
+  );
 
   // Preview bounds during drag — local state since only this component uses it
   const [preview, setPreview] = useState<TouchBounds | null>(null);
@@ -54,12 +57,6 @@ export function TouchBoundsOverlay({
       }
     | null
   >(null);
-
-  const applyDelta = useCallback(
-    (handle: HandleId, startBounds: TouchBounds, dx: number, dy: number) =>
-      applyResizeDelta(handle, startBounds, dx, dy),
-    []
-  );
 
   const startDrag = useCallback(
     (e: React.PointerEvent, mode: 'move' | HandleId) => {
@@ -97,7 +94,7 @@ export function TouchBoundsOverlay({
     const computeBounds = (dx: number, dy: number): TouchBounds => {
       if (dragging.mode === 'resize') {
         return clampToViewBox(
-          applyDelta(dragging.handle, dragging.startBounds, dx, dy),
+          applyResizeDelta(dragging.handle, dragging.startBounds, dx, dy),
           vb
         );
       }
@@ -146,7 +143,7 @@ export function TouchBoundsOverlay({
       window.removeEventListener('pointerup', onUp);
       window.removeEventListener('pointercancel', onCancel);
     };
-  }, [dragging, applyDelta, commitTouchBounds, nodeId, fieldId, vb]);
+  }, [dragging, commitTouchBounds, nodeId, fieldId, vb]);
 
   // Compute handle size as a fraction of viewBox (roughly 1.5% of the smaller dimension)
   const handleSize = Math.min(vb.width, vb.height) * 0.015;
@@ -173,6 +170,10 @@ export function TouchBoundsOverlay({
         height={vb.height}
         fill="transparent"
         style={{ pointerEvents: 'all' }}
+        onPointerDown={(e) => {
+          e.stopPropagation();
+          setEditingTouchBounds(null);
+        }}
       />
 
       {/* Bounds rectangle — draggable to move */}

@@ -3,6 +3,8 @@ import { RotateCcw } from 'lucide-react';
 
 import type { NodeMeta } from '../types';
 import { useAnnotatorStore } from '../stores/annotator-store';
+import { useElementBounds } from '../hooks/use-element-bounds';
+import { BoundsDisplay } from './bounds-display';
 
 interface TransformControlsProps {
   nodeMeta: NodeMeta;
@@ -13,10 +15,11 @@ export function TransformControls({ nodeMeta }: TransformControlsProps) {
   const setEditing = useAnnotatorStore((s) => s.setEditingTransform);
   const nodeMap = useAnnotatorStore((s) => s.nodeMap);
   const resetNodeTransform = useAnnotatorStore((s) => s.resetNodeTransform);
-
   const node = nodeMap.get(nodeMeta.nodeId);
   const hasTransform = node?.type === 'element' && !!node.attributes.transform;
   const isEditing = editingNodeId === nodeMeta.nodeId;
+
+  const bounds = useElementBounds(nodeMeta.nodeId, isEditing);
 
   const handleToggleEdit = () => {
     setEditing(isEditing ? null : nodeMeta.nodeId);
@@ -53,6 +56,7 @@ export function TransformControls({ nodeMeta }: TransformControlsProps) {
           </Tooltip>
         )}
       </Group>
+      {isEditing && bounds && <BoundsDisplay bounds={bounds} />}
     </div>
   );
 }

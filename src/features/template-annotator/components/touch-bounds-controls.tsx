@@ -5,8 +5,10 @@ import type { EditableFieldId } from '@/features/templates';
 
 import type { NodeMeta } from '../types';
 import { useAnnotatorStore } from '../stores/annotator-store';
+import { BoundsDisplay } from './bounds-display';
 import { getElementBBoxInSvgRoot } from '../utils/get-element-bbox';
 import { querySvgElement } from '../utils/svg-overlay-helpers';
+import { ensureTouchBounds } from '../utils/touch-bounds-helpers';
 
 interface TouchBoundsControlsProps {
   nodeMeta: NodeMeta;
@@ -33,16 +35,7 @@ export function TouchBoundsControls({
     if (isEditing) {
       setEditing(null);
     } else {
-      // If no bounds yet, initialize from element bbox
-      if (!hasBounds) {
-        const svgElement = querySvgElement();
-        if (svgElement) {
-          const bbox = getElementBBoxInSvgRoot(svgElement, nodeMeta.nodeId);
-          if (bbox) {
-            commitTouchBounds(nodeMeta.nodeId, fieldId, bbox);
-          }
-        }
-      }
+      ensureTouchBounds(nodeMeta.nodeId, fieldId);
       setEditing(nodeMeta.nodeId);
     }
   };
@@ -99,6 +92,9 @@ export function TouchBoundsControls({
           </>
         )}
       </Group>
+      {isEditing && assignment?.touchBounds && (
+        <BoundsDisplay bounds={assignment.touchBounds} />
+      )}
     </div>
   );
 }
