@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 
+import { Head } from '@/components/seo/head';
 import { usePageHeader } from '@/hooks/use-page-header';
 
 import { useAnnotatorStore } from '../stores/annotator-store';
@@ -53,16 +54,27 @@ export function AnnotatorPage({ onSave, isSaving }: AnnotatorPageProps) {
     if (assignments.length === 0) openWizard();
   }
 
+  const head = (
+    <Head
+      title="Template Annotator"
+      description="Annotate SVG templates with editable fields"
+    />
+  );
+
   if (!svgTree) {
     return (
-      <div className={styles.uploadContainer}>
-        <SvgUploadDropzone />
-      </div>
+      <>
+        {head}
+        <div className={styles.uploadContainer}>
+          <SvgUploadDropzone />
+        </div>
+      </>
     );
   }
 
   return (
     <>
+      {head}
       <div className={styles.layout}>
         <div className={styles.toolbar}>
           <AnnotatorToolbar

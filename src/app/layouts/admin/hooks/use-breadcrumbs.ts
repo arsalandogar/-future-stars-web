@@ -22,6 +22,7 @@ const PATH_LABELS: Record<string, string> = {
   'privacy-policy': 'Privacy Policy',
   'color-leagues': 'Color Leagues',
   'color-presets': 'Color Presets',
+  annotate: 'Annotate',
   create: 'Create',
   edit: 'Edit',
   versions: 'Versions',
