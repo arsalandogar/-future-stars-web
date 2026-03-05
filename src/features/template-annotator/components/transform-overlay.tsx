@@ -23,6 +23,7 @@ import {
   parseViewBox,
   applyResizeDelta,
   querySvgElement,
+  getCardBounds,
 } from '../utils/svg-overlay-helpers';
 
 function getAnchor(
@@ -65,6 +66,7 @@ export function TransformOverlay({ viewBox, nodeId }: TransformOverlayProps) {
   const svgRef = useRef<SVGSVGElement>(null);
 
   const vb = useMemo<TouchBounds>(() => parseViewBox(viewBox), [viewBox]);
+  const cardBounds = useMemo(() => getCardBounds(vb), [vb]);
 
   const activeBounds = preview ?? baseBounds;
 
@@ -102,7 +104,7 @@ export function TransformOverlay({ viewBox, nodeId }: TransformOverlayProps) {
       const svgEl = querySvgElement();
       const { nodeIndex } = useAnnotatorStore.getState();
       const snapTargets = svgEl
-        ? collectSnapTargets(svgEl, nodeIndex, nodeId, vb)
+        ? collectSnapTargets(svgEl, nodeIndex, nodeId, cardBounds)
         : { x: [], y: [] };
 
       if (mode === 'move') {
@@ -124,7 +126,7 @@ export function TransformOverlay({ viewBox, nodeId }: TransformOverlayProps) {
         });
       }
     },
-    [activeBounds, nodeId, vb]
+    [activeBounds, nodeId, cardBounds]
   );
 
   useEffect(() => {
@@ -157,7 +159,7 @@ export function TransformOverlay({ viewBox, nodeId }: TransformOverlayProps) {
         handle
       );
       const snapped = applySnap(raw, snap, dragging.mode, handle);
-      return { bounds: clampToViewBox(snapped, vb), snap };
+      return { bounds: clampToViewBox(snapped, cardBounds), snap };
     };
 
     const toSvgPt = (clientX: number, clientY: number): DOMPoint => {
@@ -226,9 +228,17 @@ export function TransformOverlay({ viewBox, nodeId }: TransformOverlayProps) {
       window.removeEventListener('pointerup', onUp);
       window.removeEventListener('pointercancel', onCancel);
     };
-  }, [dragging, commitNodeTransform, nodeId, baseBounds, vb]);
+  }, [
+    dragging,
+    commitNodeTransform,
+    nodeId,
+    baseBounds,
+    cardBounds,
+    vb.width,
+    vb.height,
+  ]);
 
-  const handleSize = Math.min(vb.width, vb.height) * 0.015;
+  const handleSize = Math.min(cardBounds.width, cardBounds.height) * 0.015;
 
   if (!activeBounds) return null;
 
@@ -278,8 +288,14 @@ export function TransformOverlay({ viewBox, nodeId }: TransformOverlayProps) {
       {HANDLES.map((h) => {
         const rawCx = h.cx(activeBounds);
         const rawCy = h.cy(activeBounds);
-        const cx = Math.max(vb.x, Math.min(vb.x + vb.width, rawCx));
-        const cy = Math.max(vb.y, Math.min(vb.y + vb.height, rawCy));
+        const cx = Math.max(
+          cardBounds.x,
+          Math.min(cardBounds.x + cardBounds.width, rawCx)
+        );
+        const cy = Math.max(
+          cardBounds.y,
+          Math.min(cardBounds.y + cardBounds.height, rawCy)
+        );
         return (
           <rect
             key={h.id}
@@ -302,9 +318,9 @@ export function TransformOverlay({ viewBox, nodeId }: TransformOverlayProps) {
       {activeGuides?.x && (
         <line
           x1={activeGuides.x.guideValue}
-          y1={vb.y}
+          y1={cardBounds.y}
           x2={activeGuides.x.guideValue}
-          y2={vb.y + vb.height}
+          y2={cardBounds.y + cardBounds.height}
           stroke="rgba(255, 50, 50, 0.7)"
           strokeWidth={handleSize / 6}
           strokeDasharray={`${handleSize / 2} ${handleSize / 4}`}
@@ -313,9 +329,9 @@ export function TransformOverlay({ viewBox, nodeId }: TransformOverlayProps) {
       )}
       {activeGuides?.y && (
         <line
-          x1={vb.x}
+          x1={cardBounds.x}
           y1={activeGuides.y.guideValue}
-          x2={vb.x + vb.width}
+          x2={cardBounds.x + cardBounds.width}
           y2={activeGuides.y.guideValue}
           stroke="rgba(255, 50, 50, 0.7)"
           strokeWidth={handleSize / 6}

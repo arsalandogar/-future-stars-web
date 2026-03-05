@@ -1,6 +1,13 @@
 import type { TouchBounds } from '../types';
 import { ANNOTATOR_SVG_WRAPPER_CLASS } from './svg-node-helpers';
 
+export {
+  CARD_WIDTH,
+  CARD_HEIGHT,
+  hasBleeds,
+  getCardBounds,
+} from '@fs-card-engine';
+
 export type HandleId = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
 
 export const MIN_SIZE = 10;

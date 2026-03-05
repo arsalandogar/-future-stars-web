@@ -12,6 +12,7 @@ import {
   clientToSvgPoint,
   parseViewBox,
   applyResizeDelta,
+  getCardBounds,
 } from '../utils/svg-overlay-helpers';
 
 interface TouchBoundsOverlayProps {
@@ -40,6 +41,7 @@ export function TouchBoundsOverlay({
   const svgRef = useRef<SVGSVGElement>(null);
 
   const vb = useMemo<TouchBounds>(() => parseViewBox(viewBox), [viewBox]);
+  const cardBounds = useMemo(() => getCardBounds(vb), [vb]);
 
   const [dragging, setDragging] = useState<
     | {
@@ -95,7 +97,7 @@ export function TouchBoundsOverlay({
       if (dragging.mode === 'resize') {
         return clampToViewBox(
           applyResizeDelta(dragging.handle, dragging.startBounds, dx, dy),
-          vb
+          cardBounds
         );
       }
       return clampToViewBox(
@@ -104,7 +106,7 @@ export function TouchBoundsOverlay({
           x: dragging.startBounds.x + dx,
           y: dragging.startBounds.y + dy,
         },
-        vb
+        cardBounds
       );
     };
 
@@ -143,10 +145,10 @@ export function TouchBoundsOverlay({
       window.removeEventListener('pointerup', onUp);
       window.removeEventListener('pointercancel', onCancel);
     };
-  }, [dragging, commitTouchBounds, nodeId, fieldId, vb]);
+  }, [dragging, commitTouchBounds, nodeId, fieldId, cardBounds]);
 
   // Compute handle size as a fraction of viewBox (roughly 1.5% of the smaller dimension)
-  const handleSize = Math.min(vb.width, vb.height) * 0.015;
+  const handleSize = Math.min(cardBounds.width, cardBounds.height) * 0.015;
 
   return (
     <svg
@@ -197,8 +199,14 @@ export function TouchBoundsOverlay({
       {HANDLES.map((h) => {
         const rawCx = h.cx(activeBounds);
         const rawCy = h.cy(activeBounds);
-        const cx = Math.max(vb.x, Math.min(vb.x + vb.width, rawCx));
-        const cy = Math.max(vb.y, Math.min(vb.y + vb.height, rawCy));
+        const cx = Math.max(
+          cardBounds.x,
+          Math.min(cardBounds.x + cardBounds.width, rawCx)
+        );
+        const cy = Math.max(
+          cardBounds.y,
+          Math.min(cardBounds.y + cardBounds.height, rawCy)
+        );
         return (
           <rect
             key={h.id}

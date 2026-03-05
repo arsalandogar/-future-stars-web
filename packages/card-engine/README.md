@@ -7,6 +7,15 @@ no browser APIs. This README covers installation, the core
 pipeline, template annotation, platform integration patterns, and
 the full API reference.
 
+## Card Dimensions
+
+Card templates use two sizes:
+
+- **750 × 1050** (`CARD_WIDTH` / `CARD_HEIGHT`) — standard card area (safe zone)
+- **833.34 × 1133.34** (`CARD_BLEED_WIDTH` / `CARD_BLEED_HEIGHT`) — template with bleeds (extra area trimmed during printing)
+
+When a template has bleeds, its SVG viewBox is larger than 750×1050. Use `hasBleeds(vb)` to check and `getCardBounds(vb)` to get the safe zone within a larger viewBox. The bleed region is the border between the viewBox edge and the 750×1050 safe zone.
+
 ## Installation
 
 Install the package from GitHub Packages:

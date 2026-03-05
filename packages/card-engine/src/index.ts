@@ -7,7 +7,17 @@ export type {
   EditValue,
   TouchBounds,
 } from './types.ts';
-export { isImageEdit, getEditValue, DEFAULT_IMAGE_POSITION } from './types.ts';
+export {
+  isImageEdit,
+  getEditValue,
+  DEFAULT_IMAGE_POSITION,
+  CARD_WIDTH,
+  CARD_HEIGHT,
+  CARD_BLEED_WIDTH,
+  CARD_BLEED_HEIGHT,
+  hasBleeds,
+  getCardBounds,
+} from './types.ts';
 
 // Vocabulary
 export {

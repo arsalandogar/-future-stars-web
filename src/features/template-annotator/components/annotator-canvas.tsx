@@ -1,5 +1,11 @@
 import { useCallback, useMemo, useRef } from 'react';
+import {
+  parseViewBox,
+  getCardBounds,
+  hasBleeds,
+} from '../utils/svg-overlay-helpers';
 
+import type { TouchBounds } from '../types';
 import type { SvgJsonNode } from '@/types/svg';
 import { SvgRenderer } from '@/components/svg-renderer/svg-renderer';
 import { EDITABLE_FIELDS } from '@/features/templates';
@@ -110,6 +116,13 @@ export function AnnotatorCanvas() {
     return <style>{rules.join('\n')}</style>;
   }, [selectedNodeId, hoveredNodeId, isOverlayActive]);
 
+  const bleedInfo = useMemo(() => {
+    if (!viewBox) return null;
+    const vb = parseViewBox(viewBox);
+    if (!hasBleeds(vb)) return null;
+    return { vb, cardBounds: getCardBounds(vb) };
+  }, [viewBox]);
+
   if (!svgTree) return null;
 
   return (
@@ -120,6 +133,13 @@ export function AnnotatorCanvas() {
         ref={wrapperRef}
       >
         <SvgRenderer node={svgTree} options={{ getNodeProps }} />
+        {bleedInfo && (
+          <BleedOverlay
+            viewBox={viewBox!}
+            outer={bleedInfo.vb}
+            inner={bleedInfo.cardBounds}
+          />
+        )}
         {editingAssignment?.touchBounds && viewBox && (
           <TouchBoundsOverlay
             viewBox={viewBox}
@@ -133,5 +153,105 @@ export function AnnotatorCanvas() {
         )}
       </div>
     </div>
+  );
+}
+
+/** Stripe spacing scaled to ~1% of the smaller viewBox dimension. */
+function getStripeSize(vb: TouchBounds) {
+  return Math.min(vb.width, vb.height) * 0.01;
+}
+
+function BleedOverlay({
+  viewBox,
+  outer: o,
+  inner: c,
+}: {
+  viewBox: string;
+  outer: TouchBounds;
+  inner: TouchBounds;
+}) {
+  const bleedTop = c.y - o.y;
+  const bleedBottom = o.y + o.height - c.y - c.height;
+  const bleedLeft = c.x - o.x;
+  const bleedRight = o.x + o.width - c.x - c.width;
+  const stripe = getStripeSize(o);
+  const patternId = 'bleed-hatch';
+
+  return (
+    <svg
+      viewBox={viewBox}
+      style={{
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        overflow: 'visible',
+        pointerEvents: 'none',
+      }}
+    >
+      <defs>
+        <pattern
+          id={patternId}
+          width={stripe}
+          height={stripe}
+          patternUnits="userSpaceOnUse"
+          patternTransform="rotate(45)"
+        >
+          <line
+            x1={0}
+            y1={0}
+            x2={0}
+            y2={stripe}
+            stroke="rgba(0, 0, 0, 0.18)"
+            strokeWidth={stripe * 0.4}
+          />
+        </pattern>
+      </defs>
+
+      {/* Top */}
+      <rect
+        x={o.x}
+        y={o.y}
+        width={o.width}
+        height={bleedTop}
+        fill={`url(#${patternId})`}
+      />
+      {/* Bottom */}
+      <rect
+        x={o.x}
+        y={c.y + c.height}
+        width={o.width}
+        height={bleedBottom}
+        fill={`url(#${patternId})`}
+      />
+      {/* Left */}
+      <rect
+        x={o.x}
+        y={c.y}
+        width={bleedLeft}
+        height={c.height}
+        fill={`url(#${patternId})`}
+      />
+      {/* Right */}
+      <rect
+        x={c.x + c.width}
+        y={c.y}
+        width={bleedRight}
+        height={c.height}
+        fill={`url(#${patternId})`}
+      />
+
+      {/* Safe-zone boundary — dashed cut line */}
+      <rect
+        x={c.x}
+        y={c.y}
+        width={c.width}
+        height={c.height}
+        fill="none"
+        stroke="rgba(255, 255, 255, 0.5)"
+        strokeWidth={1}
+        strokeDasharray="6 4"
+      />
+    </svg>
   );
 }

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ActionIcon, Badge, Group, Text, Tooltip } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { Download, Redo2, RotateCcw, Save, Undo2, Wand2 } from 'lucide-react';
@@ -6,6 +7,7 @@ import { EDITABLE_FIELDS } from '@/features/templates';
 
 import { useAnnotatorStore } from '../stores/annotator-store';
 import { isFieldCompatible } from '../utils/svg-node-helpers';
+import { parseViewBox, hasBleeds } from '../utils/svg-overlay-helpers';
 
 interface AnnotatorToolbarProps {
   onExport: () => void;
@@ -21,6 +23,9 @@ export function AnnotatorToolbar({
   isSaving,
 }: AnnotatorToolbarProps) {
   const fileName = useAnnotatorStore((s) => s.fileName);
+  const viewBox = useAnnotatorStore((s) =>
+    s.svgTree?.type === 'element' ? s.svgTree.attributes.viewBox : undefined
+  );
   const assignments = useAnnotatorStore((s) => s.assignments);
   const nodeIndex = useAnnotatorStore((s) => s.nodeIndex);
   const undoStack = useAnnotatorStore((s) => s.undoStack);
@@ -30,7 +35,7 @@ export function AnnotatorToolbar({
   const reset = useAnnotatorStore((s) => s.reset);
 
   // Count total assignable fields across all nodes
-  const totalAssignable = (() => {
+  const totalAssignable = useMemo(() => {
     const allFieldIds = Object.keys(EDITABLE_FIELDS) as Array<
       keyof typeof EDITABLE_FIELDS
     >;
@@ -43,7 +48,14 @@ export function AnnotatorToolbar({
       }
     }
     return assignable.size;
-  })();
+  }, [nodeIndex]);
+
+  const parsedVb = useMemo(
+    () => (viewBox ? parseViewBox(viewBox) : null),
+    [viewBox]
+  );
+  const templateHasBleeds = parsedVb ? hasBleeds(parsedVb) : false;
+  const vbDims = parsedVb ? `${parsedVb.width} × ${parsedVb.height}` : '';
 
   const handleReset = () => {
     modals.openConfirmModal({
@@ -71,6 +83,21 @@ export function AnnotatorToolbar({
           {totalAssignable > 0 ? ` / ${totalAssignable}` : ''} field
           {assignments.length !== 1 ? 's' : ''} assigned
         </Badge>
+        <Tooltip
+          label={
+            templateHasBleeds
+              ? `Template: ${vbDims} — Safe zone: 750 × 1050`
+              : `Template: ${vbDims}`
+          }
+        >
+          <Badge
+            variant="light"
+            size="sm"
+            color={templateHasBleeds ? 'orange' : 'teal'}
+          >
+            {templateHasBleeds ? 'With Bleeds' : 'Without Bleeds'}
+          </Badge>
+        </Tooltip>
       </Group>
 
       <Group gap="xs">
