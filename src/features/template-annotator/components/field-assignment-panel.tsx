@@ -7,6 +7,7 @@ import { useAnnotatorStore } from '../stores/annotator-store';
 import { supportsTouchBounds } from '../utils/svg-node-helpers';
 import { FieldPicker } from './field-picker';
 import { TouchBoundsControls } from './touch-bounds-controls';
+import { TransformControls } from './transform-controls';
 
 export function FieldAssignmentPanel() {
   const selectedNodeId = useAnnotatorStore((s) => s.selectedNodeId);
@@ -43,6 +44,8 @@ export function FieldAssignmentPanel() {
                 &lt;{meta.tagName}&gt; {meta.label}
               </Text>
             </div>
+
+            <TransformControls nodeMeta={meta} />
 
             <FieldPicker nodeMeta={meta} />
 

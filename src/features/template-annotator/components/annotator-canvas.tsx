@@ -11,6 +11,7 @@ import {
   supportsTouchBounds,
 } from '../utils/svg-node-helpers';
 import { TouchBoundsOverlay } from './touch-bounds-overlay';
+import { TransformOverlay } from './transform-overlay';
 
 import styles from './annotator-canvas.module.css';
 
@@ -22,6 +23,9 @@ export function AnnotatorCanvas() {
   const hoverNode = useAnnotatorStore((s) => s.hoverNode);
   const editingTouchBoundsNodeId = useAnnotatorStore(
     (s) => s.editingTouchBoundsNodeId
+  );
+  const editingTransformNodeId = useAnnotatorStore(
+    (s) => s.editingTransformNodeId
   );
   const assignments = useAnnotatorStore((s) => s.assignments);
 
@@ -102,6 +106,9 @@ export function AnnotatorCanvas() {
             nodeId={editingAssignment.nodeId}
             fieldId={editingAssignment.fieldId}
           />
+        )}
+        {editingTransformNodeId && viewBox && (
+          <TransformOverlay viewBox={viewBox} nodeId={editingTransformNodeId} />
         )}
       </div>
     </div>

@@ -14,6 +14,10 @@ import type {
 } from '../types';
 import { measureTextWidth } from '../utils/measure-text-width';
 
+type UndoEntry =
+  | { type: 'assignments'; assignments: FieldAssignment[] }
+  | { type: 'transform'; nodeId: string; prevValue: string | undefined };
+
 interface AnnotatorState {
   // SVG data
   svgTree: SvgJsonNode | null;
@@ -31,6 +35,9 @@ interface AnnotatorState {
   // Touch bounds editing
   editingTouchBoundsNodeId: string | null;
 
+  // Transform editing
+  editingTransformNodeId: string | null;
+
   // Tree state
   expandedNodeIds: Set<string>;
 
@@ -38,8 +45,8 @@ interface AnnotatorState {
   assignments: FieldAssignment[];
 
   // Undo/redo
-  undoStack: FieldAssignment[][];
-  redoStack: FieldAssignment[][];
+  undoStack: UndoEntry[];
+  redoStack: UndoEntry[];
 
   // Actions
   loadSvg: (opts: {
@@ -76,6 +83,9 @@ interface AnnotatorState {
     mappings: { fieldId: EditableFieldId; nodeId: string }[]
   ) => void;
   setEditingTouchBounds: (nodeId: string | null) => void;
+  setEditingTransform: (nodeId: string | null) => void;
+  commitNodeTransform: (nodeId: string, newTransform: string) => void;
+  resetNodeTransform: (nodeId: string) => void;
   commitTouchBounds: (
     nodeId: string,
     fieldId: EditableFieldId,
@@ -101,9 +111,29 @@ function getAncestorIds(
 
 const MAX_UNDO = 50;
 
+function pushUndo(undoStack: UndoEntry[], entry: UndoEntry): UndoEntry[] {
+  return [...undoStack.slice(-(MAX_UNDO - 1)), entry];
+}
+
+function applyTransformEntry(
+  entry: UndoEntry & { type: 'transform' },
+  nodeMap: Map<string, SvgJsonNode>,
+  svgTree: SvgJsonNode
+): { currentValue: string | undefined; svgTree: SvgJsonNode } | null {
+  const node = nodeMap.get(entry.nodeId);
+  if (!node || node.type !== 'element') return null;
+  const currentValue = node.attributes.transform;
+  if (entry.prevValue) {
+    node.attributes.transform = entry.prevValue;
+  } else {
+    delete node.attributes.transform;
+  }
+  return { currentValue, svgTree: { ...svgTree } };
+}
+
 function bulkAssignByType(
   assignments: FieldAssignment[],
-  undoStack: FieldAssignment[][],
+  undoStack: UndoEntry[],
   type: 'text' | 'image',
   mappings: { fieldId: EditableFieldId; nodeId: string }[],
   buildAssignment: (m: {
@@ -124,8 +154,8 @@ function bulkAssignByType(
 
   return {
     assignments: [...preserved, ...mappings.map(buildAssignment)],
-    undoStack: [...undoStack.slice(-(MAX_UNDO - 1)), assignments],
-    redoStack: [] as FieldAssignment[][],
+    undoStack: pushUndo(undoStack, { type: 'assignments', assignments }),
+    redoStack: [] as UndoEntry[],
   };
 }
 
@@ -138,10 +168,11 @@ const initialState = {
   selectedNodeId: null as string | null,
   hoveredNodeId: null as string | null,
   editingTouchBoundsNodeId: null as string | null,
+  editingTransformNodeId: null as string | null,
   expandedNodeIds: new Set<string>(),
   assignments: [] as FieldAssignment[],
-  undoStack: [] as FieldAssignment[][],
-  redoStack: [] as FieldAssignment[][],
+  undoStack: [] as UndoEntry[],
+  redoStack: [] as UndoEntry[],
 };
 
 export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
@@ -180,9 +211,14 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
         selectedNodeId: nodeId,
         expandedNodeIds: newExpanded,
         editingTouchBoundsNodeId: null,
+        editingTransformNodeId: null,
       });
     } else {
-      set({ selectedNodeId: nodeId, editingTouchBoundsNodeId: null });
+      set({
+        selectedNodeId: nodeId,
+        editingTouchBoundsNodeId: null,
+        editingTransformNodeId: null,
+      });
     }
   },
 
@@ -231,7 +267,7 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
 
     set({
       assignments: newAssignments,
-      undoStack: [...undoStack.slice(-(MAX_UNDO - 1)), assignments],
+      undoStack: pushUndo(undoStack, { type: 'assignments', assignments }),
       redoStack: [],
     });
   },
@@ -243,7 +279,7 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
     );
     set({
       assignments: newAssignments,
-      undoStack: [...undoStack.slice(-(MAX_UNDO - 1)), assignments],
+      undoStack: pushUndo(undoStack, { type: 'assignments', assignments }),
       redoStack: [],
     });
   },
@@ -289,7 +325,7 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
 
     set({
       assignments: [...preserved, ...newAssignments],
-      undoStack: [...undoStack.slice(-(MAX_UNDO - 1)), assignments],
+      undoStack: pushUndo(undoStack, { type: 'assignments', assignments }),
       redoStack: [],
     });
   },
@@ -324,7 +360,50 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
     );
   },
 
-  setEditingTouchBounds: (nodeId) => set({ editingTouchBoundsNodeId: nodeId }),
+  setEditingTouchBounds: (nodeId) =>
+    set({
+      editingTouchBoundsNodeId: nodeId,
+      ...(nodeId && { editingTransformNodeId: null }),
+    }),
+
+  setEditingTransform: (nodeId) =>
+    set({
+      editingTransformNodeId: nodeId,
+      ...(nodeId && { editingTouchBoundsNodeId: null }),
+    }),
+
+  commitNodeTransform: (nodeId, newTransform) => {
+    const { svgTree, nodeMap, undoStack } = get();
+    if (!svgTree) return;
+    const node = nodeMap.get(nodeId);
+    if (!node || node.type !== 'element') return;
+
+    const prevValue = node.attributes.transform;
+    node.attributes.transform = newTransform;
+
+    set({
+      svgTree: { ...svgTree },
+      undoStack: pushUndo(undoStack, { type: 'transform', nodeId, prevValue }),
+      redoStack: [],
+    });
+  },
+
+  resetNodeTransform: (nodeId) => {
+    const { svgTree, nodeMap, undoStack } = get();
+    if (!svgTree) return;
+    const node = nodeMap.get(nodeId);
+    if (!node || node.type !== 'element') return;
+
+    const prevValue = node.attributes.transform;
+    if (!prevValue) return;
+    delete node.attributes.transform;
+
+    set({
+      svgTree: { ...svgTree },
+      undoStack: pushUndo(undoStack, { type: 'transform', nodeId, prevValue }),
+      redoStack: [],
+    });
+  },
 
   commitTouchBounds: (nodeId, fieldId, bounds) => {
     const { assignments, undoStack } = get();
@@ -335,7 +414,7 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
     );
     set({
       assignments: newAssignments,
-      undoStack: [...undoStack.slice(-(MAX_UNDO - 1)), assignments],
+      undoStack: pushUndo(undoStack, { type: 'assignments', assignments }),
       redoStack: [],
     });
   },
@@ -350,30 +429,70 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
     });
     set({
       assignments: newAssignments,
-      undoStack: [...undoStack.slice(-(MAX_UNDO - 1)), assignments],
+      undoStack: pushUndo(undoStack, { type: 'assignments', assignments }),
       redoStack: [],
     });
   },
 
   undo: () => {
-    const { undoStack, assignments, redoStack } = get();
+    const { undoStack, assignments, redoStack, svgTree, nodeMap } = get();
     if (undoStack.length === 0) return;
-    const previous = undoStack[undoStack.length - 1];
-    set({
-      assignments: previous,
-      undoStack: undoStack.slice(0, -1),
-      redoStack: [...redoStack, assignments],
-    });
+    const entry = undoStack[undoStack.length - 1];
+    const newUndoStack = undoStack.slice(0, -1);
+
+    if (entry.type === 'assignments') {
+      set({
+        assignments: entry.assignments,
+        undoStack: newUndoStack,
+        redoStack: [...redoStack, { type: 'assignments', assignments }],
+      });
+    } else {
+      if (!svgTree) return;
+      const result = applyTransformEntry(entry, nodeMap, svgTree);
+      if (!result) return;
+      set({
+        svgTree: result.svgTree,
+        undoStack: newUndoStack,
+        redoStack: [
+          ...redoStack,
+          {
+            type: 'transform',
+            nodeId: entry.nodeId,
+            prevValue: result.currentValue,
+          },
+        ],
+      });
+    }
   },
 
   redo: () => {
-    const { redoStack, assignments, undoStack } = get();
+    const { redoStack, assignments, undoStack, svgTree, nodeMap } = get();
     if (redoStack.length === 0) return;
-    const next = redoStack[redoStack.length - 1];
-    set({
-      assignments: next,
-      redoStack: redoStack.slice(0, -1),
-      undoStack: [...undoStack, assignments],
-    });
+    const entry = redoStack[redoStack.length - 1];
+    const newRedoStack = redoStack.slice(0, -1);
+
+    if (entry.type === 'assignments') {
+      set({
+        assignments: entry.assignments,
+        redoStack: newRedoStack,
+        undoStack: [...undoStack, { type: 'assignments', assignments }],
+      });
+    } else {
+      if (!svgTree) return;
+      const result = applyTransformEntry(entry, nodeMap, svgTree);
+      if (!result) return;
+      set({
+        svgTree: result.svgTree,
+        redoStack: newRedoStack,
+        undoStack: [
+          ...undoStack,
+          {
+            type: 'transform',
+            nodeId: entry.nodeId,
+            prevValue: result.currentValue,
+          },
+        ],
+      });
+    }
   },
 }));

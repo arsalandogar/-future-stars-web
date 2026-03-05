@@ -6,13 +6,7 @@ import type { EditableFieldId } from '@/features/templates';
 import type { NodeMeta } from '../types';
 import { useAnnotatorStore } from '../stores/annotator-store';
 import { getElementBBoxInSvgRoot } from '../utils/get-element-bbox';
-import { ANNOTATOR_SVG_WRAPPER_CLASS } from '../utils/svg-node-helpers';
-
-function querySvgElement(): SVGSVGElement | null {
-  return document.querySelector<SVGSVGElement>(
-    `.${ANNOTATOR_SVG_WRAPPER_CLASS} svg`
-  );
-}
+import { querySvgElement } from '../utils/svg-overlay-helpers';
 
 interface TouchBoundsControlsProps {
   nodeMeta: NodeMeta;
