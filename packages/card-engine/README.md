@@ -170,6 +170,24 @@ element's own `clip-path`. When a user replaces the image, the
 engine expands it to fill the clip rectangle so no background bleeds
 through.
 
+### Touch bounds
+
+Add `data-touch-bounds` to the first element of a text or image
+field to define a custom touch target area. The value is a
+comma-separated string of `x,y,width,height` in SVG user units:
+
+```xml
+<text data-text-field="firstName" data-touch-bounds="50,180,300,60">
+  <tspan x="100" y="200">John</tspan>
+</text>
+```
+
+When `prepareTemplate` runs, it injects a transparent `<rect>`
+for each field that has touch bounds. These rects capture pointer
+and touch events without affecting the visual output. This is
+useful when the visible text or image element is too small for
+comfortable tapping on mobile devices.
+
 ## Core workflow
 
 This section walks through each step of the pipeline with code
@@ -208,6 +226,16 @@ const { workingCopy, fields } = prepareTemplate(svgNode);
 (which assigns a unique `__nodeId` to every element) and then runs
 all three discovery functions. You keep the original `svgNode`
 untouched and mutate only the `workingCopy`.
+
+After field discovery, `prepareTemplate` injects transparent
+`<rect>` elements at the end of the SVG tree for every field that
+has `touchBounds`. These rects have `fill="transparent"` and
+`pointer-events: all` so they capture clicks and touches without
+being visible. Image field targets are injected first (lower in
+paint order) so that a full-card image touch area doesn't block
+text field targets above it. Each rect carries `TOUCH_TARGET_ATTR`
+(set to the field ID) and `TOUCH_TARGET_TYPE_ATTR` (set to
+`'image'` or `'text'`).
 
 ### Edit
 
@@ -548,16 +576,17 @@ Every public export is listed below, grouped by module.
 
 ### Types (`types.ts`)
 
-| Export                   | Kind     | Description                                 |
-| ------------------------ | -------- | ------------------------------------------- |
-| `SvgJsonNode`            | type     | Re-export of svgson's `INode`               |
-| `ColorTarget`            | type     | `'fill' \| 'stroke' \| 'stop-color'`        |
-| `OklabOffset`            | type     | `{ deltaL, deltaA, deltaB }` — OKLAB deltas |
-| `ImageEdit`              | type     | `{ url, zoom, offsetX, offsetY }`           |
-| `EditValue`              | type     | `string \| ImageEdit`                       |
-| `isImageEdit(value)`     | function | Type guard for `ImageEdit`                  |
-| `getEditValue(value)`    | function | Extract string from a string or `ImageEdit` |
-| `DEFAULT_IMAGE_POSITION` | const    | `{ zoom: 1, offsetX: 0, offsetY: 0 }`       |
+| Export                   | Kind     | Description                                   |
+| ------------------------ | -------- | --------------------------------------------- |
+| `SvgJsonNode`            | type     | Re-export of svgson's `INode`                 |
+| `ColorTarget`            | type     | `'fill' \| 'stroke' \| 'stop-color'`          |
+| `OklabOffset`            | type     | `{ deltaL, deltaA, deltaB }` — OKLAB deltas   |
+| `TouchBounds`            | type     | `{ x, y, width, height }` — touch target area |
+| `ImageEdit`              | type     | `{ url, zoom, offsetX, offsetY }`             |
+| `EditValue`              | type     | `string \| ImageEdit`                         |
+| `isImageEdit(value)`     | function | Type guard for `ImageEdit`                    |
+| `getEditValue(value)`    | function | Extract string from a string or `ImageEdit`   |
+| `DEFAULT_IMAGE_POSITION` | const    | `{ zoom: 1, offsetX: 0, offsetY: 0 }`         |
 
 ### Vocabulary (`vocabulary.ts`)
 
@@ -610,15 +639,23 @@ the same clone.
 These functions walk the SVG tree and return arrays of discovered
 fields, sorted by their position in the vocabulary.
 
-| Export                              | Returns                |
-| ----------------------------------- | ---------------------- |
-| `discoverEditableTextFields(root)`  | `EditableTextField[]`  |
-| `discoverEditableColorFields(root)` | `EditableColorField[]` |
-| `discoverEditableImageFields(root)` | `EditableImageField[]` |
+| Export                              | Returns                    |
+| ----------------------------------- | -------------------------- |
+| `discoverEditableTextFields(root)`  | `EditableTextField[]`      |
+| `discoverEditableColorFields(root)` | `EditableColorField[]`     |
+| `discoverEditableImageFields(root)` | `EditableImageField[]`     |
+| `parseTouchBounds(value)`           | `TouchBounds \| undefined` |
+
+`parseTouchBounds` parses a `"x,y,width,height"` string into a
+`TouchBounds` object. It returns `undefined` if the input is
+missing or malformed. The discovery functions call it internally,
+but it's also exported for direct use.
 
 **`EditableTextField`** — `{ fieldId, label, originalValue,
-elementNodes }`. The `elementNodes` array contains every SVG
-element annotated with that field ID.
+elementNodes, touchBounds? }`. The `elementNodes` array contains
+every SVG element annotated with that field ID. The optional
+`touchBounds` is a `TouchBounds` parsed from the first element's
+`data-touch-bounds` attribute.
 
 **`ColorFieldElement`** — `{ node, colorTarget, colorOffset? }`.
 A single SVG element participating in a color field, with an
@@ -632,9 +669,11 @@ without an offset (the true base color).
 rectangle of the resolved clip path.
 
 **`EditableImageField`** — `{ fieldId, label, originalValue,
-originalBounds, elementNodes, aspectRatio, clipBounds }`. The
-`aspectRatio` is computed from the clip bounds (or the image's own
-dimensions if no clip path exists).
+originalBounds, elementNodes, aspectRatio, clipBounds,
+touchBounds? }`. The `aspectRatio` is computed from the clip
+bounds (or the image's own dimensions if no clip path exists).
+The optional `touchBounds` is a `TouchBounds` parsed from the
+first element's `data-touch-bounds` attribute.
 
 ### Edit application (`svg-editable-fields.ts`)
 
@@ -654,7 +693,16 @@ image to fill the clip bounds when replacing the original.
 
 ### Edit helpers (`edit-operations.ts`)
 
-Higher-level functions for building and applying edits:
+Higher-level functions for building and applying edits.
+
+Constants for identifying touch target overlay elements:
+
+| Export                   | Value                      | Description                                          |
+| ------------------------ | -------------------------- | ---------------------------------------------------- |
+| `TOUCH_TARGET_ATTR`      | `'data-touch-target'`      | Attribute on injected rects, value is the field ID   |
+| `TOUCH_TARGET_TYPE_ATTR` | `'data-touch-target-type'` | Field type on injected rects (`'image'` or `'text'`) |
+
+Functions:
 
 | Export                                                 | Signature                                                                                           |
 | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
@@ -685,15 +733,15 @@ EditableImageField[] }`.
 
 Functions for perceptual color operations in OKLAB space:
 
-| Export                                  | Signature                                            |
-| --------------------------------------- | ---------------------------------------------------- |
-| `applyOklabOffset(baseHex, offset)`     | `(baseHex: string, offset: OklabOffset) => string`   |
-| `computeOklabOffset(baseHex, shadeHex)` | `(baseHex: string, shadeHex: string) => OklabOffset` |
-| `colorDistance(hexA, hexB)`             | `(hexA: string, hexB: string) => number`             |
-| `clusterColors(colors, threshold?)`     | `(colors, threshold?) => ColorCluster[]`             |
-| `parseOffset(raw)`                      | `(raw: string) => OklabOffset \| null`               |
-| `serializeOffset(offset)`               | `(offset: OklabOffset) => string`                    |
-| `isZeroOffset(offset)`                  | `(offset: OklabOffset) => boolean`                   |
+| Export                                      | Signature                                                                    |
+| ------------------------------------------- | ---------------------------------------------------------------------------- |
+| `applyOklabOffset(baseHex, offset)`         | `(baseHex: string, offset: OklabOffset) => string`                           |
+| `computeOklabOffset(baseHex, shadeHex)`     | `(baseHex: string, shadeHex: string) => OklabOffset`                         |
+| `colorDistance(hexA, hexB)`                 | `(hexA: string, hexB: string) => number`                                     |
+| `clusterColors(detectedColors, threshold?)` | `(detectedColors: ClusterableColor[], threshold?: number) => ColorCluster[]` |
+| `parseOffset(raw)`                          | `(raw: string) => OklabOffset \| null`                                       |
+| `serializeOffset(offset)`                   | `(offset: OklabOffset) => string`                                            |
+| `isZeroOffset(offset)`                      | `(offset: OklabOffset) => boolean`                                           |
 
 **`ColorCluster`** — `{ baseHex: string, members:
 ClusterMember[] }`. Represents a group of perceptually similar
@@ -703,6 +751,12 @@ colors.
 occurrences: { nodeId: string, colorTarget: ColorTarget }[] }`.
 A single color within a cluster, with its offset relative to the
 cluster's base color.
+
+`clusterColors` expects an array of `ClusterableColor` objects.
+Each object has the shape `{ hex: string, occurrences: { nodeId:
+string, colorTarget: ColorTarget }[] }`. This is an internal
+interface — callers construct it from their own color data before
+passing it in.
 
 ## OKLAB color math
 
