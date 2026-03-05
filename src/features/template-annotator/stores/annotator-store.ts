@@ -11,10 +11,8 @@ import type {
   FieldAssignment,
   NodeMeta,
   TouchBounds,
-  ValidationResult,
 } from '../types';
 import { measureTextWidth } from '../utils/measure-text-width';
-import { runValidation } from '../utils/validation-engine';
 
 interface AnnotatorState {
   // SVG data
@@ -38,9 +36,6 @@ interface AnnotatorState {
 
   // Assignments
   assignments: FieldAssignment[];
-
-  // Validation
-  validationResults: ValidationResult[];
 
   // Undo/redo
   undoStack: FieldAssignment[][];
@@ -87,7 +82,6 @@ interface AnnotatorState {
     bounds: TouchBounds
   ) => void;
   removeTouchBounds: (nodeId: string, fieldId: EditableFieldId) => void;
-  validate: () => void;
   undo: () => void;
   redo: () => void;
 }
@@ -146,7 +140,6 @@ const initialState = {
   editingTouchBoundsNodeId: null as string | null,
   expandedNodeIds: new Set<string>(),
   assignments: [] as FieldAssignment[],
-  validationResults: [] as ValidationResult[],
   undoStack: [] as FieldAssignment[][],
   redoStack: [] as FieldAssignment[][],
 };
@@ -170,7 +163,6 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
       hoveredNodeId: null,
       expandedNodeIds: expanded,
       assignments: opts.assignments ?? [],
-      validationResults: [],
       undoStack: [],
       redoStack: [],
     });
@@ -361,13 +353,6 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
       undoStack: [...undoStack.slice(-(MAX_UNDO - 1)), assignments],
       redoStack: [],
     });
-  },
-
-  validate: () => {
-    const { assignments, nodeIndex } = get();
-    if (assignments.length === 0 && nodeIndex.size === 0) return;
-    const results = runValidation(assignments, nodeIndex);
-    set({ validationResults: results });
   },
 
   undo: () => {

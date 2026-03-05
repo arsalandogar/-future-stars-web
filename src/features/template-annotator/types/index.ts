@@ -50,13 +50,3 @@ export interface DetectedImage {
   width: string | undefined;
   height: string | undefined;
 }
-
-export type ValidationSeverity = 'error' | 'warning';
-
-export interface ValidationResult {
-  severity: ValidationSeverity;
-  code: string;
-  message: string;
-  nodeId?: string;
-  fieldId?: EditableFieldId;
-}

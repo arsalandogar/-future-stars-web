@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Button, Stack } from '@mantine/core';
+import { Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { ClipboardCheck } from 'lucide-react';
 
 import { usePageHeader } from '@/hooks/use-page-header';
 
@@ -14,16 +13,14 @@ import { ElementTree } from '../components/element-tree';
 import { ExportModal } from '../components/export-modal';
 import { FieldAssignmentPanel } from '../components/field-assignment-panel';
 import { SvgUploadDropzone } from '../components/svg-upload-dropzone';
-import { ValidationResults } from '../components/validation-results';
 
 import styles from './annotator-page.module.css';
 
-type RightPanelTab = 'assign' | 'review' | 'validate';
+type RightPanelTab = 'assign' | 'review';
 
 const TABS: { value: RightPanelTab; label: string }[] = [
   { value: 'assign', label: 'Assign' },
   { value: 'review', label: 'Review' },
-  { value: 'validate', label: 'Validate' },
 ];
 
 export interface AnnotatorPageProps {
@@ -40,7 +37,6 @@ export function AnnotatorPage({ onSave, isSaving }: AnnotatorPageProps) {
   const svgTree = useAnnotatorStore((s) => s.svgTree);
   const nodeMap = useAnnotatorStore((s) => s.nodeMap);
   const assignments = useAnnotatorStore((s) => s.assignments);
-  const validate = useAnnotatorStore((s) => s.validate);
   const [exportOpened, { open: openExport, close: closeExport }] =
     useDisclosure(false);
   const [wizardOpened, { open: openWizard, close: closeWizard }] =
@@ -109,20 +105,6 @@ export function AnnotatorPage({ onSave, isSaving }: AnnotatorPageProps) {
                 <div className="p-3">
                   <AssignmentSummaryTable />
                 </div>
-              )}
-
-              {rightTab === 'validate' && (
-                <Stack gap="md" p="md">
-                  <Button
-                    variant="light"
-                    leftSection={<ClipboardCheck size={16} />}
-                    onClick={validate}
-                    fullWidth
-                  >
-                    Run Validation
-                  </Button>
-                  <ValidationResults />
-                </Stack>
               )}
             </div>
           </Stack>
