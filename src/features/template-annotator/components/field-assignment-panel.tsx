@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
-import { ScrollArea, Stack, Text, ThemeIcon } from '@mantine/core';
-import { MousePointerClick } from 'lucide-react';
+import { ActionIcon, ScrollArea, Stack, Text, ThemeIcon } from '@mantine/core';
+import { modals } from '@mantine/modals';
+import { MousePointerClick, Trash2 } from 'lucide-react';
 
 import { EDITABLE_FIELDS } from '@/features/templates';
 
@@ -43,9 +44,36 @@ export function FieldAssignmentPanel() {
         ) : (
           <>
             <div>
-              <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
-                Selected Element
-              </Text>
+              <div className="flex items-center justify-between">
+                <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
+                  Selected Element
+                </Text>
+                {meta.parentNodeId !== null && (
+                  <ActionIcon
+                    variant="subtle"
+                    color="red"
+                    size="sm"
+                    onClick={() =>
+                      modals.openConfirmModal({
+                        title: 'Delete this element?',
+                        children: (
+                          <Text size="sm">
+                            This will permanently remove the element and all its
+                            children from the SVG tree. You can undo this
+                            action.
+                          </Text>
+                        ),
+                        labels: { confirm: 'Delete', cancel: 'Cancel' },
+                        confirmProps: { color: 'red' },
+                        onConfirm: () =>
+                          useAnnotatorStore.getState().deleteNode(meta.nodeId),
+                      })
+                    }
+                  >
+                    <Trash2 size={14} />
+                  </ActionIcon>
+                )}
+              </div>
               <Text size="sm" fw={500} mt={2}>
                 {meta.label}
               </Text>

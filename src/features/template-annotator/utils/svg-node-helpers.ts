@@ -146,6 +146,18 @@ export function isFieldCompatible(
   }
 }
 
+export function collectDescendantNodeIds(node: SvgJsonNode): Set<string> {
+  const ids = new Set<string>();
+  function walk(n: SvgJsonNode) {
+    if (n.type === 'text') return;
+    const id = n.attributes['__nodeId'];
+    if (id) ids.add(id);
+    for (const child of n.children) walk(child);
+  }
+  walk(node);
+  return ids;
+}
+
 export function buildNodeIndex(root: SvgJsonNode): {
   nodeIndex: Map<string, NodeMeta>;
   nodeMap: Map<string, SvgJsonNode>;

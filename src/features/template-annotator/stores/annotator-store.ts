@@ -13,10 +13,21 @@ import type {
   TouchBounds,
 } from '../types';
 import { measureTextWidth } from '../utils/measure-text-width';
+import {
+  buildNodeIndex,
+  collectDescendantNodeIds,
+} from '../utils/svg-node-helpers';
 
 type UndoEntry =
   | { type: 'assignments'; assignments: FieldAssignment[] }
-  | { type: 'transform'; nodeId: string; prevValue: string | undefined };
+  | { type: 'transform'; nodeId: string; prevValue: string | undefined }
+  | {
+      type: 'deleteNode';
+      parentNodeId: string;
+      childIndex: number;
+      node: SvgJsonNode;
+      prevAssignments: FieldAssignment[];
+    };
 
 interface AnnotatorState {
   // SVG data
@@ -92,6 +103,7 @@ interface AnnotatorState {
     bounds: TouchBounds
   ) => void;
   removeTouchBounds: (nodeId: string, fieldId: EditableFieldId) => void;
+  deleteNode: (nodeId: string) => void;
   undo: () => void;
   redo: () => void;
 }
@@ -129,6 +141,57 @@ function applyTransformEntry(
     delete node.attributes.transform;
   }
   return { currentValue, svgTree: { ...svgTree } };
+}
+
+function clearIfDeleted(
+  value: string | null,
+  deletedIds: Set<string>
+): string | null {
+  return value && deletedIds.has(value) ? null : value;
+}
+
+function applyNodeDeletion(
+  entry: { parentNodeId: string; node: SvgJsonNode },
+  state: {
+    svgTree: SvgJsonNode;
+    nodeIndex: Map<string, NodeMeta>;
+    nodeMap: Map<string, SvgJsonNode>;
+    expandedNodeIds: Set<string>;
+    assignments: FieldAssignment[];
+    selectedNodeId: string | null;
+    hoveredNodeId: string | null;
+    editingTouchBoundsNodeId: string | null;
+    editingTransformNodeId: string | null;
+  }
+) {
+  const descendantIds = collectDescendantNodeIds(entry.node);
+
+  const newNodeIndex = new Map(state.nodeIndex);
+  const newNodeMap = new Map(state.nodeMap);
+  const newExpanded = new Set(state.expandedNodeIds);
+  for (const id of descendantIds) {
+    newNodeIndex.delete(id);
+    newNodeMap.delete(id);
+    newExpanded.delete(id);
+  }
+
+  return {
+    svgTree: { ...state.svgTree },
+    nodeIndex: newNodeIndex,
+    nodeMap: newNodeMap,
+    expandedNodeIds: newExpanded,
+    assignments: state.assignments.filter((a) => !descendantIds.has(a.nodeId)),
+    selectedNodeId: clearIfDeleted(state.selectedNodeId, descendantIds),
+    hoveredNodeId: clearIfDeleted(state.hoveredNodeId, descendantIds),
+    editingTouchBoundsNodeId: clearIfDeleted(
+      state.editingTouchBoundsNodeId,
+      descendantIds
+    ),
+    editingTransformNodeId: clearIfDeleted(
+      state.editingTransformNodeId,
+      descendantIds
+    ),
+  };
 }
 
 function bulkAssignByType(
@@ -434,8 +497,43 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
     });
   },
 
+  deleteNode: (nodeId) => {
+    const { svgTree, ...rest } = get();
+    if (!svgTree) return;
+
+    const meta = rest.nodeIndex.get(nodeId);
+    if (!meta || meta.parentNodeId === null) return;
+
+    const parentNode = rest.nodeMap.get(meta.parentNodeId);
+    if (!parentNode || parentNode.type !== 'element') return;
+
+    const childIndex = parentNode.children.findIndex(
+      (c) => c.type === 'element' && c.attributes['__nodeId'] === nodeId
+    );
+    if (childIndex === -1) return;
+
+    const node = parentNode.children[childIndex];
+    parentNode.children.splice(childIndex, 1);
+
+    set({
+      ...applyNodeDeletion(
+        { parentNodeId: meta.parentNodeId, node },
+        { svgTree, ...rest }
+      ),
+      undoStack: pushUndo(rest.undoStack, {
+        type: 'deleteNode',
+        parentNodeId: meta.parentNodeId,
+        childIndex,
+        node,
+        prevAssignments: rest.assignments,
+      }),
+      redoStack: [],
+    });
+  },
+
   undo: () => {
-    const { undoStack, assignments, redoStack, svgTree, nodeMap } = get();
+    const { undoStack, assignments, redoStack, svgTree, nodeMap, nodeIndex } =
+      get();
     if (undoStack.length === 0) return;
     const entry = undoStack[undoStack.length - 1];
     const newUndoStack = undoStack.slice(0, -1);
@@ -446,7 +544,7 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
         undoStack: newUndoStack,
         redoStack: [...redoStack, { type: 'assignments', assignments }],
       });
-    } else {
+    } else if (entry.type === 'transform') {
       if (!svgTree) return;
       const result = applyTransformEntry(entry, nodeMap, svgTree);
       if (!result) return;
@@ -462,11 +560,52 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
           },
         ],
       });
+    } else if (entry.type === 'deleteNode') {
+      if (!svgTree) return;
+      const parentNode = nodeMap.get(entry.parentNodeId);
+      if (!parentNode || parentNode.type !== 'element') return;
+
+      // Re-insert the node
+      parentNode.children.splice(entry.childIndex, 0, entry.node);
+
+      // Rebuild index for the restored subtree
+      const parentMeta = nodeIndex.get(entry.parentNodeId);
+      const parentDepth = parentMeta?.depth ?? 0;
+      const restored = buildNodeIndex(entry.node);
+      const newNodeIndex = new Map(nodeIndex);
+      const newNodeMap = new Map(nodeMap);
+      for (const [id, restoredMeta] of restored.nodeIndex) {
+        newNodeIndex.set(id, {
+          ...restoredMeta,
+          parentNodeId: restoredMeta.parentNodeId ?? entry.parentNodeId,
+          depth: restoredMeta.depth + parentDepth + 1,
+        });
+        newNodeMap.set(id, restored.nodeMap.get(id)!);
+      }
+
+      set({
+        svgTree: { ...svgTree },
+        nodeIndex: newNodeIndex,
+        nodeMap: newNodeMap,
+        assignments: entry.prevAssignments,
+        undoStack: newUndoStack,
+        redoStack: [
+          ...redoStack,
+          {
+            type: 'deleteNode',
+            parentNodeId: entry.parentNodeId,
+            childIndex: entry.childIndex,
+            node: entry.node,
+            prevAssignments: entry.prevAssignments,
+          },
+        ],
+      });
     }
   },
 
   redo: () => {
-    const { redoStack, assignments, undoStack, svgTree, nodeMap } = get();
+    const { svgTree, ...rest } = get();
+    const { redoStack, assignments, undoStack, nodeMap } = rest;
     if (redoStack.length === 0) return;
     const entry = redoStack[redoStack.length - 1];
     const newRedoStack = redoStack.slice(0, -1);
@@ -477,7 +616,7 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
         redoStack: newRedoStack,
         undoStack: [...undoStack, { type: 'assignments', assignments }],
       });
-    } else {
+    } else if (entry.type === 'transform') {
       if (!svgTree) return;
       const result = applyTransformEntry(entry, nodeMap, svgTree);
       if (!result) return;
@@ -490,6 +629,27 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
             type: 'transform',
             nodeId: entry.nodeId,
             prevValue: result.currentValue,
+          },
+        ],
+      });
+    } else if (entry.type === 'deleteNode') {
+      if (!svgTree) return;
+      const parentNode = nodeMap.get(entry.parentNodeId);
+      if (!parentNode || parentNode.type !== 'element') return;
+
+      parentNode.children.splice(entry.childIndex, 1);
+
+      set({
+        ...applyNodeDeletion(entry, { svgTree, ...rest }),
+        redoStack: newRedoStack,
+        undoStack: [
+          ...undoStack,
+          {
+            type: 'deleteNode',
+            parentNodeId: entry.parentNodeId,
+            childIndex: entry.childIndex,
+            node: entry.node,
+            prevAssignments: assignments,
           },
         ],
       });
