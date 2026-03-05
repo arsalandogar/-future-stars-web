@@ -1,11 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from '@tanstack/react-router';
 import { Carousel } from '@mantine/carousel';
 import type { EmblaCarouselType } from 'embla-carousel';
 import {
   ActionIcon,
   AspectRatio,
-  Button,
   Drawer,
   Image,
   Modal,
@@ -16,6 +14,7 @@ import {
 import { useMediaQuery } from '@mantine/hooks';
 import { ChevronLeft, ChevronRight, Plus, X } from 'lucide-react';
 
+import { ButtonLink } from '@/components/ui/button-link';
 import type { Tag } from '@/types';
 
 import type { BrowseTemplate } from '../types';
@@ -115,15 +114,14 @@ export function TemplatePreviewModal({
 
         <Text className={styles.title}>TEMPLATE PREVIEW</Text>
 
-        <Button
-          component={Link}
+        <ButtonLink
           to="/create-card"
           search={{ templateId: template.id }}
           size="sm"
           leftSection={<Plus size={16} />}
         >
           Create Card
-        </Button>
+        </ButtonLink>
       </div>
 
       {/* Preview Section */}

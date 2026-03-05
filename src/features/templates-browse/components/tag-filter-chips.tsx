@@ -1,6 +1,6 @@
-import { Link } from '@tanstack/react-router';
-import { Button, Group } from '@mantine/core';
+import { Group } from '@mantine/core';
 
+import { ButtonLink } from '@/components/ui/button-link';
 import type { Tag } from '@/types';
 
 interface TagFilterChipsProps {
@@ -14,9 +14,8 @@ export function TagFilterChips({ tags, selected }: TagFilterChipsProps) {
       {[{ id: 0, name: null, label: 'All Styles' }, ...tags].map((tag) => {
         const isActive = selected === tag.name;
         return (
-          <Button
+          <ButtonLink
             key={tag.id}
-            component={Link}
             to="/templates"
             search={{ tag: tag.name ?? undefined }}
             size="sm"
@@ -24,7 +23,7 @@ export function TagFilterChips({ tags, selected }: TagFilterChipsProps) {
             color={isActive ? 'primary' : 'secondary'}
           >
             {tag.label}
-          </Button>
+          </ButtonLink>
         );
       })}
     </Group>
