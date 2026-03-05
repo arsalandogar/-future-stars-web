@@ -14,6 +14,7 @@ interface ElementTreeNodeProps {
   node: SvgJsonNode;
   meta: NodeMeta;
   assignmentsByNode: Map<string, FieldAssignment[]>;
+  visibleNodeIds: Set<string> | null;
 }
 
 function TagIcon({ meta }: { meta: NodeMeta }) {
@@ -44,6 +45,7 @@ export function ElementTreeNode({
   node,
   meta,
   assignmentsByNode,
+  visibleNodeIds,
 }: ElementTreeNodeProps) {
   const ref = useRef<HTMLDivElement>(null);
   const nodeId = meta.nodeId;
@@ -81,6 +83,10 @@ export function ElementTreeNode({
   );
 
   const nodeAssignments = assignmentsByNode.get(nodeId);
+  const hasAssignments = nodeAssignments && nodeAssignments.length > 0;
+
+  // Skip this node if search is active and it's not in the visible set
+  if (visibleNodeIds && !visibleNodeIds.has(nodeId)) return null;
 
   return (
     <>
@@ -89,6 +95,7 @@ export function ElementTreeNode({
         className={styles.node}
         data-selected={isSelected}
         data-hovered={isHovered}
+        data-has-assignments={hasAssignments || undefined}
         style={{ paddingLeft: `${meta.depth * 16 + 4}px` }}
         onClick={handleClick}
         onMouseEnter={() => hoverNode(nodeId)}
@@ -112,7 +119,7 @@ export function ElementTreeNode({
           <NodeLabel label={meta.label} />
         </span>
 
-        {nodeAssignments && nodeAssignments.length > 0 && (
+        {hasAssignments && (
           <div className={styles.badges}>
             {nodeAssignments.map((a) => (
               <Badge key={a.fieldId} size="xs" variant="light">
@@ -123,7 +130,7 @@ export function ElementTreeNode({
         )}
       </div>
 
-      {isExpanded &&
+      {(isExpanded || visibleNodeIds) &&
         node.children
           .filter((child) => child.type !== 'text')
           .map((child) => {
@@ -137,6 +144,7 @@ export function ElementTreeNode({
                 node={child}
                 meta={childMeta}
                 assignmentsByNode={assignmentsByNode}
+                visibleNodeIds={visibleNodeIds}
               />
             );
           })}

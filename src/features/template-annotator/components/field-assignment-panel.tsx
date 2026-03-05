@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { ScrollArea, Stack, Text } from '@mantine/core';
+import { ScrollArea, Stack, Text, ThemeIcon } from '@mantine/core';
+import { MousePointerClick } from 'lucide-react';
 
 import { EDITABLE_FIELDS } from '@/features/templates';
 
@@ -31,9 +32,14 @@ export function FieldAssignmentPanel() {
     <ScrollArea h="100%">
       <Stack gap="md" p="md">
         {!meta ? (
-          <Text size="sm" c="dimmed" ta="center" py="xl">
-            Select an element to assign fields
-          </Text>
+          <Stack align="center" gap="sm" py="xl">
+            <ThemeIcon variant="light" size="xl" radius="xl" color="gray">
+              <MousePointerClick size={20} />
+            </ThemeIcon>
+            <Text size="sm" c="dimmed" ta="center" maw={220}>
+              Click an element on the canvas or tree to assign fields
+            </Text>
+          </Stack>
         ) : (
           <>
             <div>
@@ -41,7 +47,7 @@ export function FieldAssignmentPanel() {
                 Selected Element
               </Text>
               <Text size="sm" fw={500} mt={2}>
-                &lt;{meta.tagName}&gt; {meta.label}
+                {meta.label}
               </Text>
             </div>
 

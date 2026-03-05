@@ -141,9 +141,14 @@ interface FieldPickerProps {
 export function FieldPicker({ nodeMeta }: FieldPickerProps) {
   const assignments = useAnnotatorStore((s) => s.assignments);
 
+  // Only show groups that have at least one compatible field
+  const compatibleGroups = FIELD_GROUPS.filter((group) =>
+    group.fields.some((fieldId) => isFieldCompatible(fieldId, nodeMeta))
+  );
+
   return (
     <Stack gap="md">
-      {FIELD_GROUPS.map((group) => (
+      {compatibleGroups.map((group) => (
         <div key={group.label}>
           <Text
             size="xs"

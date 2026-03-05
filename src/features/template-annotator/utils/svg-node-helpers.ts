@@ -87,6 +87,10 @@ export function hasStopColorAttribute(node: SvgJsonNode): boolean {
   return node.name === 'stop';
 }
 
+function formatId(id: string): string {
+  return id.replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
 export function getNodeLabel(node: SvgJsonNode): string {
   const tag = node.name;
   const id = node.attributes.id;
@@ -95,8 +99,13 @@ export function getNodeLabel(node: SvgJsonNode): string {
     const textContent = collectTextContent(node).trim();
     const preview =
       textContent.length > 24 ? textContent.slice(0, 24) + '...' : textContent;
-    if (id) return `${tag}#${id} "${preview}"`;
-    return preview ? `${tag} "${preview}"` : tag;
+    if (id) return `<${tag}> ${formatId(id)} "${preview}"`;
+    return preview ? `<${tag}> "${preview}"` : tag;
+  }
+
+  if (isImageNode(node)) {
+    if (id) return `<image> ${formatId(id)}`;
+    return '<image>';
   }
 
   if (node.name === 'stop') {
@@ -105,13 +114,13 @@ export function getNodeLabel(node: SvgJsonNode): string {
       node.attributes['stop-color'] ??
       getStyleProp(node, 'stopColor') ??
       '#000';
-    return `stop @ ${offset} ${color}`;
+    return `<stop> @ ${offset} ${color}`;
   }
 
-  if (id) return `${tag}#${id}`;
+  if (id) return `<${tag}> ${formatId(id)}`;
   const className = node.attributes.class;
-  if (className) return `${tag}.${className.split(' ')[0]}`;
-  return tag;
+  if (className) return `<${tag}> ${formatId(className.split(' ')[0])}`;
+  return `<${tag}>`;
 }
 
 export function collectTextContent(node: SvgJsonNode): string {

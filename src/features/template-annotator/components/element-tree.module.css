@@ -100,6 +100,32 @@
   color: var(--mantine-color-violet-5);
 }
 
+/* Assigned node accent */
+.node[data-has-assignments='true']:not([data-selected='true']) {
+  background-color: rgba(80, 70, 255, 0.04);
+}
+
+.node[data-has-assignments='true']::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 2px;
+  bottom: 2px;
+  width: 2px;
+  border-radius: 1px;
+  background-color: var(--mantine-color-primary-3);
+  opacity: 0.5;
+}
+
+.node[data-selected='true']::after {
+  display: none;
+}
+
+:global([data-mantine-color-scheme='dark'])
+  .node[data-has-assignments='true']:not([data-selected='true']) {
+  background-color: rgba(80, 70, 255, 0.08);
+}
+
 .badges {
   display: flex;
   gap: 2px;

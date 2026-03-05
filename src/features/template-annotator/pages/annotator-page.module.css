@@ -99,3 +99,13 @@
 .tab[data-active='true']::after {
   background-color: var(--mantine-color-primary-4);
 }
+
+.tabContent {
+  flex: 1;
+  overflow-y: auto;
+  background-color: var(--mantine-color-gray-0);
+}
+
+:global([data-mantine-color-scheme='dark']) .tabContent {
+  background-color: var(--mantine-color-dark-8);
+}

@@ -98,7 +98,7 @@ export function AnnotatorPage({ onSave, isSaving }: AnnotatorPageProps) {
               ))}
             </div>
 
-            <div className="flex-1 overflow-y-auto">
+            <div className={styles.tabContent}>
               {rightTab === 'assign' && <FieldAssignmentPanel />}
 
               {rightTab === 'review' && (
