@@ -104,8 +104,16 @@ export function CreateCardPage() {
 
         return {
           ...(maxWidth && {
-            textLength: maxWidth,
-            lengthAdjust: 'spacingAndGlyphs',
+            ref: (el: SVGTextElement | null) => {
+              if (!el) return;
+              el.removeAttribute('textLength');
+              el.removeAttribute('lengthAdjust');
+              const computedLength = el.getComputedTextLength();
+              if (computedLength > parseFloat(maxWidth)) {
+                el.setAttribute('textLength', maxWidth);
+                el.setAttribute('lengthAdjust', 'spacingAndGlyphs');
+              }
+            },
           }),
           ...(fieldId && {
             style: { cursor: 'pointer' },
