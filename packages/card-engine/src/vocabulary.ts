@@ -9,6 +9,21 @@ export const EDITABLE_FIELDS = {
   position: { type: 'text', label: 'Position' },
   number: { type: 'text', label: 'Number' },
 
+  // Generic text slots
+  textOne: { type: 'text', label: 'Text 1' },
+  textTwo: { type: 'text', label: 'Text 2' },
+  textThree: { type: 'text', label: 'Text 3' },
+  textFour: { type: 'text', label: 'Text 4' },
+  textFive: { type: 'text', label: 'Text 5' },
+  textSix: { type: 'text', label: 'Text 6' },
+  textSeven: { type: 'text', label: 'Text 7' },
+  textEight: { type: 'text', label: 'Text 8' },
+  textNine: { type: 'text', label: 'Text 9' },
+  textTen: { type: 'text', label: 'Text 10' },
+  textEleven: { type: 'text', label: 'Text 11' },
+  textTwelve: { type: 'text', label: 'Text 12' },
+  textThirteen: { type: 'text', label: 'Text 13' },
+
   // Images
   imageOne: { type: 'image', label: 'Image 1' },
   imageTwo: { type: 'image', label: 'Image 2' },
