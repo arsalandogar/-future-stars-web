@@ -1,20 +1,28 @@
 # @arsalandogar/fs-card-engine
 
 Shared card editing engine for Future Stars. It handles SVG
-parsing, field discovery, text/color/image edit application, text
-compression for overlong fields, and serialization as pure
-functions on plain JSON — no DOM, no React, no browser APIs. This README covers installation, the core
-pipeline, template annotation, platform integration patterns, and
-the full API reference.
+parsing, field discovery, text/color/image edit application,
+text compression for overlong fields, and serialization as
+pure functions on plain JSON — no DOM, no React, no browser
+APIs. This README covers installation, the core pipeline,
+template annotation, platform integration patterns, and the
+full API reference.
 
 ## Card Dimensions
 
 Card templates use two sizes:
 
-- **750 × 1050** (`CARD_WIDTH` / `CARD_HEIGHT`) — standard card area (safe zone)
-- **833.34 × 1133.34** (`CARD_BLEED_WIDTH` / `CARD_BLEED_HEIGHT`) — template with bleeds (extra area trimmed during printing)
+- **750 × 1050** (`CARD_WIDTH` / `CARD_HEIGHT`) — standard
+  card area (safe zone)
+- **833.34 × 1133.34** (`CARD_BLEED_WIDTH` /
+  `CARD_BLEED_HEIGHT`) — template with bleeds (extra area
+  trimmed during printing)
 
-When a template has bleeds, its SVG viewBox is larger than 750×1050. Use `hasBleeds(vb)` to check and `getCardBounds(vb)` to get the safe zone within a larger viewBox. The bleed region is the border between the viewBox edge and the 750×1050 safe zone.
+When a template has bleeds, its SVG viewBox is larger than
+750×1050. Use `hasBleeds(vb)` to check and
+`getCardBounds(vb)` to get the safe zone within a larger
+viewBox. The bleed region is the border between the viewBox
+edge and the 750×1050 safe zone.
 
 ## Installation
 
@@ -120,9 +128,9 @@ of attributes.
 ### Text fields
 
 Add `data-text-field` to any SVG element that contains editable
-text. The value must be a valid text field ID from the vocabulary
-(`firstName`, `lastName`, `fullName`, `team`, `position`, or
-`number`).
+text. The value must be a valid text field ID from the
+vocabulary (see the [Vocabulary](#vocabulary-vocabularyts)
+table below for the full list).
 
 ```xml
 <text data-text-field="firstName">
@@ -787,6 +795,10 @@ web app with these differences:
   images. Apply the same two-phase pattern (local preview → CDN
   URL) as the web app, using `Image.getSize` to determine aspect
   ratios.
+- **Text compression**: Call `applyTextCompression` after each
+  text edit, using the same coalescing pattern as the web app.
+  For font loading, use `react-native-fs` or `expo-file-system`
+  to read font files instead of `fetch` or Node.js `readFile`.
 
 ## API reference
 
@@ -811,24 +823,37 @@ Every public export is listed below, grouped by module.
 `EDITABLE_FIELDS` is a const record that defines every valid field
 ID, its type, and its label:
 
-| Field ID     | Type  | Label      |
-| ------------ | ----- | ---------- |
-| `firstName`  | text  | First Name |
-| `lastName`   | text  | Last Name  |
-| `fullName`   | text  | Full Name  |
-| `team`       | text  | Team       |
-| `position`   | text  | Position   |
-| `number`     | text  | Number     |
-| `imageOne`   | image | Image 1    |
-| `imageTwo`   | image | Image 2    |
-| `imageThree` | image | Image 3    |
-| `imageFour`  | image | Image 4    |
-| `imageFive`  | image | Image 5    |
-| `colorOne`   | color | Color 1    |
-| `colorTwo`   | color | Color 2    |
-| `colorThree` | color | Color 3    |
-| `colorFour`  | color | Color 4    |
-| `colorFive`  | color | Color 5    |
+| Field ID       | Type  | Label      |
+| -------------- | ----- | ---------- |
+| `firstName`    | text  | First Name |
+| `lastName`     | text  | Last Name  |
+| `fullName`     | text  | Full Name  |
+| `team`         | text  | Team       |
+| `position`     | text  | Position   |
+| `number`       | text  | Number     |
+| `textOne`      | text  | Text 1     |
+| `textTwo`      | text  | Text 2     |
+| `textThree`    | text  | Text 3     |
+| `textFour`     | text  | Text 4     |
+| `textFive`     | text  | Text 5     |
+| `textSix`      | text  | Text 6     |
+| `textSeven`    | text  | Text 7     |
+| `textEight`    | text  | Text 8     |
+| `textNine`     | text  | Text 9     |
+| `textTen`      | text  | Text 10    |
+| `textEleven`   | text  | Text 11    |
+| `textTwelve`   | text  | Text 12    |
+| `textThirteen` | text  | Text 13    |
+| `imageOne`     | image | Image 1    |
+| `imageTwo`     | image | Image 2    |
+| `imageThree`   | image | Image 3    |
+| `imageFour`    | image | Image 4    |
+| `imageFive`    | image | Image 5    |
+| `colorOne`     | color | Color 1    |
+| `colorTwo`     | color | Color 2    |
+| `colorThree`   | color | Color 3    |
+| `colorFour`    | color | Color 4    |
+| `colorFive`    | color | Color 5    |
 
 `EditableFieldId` is `keyof typeof EDITABLE_FIELDS`.
 `EditableFieldType` is `'text' | 'color' | 'image'`.
