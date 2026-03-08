@@ -6,6 +6,7 @@ import type {
 } from './types.ts';
 import { applyOklabOffset, parseOffset } from './color-math.ts';
 import { EDITABLE_FIELDS, type EditableFieldId } from './vocabulary.ts';
+import { collectTextContent } from './svg-text-utils.ts';
 
 function buildFieldOrder(type: string): Map<EditableFieldId, number> {
   const ids = Object.entries(EDITABLE_FIELDS)
@@ -37,11 +38,6 @@ export interface EditableTextField {
   originalValue: string;
   elementNodes: SvgJsonNode[];
   touchBounds?: TouchBounds;
-}
-
-function collectTextContent(node: SvgJsonNode): string {
-  if (node.type === 'text') return node.value;
-  return node.children.map(collectTextContent).join('');
 }
 
 function findFirstTextNode(node: SvgJsonNode): SvgJsonNode | null {

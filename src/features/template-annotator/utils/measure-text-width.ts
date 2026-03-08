@@ -47,7 +47,7 @@ function createSvgElement(node: SvgJsonNode, svgNs: string): Element {
   const el = document.createElementNS(svgNs, node.name);
 
   for (const [key, value] of Object.entries(node.attributes)) {
-    if (key === '__nodeId') continue;
+    if (key.startsWith('__')) continue;
     try {
       el.setAttribute(key, value);
     } catch {

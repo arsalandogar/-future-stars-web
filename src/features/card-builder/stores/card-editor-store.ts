@@ -7,6 +7,8 @@ import {
   type EditableImageField,
   type EditableTextField,
   type Edits,
+  type FontLookupResult,
+  applyTextCompression,
   prepareTemplate,
   applyEdits,
   withColorEdit,
@@ -22,6 +24,11 @@ import {
   withImageRemoved,
   withTextFieldReset,
 } from '@fs-card-engine';
+import { resolveCardBuilderFont } from '../lib/font-resolver';
+import {
+  clearTextCompressionWarningCache,
+  reportTextCompressionWarning,
+} from '../lib/text-compression-warning-reporter';
 
 export type Side = 'front' | 'back';
 
@@ -166,213 +173,292 @@ function createInitialState() {
   };
 }
 
-export const useCardEditorStore = create<CardEditorState>()((set, get) => ({
-  ...createInitialState(),
+interface CompressionRunState {
+  running: boolean;
+  pending: boolean;
+}
 
-  initializeSideFromSvg: (side, svgNode) => {
-    if (!svgNode) return;
-    const state = get();
-    const nextSide = initializeSideSnapshot(svgNode, state.sides[side]);
-    set({
-      sides: {
-        ...state.sides,
-        [side]: nextSide,
-      },
-    });
-  },
+function createCompressionState(): Record<Side, CompressionRunState> {
+  return {
+    front: { running: false, pending: false },
+    back: { running: false, pending: false },
+  };
+}
 
-  setActiveSide: (side) => {
-    const state = get();
-    if (side === state.activeSide) return;
-    if (side === 'back' && state.sides.back.workingCopy === null) return;
-    set({
-      activeSide: side,
-      focusedFieldId: null,
-    });
-  },
+export const useCardEditorStore = create<CardEditorState>()((set, get) => {
+  const compressionState = createCompressionState();
+  const fontCache = new Map<string, Promise<FontLookupResult>>();
 
-  getEditsForSave: () => {
-    const state = get();
-    const hasBackWorkingCopy = state.sides.back.workingCopy !== null;
-    return {
-      frontEdits: state.sides.front.edits,
-      backEdits: hasBackWorkingCopy ? state.sides.back.edits : {},
-    };
-  },
+  const scheduleTextCompression = (side: Side): void => {
+    const runState = compressionState[side];
+    runState.pending = true;
 
-  updateTextField: (fieldId, value, side) => {
-    const state = get();
-    const [target, sideState] = getSide(state, side);
-    const field = sideState.editableFields.find((f) => f.fieldId === fieldId);
-    if (!field) return;
+    if (runState.running) return;
 
-    set(
-      commitSide(state, target, {
-        edits: withTextEdit(sideState.edits, field, value),
-      })
-    );
-  },
+    runState.running = true;
+    void (async () => {
+      try {
+        while (runState.pending) {
+          runState.pending = false;
 
-  updateColorField: (fieldId, color, side) => {
-    const state = get();
-    const [target, sideState] = getSide(state, side);
-    const field = sideState.editableColorFields.find(
-      (f) => f.fieldId === fieldId
-    );
-    if (!field) return;
+          const snapshot = get().sides[side];
+          const workingCopy = snapshot.workingCopy;
+          if (!workingCopy) continue;
 
-    const newEdits = withColorEdit(sideState.edits, field, color);
+          const startRevision = snapshot.revision;
 
-    set(commitSide(state, target, { edits: newEdits, appliedPresetId: null }));
-  },
+          let result;
+          try {
+            result = await applyTextCompression(workingCopy, {
+              fontResolver: resolveCardBuilderFont,
+              fontCache,
+              onWarning: (warning) => {
+                reportTextCompressionWarning(side, warning);
+              },
+            });
+          } catch {
+            continue;
+          }
 
-  applyColorPreset: (colors, presetId, side) => {
-    const state = get();
-    const [target, sideState] = getSide(state, side);
-    const newEdits = withPresetColors(
-      sideState.edits,
-      sideState.editableColorFields,
-      colors
-    );
+          const latestSide = get().sides[side];
+          if (latestSide.revision !== startRevision) {
+            if (latestSide.workingCopy) runState.pending = true;
+            continue;
+          }
 
-    set(
-      commitSide(state, target, {
-        edits: newEdits,
-        appliedPresetId: presetId,
-        appliedPresetColors: colors,
-      })
-    );
-  },
+          if (result.compressedCount > 0) {
+            const latestState = get();
+            set(commitSide(latestState, side, {}));
+          }
+        }
+      } finally {
+        runState.running = false;
+        if (runState.pending) scheduleTextCompression(side);
+      }
+    })();
+  };
 
-  swapColors: (fieldIdA, fieldIdB, side) => {
-    const state = get();
-    const [target, sideState] = getSide(state, side);
-    const fieldA = sideState.editableColorFields.find(
-      (f) => f.fieldId === fieldIdA
-    );
-    const fieldB = sideState.editableColorFields.find(
-      (f) => f.fieldId === fieldIdB
-    );
-    if (!fieldA || !fieldB) return;
+  return {
+    ...createInitialState(),
 
-    const newEdits = withSwappedColors(sideState.edits, fieldA, fieldB);
+    initializeSideFromSvg: (side, svgNode) => {
+      if (!svgNode) return;
+      const state = get();
+      const nextSide = initializeSideSnapshot(svgNode, state.sides[side]);
+      set({
+        sides: {
+          ...state.sides,
+          [side]: nextSide,
+        },
+      });
+      scheduleTextCompression(side);
+    },
 
-    set(commitSide(state, target, { edits: newEdits, appliedPresetId: null }));
-  },
+    setActiveSide: (side) => {
+      const state = get();
+      if (side === state.activeSide) return;
+      if (side === 'back' && state.sides.back.workingCopy === null) return;
+      set({
+        activeSide: side,
+        focusedFieldId: null,
+      });
+    },
 
-  resetAllColors: (side) => {
-    const state = get();
-    const [target, sideState] = getSide(state, side);
+    getEditsForSave: () => {
+      const state = get();
+      const hasBackWorkingCopy = state.sides.back.workingCopy !== null;
+      return {
+        frontEdits: state.sides.front.edits,
+        backEdits: hasBackWorkingCopy ? state.sides.back.edits : {},
+      };
+    },
 
-    set(
-      commitSide(state, target, {
-        edits: withAllColorsReset(
-          sideState.edits,
-          sideState.editableColorFields
-        ),
-        appliedPresetId: null,
-        appliedPresetColors: null,
-      })
-    );
-  },
+    updateTextField: (fieldId, value, side) => {
+      const state = get();
+      const [target, sideState] = getSide(state, side);
+      const field = sideState.editableFields.find((f) => f.fieldId === fieldId);
+      if (!field) return;
 
-  resetToPreset: (side) => {
-    const state = get();
-    const [target, sideState] = getSide(state, side);
-    const newEdits = withPresetColors(
-      sideState.edits,
-      sideState.editableColorFields,
-      sideState.appliedPresetColors ?? []
-    );
+      set(
+        commitSide(state, target, {
+          edits: withTextEdit(sideState.edits, field, value),
+        })
+      );
+      scheduleTextCompression(target);
+    },
 
-    set(
-      commitSide(state, target, {
-        edits: newEdits,
-        appliedPresetId: sideState.appliedPresetColors
-          ? sideState.appliedPresetId
-          : null,
-      })
-    );
-  },
+    updateColorField: (fieldId, color, side) => {
+      const state = get();
+      const [target, sideState] = getSide(state, side);
+      const field = sideState.editableColorFields.find(
+        (f) => f.fieldId === fieldId
+      );
+      if (!field) return;
 
-  updateImageField: (fieldId, imageUrl, side) => {
-    const state = get();
-    const [target, sideState] = getSide(state, side);
-    const field = sideState.editableImageFields.find(
-      (f) => f.fieldId === fieldId
-    );
-    if (!field) return;
+      const newEdits = withColorEdit(sideState.edits, field, color);
 
-    set(
-      commitSide(state, target, {
-        edits: withImageEdit(sideState.edits, field, imageUrl),
-      })
-    );
-  },
+      set(
+        commitSide(state, target, { edits: newEdits, appliedPresetId: null })
+      );
+    },
 
-  removeImageField: (fieldId, side) => {
-    const state = get();
-    const [target, sideState] = getSide(state, side);
-    const field = sideState.editableImageFields.find(
-      (f) => f.fieldId === fieldId
-    );
-    if (!field) return;
+    applyColorPreset: (colors, presetId, side) => {
+      const state = get();
+      const [target, sideState] = getSide(state, side);
+      const newEdits = withPresetColors(
+        sideState.edits,
+        sideState.editableColorFields,
+        colors
+      );
 
-    set(
-      commitSide(state, target, {
-        edits: withImageRemoved(sideState.edits, field),
-      })
-    );
-  },
+      set(
+        commitSide(state, target, {
+          edits: newEdits,
+          appliedPresetId: presetId,
+          appliedPresetColors: colors,
+        })
+      );
+    },
 
-  adjustImageZoom: (fieldId, zoom, offsetX, offsetY, side) => {
-    const state = get();
-    const [target, sideState] = getSide(state, side);
-    const field = sideState.editableImageFields.find(
-      (f) => f.fieldId === fieldId
-    );
-    if (!field) return;
+    swapColors: (fieldIdA, fieldIdB, side) => {
+      const state = get();
+      const [target, sideState] = getSide(state, side);
+      const fieldA = sideState.editableColorFields.find(
+        (f) => f.fieldId === fieldIdA
+      );
+      const fieldB = sideState.editableColorFields.find(
+        (f) => f.fieldId === fieldIdB
+      );
+      if (!fieldA || !fieldB) return;
 
-    applyImageZoom(field.elementNodes, zoom, offsetX, offsetY);
+      const newEdits = withSwappedColors(sideState.edits, fieldA, fieldB);
 
-    set(
-      commitSide(state, target, {
-        edits: withZoomEdit(sideState.edits, fieldId, zoom, offsetX, offsetY),
-      })
-    );
-  },
+      set(
+        commitSide(state, target, { edits: newEdits, appliedPresetId: null })
+      );
+    },
 
-  nudgeImagePosition: (fieldId, dx, dy, side) => {
-    const state = get();
-    const [target, sideState] = getSide(state, side);
-    const field = sideState.editableImageFields.find(
-      (f) => f.fieldId === fieldId
-    );
-    if (!field) return;
+    resetAllColors: (side) => {
+      const state = get();
+      const [target, sideState] = getSide(state, side);
 
-    nudgeImageNodes(field.elementNodes, dx, dy);
+      set(
+        commitSide(state, target, {
+          edits: withAllColorsReset(
+            sideState.edits,
+            sideState.editableColorFields
+          ),
+          appliedPresetId: null,
+          appliedPresetColors: null,
+        })
+      );
+    },
 
-    set(
-      commitSide(state, target, {
-        edits: withNudgeEdit(sideState.edits, fieldId, dx, dy),
-      })
-    );
-  },
+    resetToPreset: (side) => {
+      const state = get();
+      const [target, sideState] = getSide(state, side);
+      const newEdits = withPresetColors(
+        sideState.edits,
+        sideState.editableColorFields,
+        sideState.appliedPresetColors ?? []
+      );
 
-  resetField: (fieldId, side) => {
-    const state = get();
-    const [target, sideState] = getSide(state, side);
-    const field = sideState.editableFields.find((f) => f.fieldId === fieldId);
-    if (!field) return;
+      set(
+        commitSide(state, target, {
+          edits: newEdits,
+          appliedPresetId: sideState.appliedPresetColors
+            ? sideState.appliedPresetId
+            : null,
+        })
+      );
+    },
 
-    set(
-      commitSide(state, target, {
-        edits: withTextFieldReset(sideState.edits, field),
-      })
-    );
-  },
+    updateImageField: (fieldId, imageUrl, side) => {
+      const state = get();
+      const [target, sideState] = getSide(state, side);
+      const field = sideState.editableImageFields.find(
+        (f) => f.fieldId === fieldId
+      );
+      if (!field) return;
 
-  setFocusedFieldId: (fieldId) => set({ focusedFieldId: fieldId }),
+      set(
+        commitSide(state, target, {
+          edits: withImageEdit(sideState.edits, field, imageUrl),
+        })
+      );
+    },
 
-  reset: () => set(createInitialState()),
-}));
+    removeImageField: (fieldId, side) => {
+      const state = get();
+      const [target, sideState] = getSide(state, side);
+      const field = sideState.editableImageFields.find(
+        (f) => f.fieldId === fieldId
+      );
+      if (!field) return;
+
+      set(
+        commitSide(state, target, {
+          edits: withImageRemoved(sideState.edits, field),
+        })
+      );
+    },
+
+    adjustImageZoom: (fieldId, zoom, offsetX, offsetY, side) => {
+      const state = get();
+      const [target, sideState] = getSide(state, side);
+      const field = sideState.editableImageFields.find(
+        (f) => f.fieldId === fieldId
+      );
+      if (!field) return;
+
+      applyImageZoom(field.elementNodes, zoom, offsetX, offsetY);
+
+      set(
+        commitSide(state, target, {
+          edits: withZoomEdit(sideState.edits, fieldId, zoom, offsetX, offsetY),
+        })
+      );
+    },
+
+    nudgeImagePosition: (fieldId, dx, dy, side) => {
+      const state = get();
+      const [target, sideState] = getSide(state, side);
+      const field = sideState.editableImageFields.find(
+        (f) => f.fieldId === fieldId
+      );
+      if (!field) return;
+
+      nudgeImageNodes(field.elementNodes, dx, dy);
+
+      set(
+        commitSide(state, target, {
+          edits: withNudgeEdit(sideState.edits, fieldId, dx, dy),
+        })
+      );
+    },
+
+    resetField: (fieldId, side) => {
+      const state = get();
+      const [target, sideState] = getSide(state, side);
+      const field = sideState.editableFields.find((f) => f.fieldId === fieldId);
+      if (!field) return;
+
+      set(
+        commitSide(state, target, {
+          edits: withTextFieldReset(sideState.edits, field),
+        })
+      );
+      scheduleTextCompression(target);
+    },
+
+    setFocusedFieldId: (fieldId) => set({ focusedFieldId: fieldId }),
+
+    reset: () => {
+      // Prevent stale compression loops from writing to the new state.
+      compressionState.front = { running: false, pending: false };
+      compressionState.back = { running: false, pending: false };
+      clearTextCompressionWarningCache();
+      set(createInitialState());
+    },
+  };
+});

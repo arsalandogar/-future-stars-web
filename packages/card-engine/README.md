@@ -1,9 +1,9 @@
 # @arsalandogar/fs-card-engine
 
 Shared card editing engine for Future Stars. It handles SVG
-parsing, field discovery, text/color/image edit application, and
-serialization as pure functions on plain JSON — no DOM, no React,
-no browser APIs. This README covers installation, the core
+parsing, field discovery, text/color/image edit application, text
+compression for overlong fields, and serialization as pure
+functions on plain JSON — no DOM, no React, no browser APIs. This README covers installation, the core
 pipeline, template annotation, platform integration patterns, and
 the full API reference.
 
@@ -46,6 +46,7 @@ import {
   prepareTemplate,
   withColorEdit,
   applyEdits,
+  applyTextCompression,
   stringifySvg,
 } from '@arsalandogar/fs-card-engine';
 
@@ -60,6 +61,9 @@ edits.firstName = 'Marcus';
 
 // Apply all edits to the working copy
 applyEdits(fields, edits);
+
+// Optional: compress overlong text fields (requires a FontResolver)
+// await applyTextCompression(workingCopy, { fontResolver });
 
 const finalSvg = stringifySvg(workingCopy);
 ```
@@ -99,7 +103,10 @@ Given a template SVG and a set of edits, the engine:
    attributes
 3. **Applies** each edit — replacing text content, computing derived
    colors, swapping image URLs and adjusting bounds
-4. **Serializes** the modified tree back to an SVG string
+4. **Compresses** overlong text by measuring glyph widths with
+   opentype.js and applying a horizontal scale transform when text
+   exceeds its `data-max-width`
+5. **Serializes** the modified tree back to an SVG string
 
 All operations are pure functions on plain JSON. No DOM, no React,
 no browser APIs.
@@ -126,6 +133,29 @@ text. The value must be a valid text field ID from the vocabulary
 Multiple elements can share the same field ID. When the user edits
 the field, the engine updates all elements with that ID. This is
 useful when the same name appears in two places on the card.
+
+#### Max width constraint
+
+Add `data-max-width` to a `<text>` element to enable automatic
+text compression. The value is the maximum allowed width in SVG
+user units. When `applyTextCompression` runs, it measures the
+rendered text width using opentype.js and applies a horizontal
+`scale()` transform if the text exceeds the limit:
+
+```xml
+<text data-text-field="firstName" data-max-width="280">
+  <tspan x="100" y="200">John</tspan>
+</text>
+```
+
+The compression uses `translate → scale → translate` to scale
+around the element's `x` origin, preserving text alignment.
+
+**Limitation:** Text nodes with mixed styles (child `<tspan>` or
+`<textPath>` elements that override `font-family`, `font-size`,
+`font-weight`, `font-style`, or `letter-spacing`) are skipped with
+an `unsupported-mixed-style` warning. Only uniform-style text
+elements are compressed.
 
 ### Color fields
 
@@ -311,6 +341,32 @@ import { applyEdits } from '@arsalandogar/fs-card-engine';
 applyEdits(fields, edits);
 ```
 
+### Compress
+
+If the template uses `data-max-width` annotations on text fields,
+run `applyTextCompression` after editing to horizontally scale any
+text that exceeds the maximum width:
+
+```typescript
+import { applyTextCompression } from '@arsalandogar/fs-card-engine';
+
+const fontCache = new Map(); // reuse across calls to avoid re-parsing fonts
+
+const result = await applyTextCompression(workingCopy, {
+  fontResolver, // platform-specific — see "Platform integration"
+  fontCache,
+  onWarning: (w) => console.warn(w.message),
+});
+// result.compressedCount — number of text nodes that were scaled
+// result.warningCount   — number of warnings emitted
+```
+
+Font resolution is async because platforms load font binaries
+differently (fetch on web, `readFile` on Node.js). The `fontCache`
+map stores parsed `opentype.Font` promises keyed by
+`family|weight|style`, so subsequent calls skip both loading and
+parsing.
+
 ### Serialize
 
 Convert the modified SVG tree back to a string:
@@ -328,6 +384,7 @@ const svg = stringifySvg(workingCopy);
 | SVG parsing and serialization            | SVG → PNG rendering (backend)      |
 | Field discovery from `data-*` attributes | React DOM renderer (web)           |
 | Text, color, and image edit application  | react-native-svg renderer (mobile) |
+| Text compression and font matching       | Font file loading and registry     |
 | OKLAB perceptual color math              | Zustand stores and UI components   |
 | Field vocabulary and types               | Image upload and cropping          |
 
@@ -478,6 +535,107 @@ const final = Object.fromEntries(
 );
 ```
 
+#### Text compression
+
+The store runs `applyTextCompression` after every text edit to
+horizontally scale text nodes that exceed their `data-max-width`.
+Because font resolution is async, the store uses a run-loop
+pattern to coalesce rapid edits into a single compression pass:
+
+```typescript
+const compressionState = createCompressionState();
+const fontCache = new Map<string, Promise<FontLookupResult>>();
+
+const scheduleTextCompression = (side: Side): void => {
+  const runState = compressionState[side];
+  runState.pending = true;
+
+  if (runState.running) return; // already in the loop
+
+  runState.running = true;
+  void (async () => {
+    try {
+      while (runState.pending) {
+        runState.pending = false;
+
+        const snapshot = get().sides[side];
+        if (!snapshot.workingCopy) continue;
+        const startRevision = snapshot.revision;
+
+        const result = await applyTextCompression(snapshot.workingCopy, {
+          fontResolver: resolveCardBuilderFont,
+          fontCache,
+          onWarning: (w) => reportTextCompressionWarning(side, w),
+        });
+
+        // If the revision changed while we were compressing, loop again
+        const latest = get().sides[side];
+        if (latest.revision !== startRevision) {
+          if (latest.workingCopy) runState.pending = true;
+          continue;
+        }
+
+        // Bump revision only when compression modified the tree
+        if (result.compressedCount > 0) {
+          set(commitSide(get(), side, {}));
+        }
+      }
+    } finally {
+      runState.running = false;
+      if (runState.pending) scheduleTextCompression(side);
+    }
+  })();
+};
+```
+
+Key details:
+
+- **`fontCache`** lives outside the Zustand state so parsed
+  `opentype.Font` objects are shared across all compression runs
+  without triggering re-renders.
+- **`pending`/`running` flags** ensure at most one compression loop
+  runs per side. A new edit sets `pending = true`; if a loop is
+  already running, it will pick up the change on its next iteration.
+- **Revision check** — after the async `applyTextCompression` call,
+  the store compares the current `revision` to the one captured
+  before the call. If the user made another edit while compression
+  was running, the loop restarts with the latest tree.
+- **Warnings** are deduplicated by a `Set<string>` keyed on
+  `side|reason|nodeId|message`. In dev mode, each unique warning
+  shows a Mantine notification and a `console.warn`.
+
+The `fontResolver` is created once with `createFontResolver` and
+a `fetch`-based `loadFont`:
+
+```typescript
+import {
+  createFontResolver,
+  normalizeFileToken,
+  type FontRegistryEntry,
+} from '@arsalandogar/fs-card-engine';
+
+const entries: FontRegistryEntry[] = [
+  {
+    family: 'Poppins',
+    weight: 400,
+    style: 'normal',
+    locator: poppinsRegularUrl,
+  },
+  { family: 'Poppins', weight: 700, style: 'normal', locator: poppinsBoldUrl },
+  // ...
+];
+
+export const resolveCardBuilderFont = createFontResolver({
+  entries,
+  loadFont: async (url) => {
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    return new Uint8Array(await response.arrayBuffer());
+  },
+  fileTokens, // optional fuzzy filename lookup map
+});
+```
+
 #### Gesture handling
 
 The preview supports wheel-to-zoom, pointer-drag-to-pan, and
@@ -551,6 +709,57 @@ for (const field of fields.imageFields) {
     applyImageZoom(field.elementNodes, edit.zoom, edit.offsetX, edit.offsetY);
   }
 }
+```
+
+#### Text compression on the backend
+
+If the template uses `data-max-width` annotations, run
+`applyTextCompression` after `applyEdits` so that overlong text
+fields are horizontally scaled before rendering to PNG:
+
+```typescript
+import {
+  parseSvgSync,
+  prepareTemplate,
+  applyEdits,
+  applyTextCompression,
+  createFontResolver,
+  stringifySvg,
+  type FontRegistryEntry,
+} from '@arsalandogar/fs-card-engine';
+import { readFile, readdir } from 'node:fs/promises';
+import { join, basename, extname } from 'node:path';
+
+// Build font entries from a directory of font files
+const FONT_DIR = '/path/to/fonts';
+const fontFiles = await readdir(FONT_DIR);
+const entries: FontRegistryEntry[] = fontFiles
+  .filter((f) => /\.(ttf|otf|woff)$/i.test(f))
+  .map((f) => ({
+    family: basename(f, extname(f)).replace(/-\w+$/, ''),
+    weight: 400,
+    style: 'normal' as const,
+    locator: join(FONT_DIR, f),
+  }));
+
+const fontResolver = createFontResolver({
+  entries,
+  loadFont: async (locator) => {
+    try {
+      const buffer = await readFile(locator);
+      return new Uint8Array(buffer);
+    } catch {
+      return null;
+    }
+  },
+});
+
+const svgNode = parseSvgSync(templateSvgString);
+const { workingCopy, fields } = prepareTemplate(svgNode);
+applyEdits(fields, savedEdits);
+await applyTextCompression(workingCopy, { fontResolver });
+
+const finalSvg = stringifySvg(workingCopy);
 ```
 
 ### React Native
@@ -767,6 +976,80 @@ string, colorTarget: ColorTarget }[] }`. This is an internal
 interface — callers construct it from their own color data before
 passing it in.
 
+### Text compression (`text-compression.ts`)
+
+Functions for measuring text width and applying horizontal scale
+compression to text nodes that exceed their `data-max-width`.
+
+| Export                                                   | Signature                                                                                          |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `measureTextWidth(text, fontSize, font, letterSpacing?)` | `(text: string, fontSize: number, font: opentype.Font, letterSpacing?: number) => number`          |
+| `applyTextCompression(root, options)`                    | `(root: SvgJsonNode, options: ApplyTextCompressionOptions) => Promise<ApplyTextCompressionResult>` |
+
+**Types:**
+
+| Export                         | Kind      | Description                                                                   |
+| ------------------------------ | --------- | ----------------------------------------------------------------------------- |
+| `FontData`                     | type      | `ArrayBuffer \| Uint8Array` — raw font binary                                 |
+| `FontResolverInput`            | interface | `{ family, weight, style }` — font lookup parameters                          |
+| `FontResolver`                 | type      | `(input: FontResolverInput) => Promise<FontData \| null> \| FontData \| null` |
+| `TextCompressionWarningReason` | type      | Union of warning reason strings (see table below)                             |
+| `TextCompressionWarning`       | interface | `{ reason, nodeId?, message }` — compression warning                          |
+| `ApplyTextCompressionOptions`  | interface | `{ fontResolver, onWarning?, fontCache? }`                                    |
+| `ApplyTextCompressionResult`   | interface | `{ compressedCount, warningCount }`                                           |
+| `FontLookupResult`             | interface | `{ font, errorReason? }` — cached font resolution result                      |
+
+**Warning reasons:**
+
+| Reason                    | When it fires                                                   |
+| ------------------------- | --------------------------------------------------------------- |
+| `font-not-found`          | The `FontResolver` returned `null` for the requested font       |
+| `parse-failed`            | The font binary could not be parsed by opentype.js              |
+| `unsupported-mixed-style` | The `<text>` element has child tspans with font style overrides |
+| `invalid-max-width`       | The `data-max-width` value is missing, non-numeric, or ≤ 0      |
+
+### Font matching (`font-matching.ts`)
+
+Utilities for normalizing font metadata and resolving font file
+candidates from family/weight/style inputs.
+
+| Export                                                | Signature                                                           |
+| ----------------------------------------------------- | ------------------------------------------------------------------- |
+| `stripQuotes(value)`                                  | `(value: string) => string`                                         |
+| `normalizeFamily(value)`                              | `(value: string) => string`                                         |
+| `normalizeWeight(weight)`                             | `(weight: string \| number) => number`                              |
+| `normalizeStyle(style)`                               | `(style: string) => FontStyle`                                      |
+| `normalizeFileToken(value)`                           | `(value: string) => string`                                         |
+| `weightToVariantToken(weight)`                        | `(weight: number) => string`                                        |
+| `pickNearestWeight(entries, requestedWeight)`         | `<T extends FontEntry>(entries: T[], requestedWeight: number) => T` |
+| `generateFontFileCandidates(family, variant, italic)` | `(family: string, variant: string, italic: boolean) => string[]`    |
+
+**Types:**
+
+| Export      | Kind      | Description                                       |
+| ----------- | --------- | ------------------------------------------------- |
+| `FontStyle` | type      | `'normal' \| 'italic'`                            |
+| `FontEntry` | interface | `{ family, weight, style }` — font registry entry |
+
+### Font resolver factory (`create-font-resolver.ts`)
+
+| Export                        | Signature                                              |
+| ----------------------------- | ------------------------------------------------------ |
+| `createFontResolver(options)` | `(options: CreateFontResolverOptions) => FontResolver` |
+
+Creates a `FontResolver` that maps `FontResolverInput` requests to
+font binaries. It builds a family/style/weight index from a list of
+`FontRegistryEntry` objects, picks the nearest weight, and caches
+loaded font data. An optional `fileTokens` map enables fuzzy
+filename-based fallback when no exact registry match is found.
+
+**Types:**
+
+| Export                      | Kind      | Description                                                  |
+| --------------------------- | --------- | ------------------------------------------------------------ |
+| `FontRegistryEntry`         | interface | `{ family, weight, style, locator }` — registered font       |
+| `CreateFontResolverOptions` | interface | `{ entries, loadFont, fileTokens? }` — factory configuration |
+
 ## OKLAB color math
 
 The engine uses OKLAB for all color operations because it is
@@ -816,6 +1099,8 @@ range (`~0–0.5`) to `~0–100`. The default clustering threshold of
 
 - [**culori**](https://culorijs.org/) — pure JS OKLAB color conversions
 - [**nanoid**](https://github.com/ai/nanoid) — unique ID generation for SVG node cloning
+- [**opentype.js**](https://opentype.js.org/) — OpenType font
+  parsing for text width measurement
 - [**svgson**](https://github.com/elrumordelaluz/svgson) — SVG string ↔ JSON tree parsing
 
 No native modules, no DOM APIs. Works in Node.js, browsers,

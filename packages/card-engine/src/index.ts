@@ -61,6 +61,41 @@ export { parseSvgSync, parseSvg, stringifySvg } from './parse-svg.ts';
 // SVG cloning
 export { cloneWithStableIds } from './svg-clone.ts';
 
+// Text compression
+export {
+  measureTextWidth,
+  applyTextCompression,
+  type FontData,
+  type FontResolverInput,
+  type FontResolver,
+  type TextCompressionWarningReason,
+  type TextCompressionWarning,
+  type ApplyTextCompressionOptions,
+  type ApplyTextCompressionResult,
+  type FontLookupResult,
+} from './text-compression.ts';
+
+// Font matching
+export {
+  normalizeFamily,
+  normalizeWeight,
+  normalizeStyle,
+  normalizeFileToken,
+  stripQuotes,
+  weightToVariantToken,
+  pickNearestWeight,
+  generateFontFileCandidates,
+  type FontStyle,
+  type FontEntry,
+} from './font-matching.ts';
+
+// Font resolver factory
+export {
+  createFontResolver,
+  type FontRegistryEntry,
+  type CreateFontResolverOptions,
+} from './create-font-resolver.ts';
+
 // Edit operations
 export {
   TOUCH_TARGET_ATTR,

@@ -95,33 +95,18 @@ export function CreateCardPage() {
 
         if (node.name !== 'text') return undefined;
 
-        const maxWidth = node.attributes['data-max-width'];
         const fieldId = node.attributes['data-text-field'] as
           | string
           | undefined;
 
-        if (!maxWidth && !fieldId) return undefined;
+        if (!fieldId) return undefined;
 
         return {
-          ...(maxWidth && {
-            ref: (el: SVGTextElement | null) => {
-              if (!el) return;
-              el.removeAttribute('textLength');
-              el.removeAttribute('lengthAdjust');
-              const computedLength = el.getComputedTextLength();
-              if (computedLength > parseFloat(maxWidth)) {
-                el.setAttribute('textLength', maxWidth);
-                el.setAttribute('lengthAdjust', 'spacingAndGlyphs');
-              }
-            },
-          }),
-          ...(fieldId && {
-            style: { cursor: 'pointer' },
-            onClick: () => {
-              setActiveTab('content');
-              setFocusedFieldId(fieldId as EditableFieldId);
-            },
-          }),
+          style: { cursor: 'pointer' },
+          onClick: () => {
+            setActiveTab('content');
+            setFocusedFieldId(fieldId as EditableFieldId);
+          },
         };
       },
     }),

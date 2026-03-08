@@ -24,15 +24,17 @@ export const ALL_ANNOTATION_ATTRS = [
   DATA_ATTR_TOUCH_BOUNDS,
 ];
 
-function stripNodeIds(node: SvgJsonNode): SvgJsonNode {
+function stripInternalAttrs(node: SvgJsonNode): SvgJsonNode {
   if (node.type === 'text') return node;
 
   const attrs = { ...node.attributes };
-  delete attrs['__nodeId'];
+  for (const key of Object.keys(attrs)) {
+    if (key.startsWith('__')) delete attrs[key];
+  }
   return {
     ...node,
     attributes: attrs,
-    children: node.children.map(stripNodeIds),
+    children: node.children.map(stripInternalAttrs),
   };
 }
 
@@ -96,7 +98,7 @@ export function buildAnnotatedSvg(
   }
 
   injectAttributes(clone);
-  return stripNodeIds(clone);
+  return stripInternalAttrs(clone);
 }
 
 export function stripAnnotationAttrs(node: SvgJsonNode): void {

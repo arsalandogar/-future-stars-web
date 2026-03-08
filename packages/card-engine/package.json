@@ -1,6 +1,6 @@
 {
   "name": "@arsalandogar/fs-card-engine",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Shared card editing engine for Future Stars",
   "license": "UNLICENSED",
   "type": "module",
@@ -33,10 +33,12 @@
   "dependencies": {
     "culori": "^4.0.2",
     "nanoid": "^5.1.5",
+    "opentype.js": "^1.3.4",
     "svgson": "^5.3.1"
   },
   "devDependencies": {
     "@types/culori": "^4.0.1",
+    "@types/opentype.js": "^1.3.9",
     "typescript": "~5.9.3"
   }
 }
