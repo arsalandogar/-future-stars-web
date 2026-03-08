@@ -11,6 +11,8 @@ export {
   isImageEdit,
   getEditValue,
   DEFAULT_IMAGE_POSITION,
+  ZOOM_MIN,
+  ZOOM_MAX,
   CARD_WIDTH,
   CARD_HEIGHT,
   CARD_BLEED_WIDTH,
@@ -95,6 +97,14 @@ export {
   type FontRegistryEntry,
   type CreateFontResolverOptions,
 } from './create-font-resolver.ts';
+
+// Side state
+export {
+  type Side,
+  type SideState,
+  createEmptySideState,
+  initializeSideSnapshot,
+} from './side-state.ts';
 
 // Edit operations
 export {

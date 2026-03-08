@@ -40,6 +40,12 @@ export function getEditValue(value: EditValue | undefined): string | undefined {
 
 export const DEFAULT_IMAGE_POSITION = { zoom: 1, offsetX: 0, offsetY: 0 };
 
+/** Minimum zoom level for image fields. */
+export const ZOOM_MIN = 0.5;
+
+/** Maximum zoom level for image fields. */
+export const ZOOM_MAX = 2;
+
 /** Standard card dimensions (safe zone). */
 export const CARD_WIDTH = 750;
 export const CARD_HEIGHT = 1050;

@@ -86,7 +86,7 @@ from the same inputs:
 - **Node.js backend** — final SVG → PNG rendering
 - **React Native app** — mobile editor
 
-If each platform implements its own edit logic, they will drift.
+Separate implementations per platform drift over time.
 A color that looks right on web could render differently on the
 backend. The engine is the single source of truth.
 
@@ -817,6 +817,14 @@ Every public export is listed below, grouped by module.
 | `isImageEdit(value)`     | function | Type guard for `ImageEdit`                    |
 | `getEditValue(value)`    | function | Extract string from a string or `ImageEdit`   |
 | `DEFAULT_IMAGE_POSITION` | const    | `{ zoom: 1, offsetX: 0, offsetY: 0 }`         |
+| `ZOOM_MIN`               | const    | `0.5` — minimum image zoom                    |
+| `ZOOM_MAX`               | const    | `2` — maximum image zoom                      |
+| `CARD_WIDTH`             | const    | `750` — standard card width (safe zone)       |
+| `CARD_HEIGHT`            | const    | `1050` — standard card height (safe zone)     |
+| `CARD_BLEED_WIDTH`       | const    | `833.34` — card width with bleeds             |
+| `CARD_BLEED_HEIGHT`      | const    | `1133.34` — card height with bleeds           |
+| `hasBleeds(vb)`          | function | Returns true when viewBox exceeds safe zone   |
+| `getCardBounds(vb)`      | function | Returns safe zone within a larger viewBox     |
 
 ### Vocabulary (`vocabulary.ts`)
 
@@ -1074,6 +1082,23 @@ filename-based fallback when no exact registry match is found.
 | --------------------------- | --------- | ------------------------------------------------------------ |
 | `FontRegistryEntry`         | interface | `{ family, weight, style, locator }` — registered font       |
 | `CreateFontResolverOptions` | interface | `{ entries, loadFont, fileTokens? }` — factory configuration |
+
+### Side state (`side-state.ts`)
+
+Per-side editing state used by platform integrations to track the
+working copy, discovered fields, and edits for each card side.
+
+| Export                                  | Kind      | Description                                                     |
+| --------------------------------------- | --------- | --------------------------------------------------------------- |
+| `Side`                                  | type      | `'front' \| 'back'`                                             |
+| `SideState`                             | interface | Per-side state: working copy, fields, edits, revision, preset   |
+| `createEmptySideState()`                | function  | Returns a blank `SideState` with no fields or edits             |
+| `initializeSideSnapshot(svgNode, prev)` | function  | Rebuilds a side from SVG, re-applying edits from previous state |
+
+**`SideState`** — `{ workingCopy, editableFields,
+editableColorFields, editableImageFields, edits, revision,
+appliedPresetId, appliedPresetColors }`. The `revision` counter
+increments on each rebuild, letting renderers detect changes.
 
 ## OKLAB color math
 

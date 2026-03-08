@@ -3,14 +3,13 @@ import { create } from 'zustand';
 import {
   type SvgJsonNode,
   type EditableFieldId,
-  type EditableColorField,
-  type EditableImageField,
-  type EditableTextField,
   type Edits,
   type FontLookupResult,
+  type Side,
+  type SideState,
+  createEmptySideState,
+  initializeSideSnapshot,
   applyTextCompression,
-  prepareTemplate,
-  applyEdits,
   withColorEdit,
   withImageEdit,
   applyImageZoom,
@@ -29,19 +28,6 @@ import {
   clearTextCompressionWarningCache,
   reportTextCompressionWarning,
 } from '../lib/text-compression-warning-reporter';
-
-export type Side = 'front' | 'back';
-
-interface SideState {
-  workingCopy: SvgJsonNode | null;
-  editableFields: EditableTextField[];
-  editableColorFields: EditableColorField[];
-  editableImageFields: EditableImageField[];
-  edits: Edits;
-  revision: number;
-  appliedPresetId: number | null;
-  appliedPresetColors: string[] | null;
-}
 
 interface CardEditorState {
   activeSide: Side;
@@ -94,47 +80,6 @@ interface CardEditorState {
   resetField: (fieldId: EditableFieldId, side?: Side) => void;
   setFocusedFieldId: (fieldId: EditableFieldId | null) => void;
   reset: () => void;
-}
-
-function createEmptySideState(): SideState {
-  return {
-    workingCopy: null,
-    editableFields: [],
-    editableColorFields: [],
-    editableImageFields: [],
-    edits: {},
-    revision: 0,
-    appliedPresetId: null,
-    appliedPresetColors: null,
-  };
-}
-
-/** Rebuild a side from SVG while re-applying matching editable state. */
-function initializeSideSnapshot(svgNode: SvgJsonNode, previous: SideState) {
-  const { workingCopy, fields } = prepareTemplate(svgNode);
-
-  const preservedEdits: Edits = { ...previous.edits };
-
-  if (previous.appliedPresetColors) {
-    // Reapply preset colors positionally on the new template before replaying
-    // explicit edits. This preserves preset intent across template changes even
-    // when some preset colors were not stored in edits on the previous template.
-    withPresetColors({}, fields.colorFields, previous.appliedPresetColors);
-  }
-  applyEdits(fields, preservedEdits);
-
-  return {
-    workingCopy,
-    editableFields: fields.textFields,
-    editableColorFields: fields.colorFields,
-    editableImageFields: fields.imageFields,
-    edits: preservedEdits,
-    revision: previous.revision + 1,
-    appliedPresetId: previous.appliedPresetColors
-      ? previous.appliedPresetId
-      : null,
-    appliedPresetColors: previous.appliedPresetColors,
-  } as SideState;
 }
 
 /** Resolve the target side and return its state. */

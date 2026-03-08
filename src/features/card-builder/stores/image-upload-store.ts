@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 import type { EditableFieldId } from '@/features/templates';
-import type { Side } from './card-editor-store';
+import type { Side } from '@fs-card-engine';
 
 export type UploadKey = `${Side}:${string}`;
 

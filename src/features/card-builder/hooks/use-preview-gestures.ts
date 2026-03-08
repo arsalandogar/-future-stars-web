@@ -3,17 +3,17 @@ import { useEffect, useRef } from 'react';
 import type { EditableFieldId } from '@/features/templates';
 
 import { useCardBuilderStore } from '../stores/card-builder-store';
-import { type Side, useCardEditorStore } from '../stores/card-editor-store';
+import { useCardEditorStore } from '../stores/card-editor-store';
 import {
+  type Side,
   DEFAULT_IMAGE_POSITION,
   getEditValue,
   isImageEdit,
   TOUCH_TARGET_ATTR,
   TOUCH_TARGET_TYPE_ATTR,
+  ZOOM_MIN,
+  ZOOM_MAX,
 } from '@fs-card-engine';
-
-const ZOOM_MIN = 0.5;
-const ZOOM_MAX = 2;
 const WHEEL_SENSITIVITY = 0.001;
 const DRAG_THRESHOLD = 3;
 

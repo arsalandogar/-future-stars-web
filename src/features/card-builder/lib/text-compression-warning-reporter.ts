@@ -2,7 +2,7 @@ import { notifications } from '@mantine/notifications';
 
 import type { TextCompressionWarning } from '@fs-card-engine';
 
-import type { Side } from '../stores/card-editor-store';
+import type { Side } from '@fs-card-engine';
 
 const seenWarningKeys = new Set<string>();
 
