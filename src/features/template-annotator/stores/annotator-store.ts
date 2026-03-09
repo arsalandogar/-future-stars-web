@@ -12,11 +12,12 @@ import type {
   NodeMeta,
   TouchBounds,
 } from '../types';
-import { measureTextWidth } from '../utils/measure-text-width';
+import { measureTextBounds } from '../utils/measure-text-bounds';
 import {
   buildNodeIndex,
   collectDescendantNodeIds,
 } from '../utils/svg-node-helpers';
+import { removeScaleFromTransform } from '../utils/svg-transform-helpers';
 
 type UndoEntry =
   | { type: 'assignments'; assignments: FieldAssignment[] }
@@ -49,6 +50,9 @@ interface AnnotatorState {
   // Transform editing
   editingTransformNodeId: string | null;
 
+  // Text area editing
+  editingTextAreaNodeId: string | null;
+
   // Tree state
   expandedNodeIds: Set<string>;
 
@@ -79,11 +83,13 @@ interface AnnotatorState {
     colorTarget?: ColorTarget
   ) => void;
   removeAssignment: (nodeId: string, fieldId: EditableFieldId) => void;
-  setMaxWidth: (
+  setTextDimensions: (
     nodeId: string,
     fieldId: EditableFieldId,
-    maxWidth: number
+    maxWidth: number,
+    maxHeight: number
   ) => void;
+  removeNodeScale: (nodeId: string) => void;
   bulkAssignColors: (
     mappings: { fieldId: EditableFieldId; members: ClusterMember[] }[]
   ) => void;
@@ -95,6 +101,7 @@ interface AnnotatorState {
   ) => void;
   setEditingTouchBounds: (nodeId: string | null) => void;
   setEditingTransform: (nodeId: string | null) => void;
+  setEditingTextArea: (nodeId: string | null) => void;
   commitNodeTransform: (nodeId: string, newTransform: string) => void;
   resetNodeTransform: (nodeId: string) => void;
   commitTouchBounds: (
@@ -162,6 +169,7 @@ function applyNodeDeletion(
     hoveredNodeId: string | null;
     editingTouchBoundsNodeId: string | null;
     editingTransformNodeId: string | null;
+    editingTextAreaNodeId: string | null;
   }
 ) {
   const descendantIds = collectDescendantNodeIds(entry.node);
@@ -189,6 +197,10 @@ function applyNodeDeletion(
     ),
     editingTransformNodeId: clearIfDeleted(
       state.editingTransformNodeId,
+      descendantIds
+    ),
+    editingTextAreaNodeId: clearIfDeleted(
+      state.editingTextAreaNodeId,
       descendantIds
     ),
   };
@@ -232,6 +244,7 @@ const initialState = {
   hoveredNodeId: null as string | null,
   editingTouchBoundsNodeId: null as string | null,
   editingTransformNodeId: null as string | null,
+  editingTextAreaNodeId: null as string | null,
   expandedNodeIds: new Set<string>(),
   assignments: [] as FieldAssignment[],
   undoStack: [] as UndoEntry[],
@@ -275,12 +288,14 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
         expandedNodeIds: newExpanded,
         editingTouchBoundsNodeId: null,
         editingTransformNodeId: null,
+        editingTextAreaNodeId: null,
       });
     } else {
       set({
         selectedNodeId: nodeId,
         editingTouchBoundsNodeId: null,
         editingTransformNodeId: null,
+        editingTextAreaNodeId: null,
       });
     }
   },
@@ -347,12 +362,42 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
     });
   },
 
-  setMaxWidth: (nodeId, fieldId, maxWidth) => {
-    const { assignments } = get();
+  setTextDimensions: (nodeId, fieldId, maxWidth, maxHeight) => {
+    const { assignments, undoStack } = get();
     const newAssignments = assignments.map((a) =>
-      a.nodeId === nodeId && a.fieldId === fieldId ? { ...a, maxWidth } : a
+      a.nodeId === nodeId && a.fieldId === fieldId
+        ? { ...a, maxWidth, maxHeight }
+        : a
     );
-    set({ assignments: newAssignments });
+    set({
+      assignments: newAssignments,
+      undoStack: pushUndo(undoStack, { type: 'assignments', assignments }),
+      redoStack: [],
+    });
+  },
+
+  removeNodeScale: (nodeId) => {
+    const { svgTree, nodeMap, undoStack } = get();
+    if (!svgTree) return;
+    const node = nodeMap.get(nodeId);
+    if (!node || node.type !== 'element') return;
+
+    const prevValue = node.attributes.transform;
+    const newTransform = removeScaleFromTransform(prevValue);
+
+    if (newTransform === prevValue) return;
+
+    if (newTransform) {
+      node.attributes.transform = newTransform;
+    } else {
+      delete node.attributes.transform;
+    }
+
+    set({
+      svgTree: { ...svgTree },
+      undoStack: pushUndo(undoStack, { type: 'transform', nodeId, prevValue }),
+      redoStack: [],
+    });
   },
 
   bulkAssignColors: (mappings) => {
@@ -404,8 +449,11 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
         if (svgTree) {
           const textNode = nodeMap.get(m.nodeId);
           if (textNode) {
-            const width = measureTextWidth(textNode, svgTree);
-            if (width != null) assignment.maxWidth = width;
+            const bounds = measureTextBounds(textNode, svgTree);
+            if (bounds) {
+              assignment.maxWidth = bounds.width;
+              assignment.maxHeight = bounds.height;
+            }
           }
         }
         return assignment;
@@ -426,13 +474,28 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
   setEditingTouchBounds: (nodeId) =>
     set({
       editingTouchBoundsNodeId: nodeId,
-      ...(nodeId && { editingTransformNodeId: null }),
+      ...(nodeId && {
+        editingTransformNodeId: null,
+        editingTextAreaNodeId: null,
+      }),
     }),
 
   setEditingTransform: (nodeId) =>
     set({
       editingTransformNodeId: nodeId,
-      ...(nodeId && { editingTouchBoundsNodeId: null }),
+      ...(nodeId && {
+        editingTouchBoundsNodeId: null,
+        editingTextAreaNodeId: null,
+      }),
+    }),
+
+  setEditingTextArea: (nodeId) =>
+    set({
+      editingTextAreaNodeId: nodeId,
+      ...(nodeId && {
+        editingTouchBoundsNodeId: null,
+        editingTransformNodeId: null,
+      }),
     }),
 
   commitNodeTransform: (nodeId, newTransform) => {

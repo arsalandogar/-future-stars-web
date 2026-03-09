@@ -23,7 +23,8 @@ export function useElementBounds(
       const svgEl = querySvgElement();
       if (!svgEl) return;
       const bbox = getElementBBoxInSvgRoot(svgEl, nodeId);
-      if (bbox) setBounds(bbox);
+      if (!bbox) return;
+      setBounds(bbox);
     });
     return () => cancelAnimationFrame(rafId);
   }, [enabled, nodeId, svgTree]);

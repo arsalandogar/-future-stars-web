@@ -8,6 +8,7 @@ import { EDITABLE_FIELDS } from '@/features/templates';
 import { useAnnotatorStore } from '../stores/annotator-store';
 import { supportsTouchBounds } from '../utils/svg-node-helpers';
 import { FieldPicker } from './field-picker';
+import { TextAreaControls } from './text-area-controls';
 import { TouchBoundsControls } from './touch-bounds-controls';
 import { TransformControls } from './transform-controls';
 
@@ -25,6 +26,17 @@ export function FieldAssignmentPanel() {
       assignments.find((a) => {
         if (a.nodeId !== selectedNodeId) return false;
         return supportsTouchBounds(EDITABLE_FIELDS[a.fieldId].type);
+      }) || null
+    );
+  }, [selectedNodeId, assignments]);
+
+  // Find a text assignment on the selected node for text area controls
+  const textAssignment = useMemo(() => {
+    if (!selectedNodeId) return null;
+    return (
+      assignments.find((a) => {
+        if (a.nodeId !== selectedNodeId) return false;
+        return EDITABLE_FIELDS[a.fieldId].type === 'text';
       }) || null
     );
   }, [selectedNodeId, assignments]);
@@ -82,6 +94,13 @@ export function FieldAssignmentPanel() {
             <TransformControls nodeMeta={meta} />
 
             <FieldPicker nodeMeta={meta} />
+
+            {textAssignment && (
+              <TextAreaControls
+                nodeMeta={meta}
+                fieldId={textAssignment.fieldId}
+              />
+            )}
 
             {touchBoundsAssignment && (
               <TouchBoundsControls

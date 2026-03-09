@@ -1,11 +1,4 @@
-import {
-  ActionIcon,
-  Badge,
-  Group,
-  NumberInput,
-  Text,
-  Tooltip,
-} from '@mantine/core';
+import { ActionIcon, Badge, Group, Text, Tooltip } from '@mantine/core';
 import { Trash2 } from 'lucide-react';
 
 import { EDITABLE_FIELDS } from '@/features/templates';
@@ -19,7 +12,6 @@ export function AssignmentSummaryTable() {
   const nodeIndex = useAnnotatorStore((s) => s.nodeIndex);
   const selectNode = useAnnotatorStore((s) => s.selectNode);
   const removeAssignment = useAnnotatorStore((s) => s.removeAssignment);
-  const setMaxWidth = useAnnotatorStore((s) => s.setMaxWidth);
 
   if (assignments.length === 0) {
     return (
@@ -61,26 +53,12 @@ export function AssignmentSummaryTable() {
               {meta ? `<${meta.tagName}> ${meta.label}` : a.nodeId}
             </div>
 
-            {field.type === 'text' && (
-              <div className={styles.cardFooter}>
-                <Text size="xs" c="dimmed">
-                  Max width
+            {field.type === 'text' &&
+              (a.maxWidth != null || a.maxHeight != null) && (
+                <Text size="xs" c="dimmed" mt={2}>
+                  {a.maxWidth ?? '–'} × {a.maxHeight ?? '–'}
                 </Text>
-                <NumberInput
-                  size="xs"
-                  w={80}
-                  value={a.maxWidth ?? ''}
-                  onChange={(val) => {
-                    if (typeof val === 'number') {
-                      setMaxWidth(a.nodeId, a.fieldId, val);
-                    }
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                  min={0}
-                  placeholder="auto"
-                />
-              </div>
-            )}
+              )}
 
             <Tooltip label="Remove">
               <ActionIcon

@@ -12,6 +12,7 @@ import {
   DATA_ATTR_COLOR_TARGET,
   DATA_ATTR_COLOR_OFFSET,
   DATA_ATTR_MAX_WIDTH,
+  DATA_ATTR_MAX_HEIGHT,
   DATA_ATTR_TOUCH_BOUNDS,
 } from './export-annotated-svg';
 
@@ -54,6 +55,12 @@ export function extractAssignments(
         if (maxWidthStr) {
           const maxWidth = Number(maxWidthStr);
           if (Number.isFinite(maxWidth)) assignment.maxWidth = maxWidth;
+        }
+
+        const maxHeightStr = node.attributes[DATA_ATTR_MAX_HEIGHT];
+        if (maxHeightStr) {
+          const maxHeight = Number(maxHeightStr);
+          if (Number.isFinite(maxHeight)) assignment.maxHeight = maxHeight;
         }
       }
 

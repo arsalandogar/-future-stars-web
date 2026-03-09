@@ -1,19 +1,17 @@
 import type { SvgJsonNode } from '@/types/svg';
 
-export function measureTextWidth(
+export interface TextBounds {
+  width: number;
+  height: number;
+}
+
+export function measureTextBounds(
   textNode: SvgJsonNode,
   svgTree: SvgJsonNode
-): number | null {
-  // If the element has a textLength attribute, use that directly
-  if (textNode.attributes.textLength) {
-    const parsed = parseFloat(textNode.attributes.textLength);
-    if (!isNaN(parsed)) return Math.round(parsed);
-  }
-
+): TextBounds | null {
   try {
     const viewBox = svgTree.attributes.viewBox ?? '0 0 500 700';
 
-    // Create a hidden off-screen SVG
     const svgNs = 'http://www.w3.org/2000/svg';
     const svgEl = document.createElementNS(svgNs, 'svg');
     svgEl.setAttribute('viewBox', viewBox);
@@ -24,16 +22,16 @@ export function measureTextWidth(
     svgEl.style.height = '0';
     svgEl.style.overflow = 'hidden';
 
-    // Clone the text element into the hidden SVG
     const textEl = createSvgElement(textNode, svgNs);
     svgEl.appendChild(textEl);
     document.body.appendChild(svgEl);
 
     const bbox = (textEl as SVGGraphicsElement).getBBox();
     const width = Math.round(bbox.width);
+    const height = Math.round(bbox.height);
 
     document.body.removeChild(svgEl);
-    return width > 0 ? width : null;
+    return width > 0 && height > 0 ? { width, height } : null;
   } catch {
     return null;
   }

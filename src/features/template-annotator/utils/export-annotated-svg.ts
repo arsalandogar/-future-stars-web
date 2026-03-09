@@ -14,6 +14,7 @@ export const DATA_ATTR_BY_TYPE: Record<string, string> = {
 export const DATA_ATTR_COLOR_TARGET = 'data-color-target';
 export const DATA_ATTR_COLOR_OFFSET = 'data-color-offset';
 export const DATA_ATTR_MAX_WIDTH = 'data-max-width';
+export const DATA_ATTR_MAX_HEIGHT = 'data-max-height';
 export const DATA_ATTR_TOUCH_BOUNDS = 'data-touch-bounds';
 
 export const ALL_ANNOTATION_ATTRS = [
@@ -21,6 +22,7 @@ export const ALL_ANNOTATION_ATTRS = [
   DATA_ATTR_COLOR_TARGET,
   DATA_ATTR_COLOR_OFFSET,
   DATA_ATTR_MAX_WIDTH,
+  DATA_ATTR_MAX_HEIGHT,
   DATA_ATTR_TOUCH_BOUNDS,
 ];
 
@@ -81,6 +83,12 @@ export function buildAnnotatedSvg(
 
           if (field.type === 'text' && assignment.maxWidth != null) {
             node.attributes[DATA_ATTR_MAX_WIDTH] = String(assignment.maxWidth);
+          }
+
+          if (field.type === 'text' && assignment.maxHeight != null) {
+            node.attributes[DATA_ATTR_MAX_HEIGHT] = String(
+              assignment.maxHeight
+            );
           }
 
           if (supportsTouchBounds(field.type) && assignment.touchBounds) {

@@ -198,14 +198,19 @@ export function TransformOverlay({ viewBox, nodeId }: TransformOverlayProps) {
           );
         }
       } else {
-        const sx = finalBounds.width / baseBounds.width;
-        const sy = finalBounds.height / baseBounds.height;
-        if (Math.abs(sx - 1) > 0.001 || Math.abs(sy - 1) > 0.001) {
-          const { ax, ay } = getAnchor(dragging.handle, baseBounds);
-          commitNodeTransform(
-            nodeId,
-            applyScaleAroundPoint(existingTransform, ax, ay, sx, sy)
-          );
+        // Skip resize for text elements — use text area mode instead
+        const { nodeIndex } = useAnnotatorStore.getState();
+        const meta = nodeIndex.get(nodeId);
+        if (!meta?.isTextElement) {
+          const sx = finalBounds.width / baseBounds.width;
+          const sy = finalBounds.height / baseBounds.height;
+          if (Math.abs(sx - 1) > 0.001 || Math.abs(sy - 1) > 0.001) {
+            const { ax, ay } = getAnchor(dragging.handle, baseBounds);
+            commitNodeTransform(
+              nodeId,
+              applyScaleAroundPoint(existingTransform, ax, ay, sx, sy)
+            );
+          }
         }
       }
 

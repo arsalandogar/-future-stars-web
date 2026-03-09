@@ -12,6 +12,7 @@ export interface FieldAssignment {
   colorTarget?: ColorTarget;
   colorOffset?: OklabOffset;
   maxWidth?: number;
+  maxHeight?: number;
   touchBounds?: TouchBounds;
 }
 

@@ -7,7 +7,7 @@ import { EDITABLE_FIELDS, type EditableFieldId } from '@/features/templates';
 import type { ColorTarget, FieldAssignment, NodeMeta } from '../types';
 import { useAnnotatorStore } from '../stores/annotator-store';
 import { isFieldCompatible } from '../utils/svg-node-helpers';
-import { measureTextWidth } from '../utils/measure-text-width';
+import { measureTextBounds } from '../utils/measure-text-bounds';
 
 import { StrokeTargetToggle } from './stroke-target-toggle';
 
@@ -50,7 +50,7 @@ function FieldItem({ fieldId, nodeMeta, assignments }: FieldItemProps) {
   const field = EDITABLE_FIELDS[fieldId];
   const assignField = useAnnotatorStore((s) => s.assignField);
   const removeAssignment = useAnnotatorStore((s) => s.removeAssignment);
-  const setMaxWidth = useAnnotatorStore((s) => s.setMaxWidth);
+  const setTextDimensions = useAnnotatorStore((s) => s.setTextDimensions);
   const svgTree = useAnnotatorStore((s) => s.svgTree);
   const nodeMap = useAnnotatorStore((s) => s.nodeMap);
 
@@ -83,13 +83,18 @@ function FieldItem({ fieldId, nodeMeta, assignments }: FieldItemProps) {
           : undefined;
       assignField(nodeMeta.nodeId, fieldId, target);
 
-      // Auto-measure text width
+      // Auto-measure text dimensions
       if (field.type === 'text' && svgTree) {
         const textNode = nodeMap.get(nodeMeta.nodeId);
         if (textNode) {
-          const width = measureTextWidth(textNode, svgTree);
-          if (width != null) {
-            setMaxWidth(nodeMeta.nodeId, fieldId, width);
+          const bounds = measureTextBounds(textNode, svgTree);
+          if (bounds) {
+            setTextDimensions(
+              nodeMeta.nodeId,
+              fieldId,
+              bounds.width,
+              bounds.height
+            );
           }
         }
       }
