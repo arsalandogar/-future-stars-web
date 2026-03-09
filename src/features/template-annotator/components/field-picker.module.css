@@ -24,12 +24,12 @@
 
 /* Assigned state */
 .fieldItem[data-assigned='true'] {
-  background-color: rgba(80, 70, 255, 0.06);
+  background-color: rgba(80, 70, 255, 0.08);
   border-left: 2px solid var(--mantine-color-primary-4);
 }
 
 :global([data-mantine-color-scheme='dark']) .fieldItem[data-assigned='true'] {
-  background-color: rgba(80, 70, 255, 0.1);
+  background-color: rgba(80, 70, 255, 0.12);
 }
 
 /* Disabled state */
@@ -42,12 +42,48 @@
   background-color: var(--mantine-color-dark-7);
 }
 
-.groupLabel {
-  border-bottom: 1px solid var(--mantine-color-default-border);
-  padding-bottom: 4px;
-  margin-bottom: 4px;
+/* Assigned elsewhere — dashed left border */
+.fieldItem[data-assigned-elsewhere='true'] {
+  border-left: 2px dashed var(--mantine-color-gray-5);
 }
 
-:global([data-mantine-color-scheme='dark']) .groupLabel {
-  border-bottom-color: var(--mantine-color-dark-5);
+:global([data-mantine-color-scheme='dark'])
+  .fieldItem[data-assigned-elsewhere='true'] {
+  border-left-color: var(--mantine-color-dark-4);
+}
+
+/* Accordion styles */
+.accordionRoot {
+  gap: 0;
+}
+
+.accordionItem {
+  border-bottom: none;
+}
+
+.accordionControl {
+  padding: 6px 0;
+}
+
+.accordionControl:hover {
+  background-color: transparent;
+}
+
+.accordionLabel {
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--mantine-color-dimmed);
+  letter-spacing: 0.03em;
+  padding: 0;
+}
+
+.accordionContent {
+  padding: 2px 0 8px;
+}
+
+.accordionChevron {
+  color: var(--mantine-color-dimmed);
+  width: 16px;
+  min-width: 16px;
 }

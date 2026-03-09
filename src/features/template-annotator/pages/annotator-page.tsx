@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Stack } from '@mantine/core';
+import { Badge, ScrollArea, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 
 import { Head } from '@/components/seo/head';
@@ -106,6 +106,16 @@ export function AnnotatorPage({ onSave, isSaving }: AnnotatorPageProps) {
                   onClick={() => setRightTab(tab.value)}
                 >
                   {tab.label}
+                  {tab.value === 'review' && assignments.length > 0 && (
+                    <Badge
+                      size="xs"
+                      variant="filled"
+                      circle
+                      className={styles.tabBadge}
+                    >
+                      {assignments.length}
+                    </Badge>
+                  )}
                 </button>
               ))}
             </div>
@@ -114,9 +124,11 @@ export function AnnotatorPage({ onSave, isSaving }: AnnotatorPageProps) {
               {rightTab === 'assign' && <FieldAssignmentPanel />}
 
               {rightTab === 'review' && (
-                <div className="p-3">
-                  <AssignmentSummaryTable />
-                </div>
+                <ScrollArea h="100%">
+                  <div className="p-3">
+                    <AssignmentSummaryTable />
+                  </div>
+                </ScrollArea>
               )}
             </div>
           </Stack>

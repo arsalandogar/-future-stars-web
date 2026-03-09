@@ -67,6 +67,8 @@
 .tab {
   all: unset;
   position: relative;
+  flex: 1;
+  text-align: center;
   padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
   font-size: var(--mantine-font-size-xs);
   font-weight: 600;
@@ -108,4 +110,10 @@
 
 :global([data-mantine-color-scheme='dark']) .tabContent {
   background-color: var(--mantine-color-dark-8);
+}
+
+.tabBadge {
+  margin-left: 6px;
+  vertical-align: middle;
+  display: inline-flex;
 }

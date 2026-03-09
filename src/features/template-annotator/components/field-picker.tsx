@@ -1,5 +1,12 @@
-import { useState } from 'react';
-import { Badge, Stack, Text } from '@mantine/core';
+import { useMemo, useState } from 'react';
+import {
+  Accordion,
+  Badge,
+  Stack,
+  Text,
+  ThemeIcon,
+  Tooltip,
+} from '@mantine/core';
 import { Check } from 'lucide-react';
 
 import { EDITABLE_FIELDS, type EditableFieldId } from '@/features/templates';
@@ -16,6 +23,19 @@ import styles from './field-picker.module.css';
 const ALL_FIELD_IDS = Object.keys(EDITABLE_FIELDS) as EditableFieldId[];
 const NAME_FIELDS: EditableFieldId[] = ['firstName', 'lastName', 'fullName'];
 
+// Text Slot fields are text fields that follow the pattern "Text 1", "Text 2", etc.
+const TEXT_SLOT_FIELDS: EditableFieldId[] = ALL_FIELD_IDS.filter((id) => {
+  const field = EDITABLE_FIELDS[id];
+  return field.type === 'text' && /^Text \d+$/.test(field.label);
+});
+
+const DETAIL_FIELDS: EditableFieldId[] = ALL_FIELD_IDS.filter(
+  (id) =>
+    EDITABLE_FIELDS[id].type === 'text' &&
+    !NAME_FIELDS.includes(id) &&
+    !TEXT_SLOT_FIELDS.includes(id)
+);
+
 const FIELD_GROUPS: { label: string; fields: EditableFieldId[] }[] = [
   {
     label: 'Names',
@@ -23,9 +43,11 @@ const FIELD_GROUPS: { label: string; fields: EditableFieldId[] }[] = [
   },
   {
     label: 'Details',
-    fields: ALL_FIELD_IDS.filter(
-      (id) => EDITABLE_FIELDS[id].type === 'text' && !NAME_FIELDS.includes(id)
-    ),
+    fields: DETAIL_FIELDS,
+  },
+  {
+    label: 'Text Slots',
+    fields: TEXT_SLOT_FIELDS,
   },
   {
     label: 'Images',
@@ -51,16 +73,16 @@ function FieldItem({ fieldId, nodeMeta, assignments }: FieldItemProps) {
   const assignField = useAnnotatorStore((s) => s.assignField);
   const removeAssignment = useAnnotatorStore((s) => s.removeAssignment);
   const setTextDimensions = useAnnotatorStore((s) => s.setTextDimensions);
-  const svgTree = useAnnotatorStore((s) => s.svgTree);
-  const nodeMap = useAnnotatorStore((s) => s.nodeMap);
+  const nodeIndex = useAnnotatorStore((s) => s.nodeIndex);
 
   const compatible = isFieldCompatible(fieldId, nodeMeta);
   const isAssignedHere = assignments.some(
     (a) => a.fieldId === fieldId && a.nodeId === nodeMeta.nodeId
   );
-  const isAssignedElsewhere = assignments.some(
+  const assignedElsewhereEntry = assignments.find(
     (a) => a.fieldId === fieldId && a.nodeId !== nodeMeta.nodeId
   );
+  const isAssignedElsewhere = !!assignedElsewhereEntry;
 
   // Color fields can be multi-assigned to different nodes
   // Text/image: one node per field
@@ -68,6 +90,13 @@ function FieldItem({ fieldId, nodeMeta, assignments }: FieldItemProps) {
     !compatible || (field.type !== 'color' && isAssignedElsewhere);
 
   const colorCount = assignments.filter((a) => a.fieldId === fieldId).length;
+
+  // Get label of the node this field is assigned to (for tooltip)
+  const assignedToLabel = useMemo(() => {
+    if (!assignedElsewhereEntry) return '';
+    const meta = nodeIndex.get(assignedElsewhereEntry.nodeId);
+    return meta?.label ?? assignedElsewhereEntry.nodeId;
+  }, [assignedElsewhereEntry, nodeIndex]);
 
   const handleClick = () => {
     if (isDisabled) return;
@@ -84,6 +113,7 @@ function FieldItem({ fieldId, nodeMeta, assignments }: FieldItemProps) {
       assignField(nodeMeta.nodeId, fieldId, target);
 
       // Auto-measure text dimensions
+      const { svgTree, nodeMap } = useAnnotatorStore.getState();
       if (field.type === 'text' && svgTree) {
         const textNode = nodeMap.get(nodeMeta.nodeId);
         if (textNode) {
@@ -101,16 +131,19 @@ function FieldItem({ fieldId, nodeMeta, assignments }: FieldItemProps) {
     }
   };
 
-  return (
+  const item = (
     <div
       className={styles.fieldItem}
       data-assigned={isAssignedHere}
       data-disabled={isDisabled}
+      data-assigned-elsewhere={isAssignedElsewhere && !isAssignedHere}
       onClick={isDisabled ? undefined : handleClick}
     >
       <div className="w-4 shrink-0">
         {isAssignedHere && (
-          <Check size={14} color="var(--mantine-color-primary-4)" />
+          <ThemeIcon size={16} radius="xl" variant="filled" color="primary">
+            <Check size={10} />
+          </ThemeIcon>
         )}
       </div>
 
@@ -137,6 +170,20 @@ function FieldItem({ fieldId, nodeMeta, assignments }: FieldItemProps) {
         )}
     </div>
   );
+
+  if (isDisabled && isAssignedElsewhere) {
+    return (
+      <Tooltip
+        label={`Assigned to ${assignedToLabel}`}
+        position="left"
+        withArrow
+      >
+        {item}
+      </Tooltip>
+    );
+  }
+
+  return item;
 }
 
 interface FieldPickerProps {
@@ -147,36 +194,93 @@ export function FieldPicker({ nodeMeta }: FieldPickerProps) {
   const assignments = useAnnotatorStore((s) => s.assignments);
 
   // Only show groups that have at least one compatible field
-  const compatibleGroups = FIELD_GROUPS.filter((group) =>
-    group.fields.some((fieldId) => isFieldCompatible(fieldId, nodeMeta))
+  const compatibleGroups = useMemo(
+    () =>
+      FIELD_GROUPS.filter((group) =>
+        group.fields.some((fieldId) => isFieldCompatible(fieldId, nodeMeta))
+      ),
+    [nodeMeta]
   );
 
+  // Count assignments per group for selected node
+  const groupAssignmentCounts = useMemo(() => {
+    const counts = new Map<string, { assigned: number; total: number }>();
+    for (const group of compatibleGroups) {
+      const compatibleFields = group.fields.filter((fid) =>
+        isFieldCompatible(fid, nodeMeta)
+      );
+      const assignedCount = compatibleFields.filter((fid) =>
+        assignments.some(
+          (a) => a.fieldId === fid && a.nodeId === nodeMeta.nodeId
+        )
+      ).length;
+      counts.set(group.label, {
+        assigned: assignedCount,
+        total: compatibleFields.length,
+      });
+    }
+    return counts;
+  }, [compatibleGroups, assignments, nodeMeta]);
+
+  // Auto-expand groups that have assignments on the selected node
+  const defaultExpanded = useMemo(() => {
+    const expanded: string[] = [];
+    for (const group of compatibleGroups) {
+      const count = groupAssignmentCounts.get(group.label);
+      if (count && count.assigned > 0) {
+        expanded.push(group.label);
+      }
+    }
+    // If nothing is expanded, expand the first group
+    if (expanded.length === 0 && compatibleGroups.length > 0) {
+      expanded.push(compatibleGroups[0].label);
+    }
+    return expanded;
+  }, [compatibleGroups, groupAssignmentCounts]);
+
   return (
-    <Stack gap="md">
-      {compatibleGroups.map((group) => (
-        <div key={group.label}>
-          <Text
-            size="xs"
-            fw={600}
-            c="dimmed"
-            tt="uppercase"
-            mb={4}
-            className={styles.groupLabel}
-          >
-            {group.label}
-          </Text>
-          <Stack gap={2}>
-            {group.fields.map((fieldId) => (
-              <FieldItem
-                key={fieldId}
-                fieldId={fieldId}
-                nodeMeta={nodeMeta}
-                assignments={assignments}
-              />
-            ))}
-          </Stack>
-        </div>
-      ))}
-    </Stack>
+    <Accordion
+      multiple
+      defaultValue={defaultExpanded}
+      variant="default"
+      classNames={{
+        root: styles.accordionRoot,
+        item: styles.accordionItem,
+        control: styles.accordionControl,
+        label: styles.accordionLabel,
+        content: styles.accordionContent,
+        chevron: styles.accordionChevron,
+      }}
+    >
+      {compatibleGroups.map((group) => {
+        const count = groupAssignmentCounts.get(group.label);
+        return (
+          <Accordion.Item key={group.label} value={group.label}>
+            <Accordion.Control>
+              <div className="flex items-center gap-2">
+                <span>{group.label}</span>
+                {count && count.assigned > 0 && (
+                  <Badge size="xs" variant="light" color="primary">
+                    {count.assigned}/{count.total}
+                  </Badge>
+                )}
+              </div>
+            </Accordion.Control>
+            <Accordion.Panel>
+              <Stack gap={2}>
+                {group.fields.map((fieldId) => (
+                  <FieldItem
+                    key={fieldId}
+                    fieldId={fieldId}
+                    nodeMeta={nodeMeta}
+                    assignments={assignments}
+                  />
+                ))}
+              </Stack>
+            </Accordion.Panel>
+          </Accordion.Item>
+        );
+      })}
+    </Accordion>
   );
 }
