@@ -6,6 +6,21 @@ import type { OklabOffset } from '@/utils/color-math';
 export type { ColorTarget, TouchBounds } from '@/types/svg';
 export type { ClusterMember } from '@/utils/color-math';
 
+export type TextAlign = 'left' | 'center' | 'right';
+export type SvgTextAnchor = 'start' | 'middle' | 'end';
+
+export const ALIGN_TO_TEXT_ANCHOR: Record<TextAlign, SvgTextAnchor> = {
+  left: 'start',
+  center: 'middle',
+  right: 'end',
+};
+
+export const TEXT_ANCHOR_TO_ALIGN: Record<SvgTextAnchor, TextAlign> = {
+  start: 'left',
+  middle: 'center',
+  end: 'right',
+};
+
 export interface FieldAssignment {
   nodeId: string;
   fieldId: EditableFieldId;
@@ -14,6 +29,7 @@ export interface FieldAssignment {
   maxWidth?: number;
   maxHeight?: number;
   touchBounds?: TouchBounds;
+  textAlign?: TextAlign;
 }
 
 export interface NodeMeta {

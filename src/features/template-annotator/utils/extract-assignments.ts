@@ -6,7 +6,7 @@ import { EDITABLE_FIELDS, type EditableFieldId } from '@/features/templates';
 
 import { supportsTouchBounds } from './svg-node-helpers';
 
-import type { FieldAssignment } from '../types';
+import type { FieldAssignment, TextAlign } from '../types';
 import {
   DATA_ATTR_BY_TYPE,
   DATA_ATTR_COLOR_TARGET,
@@ -14,6 +14,7 @@ import {
   DATA_ATTR_MAX_WIDTH,
   DATA_ATTR_MAX_HEIGHT,
   DATA_ATTR_TOUCH_BOUNDS,
+  DATA_ATTR_TEXT_ALIGN,
 } from './export-annotated-svg';
 
 function isEditableFieldId(value: string): value is EditableFieldId {
@@ -61,6 +62,15 @@ export function extractAssignments(
         if (maxHeightStr) {
           const maxHeight = Number(maxHeightStr);
           if (Number.isFinite(maxHeight)) assignment.maxHeight = maxHeight;
+        }
+
+        const textAlignStr = node.attributes[DATA_ATTR_TEXT_ALIGN];
+        if (
+          textAlignStr === 'left' ||
+          textAlignStr === 'center' ||
+          textAlignStr === 'right'
+        ) {
+          assignment.textAlign = textAlignStr as TextAlign;
         }
       }
 

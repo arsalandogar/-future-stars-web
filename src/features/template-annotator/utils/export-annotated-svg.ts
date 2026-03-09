@@ -16,6 +16,7 @@ export const DATA_ATTR_COLOR_OFFSET = 'data-color-offset';
 export const DATA_ATTR_MAX_WIDTH = 'data-max-width';
 export const DATA_ATTR_MAX_HEIGHT = 'data-max-height';
 export const DATA_ATTR_TOUCH_BOUNDS = 'data-touch-bounds';
+export const DATA_ATTR_TEXT_ALIGN = 'data-text-align';
 
 export const ALL_ANNOTATION_ATTRS = [
   ...Object.values(DATA_ATTR_BY_TYPE),
@@ -24,6 +25,7 @@ export const ALL_ANNOTATION_ATTRS = [
   DATA_ATTR_MAX_WIDTH,
   DATA_ATTR_MAX_HEIGHT,
   DATA_ATTR_TOUCH_BOUNDS,
+  DATA_ATTR_TEXT_ALIGN,
 ];
 
 function stripInternalAttrs(node: SvgJsonNode): SvgJsonNode {
@@ -89,6 +91,10 @@ export function buildAnnotatedSvg(
             node.attributes[DATA_ATTR_MAX_HEIGHT] = String(
               assignment.maxHeight
             );
+          }
+
+          if (field.type === 'text' && assignment.textAlign) {
+            node.attributes[DATA_ATTR_TEXT_ALIGN] = assignment.textAlign;
           }
 
           if (supportsTouchBounds(field.type) && assignment.touchBounds) {

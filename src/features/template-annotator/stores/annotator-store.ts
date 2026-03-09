@@ -10,8 +10,10 @@ import type {
   ColorTarget,
   FieldAssignment,
   NodeMeta,
+  TextAlign,
   TouchBounds,
 } from '../types';
+import { ALIGN_TO_TEXT_ANCHOR } from '../types';
 import { measureTextBounds } from '../utils/measure-text-bounds';
 import {
   buildNodeIndex,
@@ -37,6 +39,12 @@ type UndoEntry =
       nodeId: string;
       prevAssignments: FieldAssignment[];
       prevTransform: string | undefined;
+    }
+  | {
+      type: 'textAlignChange';
+      nodeId: string;
+      prevAssignments: FieldAssignment[];
+      prevSnapshot: TextAlignSnapshot;
     };
 
 interface AnnotatorState {
@@ -127,6 +135,11 @@ interface AnnotatorState {
     bounds: TouchBounds
   ) => void;
   removeTouchBounds: (nodeId: string, fieldId: EditableFieldId) => void;
+  setTextAlign: (
+    nodeId: string,
+    fieldId: EditableFieldId,
+    align: TextAlign
+  ) => void;
   deleteNode: (nodeId: string) => void;
   undo: () => void;
   redo: () => void;
@@ -179,6 +192,54 @@ function applyTransformEntry(
   );
   if (currentValue === null) return null;
   return { currentValue, svgTree: { ...svgTree } };
+}
+
+interface TextAlignSnapshot {
+  textAnchor: string | undefined;
+  x: string | undefined;
+  tspanXValues: { index: number; x: string }[];
+}
+
+function snapshotTextAlign(
+  node: SvgJsonNode & { type: 'element' }
+): TextAlignSnapshot {
+  const tspanXValues: { index: number; x: string }[] = [];
+  node.children.forEach((child, index) => {
+    if (
+      child.type === 'element' &&
+      child.name === 'tspan' &&
+      child.attributes.x != null
+    ) {
+      tspanXValues.push({ index, x: child.attributes.x });
+    }
+  });
+  return {
+    textAnchor: node.attributes['text-anchor'],
+    x: node.attributes.x,
+    tspanXValues,
+  };
+}
+
+function restoreTextAlign(
+  node: SvgJsonNode & { type: 'element' },
+  snapshot: TextAlignSnapshot
+): void {
+  if (snapshot.textAnchor != null) {
+    node.attributes['text-anchor'] = snapshot.textAnchor;
+  } else {
+    delete node.attributes['text-anchor'];
+  }
+  if (snapshot.x != null) {
+    node.attributes.x = snapshot.x;
+  } else {
+    delete node.attributes.x;
+  }
+  for (const { index, x } of snapshot.tspanXValues) {
+    const child = node.children[index];
+    if (child?.type === 'element' && child.name === 'tspan') {
+      child.attributes.x = x;
+    }
+  }
 }
 
 function updateAssignmentDimensions(
@@ -652,6 +713,84 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
     });
   },
 
+  setTextAlign: (nodeId, fieldId, align) => {
+    const { assignments, undoStack, svgTree, nodeMap } = get();
+    if (!svgTree) return;
+    const node = nodeMap.get(nodeId);
+    if (!node || node.type !== 'element') return;
+
+    const prevSnapshot = snapshotTextAlign(node);
+    const prevAssignments = assignments;
+
+    // Calculate new x position when maxWidth is available
+    const assignment = assignments.find(
+      (a) => a.nodeId === nodeId && a.fieldId === fieldId
+    );
+    const maxWidth = assignment?.maxWidth;
+
+    if (maxWidth != null) {
+      const originalAnchor = prevSnapshot.textAnchor ?? 'start';
+      const originalX = Number(prevSnapshot.x ?? 0);
+
+      // Calculate left edge from current anchor position
+      let leftEdge: number;
+      if (originalAnchor === 'middle') {
+        leftEdge = originalX - maxWidth / 2;
+      } else if (originalAnchor === 'end') {
+        leftEdge = originalX - maxWidth;
+      } else {
+        leftEdge = originalX;
+      }
+
+      // Calculate new x from left edge based on desired alignment
+      let newX: number;
+      if (align === 'center') {
+        newX = leftEdge + maxWidth / 2;
+      } else if (align === 'right') {
+        newX = leftEdge + maxWidth;
+      } else {
+        newX = leftEdge;
+      }
+
+      const newXStr = String(newX);
+      const originalXStr = prevSnapshot.x ?? String(originalX);
+
+      // Update x on the text element and matching tspan children
+      node.attributes.x = newXStr;
+      for (const child of node.children) {
+        if (
+          child.type === 'element' &&
+          child.name === 'tspan' &&
+          child.attributes.x === originalXStr
+        ) {
+          child.attributes.x = newXStr;
+        }
+      }
+    }
+
+    // Always set text-anchor
+    node.attributes['text-anchor'] = ALIGN_TO_TEXT_ANCHOR[align];
+
+    // Update assignment
+    const newAssignments = assignments.map((a) =>
+      a.nodeId === nodeId && a.fieldId === fieldId
+        ? { ...a, textAlign: align }
+        : a
+    );
+
+    set({
+      svgTree: { ...svgTree },
+      assignments: newAssignments,
+      undoStack: pushUndo(undoStack, {
+        type: 'textAlignChange',
+        nodeId,
+        prevAssignments,
+        prevSnapshot,
+      }),
+      redoStack: [],
+    });
+  },
+
   deleteNode: (nodeId) => {
     const { svgTree, ...rest } = get();
     if (!svgTree) return;
@@ -735,6 +874,28 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
             nodeId: entry.nodeId,
             prevAssignments: assignments,
             prevTransform: currentTransform,
+          },
+        ],
+      });
+    } else if (entry.type === 'textAlignChange') {
+      if (!svgTree) return;
+      const node = nodeMap.get(entry.nodeId);
+      if (!node || node.type !== 'element') return;
+
+      const currentSnapshot = snapshotTextAlign(node);
+      restoreTextAlign(node, entry.prevSnapshot);
+
+      set({
+        svgTree: { ...svgTree },
+        assignments: entry.prevAssignments,
+        undoStack: newUndoStack,
+        redoStack: [
+          ...redoStack,
+          {
+            type: 'textAlignChange',
+            nodeId: entry.nodeId,
+            prevAssignments: assignments,
+            prevSnapshot: currentSnapshot,
           },
         ],
       });
@@ -830,6 +991,28 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
             nodeId: entry.nodeId,
             prevAssignments: assignments,
             prevTransform: currentTransform,
+          },
+        ],
+      });
+    } else if (entry.type === 'textAlignChange') {
+      if (!svgTree) return;
+      const node = nodeMap.get(entry.nodeId);
+      if (!node || node.type !== 'element') return;
+
+      const currentSnapshot = snapshotTextAlign(node);
+      restoreTextAlign(node, entry.prevSnapshot);
+
+      set({
+        svgTree: { ...svgTree },
+        assignments: entry.prevAssignments,
+        redoStack: newRedoStack,
+        undoStack: [
+          ...undoStack,
+          {
+            type: 'textAlignChange',
+            nodeId: entry.nodeId,
+            prevAssignments: assignments,
+            prevSnapshot: currentSnapshot,
           },
         ],
       });
