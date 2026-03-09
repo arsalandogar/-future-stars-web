@@ -11,7 +11,7 @@ import {
   Title,
 } from '@mantine/core';
 import { Link } from '@tanstack/react-router';
-import { Edit, PenLine, Trash2 } from 'lucide-react';
+import { Edit, PenLine, SlidersHorizontal, Trash2 } from 'lucide-react';
 
 import { formatDate } from '@/utils/date';
 
@@ -130,6 +130,14 @@ export function TemplateView({ template, onDelete }: TemplateViewProps) {
             )}
           </div>
           <Group gap="sm">
+            <Button
+              component={Link}
+              to={`/admin/templates/${template.id}/defaults`}
+              variant="default"
+              leftSection={<SlidersHorizontal size={16} />}
+            >
+              Edit Defaults
+            </Button>
             <Button
               component={Link}
               to={`/admin/templates/${template.id}/annotate`}

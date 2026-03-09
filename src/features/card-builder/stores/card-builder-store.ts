@@ -5,12 +5,12 @@ import type { EditableFieldId } from '@/features/templates';
 import type { BuilderTab, ColorSubTab, PhotoSubTab } from '../types';
 
 interface CardBuilderState {
-  activeTab: BuilderTab;
+  activeTab: BuilderTab | null;
   activeTagFilter: string | null;
   activeColorSubTab: ColorSubTab;
   activePhotoSubTab: PhotoSubTab;
   selectedImageFieldId: EditableFieldId | null;
-  setActiveTab: (tab: BuilderTab) => void;
+  setActiveTab: (tab: BuilderTab | null) => void;
   setActiveTagFilter: (tag: string | null) => void;
   setActiveColorSubTab: (tab: ColorSubTab) => void;
   setActivePhotoSubTab: (tab: PhotoSubTab) => void;
@@ -19,7 +19,7 @@ interface CardBuilderState {
 }
 
 const initialState = {
-  activeTab: 'templates' as BuilderTab,
+  activeTab: null as BuilderTab | null,
   activeTagFilter: null,
   activeColorSubTab: 'popular' as ColorSubTab,
   activePhotoSubTab: 'image' as PhotoSubTab,

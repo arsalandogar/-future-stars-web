@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import * as v from 'valibot';
 
-import { CreateCardPage, useTemplateSvgJson } from '@/features/card-builder';
+import { useTemplateSvgJson } from '@/features/templates';
+import { CreateCardPage } from '@/features/card-builder';
 import {
   useTemplate,
   useTemplateTags,

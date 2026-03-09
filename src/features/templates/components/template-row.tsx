@@ -10,7 +10,15 @@ import {
   Text,
   Tooltip,
 } from '@mantine/core';
-import { Edit, Eye, MoreHorizontal, PenLine, Star, Tags } from 'lucide-react';
+import {
+  Edit,
+  Eye,
+  MoreHorizontal,
+  PenLine,
+  SlidersHorizontal,
+  Star,
+  Tags,
+} from 'lucide-react';
 
 import { formatDate } from '@/utils/date';
 
@@ -173,6 +181,13 @@ export function TemplateRow({
               leftSection={<PenLine size={14} />}
             >
               Annotate
+            </Menu.Item>
+            <Menu.Item
+              component={Link}
+              to={`/admin/templates/${template.id}/defaults`}
+              leftSection={<SlidersHorizontal size={14} />}
+            >
+              Edit Defaults
             </Menu.Item>
             {onSetTags && (
               <>

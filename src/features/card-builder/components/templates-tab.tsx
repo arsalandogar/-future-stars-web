@@ -8,7 +8,7 @@ import { useTemplateTags, useTemplates } from '@/features/templates-browse';
 import { useInfiniteScroll } from '@/hooks';
 import { DEFAULT_PAGE_LIMIT, flattenInfiniteData } from '@/lib/react-query';
 
-import { useTemplateSvgJson } from '../api/get-template-svg-json';
+import { useTemplateSvgJson } from '@/features/templates';
 import { useCardBuilderStore } from '../stores/card-builder-store';
 import { useCardEditorStore } from '../stores/card-editor-store';
 import { TemplateThumbnail } from './template-thumbnail';

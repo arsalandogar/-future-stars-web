@@ -9,23 +9,37 @@ import { TemplatesTab } from './templates-tab';
 
 import styles from './builder-tabs-panel.module.css';
 
-const TAB_ITEMS: ContentTabItem[] = [
+const BASE_TAB_ITEMS: ContentTabItem[] = [
   { label: 'Content', value: 'content' },
   { label: 'Colors', value: 'colors' },
   { label: 'Photo', value: 'photo' },
+];
+
+const ALL_TAB_ITEMS: ContentTabItem[] = [
+  ...BASE_TAB_ITEMS,
   { label: 'Templates', value: 'templates' },
 ];
 
-export function BuilderTabsPanel() {
+interface BuilderTabsPanelProps {
+  defaultTab: BuilderTab;
+  showTemplatesTab?: boolean;
+}
+
+export function BuilderTabsPanel({
+  defaultTab,
+  showTemplatesTab = true,
+}: BuilderTabsPanelProps) {
   const activeTab = useCardBuilderStore((s) => s.activeTab);
   const setActiveTab = useCardBuilderStore((s) => s.setActiveTab);
+
+  const effectiveTab = activeTab ?? defaultTab;
 
   return (
     <div className={styles.panel}>
       <div className={styles.tabs}>
         <ContentTabs
-          items={TAB_ITEMS}
-          activeValue={activeTab}
+          items={showTemplatesTab ? ALL_TAB_ITEMS : BASE_TAB_ITEMS}
+          activeValue={effectiveTab}
           onChange={(value) => setActiveTab(value as BuilderTab)}
           size="lg"
           gap="3rem"
@@ -33,10 +47,10 @@ export function BuilderTabsPanel() {
       </div>
 
       <div className={styles.content}>
-        {activeTab === 'content' && <ContentTab />}
-        {activeTab === 'colors' && <ColorsTab />}
-        {activeTab === 'photo' && <PhotoTab />}
-        {activeTab === 'templates' && <TemplatesTab />}
+        {effectiveTab === 'content' && <ContentTab />}
+        {effectiveTab === 'colors' && <ColorsTab />}
+        {effectiveTab === 'photo' && <PhotoTab />}
+        {showTemplatesTab && effectiveTab === 'templates' && <TemplatesTab />}
       </div>
     </div>
   );
