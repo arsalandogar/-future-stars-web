@@ -23,6 +23,7 @@ import {
   withImageRemoved,
   withTextFieldReset,
 } from '@fs-card-engine';
+import { ensureSvgFontsLoaded } from '../lib/ensure-svg-fonts-loaded';
 import { resolveCardBuilderFont } from '../lib/font-resolver';
 import {
   clearTextCompressionWarningCache,
@@ -196,7 +197,13 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => {
           [side]: nextSide,
         },
       });
-      scheduleTextCompression(side);
+      void ensureSvgFontsLoaded(svgNode).then(() => {
+        // Bump revision so React re-renders the SVG with the loaded font,
+        // then re-run text compression against the correct glyph widths.
+        const current = get();
+        set(commitSide(current, side, {}));
+        scheduleTextCompression(side);
+      });
     },
 
     setActiveSide: (side) => {

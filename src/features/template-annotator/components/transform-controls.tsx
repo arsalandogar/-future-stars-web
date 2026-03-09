@@ -2,23 +2,48 @@ import {
   ActionIcon,
   Button,
   Group,
+  NumberInput,
+  SegmentedControl,
   SimpleGrid,
   Text,
   Tooltip,
 } from '@mantine/core';
-import { RotateCcw, Scaling } from 'lucide-react';
+import {
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
+  RotateCcw,
+  Scaling,
+} from 'lucide-react';
 
-import type { NodeMeta } from '../types';
+import type { EditableFieldId } from '@/features/templates';
+
+import type { NodeMeta, TextAlign, SvgTextAnchor } from '../types';
+import { TEXT_ANCHOR_TO_ALIGN } from '../types';
 import { useAnnotatorStore } from '../stores/annotator-store';
 import { useElementBounds } from '../hooks/use-element-bounds';
 import { parseScaleValues } from '../utils/svg-transform-helpers';
+import {
+  ensureTextDimensions,
+  resetTextDimensions,
+} from '../utils/text-area-helpers';
 import { BoundsDisplay } from './bounds-display';
+
+const ALIGN_OPTIONS = [
+  { value: 'left', label: <AlignLeft size={14} /> },
+  { value: 'center', label: <AlignCenter size={14} /> },
+  { value: 'right', label: <AlignRight size={14} /> },
+];
 
 interface TransformControlsProps {
   nodeMeta: NodeMeta;
+  fieldId?: EditableFieldId;
 }
 
-export function TransformControls({ nodeMeta }: TransformControlsProps) {
+export function TransformControls({
+  nodeMeta,
+  fieldId,
+}: TransformControlsProps) {
   const editingNodeId = useAnnotatorStore((s) => s.editingTransformNodeId);
   const setEditing = useAnnotatorStore((s) => s.setEditingTransform);
   const nodeMap = useAnnotatorStore((s) => s.nodeMap);
@@ -34,12 +59,59 @@ export function TransformControls({ nodeMeta }: TransformControlsProps) {
 
   const bounds = useElementBounds(nodeMeta.nodeId, isEditing);
 
+  const setTextAlign = useAnnotatorStore((s) => s.setTextAlign);
+  const setFontSize = useAnnotatorStore((s) => s.setFontSize);
+  const assignment = useAnnotatorStore((s) =>
+    fieldId
+      ? s.assignments.find(
+          (a) => a.nodeId === nodeMeta.nodeId && a.fieldId === fieldId
+        )
+      : undefined
+  );
+  const hasDimensions =
+    assignment?.maxWidth != null && assignment?.maxHeight != null;
+
+  const currentFontSize = (() => {
+    if (!fieldId || node?.type !== 'element') return undefined;
+    const fromAttr = node.attributes['font-size'];
+    if (fromAttr) return Number(fromAttr);
+    const styleMatch = node.attributes.style?.match(/font-size:\s*([\d.]+)/);
+    if (styleMatch) return Number(styleMatch[1]);
+    return undefined;
+  })();
+
+  const currentAlign: TextAlign = (() => {
+    if (!fieldId) return 'left';
+    if (assignment?.textAlign) return assignment.textAlign;
+    if (node?.type === 'element') {
+      // Check inline style first (CSS precedence), then SVG attribute
+      const styleMatch = node.attributes.style?.match(
+        /text-anchor\s*:\s*(\w+)/
+      );
+      const anchor = styleMatch?.[1] ?? node.attributes['text-anchor'];
+      if (anchor && anchor in TEXT_ANCHOR_TO_ALIGN) {
+        return TEXT_ANCHOR_TO_ALIGN[anchor as SvgTextAnchor];
+      }
+    }
+    return 'left';
+  })();
+
   const handleToggleEdit = () => {
-    setEditing(isEditing ? null : nodeMeta.nodeId);
+    if (isEditing) {
+      setEditing(null);
+    } else {
+      if (fieldId) {
+        ensureTextDimensions(nodeMeta.nodeId, fieldId);
+      }
+      setEditing(nodeMeta.nodeId);
+    }
   };
 
   const handleReset = () => {
     resetNodeTransform(nodeMeta.nodeId);
+    if (fieldId && hasDimensions) {
+      resetTextDimensions(nodeMeta.nodeId, fieldId);
+    }
   };
 
   return (
@@ -68,8 +140,8 @@ export function TransformControls({ nodeMeta }: TransformControlsProps) {
             </ActionIcon>
           </Tooltip>
         )}
-        {hasTransform && (
-          <Tooltip label="Reset transform">
+        {(hasTransform || hasDimensions) && (
+          <Tooltip label="Reset transform and dimensions">
             <ActionIcon
               size="sm"
               variant="subtle"
@@ -97,6 +169,49 @@ export function TransformControls({ nodeMeta }: TransformControlsProps) {
             {scaleValues.sy.toFixed(2)}
           </Text>
         </SimpleGrid>
+      )}
+      {isEditing && hasDimensions && (
+        <SimpleGrid cols={2} spacing={4} mt="xs">
+          <Text size="xs" c="dimmed" ta="center">
+            <Text span tt="uppercase" fw={600}>
+              Max W
+            </Text>{' '}
+            {assignment.maxWidth}
+          </Text>
+          <Text size="xs" c="dimmed" ta="center">
+            <Text span tt="uppercase" fw={600}>
+              Max H
+            </Text>{' '}
+            {assignment.maxHeight}
+          </Text>
+        </SimpleGrid>
+      )}
+      {fieldId && (
+        <SegmentedControl
+          size="xs"
+          value={currentAlign}
+          onChange={(value) => {
+            ensureTextDimensions(nodeMeta.nodeId, fieldId);
+            setTextAlign(nodeMeta.nodeId, fieldId, value as TextAlign);
+          }}
+          data={ALIGN_OPTIONS}
+          mt="xs"
+        />
+      )}
+      {fieldId && currentFontSize != null && (
+        <NumberInput
+          size="xs"
+          label="Font Size"
+          value={currentFontSize}
+          onChange={(value) => {
+            if (typeof value === 'number' && value > 0) {
+              setFontSize(nodeMeta.nodeId, value);
+            }
+          }}
+          min={1}
+          step={1}
+          mt="xs"
+        />
       )}
     </div>
   );

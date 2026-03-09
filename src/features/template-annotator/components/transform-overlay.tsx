@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useCallback, useRef, useState } from 'react';
 
-import type { TouchBounds } from '../types';
+import type { FieldAssignment, TouchBounds } from '../types';
 import { useAnnotatorStore } from '../stores/annotator-store';
 import { useElementBounds } from '../hooks/use-element-bounds';
 import {
@@ -54,13 +54,62 @@ function getAnchor(
 interface TransformOverlayProps {
   viewBox: string;
   nodeId: string;
+  assignment?: FieldAssignment | null;
 }
 
-export function TransformOverlay({ viewBox, nodeId }: TransformOverlayProps) {
+export function TransformOverlay({
+  viewBox,
+  nodeId,
+  assignment,
+}: TransformOverlayProps) {
   const commitNodeTransform = useAnnotatorStore((s) => s.commitNodeTransform);
+  const commitTextAreaResize = useAnnotatorStore((s) => s.commitTextAreaResize);
   const setEditingTransform = useAnnotatorStore((s) => s.setEditingTransform);
+  const nodeMap = useAnnotatorStore((s) => s.nodeMap);
 
-  const baseBounds = useElementBounds(nodeId, true);
+  const elementBounds = useElementBounds(nodeId, true);
+  const elementBoundsRef = useRef(elementBounds);
+  useEffect(() => {
+    elementBoundsRef.current = elementBounds;
+  }, [elementBounds]);
+
+  // For text elements with assignment, use maxWidth/maxHeight as overlay bounds.
+  // Adjust x based on text-anchor so the box matches the logical text area:
+  // getBBox() returns the bounding box of visible glyphs, so for center/end
+  // aligned text we derive the anchor point and offset by maxWidth accordingly.
+  const baseBounds = useMemo<TouchBounds | null>(() => {
+    if (
+      assignment?.maxWidth != null &&
+      assignment?.maxHeight != null &&
+      elementBounds
+    ) {
+      const node = nodeMap.get(nodeId);
+      const styleMatch =
+        node?.type === 'element'
+          ? node.attributes.style?.match(/text-anchor\s*:\s*(\w+)/)
+          : undefined;
+      const anchor =
+        styleMatch?.[1] ??
+        (node?.type === 'element' ? node.attributes['text-anchor'] : undefined);
+
+      let boxX = elementBounds.x;
+      if (anchor === 'middle') {
+        const anchorX = elementBounds.x + elementBounds.width / 2;
+        boxX = anchorX - assignment.maxWidth / 2;
+      } else if (anchor === 'end') {
+        const anchorX = elementBounds.x + elementBounds.width;
+        boxX = anchorX - assignment.maxWidth;
+      }
+
+      return {
+        x: boxX,
+        y: elementBounds.y,
+        width: assignment.maxWidth,
+        height: assignment.maxHeight,
+      };
+    }
+    return elementBounds;
+  }, [assignment, elementBounds, nodeMap, nodeId]);
   const [preview, setPreview] = useState<TouchBounds | null>(null);
 
   const svgRef = useRef<SVGSVGElement>(null);
@@ -197,6 +246,19 @@ export function TransformOverlay({ viewBox, nodeId }: TransformOverlayProps) {
             applyTranslate(existingTransform, tdx, tdy)
           );
         }
+      } else if (assignment) {
+        // Text element: update maxWidth/maxHeight instead of scale
+        const eb = elementBoundsRef.current;
+        const tdx = finalBounds.x - (eb?.x ?? finalBounds.x);
+        const tdy = finalBounds.y - (eb?.y ?? finalBounds.y);
+        commitTextAreaResize(
+          nodeId,
+          assignment.fieldId,
+          Math.round(finalBounds.width),
+          Math.round(finalBounds.height),
+          tdx,
+          tdy
+        );
       } else {
         const sx = finalBounds.width / baseBounds.width;
         const sy = finalBounds.height / baseBounds.height;
@@ -231,6 +293,8 @@ export function TransformOverlay({ viewBox, nodeId }: TransformOverlayProps) {
   }, [
     dragging,
     commitNodeTransform,
+    commitTextAreaResize,
+    assignment,
     nodeId,
     baseBounds,
     cardBounds,

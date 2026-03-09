@@ -58,9 +58,20 @@ function toReactAttributeName(attr: string): string {
 
 const KEBAB_REGEX = /-([a-z])/g;
 
+/** Decode XML/HTML entities that backend SVG-to-JSON parsers may leave unescaped. */
+function decodeXmlEntities(str: string): string {
+  if (!str.includes('&')) return str;
+  return str
+    .replace(/&apos;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&');
+}
+
 export function parseStyleString(str: string): CSSProperties {
   const style: Record<string, string> = {};
-  for (const declaration of str.split(';')) {
+  for (const declaration of decodeXmlEntities(str).split(';')) {
     const trimmed = declaration.trim();
     if (!trimmed) continue;
     const colonIndex = trimmed.indexOf(':');
@@ -84,7 +95,7 @@ export function toReactAttributes(
     if (key === 'style') {
       props.style = parseStyleString(value);
     } else {
-      props[toReactAttributeName(key)] = value;
+      props[toReactAttributeName(key)] = decodeXmlEntities(value);
     }
   }
   return props;

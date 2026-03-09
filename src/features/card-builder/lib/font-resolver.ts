@@ -4,7 +4,7 @@ import {
   type FontRegistryEntry,
 } from '@fs-card-engine';
 
-const entries: FontRegistryEntry[] = [
+export const entries: FontRegistryEntry[] = [
   {
     family: 'Montserrat',
     weight: 400,
@@ -100,7 +100,7 @@ const LOCAL_FONT_FILE_URLS = import.meta.glob<string>(
   { eager: true, import: 'default' }
 );
 
-const fileTokens = new Map<string, string>();
+export const fileTokens = new Map<string, string>();
 for (const [filePath, url] of Object.entries(LOCAL_FONT_FILE_URLS)) {
   const fileName = filePath.split('/').pop() ?? '';
   const baseName = fileName.replace(/\.[^.]+$/, '');

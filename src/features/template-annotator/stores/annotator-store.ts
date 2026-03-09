@@ -45,6 +45,12 @@ type UndoEntry =
       nodeId: string;
       prevAssignments: FieldAssignment[];
       prevSnapshot: TextAlignSnapshot;
+    }
+  | {
+      type: 'fontSizeChange';
+      nodeId: string;
+      prevStyle: string | undefined;
+      prevFontSize: string | undefined;
     };
 
 interface AnnotatorState {
@@ -66,9 +72,6 @@ interface AnnotatorState {
 
   // Transform editing
   editingTransformNodeId: string | null;
-
-  // Text area editing
-  editingTextAreaNodeId: string | null;
 
   // Tree state
   expandedNodeIds: Set<string>;
@@ -126,7 +129,6 @@ interface AnnotatorState {
   ) => void;
   setEditingTouchBounds: (nodeId: string | null) => void;
   setEditingTransform: (nodeId: string | null) => void;
-  setEditingTextArea: (nodeId: string | null) => void;
   commitNodeTransform: (nodeId: string, newTransform: string) => void;
   resetNodeTransform: (nodeId: string) => void;
   commitTouchBounds: (
@@ -140,6 +142,7 @@ interface AnnotatorState {
     fieldId: EditableFieldId,
     align: TextAlign
   ) => void;
+  setFontSize: (nodeId: string, fontSize: number) => void;
   deleteNode: (nodeId: string) => void;
   undo: () => void;
   redo: () => void;
@@ -213,8 +216,15 @@ function snapshotTextAlign(
       tspanXValues.push({ index, x: child.attributes.x });
     }
   });
+  // Inline style text-anchor takes CSS precedence over the SVG attribute
+  const styleAnchorMatch = node.attributes.style?.match(
+    /text-anchor\s*:\s*(\w+)/
+  );
+  const effectiveTextAnchor =
+    styleAnchorMatch?.[1] ?? node.attributes['text-anchor'];
+
   return {
-    textAnchor: node.attributes['text-anchor'],
+    textAnchor: effectiveTextAnchor,
     x: node.attributes.x,
     tspanXValues,
   };
@@ -240,6 +250,35 @@ function restoreTextAlign(
       child.attributes.x = x;
     }
   }
+}
+
+function swapFontSize(
+  nodeMap: Map<string, SvgJsonNode>,
+  nodeId: string,
+  prevStyle: string | undefined,
+  prevFontSize: string | undefined
+): {
+  currentStyle: string | undefined;
+  currentFontSize: string | undefined;
+} | null {
+  const node = nodeMap.get(nodeId);
+  if (!node || node.type !== 'element') return null;
+
+  const currentFontSize = node.attributes['font-size'];
+  const currentStyle = node.attributes.style;
+
+  if (prevFontSize != null) {
+    node.attributes['font-size'] = prevFontSize;
+  } else {
+    delete node.attributes['font-size'];
+  }
+  if (prevStyle != null) {
+    node.attributes.style = prevStyle;
+  } else {
+    delete node.attributes.style;
+  }
+
+  return { currentStyle, currentFontSize };
 }
 
 function updateAssignmentDimensions(
@@ -275,7 +314,6 @@ function applyNodeDeletion(
     hoveredNodeId: string | null;
     editingTouchBoundsNodeId: string | null;
     editingTransformNodeId: string | null;
-    editingTextAreaNodeId: string | null;
   }
 ) {
   const descendantIds = collectDescendantNodeIds(entry.node);
@@ -303,10 +341,6 @@ function applyNodeDeletion(
     ),
     editingTransformNodeId: clearIfDeleted(
       state.editingTransformNodeId,
-      descendantIds
-    ),
-    editingTextAreaNodeId: clearIfDeleted(
-      state.editingTextAreaNodeId,
       descendantIds
     ),
   };
@@ -350,7 +384,6 @@ const initialState = {
   hoveredNodeId: null as string | null,
   editingTouchBoundsNodeId: null as string | null,
   editingTransformNodeId: null as string | null,
-  editingTextAreaNodeId: null as string | null,
   expandedNodeIds: new Set<string>(),
   assignments: [] as FieldAssignment[],
   undoStack: [] as UndoEntry[],
@@ -394,14 +427,12 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
         expandedNodeIds: newExpanded,
         editingTouchBoundsNodeId: null,
         editingTransformNodeId: null,
-        editingTextAreaNodeId: null,
       });
     } else {
       set({
         selectedNodeId: nodeId,
         editingTouchBoundsNodeId: null,
         editingTransformNodeId: null,
-        editingTextAreaNodeId: null,
       });
     }
   },
@@ -627,28 +658,13 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
   setEditingTouchBounds: (nodeId) =>
     set({
       editingTouchBoundsNodeId: nodeId,
-      ...(nodeId && {
-        editingTransformNodeId: null,
-        editingTextAreaNodeId: null,
-      }),
+      ...(nodeId && { editingTransformNodeId: null }),
     }),
 
   setEditingTransform: (nodeId) =>
     set({
       editingTransformNodeId: nodeId,
-      ...(nodeId && {
-        editingTouchBoundsNodeId: null,
-        editingTextAreaNodeId: null,
-      }),
-    }),
-
-  setEditingTextArea: (nodeId) =>
-    set({
-      editingTextAreaNodeId: nodeId,
-      ...(nodeId && {
-        editingTouchBoundsNodeId: null,
-        editingTransformNodeId: null,
-      }),
+      ...(nodeId && { editingTouchBoundsNodeId: null }),
     }),
 
   commitNodeTransform: (nodeId, newTransform) => {
@@ -768,6 +784,18 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
       }
     }
 
+    // Remove text-anchor from inline style so SVG attribute takes effect
+    if (node.attributes.style) {
+      const cleaned = node.attributes.style
+        .replace(/text-anchor\s*:\s*[^;]+;?\s*/g, '')
+        .trim();
+      if (cleaned) {
+        node.attributes.style = cleaned;
+      } else {
+        delete node.attributes.style;
+      }
+    }
+
     // Always set text-anchor
     node.attributes['text-anchor'] = ALIGN_TO_TEXT_ANCHOR[align];
 
@@ -786,6 +814,37 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
         nodeId,
         prevAssignments,
         prevSnapshot,
+      }),
+      redoStack: [],
+    });
+  },
+
+  setFontSize: (nodeId, fontSize) => {
+    const { svgTree, nodeMap, undoStack } = get();
+    if (!svgTree) return;
+    const node = nodeMap.get(nodeId);
+    if (!node || node.type !== 'element') return;
+
+    const prevFontSize = node.attributes['font-size'];
+    const prevStyle = node.attributes.style;
+
+    // If font-size lives in the style attribute, replace it there
+    if (prevStyle && /font-size\s*:/.test(prevStyle)) {
+      node.attributes.style = prevStyle.replace(
+        /font-size\s*:\s*[\d.]+\s*(px|em|rem|pt|%)?/,
+        `font-size: ${fontSize}px`
+      );
+    } else {
+      node.attributes['font-size'] = String(fontSize);
+    }
+
+    set({
+      svgTree: { ...svgTree },
+      undoStack: pushUndo(undoStack, {
+        type: 'fontSizeChange',
+        nodeId,
+        prevStyle,
+        prevFontSize,
       }),
       redoStack: [],
     });
@@ -899,6 +958,28 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
           },
         ],
       });
+    } else if (entry.type === 'fontSizeChange') {
+      if (!svgTree) return;
+      const result = swapFontSize(
+        nodeMap,
+        entry.nodeId,
+        entry.prevStyle,
+        entry.prevFontSize
+      );
+      if (!result) return;
+      set({
+        svgTree: { ...svgTree },
+        undoStack: newUndoStack,
+        redoStack: [
+          ...redoStack,
+          {
+            type: 'fontSizeChange',
+            nodeId: entry.nodeId,
+            prevStyle: result.currentStyle,
+            prevFontSize: result.currentFontSize,
+          },
+        ],
+      });
     } else if (entry.type === 'deleteNode') {
       if (!svgTree) return;
       const parentNode = nodeMap.get(entry.parentNodeId);
@@ -935,7 +1016,7 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
             parentNodeId: entry.parentNodeId,
             childIndex: entry.childIndex,
             node: entry.node,
-            prevAssignments: entry.prevAssignments,
+            prevAssignments: assignments,
           },
         ],
       });
@@ -1013,6 +1094,28 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
             nodeId: entry.nodeId,
             prevAssignments: assignments,
             prevSnapshot: currentSnapshot,
+          },
+        ],
+      });
+    } else if (entry.type === 'fontSizeChange') {
+      if (!svgTree) return;
+      const result = swapFontSize(
+        nodeMap,
+        entry.nodeId,
+        entry.prevStyle,
+        entry.prevFontSize
+      );
+      if (!result) return;
+      set({
+        svgTree: { ...svgTree },
+        redoStack: newRedoStack,
+        undoStack: [
+          ...undoStack,
+          {
+            type: 'fontSizeChange',
+            nodeId: entry.nodeId,
+            prevStyle: result.currentStyle,
+            prevFontSize: result.currentFontSize,
           },
         ],
       });

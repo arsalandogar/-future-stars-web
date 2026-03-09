@@ -16,7 +16,6 @@ import type { NodeMeta } from '../types';
 import { useAnnotatorStore } from '../stores/annotator-store';
 import { supportsTouchBounds } from '../utils/svg-node-helpers';
 import { FieldPicker } from './field-picker';
-import { TextAreaControls } from './text-area-controls';
 import { TouchBoundsControls } from './touch-bounds-controls';
 import { TransformControls } from './transform-controls';
 
@@ -140,14 +139,10 @@ export function FieldAssignmentPanel() {
           <>
             <SelectedElementHeader meta={meta} />
 
-            <TransformControls nodeMeta={meta} />
-
-            {textAssignment && (
-              <TextAreaControls
-                nodeMeta={meta}
-                fieldId={textAssignment.fieldId}
-              />
-            )}
+            <TransformControls
+              nodeMeta={meta}
+              fieldId={textAssignment?.fieldId}
+            />
 
             {touchBoundsAssignment && (
               <TouchBoundsControls

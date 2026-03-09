@@ -17,7 +17,6 @@ import {
   supportsTouchBounds,
 } from '../utils/svg-node-helpers';
 import { ensureTouchBounds } from '../utils/touch-bounds-helpers';
-import { TextAreaOverlay } from './text-area-overlay';
 import { TouchBoundsOverlay } from './touch-bounds-overlay';
 import { TransformOverlay } from './transform-overlay';
 
@@ -34,9 +33,6 @@ export function AnnotatorCanvas() {
   );
   const editingTransformNodeId = useAnnotatorStore(
     (s) => s.editingTransformNodeId
-  );
-  const editingTextAreaNodeId = useAnnotatorStore(
-    (s) => s.editingTextAreaNodeId
   );
   const assignments = useAnnotatorStore((s) => s.assignments);
 
@@ -96,17 +92,19 @@ export function AnnotatorCanvas() {
     return found ?? null;
   }, [editingTouchBoundsNodeId, assignments]);
 
-  // Find the text area assignment being edited
-  const editingTextAreaAssignment = useMemo(() => {
-    if (!editingTextAreaNodeId) return null;
-    const found = assignments.find(
-      (a) =>
-        a.nodeId === editingTextAreaNodeId &&
-        a.maxWidth != null &&
-        a.maxHeight != null
+  // Find text assignment for the transform overlay (text elements resize maxWidth/maxHeight)
+  const editingTransformAssignment = useMemo(() => {
+    if (!editingTransformNodeId) return null;
+    return (
+      assignments.find(
+        (a) =>
+          a.nodeId === editingTransformNodeId &&
+          EDITABLE_FIELDS[a.fieldId].type === 'text' &&
+          a.maxWidth != null &&
+          a.maxHeight != null
+      ) ?? null
     );
-    return found ?? null;
-  }, [editingTextAreaNodeId, assignments]);
+  }, [editingTransformNodeId, assignments]);
 
   // Get viewBox from svgTree root
   const viewBox =
@@ -116,9 +114,7 @@ export function AnnotatorCanvas() {
   // Hide the selection outline when an overlay (touch bounds or transform) is active
   // to avoid visual clutter — the overlay already highlights the element.
   const isOverlayActive =
-    !!editingTouchBoundsNodeId ||
-    !!editingTransformNodeId ||
-    !!editingTextAreaNodeId;
+    !!editingTouchBoundsNodeId || !!editingTransformNodeId;
   const highlightStyle = useMemo(() => {
     const rules: string[] = [];
     if (selectedNodeId && !isOverlayActive) {
@@ -168,12 +164,10 @@ export function AnnotatorCanvas() {
           />
         )}
         {editingTransformNodeId && viewBox && (
-          <TransformOverlay viewBox={viewBox} nodeId={editingTransformNodeId} />
-        )}
-        {editingTextAreaAssignment && viewBox && (
-          <TextAreaOverlay
+          <TransformOverlay
             viewBox={viewBox}
-            assignment={editingTextAreaAssignment}
+            nodeId={editingTransformNodeId}
+            assignment={editingTransformAssignment}
           />
         )}
       </div>
