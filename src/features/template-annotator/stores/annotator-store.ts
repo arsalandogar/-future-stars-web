@@ -167,6 +167,14 @@ function pushUndo(undoStack: UndoEntry[], entry: UndoEntry): UndoEntry[] {
   return [...undoStack.slice(-(MAX_UNDO - 1)), entry];
 }
 
+function asElementNode(
+  node: SvgJsonNode
+): (SvgJsonNode & { type: 'element' }) | null {
+  return node.type === 'element'
+    ? (node as SvgJsonNode & { type: 'element' })
+    : null;
+}
+
 function swapNodeTransform(
   nodeMap: Map<string, SvgJsonNode>,
   nodeId: string,
@@ -732,8 +740,10 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
   setTextAlign: (nodeId, fieldId, align) => {
     const { assignments, undoStack, svgTree, nodeMap } = get();
     if (!svgTree) return;
-    const node = nodeMap.get(nodeId);
-    if (!node || node.type !== 'element') return;
+    const rawNode = nodeMap.get(nodeId);
+    if (!rawNode) return;
+    const node = asElementNode(rawNode);
+    if (!node) return;
 
     const prevSnapshot = snapshotTextAlign(node);
     const prevAssignments = assignments;
@@ -938,8 +948,10 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
       });
     } else if (entry.type === 'textAlignChange') {
       if (!svgTree) return;
-      const node = nodeMap.get(entry.nodeId);
-      if (!node || node.type !== 'element') return;
+      const rawNode = nodeMap.get(entry.nodeId);
+      if (!rawNode) return;
+      const node = asElementNode(rawNode);
+      if (!node) return;
 
       const currentSnapshot = snapshotTextAlign(node);
       restoreTextAlign(node, entry.prevSnapshot);
@@ -1077,8 +1089,10 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
       });
     } else if (entry.type === 'textAlignChange') {
       if (!svgTree) return;
-      const node = nodeMap.get(entry.nodeId);
-      if (!node || node.type !== 'element') return;
+      const rawNode = nodeMap.get(entry.nodeId);
+      if (!rawNode) return;
+      const node = asElementNode(rawNode);
+      if (!node) return;
 
       const currentSnapshot = snapshotTextAlign(node);
       restoreTextAlign(node, entry.prevSnapshot);
