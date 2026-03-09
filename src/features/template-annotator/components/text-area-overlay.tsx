@@ -24,11 +24,15 @@ interface TextAreaOverlayProps {
 
 export function TextAreaOverlay({ viewBox, assignment }: TextAreaOverlayProps) {
   const { nodeId, fieldId, maxWidth, maxHeight } = assignment;
-  const setTextDimensions = useAnnotatorStore((s) => s.setTextDimensions);
+  const commitTextAreaResize = useAnnotatorStore((s) => s.commitTextAreaResize);
   const setEditingTextArea = useAnnotatorStore((s) => s.setEditingTextArea);
 
   // Get the element's real bbox for positioning
   const elementBounds = useElementBounds(nodeId, true);
+  const elementBoundsRef = useRef(elementBounds);
+  useEffect(() => {
+    elementBoundsRef.current = elementBounds;
+  }, [elementBounds]);
 
   // Build the text area bounds: positioned at element bbox, sized to maxWidth × maxHeight
   const textAreaBounds = useMemo<TouchBounds | null>(() => {
@@ -103,11 +107,16 @@ export function TextAreaOverlay({ viewBox, assignment }: TextAreaOverlayProps) {
       const dx = svgPt.x - dragging.startPt.x;
       const dy = svgPt.y - dragging.startPt.y;
       const finalBounds = computeBounds(dx, dy);
-      setTextDimensions(
+      const eb = elementBoundsRef.current;
+      const tdx = finalBounds.x - (eb?.x ?? finalBounds.x);
+      const tdy = finalBounds.y - (eb?.y ?? finalBounds.y);
+      commitTextAreaResize(
         nodeId,
         fieldId,
         Math.round(finalBounds.width),
-        Math.round(finalBounds.height)
+        Math.round(finalBounds.height),
+        tdx,
+        tdy
       );
       setPreview(null);
       setDragging(null);
@@ -126,7 +135,7 @@ export function TextAreaOverlay({ viewBox, assignment }: TextAreaOverlayProps) {
       window.removeEventListener('pointerup', onUp);
       window.removeEventListener('pointercancel', onCancel);
     };
-  }, [dragging, setTextDimensions, nodeId, fieldId, cardBounds]);
+  }, [dragging, commitTextAreaResize, nodeId, fieldId, cardBounds]);
 
   const handleSize = Math.min(cardBounds.width, cardBounds.height) * 0.015;
 

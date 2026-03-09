@@ -17,7 +17,10 @@ import {
   buildNodeIndex,
   collectDescendantNodeIds,
 } from '../utils/svg-node-helpers';
-import { removeScaleFromTransform } from '../utils/svg-transform-helpers';
+import {
+  applyTranslate,
+  removeScaleFromTransform,
+} from '../utils/svg-transform-helpers';
 
 type UndoEntry =
   | { type: 'assignments'; assignments: FieldAssignment[] }
@@ -28,6 +31,12 @@ type UndoEntry =
       childIndex: number;
       node: SvgJsonNode;
       prevAssignments: FieldAssignment[];
+    }
+  | {
+      type: 'textAreaResize';
+      nodeId: string;
+      prevAssignments: FieldAssignment[];
+      prevTransform: string | undefined;
     };
 
 interface AnnotatorState {
@@ -89,6 +98,14 @@ interface AnnotatorState {
     maxWidth: number,
     maxHeight: number
   ) => void;
+  commitTextAreaResize: (
+    nodeId: string,
+    fieldId: EditableFieldId,
+    maxWidth: number,
+    maxHeight: number,
+    translateDx: number,
+    translateDy: number
+  ) => void;
   removeNodeScale: (nodeId: string) => void;
   bulkAssignColors: (
     mappings: { fieldId: EditableFieldId; members: ClusterMember[] }[]
@@ -134,20 +151,48 @@ function pushUndo(undoStack: UndoEntry[], entry: UndoEntry): UndoEntry[] {
   return [...undoStack.slice(-(MAX_UNDO - 1)), entry];
 }
 
+function swapNodeTransform(
+  nodeMap: Map<string, SvgJsonNode>,
+  nodeId: string,
+  newTransform: string | undefined
+): string | undefined | null {
+  const node = nodeMap.get(nodeId);
+  if (!node || node.type !== 'element') return null;
+  const current = node.attributes.transform;
+  if (newTransform) {
+    node.attributes.transform = newTransform;
+  } else {
+    delete node.attributes.transform;
+  }
+  return current;
+}
+
 function applyTransformEntry(
   entry: UndoEntry & { type: 'transform' },
   nodeMap: Map<string, SvgJsonNode>,
   svgTree: SvgJsonNode
 ): { currentValue: string | undefined; svgTree: SvgJsonNode } | null {
-  const node = nodeMap.get(entry.nodeId);
-  if (!node || node.type !== 'element') return null;
-  const currentValue = node.attributes.transform;
-  if (entry.prevValue) {
-    node.attributes.transform = entry.prevValue;
-  } else {
-    delete node.attributes.transform;
-  }
+  const currentValue = swapNodeTransform(
+    nodeMap,
+    entry.nodeId,
+    entry.prevValue
+  );
+  if (currentValue === null) return null;
   return { currentValue, svgTree: { ...svgTree } };
+}
+
+function updateAssignmentDimensions(
+  assignments: FieldAssignment[],
+  nodeId: string,
+  fieldId: EditableFieldId,
+  maxWidth: number,
+  maxHeight: number
+): FieldAssignment[] {
+  return assignments.map((a) =>
+    a.nodeId === nodeId && a.fieldId === fieldId
+      ? { ...a, maxWidth, maxHeight }
+      : a
+  );
 }
 
 function clearIfDeleted(
@@ -364,14 +409,61 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
 
   setTextDimensions: (nodeId, fieldId, maxWidth, maxHeight) => {
     const { assignments, undoStack } = get();
-    const newAssignments = assignments.map((a) =>
-      a.nodeId === nodeId && a.fieldId === fieldId
-        ? { ...a, maxWidth, maxHeight }
-        : a
+    set({
+      assignments: updateAssignmentDimensions(
+        assignments,
+        nodeId,
+        fieldId,
+        maxWidth,
+        maxHeight
+      ),
+      undoStack: pushUndo(undoStack, { type: 'assignments', assignments }),
+      redoStack: [],
+    });
+  },
+
+  commitTextAreaResize: (
+    nodeId,
+    fieldId,
+    maxWidth,
+    maxHeight,
+    translateDx,
+    translateDy
+  ) => {
+    const { assignments, undoStack, svgTree, nodeMap } = get();
+    if (!svgTree) return;
+    const node = nodeMap.get(nodeId);
+    if (!node || node.type !== 'element') return;
+
+    const prevAssignments = assignments;
+    const prevTransform = node.attributes.transform;
+    const newAssignments = updateAssignmentDimensions(
+      assignments,
+      nodeId,
+      fieldId,
+      maxWidth,
+      maxHeight
     );
+
+    // Apply translate if north/west handle moved the origin
+    if (translateDx !== 0 || translateDy !== 0) {
+      const newTransform = applyTranslate(
+        node.attributes.transform,
+        translateDx,
+        translateDy
+      );
+      node.attributes.transform = newTransform;
+    }
+
     set({
       assignments: newAssignments,
-      undoStack: pushUndo(undoStack, { type: 'assignments', assignments }),
+      svgTree: { ...svgTree },
+      undoStack: pushUndo(undoStack, {
+        type: 'textAreaResize',
+        nodeId,
+        prevAssignments,
+        prevTransform,
+      }),
       redoStack: [],
     });
   },
@@ -623,6 +715,29 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
           },
         ],
       });
+    } else if (entry.type === 'textAreaResize') {
+      if (!svgTree) return;
+      const currentTransform = swapNodeTransform(
+        nodeMap,
+        entry.nodeId,
+        entry.prevTransform
+      );
+      if (currentTransform === null) return;
+
+      set({
+        svgTree: { ...svgTree },
+        assignments: entry.prevAssignments,
+        undoStack: newUndoStack,
+        redoStack: [
+          ...redoStack,
+          {
+            type: 'textAreaResize',
+            nodeId: entry.nodeId,
+            prevAssignments: assignments,
+            prevTransform: currentTransform,
+          },
+        ],
+      });
     } else if (entry.type === 'deleteNode') {
       if (!svgTree) return;
       const parentNode = nodeMap.get(entry.parentNodeId);
@@ -692,6 +807,29 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
             type: 'transform',
             nodeId: entry.nodeId,
             prevValue: result.currentValue,
+          },
+        ],
+      });
+    } else if (entry.type === 'textAreaResize') {
+      if (!svgTree) return;
+      const currentTransform = swapNodeTransform(
+        nodeMap,
+        entry.nodeId,
+        entry.prevTransform
+      );
+      if (currentTransform === null) return;
+
+      set({
+        svgTree: { ...svgTree },
+        assignments: entry.prevAssignments,
+        redoStack: newRedoStack,
+        undoStack: [
+          ...undoStack,
+          {
+            type: 'textAreaResize',
+            nodeId: entry.nodeId,
+            prevAssignments: assignments,
+            prevTransform: currentTransform,
           },
         ],
       });
