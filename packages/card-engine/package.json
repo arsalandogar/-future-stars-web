@@ -1,6 +1,6 @@
 {
   "name": "@arsalandogar/fs-card-engine",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "Shared card editing engine for Future Stars",
   "license": "UNLICENSED",
   "type": "module",
@@ -27,7 +27,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && tsc --build --force",
     "prepack": "npm run build"
   },
   "dependencies": {
