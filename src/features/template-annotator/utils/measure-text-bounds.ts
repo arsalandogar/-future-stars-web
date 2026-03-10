@@ -5,24 +5,39 @@ export interface TextBounds {
   height: number;
 }
 
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+/**
+ * Creates an offscreen SVG element for measuring text bounds.
+ * Caller must call `document.body.removeChild(svg)` when done.
+ */
+export function createOffscreenMeasureSvg(viewBox: string): SVGSVGElement {
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', viewBox);
+  svg.style.position = 'absolute';
+  svg.style.left = '-9999px';
+  svg.style.top = '-9999px';
+  svg.style.width = '0';
+  svg.style.height = '0';
+  svg.style.overflow = 'hidden';
+  return svg;
+}
+
 export function measureTextBounds(
   textNode: SvgJsonNode,
   svgTree: SvgJsonNode
 ): TextBounds | null {
   try {
     const viewBox = svgTree.attributes.viewBox ?? '0 0 500 700';
+    const svgEl = createOffscreenMeasureSvg(viewBox);
 
-    const svgNs = 'http://www.w3.org/2000/svg';
-    const svgEl = document.createElementNS(svgNs, 'svg');
-    svgEl.setAttribute('viewBox', viewBox);
-    svgEl.style.position = 'absolute';
-    svgEl.style.left = '-9999px';
-    svgEl.style.top = '-9999px';
-    svgEl.style.width = '0';
-    svgEl.style.height = '0';
-    svgEl.style.overflow = 'hidden';
-
-    const textEl = createSvgElement(textNode, svgNs);
+    const textEl = createSvgElement(textNode, SVG_NS);
+    if (textEl instanceof SVGElement) {
+      // `data-max-width` is stored in the text node's own coordinate space.
+      // Strip the top-level transform so rotated/translated text measures in
+      // local text space instead of its rendered axis-aligned bounds.
+      textEl.removeAttribute('transform');
+    }
     svgEl.appendChild(textEl);
     document.body.appendChild(svgEl);
 

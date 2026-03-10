@@ -1,3 +1,19 @@
+import type { TouchBounds } from '../types';
+
+export interface SvgPoint {
+  x: number;
+  y: number;
+}
+
+export interface TransformBasis {
+  rotation: number;
+}
+
+export interface TextAreaDimensions {
+  width: number;
+  height: number;
+}
+
 /**
  * Prepends a translate(dx, dy) to an existing transform string.
  * SVG transforms compose right-to-left, so prepending applies the translation
@@ -106,6 +122,89 @@ export function parseScaleValues(
   const sy = match[2] ? parseFloat(match[2].trim()) : sx;
   if (isNaN(sx) || isNaN(sy)) return null;
   return { sx, sy };
+}
+
+export function transformPoint(
+  matrix: DOMMatrix,
+  x: number,
+  y: number
+): SvgPoint {
+  const pt = new DOMPoint(x, y).matrixTransform(matrix);
+  return { x: pt.x, y: pt.y };
+}
+
+export function getTransformBasis(matrix: DOMMatrix): TransformBasis {
+  const origin = transformPoint(matrix, 0, 0);
+  const xPt = transformPoint(matrix, 1, 0);
+  const xAxis = { x: xPt.x - origin.x, y: xPt.y - origin.y };
+
+  return {
+    rotation: normalizeAngle((Math.atan2(xAxis.y, xAxis.x) * 180) / Math.PI),
+  };
+}
+
+export function getTransformedRectPoints(
+  rect: TouchBounds,
+  matrix: DOMMatrix
+): SvgPoint[] {
+  return [
+    transformPoint(matrix, rect.x, rect.y),
+    transformPoint(matrix, rect.x + rect.width, rect.y),
+    transformPoint(matrix, rect.x + rect.width, rect.y + rect.height),
+    transformPoint(matrix, rect.x, rect.y + rect.height),
+  ];
+}
+
+export function getBoundsFromPoints(points: SvgPoint[]): TouchBounds {
+  let minX = points[0].x;
+  let maxX = minX;
+  let minY = points[0].y;
+  let maxY = minY;
+  for (let i = 1; i < points.length; i++) {
+    const p = points[i];
+    if (p.x < minX) minX = p.x;
+    if (p.x > maxX) maxX = p.x;
+    if (p.y < minY) minY = p.y;
+    if (p.y > maxY) maxY = p.y;
+  }
+  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+}
+
+export function normalizeImportedTextAreaDimensions(params: {
+  storedWidth: number;
+  storedHeight: number;
+  rotation: number;
+  renderedBounds?: TouchBounds | null;
+  localBounds?: TouchBounds | null;
+}): TextAreaDimensions {
+  const { renderedBounds, localBounds, storedWidth, storedHeight } = params;
+
+  if (!isNearRightAngle(params.rotation) || !renderedBounds || !localBounds) {
+    return { width: storedWidth, height: storedHeight };
+  }
+
+  const storedToRendered =
+    Math.abs(storedWidth - renderedBounds.width) +
+    Math.abs(storedHeight - renderedBounds.height);
+  const storedToLocal =
+    Math.abs(storedWidth - localBounds.width) +
+    Math.abs(storedHeight - localBounds.height);
+
+  if (storedToLocal <= storedToRendered) {
+    return { width: storedWidth, height: storedHeight };
+  }
+
+  return { width: storedHeight, height: storedWidth };
+}
+
+export function normalizeAngle(angle: number): number {
+  const normalized = angle % 360;
+  return normalized < 0 ? normalized + 360 : normalized;
+}
+
+function isNearRightAngle(rotation: number): boolean {
+  const normalized = normalizeAngle(rotation);
+  return Math.abs(normalized - 90) < 1 || Math.abs(normalized - 270) < 1;
 }
 
 function parseTranslateArgs(token: string): [number, number] | null {

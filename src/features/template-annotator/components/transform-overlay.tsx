@@ -1,8 +1,13 @@
-import { useEffect, useMemo, useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import type { SvgJsonNode } from '@/types/svg';
 
 import type { FieldAssignment, TouchBounds } from '../types';
 import { useAnnotatorStore } from '../stores/annotator-store';
-import { useElementBounds } from '../hooks/use-element-bounds';
+import {
+  useElementBounds,
+  useElementGeometry,
+} from '../hooks/use-element-bounds';
 import {
   collectSnapTargets,
   computeSnap,
@@ -13,17 +18,21 @@ import {
 import {
   applyTranslate,
   applyScaleAroundPoint,
+  getBoundsFromPoints,
+  getTransformedRectPoints,
+  transformPoint,
+  type SvgPoint,
 } from '../utils/svg-transform-helpers';
 import {
   type HandleId,
   HANDLES,
-  HANDLE_CURSORS,
   clampToViewBox,
   clientToSvgPoint,
   parseViewBox,
   applyResizeDelta,
   querySvgElement,
   getCardBounds,
+  getHandleCursor,
 } from '../utils/svg-overlay-helpers';
 
 function getAnchor(
@@ -51,6 +60,172 @@ function getAnchor(
   }
 }
 
+function getEffectiveTextAnchor(
+  assignment: FieldAssignment | null | undefined,
+  nodeMap: Map<string, SvgJsonNode>,
+  nodeId: string
+): 'start' | 'middle' | 'end' {
+  if (!assignment) return 'start';
+  const node = nodeMap.get(nodeId);
+  if (!node || node.type !== 'element') return 'start';
+
+  const styleMatch = node.attributes.style?.match(/text-anchor\s*:\s*(\w+)/);
+  const anchor = styleMatch?.[1] ?? node.attributes['text-anchor'];
+  return anchor === 'middle' || anchor === 'end' ? anchor : 'start';
+}
+
+function buildTextLocalRect(
+  glyphBounds: TouchBounds,
+  maxWidth: number,
+  maxHeight: number,
+  anchor: 'start' | 'middle' | 'end'
+): TouchBounds {
+  let x = glyphBounds.x;
+  if (anchor === 'middle') {
+    const anchorX = glyphBounds.x + glyphBounds.width / 2;
+    x = anchorX - maxWidth / 2;
+  } else if (anchor === 'end') {
+    const anchorX = glyphBounds.x + glyphBounds.width;
+    x = anchorX - maxWidth;
+  }
+
+  return {
+    x,
+    y: glyphBounds.y,
+    width: maxWidth,
+    height: maxHeight,
+  };
+}
+
+function getRotatedHandlePoints(
+  points: SvgPoint[]
+): Record<HandleId, SvgPoint> {
+  const [nw, ne, se, sw] = points;
+  return {
+    nw,
+    n: midpoint(nw, ne),
+    ne,
+    e: midpoint(ne, se),
+    se,
+    s: midpoint(se, sw),
+    sw,
+    w: midpoint(sw, nw),
+  };
+}
+
+function midpoint(a: SvgPoint, b: SvgPoint): SvgPoint {
+  return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+}
+
+function toPolygonPoints(points: SvgPoint[]): string {
+  return points.map((point) => `${point.x},${point.y}`).join(' ');
+}
+
+function shiftLocalRectInSvgSpace(
+  rect: TouchBounds,
+  localToSvg: DOMMatrix,
+  svgToLocal: DOMMatrix,
+  dx: number,
+  dy: number
+): TouchBounds {
+  if (dx === 0 && dy === 0) return rect;
+
+  const origin = transformPoint(localToSvg, rect.x, rect.y);
+  const shiftedOrigin = transformPoint(
+    svgToLocal,
+    origin.x + dx,
+    origin.y + dy
+  );
+  return { ...rect, x: shiftedOrigin.x, y: shiftedOrigin.y };
+}
+
+function getClampDelta(
+  bounds: TouchBounds,
+  vb: TouchBounds
+): { dx: number; dy: number } {
+  let dx = 0;
+  let dy = 0;
+
+  if (bounds.x < vb.x) {
+    dx = vb.x - bounds.x;
+  } else if (bounds.x + bounds.width > vb.x + vb.width) {
+    dx = vb.x + vb.width - (bounds.x + bounds.width);
+  }
+
+  if (bounds.y < vb.y) {
+    dy = vb.y - bounds.y;
+  } else if (bounds.y + bounds.height > vb.y + vb.height) {
+    dy = vb.y + vb.height - (bounds.y + bounds.height);
+  }
+
+  return { dx, dy };
+}
+
+interface TextOverlayGeometry {
+  localRect: TouchBounds;
+  points: SvgPoint[];
+  bounds: TouchBounds;
+  localToSvg: DOMMatrix;
+  svgToLocal: DOMMatrix;
+  rotation: number;
+}
+
+function buildTextOverlayGeometry(
+  localRect: TouchBounds,
+  localToSvg: DOMMatrix,
+  svgToLocal: DOMMatrix,
+  rotation: number
+): TextOverlayGeometry {
+  const points = getTransformedRectPoints(localRect, localToSvg);
+  return {
+    localRect,
+    points,
+    bounds: getBoundsFromPoints(points),
+    localToSvg,
+    svgToLocal,
+    rotation,
+  };
+}
+
+type DraggingState =
+  | {
+      kind: 'axis';
+      mode: 'resize';
+      handle: HandleId;
+      startBounds: TouchBounds;
+      startPt: DOMPoint;
+      ctmInverse: DOMMatrix;
+      snapTargets: SnapTargets;
+    }
+  | {
+      kind: 'axis';
+      mode: 'move';
+      startBounds: TouchBounds;
+      startPt: DOMPoint;
+      ctmInverse: DOMMatrix;
+      snapTargets: SnapTargets;
+    }
+  | {
+      kind: 'text';
+      mode: 'resize';
+      handle: HandleId;
+      startLocalRect: TouchBounds;
+      startLocalPt: DOMPoint;
+      startBounds: TouchBounds;
+      localToSvg: DOMMatrix;
+      svgToLocal: DOMMatrix;
+    }
+  | {
+      kind: 'text';
+      mode: 'move';
+      startLocalRect: TouchBounds;
+      startLocalPt: DOMPoint;
+      startBounds: TouchBounds;
+      localToSvg: DOMMatrix;
+      svgToLocal: DOMMatrix;
+      snapTargets: SnapTargets;
+    };
+
 interface TransformOverlayProps {
   viewBox: string;
   nodeId: string;
@@ -68,77 +243,76 @@ export function TransformOverlay({
   const nodeMap = useAnnotatorStore((s) => s.nodeMap);
 
   const elementBounds = useElementBounds(nodeId, true);
-  const elementBoundsRef = useRef(elementBounds);
-  useEffect(() => {
-    elementBoundsRef.current = elementBounds;
-  }, [elementBounds]);
+  const elementGeometry = useElementGeometry(nodeId, !!assignment);
 
-  // For text elements with assignment, use maxWidth/maxHeight as overlay bounds.
-  // Adjust x based on text-anchor so the box matches the logical text area:
-  // getBBox() returns the bounding box of visible glyphs, so for center/end
-  // aligned text we derive the anchor point and offset by maxWidth accordingly.
-  const baseBounds = useMemo<TouchBounds | null>(() => {
+  const textBaseGeometry = useMemo<TextOverlayGeometry | null>(() => {
     if (
-      assignment?.maxWidth != null &&
-      assignment?.maxHeight != null &&
-      elementBounds
+      !assignment ||
+      assignment.maxWidth == null ||
+      assignment.maxHeight == null ||
+      !elementGeometry
     ) {
-      const node = nodeMap.get(nodeId);
-      const styleMatch =
-        node?.type === 'element'
-          ? node.attributes.style?.match(/text-anchor\s*:\s*(\w+)/)
-          : undefined;
-      const anchor =
-        styleMatch?.[1] ??
-        (node?.type === 'element' ? node.attributes['text-anchor'] : undefined);
-
-      let boxX = elementBounds.x;
-      if (anchor === 'middle') {
-        const anchorX = elementBounds.x + elementBounds.width / 2;
-        boxX = anchorX - assignment.maxWidth / 2;
-      } else if (anchor === 'end') {
-        const anchorX = elementBounds.x + elementBounds.width;
-        boxX = anchorX - assignment.maxWidth;
-      }
-
-      return {
-        x: boxX,
-        y: elementBounds.y,
-        width: assignment.maxWidth,
-        height: assignment.maxHeight,
-      };
+      return null;
     }
-    return elementBounds;
-  }, [assignment, elementBounds, nodeMap, nodeId]);
-  const [preview, setPreview] = useState<TouchBounds | null>(null);
+
+    const anchor = getEffectiveTextAnchor(assignment, nodeMap, nodeId);
+    const localRect = buildTextLocalRect(
+      elementGeometry.localBounds,
+      assignment.maxWidth,
+      assignment.maxHeight,
+      anchor
+    );
+
+    return buildTextOverlayGeometry(
+      localRect,
+      elementGeometry.localToSvg,
+      elementGeometry.svgToLocal,
+      elementGeometry.rotation
+    );
+  }, [assignment, elementGeometry, nodeMap, nodeId]);
+
+  const [previewBounds, setPreviewBounds] = useState<TouchBounds | null>(null);
+  const [previewLocalRect, setPreviewLocalRect] = useState<TouchBounds | null>(
+    null
+  );
+
+  const activeTextGeometry = useMemo<TextOverlayGeometry | null>(() => {
+    if (!textBaseGeometry) return null;
+    if (!previewLocalRect) return textBaseGeometry;
+    return buildTextOverlayGeometry(
+      previewLocalRect,
+      textBaseGeometry.localToSvg,
+      textBaseGeometry.svgToLocal,
+      textBaseGeometry.rotation
+    );
+  }, [previewLocalRect, textBaseGeometry]);
 
   const svgRef = useRef<SVGSVGElement>(null);
 
   const vb = useMemo<TouchBounds>(() => parseViewBox(viewBox), [viewBox]);
   const cardBounds = useMemo(() => getCardBounds(vb), [vb]);
 
-  const activeBounds = preview ?? baseBounds;
+  const baseBounds = assignment
+    ? (textBaseGeometry?.bounds ?? null)
+    : elementBounds;
+  const activeBounds = assignment
+    ? (activeTextGeometry?.bounds ?? baseBounds)
+    : (previewBounds ?? baseBounds);
+
+  const activeHandlePoints = activeTextGeometry
+    ? getRotatedHandlePoints(activeTextGeometry.points)
+    : null;
 
   const [activeGuides, setActiveGuides] = useState<SnapResult | null>(null);
 
-  const [dragging, setDragging] = useState<
-    | {
-        mode: 'resize';
-        handle: HandleId;
-        startBounds: TouchBounds;
-        startPt: DOMPoint;
-        ctmInverse: DOMMatrix;
-        snapTargets: SnapTargets;
-      }
-    | {
-        mode: 'move';
-        startBounds: TouchBounds;
-        startPt: DOMPoint;
-        ctmInverse: DOMMatrix;
-        snapTargets: SnapTargets;
-      }
-    | null
-  >(null);
+  const [dragging, setDragging] = useState<DraggingState | null>(null);
+
+  const resetDragState = useCallback(() => {
+    setPreviewBounds(null);
+    setPreviewLocalRect(null);
+    setDragging(null);
+    setActiveGuides(null);
+  }, []);
 
   const startDrag = useCallback(
     (e: React.PointerEvent, mode: 'move' | HandleId) => {
@@ -146,7 +320,7 @@ export function TransformOverlay({
       e.preventDefault();
 
       const svg = svgRef.current;
-      if (!svg || !activeBounds) return;
+      if (!svg) return;
       const result = clientToSvgPoint(svg, e.clientX, e.clientY);
       if (!result) return;
 
@@ -156,8 +330,32 @@ export function TransformOverlay({
         ? collectSnapTargets(svgEl, nodeIndex, nodeId, cardBounds)
         : { x: [], y: [] };
 
+      if (assignment && activeTextGeometry) {
+        const startLocalPt = result.svgPt.matrixTransform(
+          activeTextGeometry.svgToLocal
+        );
+        const textBase = {
+          kind: 'text' as const,
+          startLocalRect: { ...activeTextGeometry.localRect },
+          startLocalPt,
+          startBounds: activeTextGeometry.bounds,
+          localToSvg: activeTextGeometry.localToSvg,
+          svgToLocal: activeTextGeometry.svgToLocal,
+        };
+
+        setDragging(
+          mode === 'move'
+            ? { ...textBase, mode: 'move', snapTargets }
+            : { ...textBase, mode: 'resize', handle: mode }
+        );
+        return;
+      }
+
+      if (!activeBounds) return;
+
       if (mode === 'move') {
         setDragging({
+          kind: 'axis',
           mode: 'move',
           startBounds: { ...activeBounds },
           startPt: result.svgPt,
@@ -166,6 +364,7 @@ export function TransformOverlay({
         });
       } else {
         setDragging({
+          kind: 'axis',
           mode: 'resize',
           handle: mode,
           startBounds: { ...activeBounds },
@@ -175,13 +374,161 @@ export function TransformOverlay({
         });
       }
     },
-    [activeBounds, nodeId, cardBounds]
+    [activeBounds, activeTextGeometry, assignment, cardBounds, nodeId]
   );
 
   useEffect(() => {
-    if (!dragging || !baseBounds) return;
+    if (!dragging) return;
 
     const snapThreshold = Math.min(vb.width, vb.height) * 0.008;
+
+    if (dragging.kind === 'text') {
+      const toLocalPt = (clientX: number, clientY: number): DOMPoint | null => {
+        const svg = svgRef.current;
+        if (!svg) return null;
+        const result = clientToSvgPoint(svg, clientX, clientY);
+        if (!result) return null;
+        return result.svgPt.matrixTransform(dragging.svgToLocal);
+      };
+
+      const localRectBounds = (rect: TouchBounds): TouchBounds =>
+        getBoundsFromPoints(
+          getTransformedRectPoints(rect, dragging.localToSvg)
+        );
+
+      const computeMoveRect = (
+        dx: number,
+        dy: number,
+        snapTargets: SnapTargets
+      ): { rect: TouchBounds; snap: SnapResult } => {
+        let rect = {
+          ...dragging.startLocalRect,
+          x: dragging.startLocalRect.x + dx,
+          y: dragging.startLocalRect.y + dy,
+        };
+
+        let bounds = localRectBounds(rect);
+
+        const snap = computeSnap(bounds, snapTargets, snapThreshold, 'move');
+        const snapDx = snap.x?.delta ?? 0;
+        const snapDy = snap.y?.delta ?? 0;
+        if (snapDx !== 0 || snapDy !== 0) {
+          rect = shiftLocalRectInSvgSpace(
+            rect,
+            dragging.localToSvg,
+            dragging.svgToLocal,
+            snapDx,
+            snapDy
+          );
+          bounds = localRectBounds(rect);
+        }
+
+        const clamp = getClampDelta(bounds, cardBounds);
+        if (clamp.dx !== 0 || clamp.dy !== 0) {
+          rect = shiftLocalRectInSvgSpace(
+            rect,
+            dragging.localToSvg,
+            dragging.svgToLocal,
+            clamp.dx,
+            clamp.dy
+          );
+        }
+
+        return { rect, snap };
+      };
+
+      const onMove = (e: PointerEvent) => {
+        const localPt = toLocalPt(e.clientX, e.clientY);
+        if (!localPt) return;
+
+        const dx = localPt.x - dragging.startLocalPt.x;
+        const dy = localPt.y - dragging.startLocalPt.y;
+
+        if (dragging.mode === 'move') {
+          const { rect, snap } = computeMoveRect(dx, dy, dragging.snapTargets);
+          setPreviewLocalRect(rect);
+          setActiveGuides(snap);
+        } else {
+          setPreviewLocalRect(
+            applyResizeDelta(dragging.handle, dragging.startLocalRect, dx, dy)
+          );
+          setActiveGuides(null);
+        }
+      };
+
+      const onUp = (e: PointerEvent) => {
+        const localPt = toLocalPt(e.clientX, e.clientY);
+        if (!localPt) {
+          resetDragState();
+          return;
+        }
+
+        const dx = localPt.x - dragging.startLocalPt.x;
+        const dy = localPt.y - dragging.startLocalPt.y;
+
+        const finalLocalRect =
+          dragging.mode === 'move'
+            ? computeMoveRect(dx, dy, dragging.snapTargets).rect
+            : applyResizeDelta(
+                dragging.handle,
+                dragging.startLocalRect,
+                dx,
+                dy
+              );
+
+        const startOrigin = transformPoint(
+          dragging.localToSvg,
+          dragging.startLocalRect.x,
+          dragging.startLocalRect.y
+        );
+        const finalOrigin = transformPoint(
+          dragging.localToSvg,
+          finalLocalRect.x,
+          finalLocalRect.y
+        );
+        const translateDx = finalOrigin.x - startOrigin.x;
+        const translateDy = finalOrigin.y - startOrigin.y;
+
+        const { nodeMap } = useAnnotatorStore.getState();
+        const node = nodeMap.get(nodeId);
+        const existingTransform =
+          node?.type === 'element' ? node.attributes.transform : undefined;
+
+        if (dragging.mode === 'move') {
+          if (Math.abs(translateDx) > 0.01 || Math.abs(translateDy) > 0.01) {
+            commitNodeTransform(
+              nodeId,
+              applyTranslate(existingTransform, translateDx, translateDy)
+            );
+          }
+        } else if (assignment) {
+          commitTextAreaResize(
+            nodeId,
+            assignment.fieldId,
+            Math.round(finalLocalRect.width),
+            Math.round(finalLocalRect.height),
+            translateDx,
+            translateDy
+          );
+        }
+
+        resetDragState();
+      };
+
+      const onCancel = () => resetDragState();
+
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onCancel);
+      return () => {
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('pointercancel', onCancel);
+      };
+    }
+
+    if (!baseBounds) return;
+
     const handle = dragging.mode === 'resize' ? dragging.handle : undefined;
 
     const computeRawBounds = (dx: number, dy: number): TouchBounds => {
@@ -222,7 +569,7 @@ export function TransformOverlay({
       const dx = svgPt.x - dragging.startPt.x;
       const dy = svgPt.y - dragging.startPt.y;
       const { bounds, snap } = snapAndClamp(dx, dy);
-      setPreview(bounds);
+      setPreviewBounds(bounds);
       setActiveGuides(snap);
     };
 
@@ -246,19 +593,6 @@ export function TransformOverlay({
             applyTranslate(existingTransform, tdx, tdy)
           );
         }
-      } else if (assignment) {
-        // Text element: update maxWidth/maxHeight instead of scale
-        const eb = elementBoundsRef.current;
-        const tdx = finalBounds.x - (eb?.x ?? finalBounds.x);
-        const tdy = finalBounds.y - (eb?.y ?? finalBounds.y);
-        commitTextAreaResize(
-          nodeId,
-          assignment.fieldId,
-          Math.round(finalBounds.width),
-          Math.round(finalBounds.height),
-          tdx,
-          tdy
-        );
       } else {
         const sx = finalBounds.width / baseBounds.width;
         const sy = finalBounds.height / baseBounds.height;
@@ -271,16 +605,10 @@ export function TransformOverlay({
         }
       }
 
-      setPreview(null);
-      setDragging(null);
-      setActiveGuides(null);
+      resetDragState();
     };
 
-    const onCancel = () => {
-      setPreview(null);
-      setDragging(null);
-      setActiveGuides(null);
-    };
+    const onCancel = () => resetDragState();
 
     window.addEventListener('pointermove', onMove);
     window.addEventListener('pointerup', onUp);
@@ -291,15 +619,16 @@ export function TransformOverlay({
       window.removeEventListener('pointercancel', onCancel);
     };
   }, [
-    dragging,
-    commitNodeTransform,
-    commitTextAreaResize,
     assignment,
-    nodeId,
     baseBounds,
     cardBounds,
-    vb.width,
+    commitNodeTransform,
+    commitTextAreaResize,
+    dragging,
+    nodeId,
+    resetDragState,
     vb.height,
+    vb.width,
   ]);
 
   const handleSize = Math.min(cardBounds.width, cardBounds.height) * 0.015;
@@ -333,51 +662,102 @@ export function TransformOverlay({
         }}
       />
 
-      <rect
-        x={activeBounds.x}
-        y={activeBounds.y}
-        width={activeBounds.width}
-        height={activeBounds.height}
-        fill="rgba(255, 140, 0, 0.08)"
-        stroke="rgb(255, 140, 0)"
-        strokeWidth={handleSize / 4}
-        strokeDasharray={`${handleSize} ${handleSize / 2}`}
-        style={{
-          pointerEvents: 'all',
-          cursor: dragging?.mode === 'move' ? 'grabbing' : 'grab',
-        }}
-        onPointerDown={(e) => startDrag(e, 'move')}
-      />
-
-      {HANDLES.map((h) => {
-        const rawCx = h.cx(activeBounds);
-        const rawCy = h.cy(activeBounds);
-        const cx = Math.max(
-          cardBounds.x,
-          Math.min(cardBounds.x + cardBounds.width, rawCx)
-        );
-        const cy = Math.max(
-          cardBounds.y,
-          Math.min(cardBounds.y + cardBounds.height, rawCy)
-        );
-        return (
-          <rect
-            key={h.id}
-            x={cx - handleSize / 2}
-            y={cy - handleSize / 2}
-            width={handleSize}
-            height={handleSize}
-            fill="white"
+      {activeTextGeometry ? (
+        <>
+          <polygon
+            points={toPolygonPoints(activeTextGeometry.points)}
+            fill="rgba(255, 140, 0, 0.08)"
             stroke="rgb(255, 140, 0)"
-            strokeWidth={handleSize / 6}
+            strokeWidth={handleSize / 4}
+            strokeDasharray={`${handleSize} ${handleSize / 2}`}
             style={{
-              cursor: HANDLE_CURSORS[h.id],
               pointerEvents: 'all',
+              cursor:
+                dragging?.mode === 'move' && dragging.kind === 'text'
+                  ? 'grabbing'
+                  : 'grab',
             }}
-            onPointerDown={(e) => startDrag(e, h.id)}
+            onPointerDown={(e) => startDrag(e, 'move')}
           />
-        );
-      })}
+
+          {HANDLES.map((handle) => {
+            const point = activeHandlePoints?.[handle.id];
+            if (!point) return null;
+
+            return (
+              <rect
+                key={handle.id}
+                x={point.x - handleSize / 2}
+                y={point.y - handleSize / 2}
+                width={handleSize}
+                height={handleSize}
+                fill="white"
+                stroke="rgb(255, 140, 0)"
+                strokeWidth={handleSize / 6}
+                style={{
+                  cursor: getHandleCursor(
+                    handle.id,
+                    activeTextGeometry.rotation
+                  ),
+                  pointerEvents: 'all',
+                }}
+                onPointerDown={(e) => startDrag(e, handle.id)}
+              />
+            );
+          })}
+        </>
+      ) : (
+        <>
+          <rect
+            x={activeBounds.x}
+            y={activeBounds.y}
+            width={activeBounds.width}
+            height={activeBounds.height}
+            fill="rgba(255, 140, 0, 0.08)"
+            stroke="rgb(255, 140, 0)"
+            strokeWidth={handleSize / 4}
+            strokeDasharray={`${handleSize} ${handleSize / 2}`}
+            style={{
+              pointerEvents: 'all',
+              cursor:
+                dragging?.mode === 'move' && dragging.kind === 'axis'
+                  ? 'grabbing'
+                  : 'grab',
+            }}
+            onPointerDown={(e) => startDrag(e, 'move')}
+          />
+
+          {HANDLES.map((handle) => {
+            const rawCx = handle.cx(activeBounds);
+            const rawCy = handle.cy(activeBounds);
+            const cx = Math.max(
+              cardBounds.x,
+              Math.min(cardBounds.x + cardBounds.width, rawCx)
+            );
+            const cy = Math.max(
+              cardBounds.y,
+              Math.min(cardBounds.y + cardBounds.height, rawCy)
+            );
+            return (
+              <rect
+                key={handle.id}
+                x={cx - handleSize / 2}
+                y={cy - handleSize / 2}
+                width={handleSize}
+                height={handleSize}
+                fill="white"
+                stroke="rgb(255, 140, 0)"
+                strokeWidth={handleSize / 6}
+                style={{
+                  cursor: getHandleCursor(handle.id),
+                  pointerEvents: 'all',
+                }}
+                onPointerDown={(e) => startDrag(e, handle.id)}
+              />
+            );
+          })}
+        </>
+      )}
 
       {activeGuides?.x && (
         <line

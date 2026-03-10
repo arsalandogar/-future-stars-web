@@ -1,8 +1,9 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
 import {
   parseViewBox,
   getCardBounds,
   hasBleeds,
+  querySvgElement,
 } from '../utils/svg-overlay-helpers';
 
 import type { TouchBounds } from '../types';
@@ -16,6 +17,8 @@ import {
   isNonInteractive,
   supportsTouchBounds,
 } from '../utils/svg-node-helpers';
+import { getElementGeometryInSvgRoot } from '../utils/get-element-bbox';
+import { normalizeImportedTextAreaDimensions } from '../utils/svg-transform-helpers';
 import { ensureTouchBounds } from '../utils/touch-bounds-helpers';
 import { TouchBoundsOverlay } from './touch-bounds-overlay';
 import { TransformOverlay } from './transform-overlay';
@@ -105,6 +108,61 @@ export function AnnotatorCanvas() {
       ) ?? null
     );
   }, [editingTransformNodeId, assignments]);
+
+  // Track which svgTree identity we've already normalized for, so the effect
+  // doesn't re-run after it mutates assignments (which is its own dependency).
+  const normalizedForTreeRef = useRef<SvgJsonNode | null>(null);
+
+  useLayoutEffect(() => {
+    if (!svgTree || assignments.length === 0) return;
+    if (normalizedForTreeRef.current === svgTree) return;
+
+    const svgEl = querySvgElement();
+    if (!svgEl) return;
+
+    normalizedForTreeRef.current = svgTree;
+
+    let didNormalize = false;
+    const nextAssignments = assignments.map((assignment) => {
+      if (EDITABLE_FIELDS[assignment.fieldId].type !== 'text') {
+        return assignment;
+      }
+      if (assignment.maxWidth == null || assignment.maxHeight == null) {
+        return assignment;
+      }
+
+      const geometry = getElementGeometryInSvgRoot(svgEl, assignment.nodeId);
+      if (!geometry) return assignment;
+
+      const normalized = normalizeImportedTextAreaDimensions({
+        storedWidth: assignment.maxWidth,
+        storedHeight: assignment.maxHeight,
+        rotation: geometry.rotation,
+        renderedBounds: geometry.bounds,
+        localBounds: geometry.localBounds,
+      });
+      const nextWidth = Math.round(normalized.width);
+      const nextHeight = Math.round(normalized.height);
+
+      if (
+        nextWidth === assignment.maxWidth &&
+        nextHeight === assignment.maxHeight
+      ) {
+        return assignment;
+      }
+
+      didNormalize = true;
+      return {
+        ...assignment,
+        maxWidth: nextWidth,
+        maxHeight: nextHeight,
+      };
+    });
+
+    if (didNormalize) {
+      useAnnotatorStore.setState({ assignments: nextAssignments });
+    }
+  }, [assignments, svgTree]);
 
   // Get viewBox from svgTree root
   const viewBox =

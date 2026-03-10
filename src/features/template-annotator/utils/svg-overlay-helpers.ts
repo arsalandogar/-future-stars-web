@@ -1,4 +1,5 @@
 import type { TouchBounds } from '../types';
+import { normalizeAngle } from './svg-transform-helpers';
 import { ANNOTATOR_SVG_WRAPPER_CLASS } from './svg-node-helpers';
 
 export {
@@ -37,6 +38,34 @@ export const HANDLE_CURSORS: Record<HandleId, string> = {
   sw: 'nesw-resize',
   w: 'ew-resize',
 };
+
+const HANDLE_ANGLES: Record<HandleId, number> = {
+  e: 0,
+  se: 45,
+  s: 90,
+  sw: 135,
+  w: 180,
+  nw: 225,
+  n: 270,
+  ne: 315,
+};
+
+const ANGLE_TO_HANDLE: Record<number, HandleId> = {
+  0: 'e',
+  45: 'se',
+  90: 's',
+  135: 'sw',
+  180: 'w',
+  225: 'nw',
+  270: 'n',
+  315: 'ne',
+};
+
+export function getHandleCursor(handle: HandleId, rotation = 0): string {
+  const angle = normalizeAngle(HANDLE_ANGLES[handle] + rotation);
+  const snapped = Math.round(angle / 45) * 45;
+  return HANDLE_CURSORS[ANGLE_TO_HANDLE[normalizeAngle(snapped)]];
+}
 
 export function clampToViewBox(
   bounds: TouchBounds,

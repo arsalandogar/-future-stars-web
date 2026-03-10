@@ -748,7 +748,7 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
     const prevSnapshot = snapshotTextAlign(node);
     const prevAssignments = assignments;
 
-    // Calculate new x position when maxWidth is available
+    // Calculate new x position when local maxWidth is available.
     const assignment = assignments.find(
       (a) => a.nodeId === nodeId && a.fieldId === fieldId
     );

@@ -1,32 +1,34 @@
 import type { EditableFieldId } from '@/features/templates';
 
 import { useAnnotatorStore } from '../stores/annotator-store';
-import { getElementBBoxInSvgRoot } from './get-element-bbox';
-import { querySvgElement } from './svg-overlay-helpers';
+import { measureTextBounds } from './measure-text-bounds';
 
-/**
- * Measures the element's bbox and sets maxWidth/maxHeight unconditionally.
- */
+function measureAssignedTextDimensions(nodeId: string) {
+  const { nodeMap, svgTree } = useAnnotatorStore.getState();
+  if (!svgTree) return null;
+
+  const textNode = nodeMap.get(nodeId);
+  if (!textNode) return null;
+
+  return measureTextBounds(textNode, svgTree);
+}
+
+/** Measures local text-space bounds and sets maxWidth/maxHeight unconditionally. */
 export function resetTextDimensions(nodeId: string, fieldId: EditableFieldId) {
-  const svgEl = querySvgElement();
-  if (!svgEl) return;
-  const bbox = getElementBBoxInSvgRoot(svgEl, nodeId);
-  if (bbox) {
+  const bounds = measureAssignedTextDimensions(nodeId);
+  if (bounds) {
     useAnnotatorStore
       .getState()
       .setTextDimensions(
         nodeId,
         fieldId,
-        Math.round(bbox.width),
-        Math.round(bbox.height)
+        Math.round(bounds.width),
+        Math.round(bounds.height)
       );
   }
 }
 
-/**
- * If the assignment doesn't have maxWidth/maxHeight yet,
- * measures the element's bbox and initializes them.
- */
+/** Initializes local text-space dimensions if the assignment does not have them. */
 export function ensureTextDimensions(nodeId: string, fieldId: EditableFieldId) {
   const { assignments } = useAnnotatorStore.getState();
   const assignment = assignments.find(
