@@ -12,8 +12,9 @@ import {
   AlignCenter,
   AlignLeft,
   AlignRight,
-  RotateCcw,
+  RotateCw,
   Scaling,
+  Undo2,
 } from 'lucide-react';
 
 import type { EditableFieldId } from '@/features/templates';
@@ -22,7 +23,9 @@ import type { NodeMeta, TextAlign, SvgTextAnchor } from '../types';
 import { TEXT_ANCHOR_TO_ALIGN } from '../types';
 import { useAnnotatorStore } from '../stores/annotator-store';
 import { useElementBounds } from '../hooks/use-element-bounds';
+import { getElementBBoxInSvgRoot } from '../utils/get-element-bbox';
 import { parseScaleValues } from '../utils/svg-transform-helpers';
+import { querySvgElement } from '../utils/svg-overlay-helpers';
 import {
   ensureTextDimensions,
   resetTextDimensions,
@@ -34,6 +37,7 @@ const ALIGN_OPTIONS = [
   { value: 'center', label: <AlignCenter size={14} /> },
   { value: 'right', label: <AlignRight size={14} /> },
 ];
+const ROTATE_STEP_DEGREES = 15;
 
 interface TransformControlsProps {
   nodeMeta: NodeMeta;
@@ -47,6 +51,7 @@ export function TransformControls({
   const editingNodeId = useAnnotatorStore((s) => s.editingTransformNodeId);
   const setEditing = useAnnotatorStore((s) => s.setEditingTransform);
   const nodeMap = useAnnotatorStore((s) => s.nodeMap);
+  const rotateNode = useAnnotatorStore((s) => s.rotateNode);
   const resetNodeTransform = useAnnotatorStore((s) => s.resetNodeTransform);
   const removeNodeScale = useAnnotatorStore((s) => s.removeNodeScale);
   const node = nodeMap.get(nodeMeta.nodeId);
@@ -114,6 +119,17 @@ export function TransformControls({
     }
   };
 
+  const handleRotate = () => {
+    const svgEl = querySvgElement();
+    if (!svgEl) return;
+    const bbox = getElementBBoxInSvgRoot(svgEl, nodeMeta.nodeId);
+    if (!bbox) return;
+    rotateNode(nodeMeta.nodeId, ROTATE_STEP_DEGREES, {
+      x: bbox.x + bbox.width / 2,
+      y: bbox.y + bbox.height / 2,
+    });
+  };
+
   return (
     <div>
       <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb={4}>
@@ -128,6 +144,16 @@ export function TransformControls({
         >
           {isEditing ? 'Done' : 'Move / Resize'}
         </Button>
+        <Button
+          size="xs"
+          variant="light"
+          color="blue"
+          leftSection={<RotateCw size={14} />}
+          onClick={handleRotate}
+          aria-label={`Rotate ${ROTATE_STEP_DEGREES} degrees clockwise`}
+        >
+          Rotate {ROTATE_STEP_DEGREES}&deg;
+        </Button>
         {hasScale && (
           <Tooltip label="Remove scale">
             <ActionIcon
@@ -135,6 +161,7 @@ export function TransformControls({
               variant="subtle"
               color="orange"
               onClick={() => removeNodeScale(nodeMeta.nodeId)}
+              aria-label="Remove scale"
             >
               <Scaling size={14} />
             </ActionIcon>
@@ -147,8 +174,9 @@ export function TransformControls({
               variant="subtle"
               color="gray"
               onClick={handleReset}
+              aria-label="Reset transform and dimensions"
             >
-              <RotateCcw size={14} />
+              <Undo2 size={14} />
             </ActionIcon>
           </Tooltip>
         )}

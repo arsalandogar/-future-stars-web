@@ -47,6 +47,22 @@ export function applyScaleAroundPoint(
 }
 
 /**
+ * Prepends a rotation around a point in SVG root space to an existing transform.
+ * Equivalent to: rotate(angleDeg, cx, cy)
+ * This rotates the rendered element around its current visual center.
+ */
+export function applyRotateAroundPoint(
+  existingTransform: string | undefined,
+  angleDeg: number,
+  cx: number,
+  cy: number
+): string {
+  const rotate = `rotate(${angleDeg},${cx},${cy})`;
+  if (!existingTransform) return rotate;
+  return `${rotate} ${existingTransform}`;
+}
+
+/**
  * Removes scale transforms (and their surrounding anchor-translate pairs)
  * from a transform string, preserving standalone translate() functions.
  *

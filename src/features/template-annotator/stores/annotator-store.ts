@@ -20,6 +20,7 @@ import {
   collectDescendantNodeIds,
 } from '../utils/svg-node-helpers';
 import {
+  applyRotateAroundPoint,
   applyTranslate,
   removeScaleFromTransform,
 } from '../utils/svg-transform-helpers';
@@ -129,6 +130,11 @@ interface AnnotatorState {
   ) => void;
   setEditingTouchBounds: (nodeId: string | null) => void;
   setEditingTransform: (nodeId: string | null) => void;
+  rotateNode: (
+    nodeId: string,
+    angleDeg: number,
+    center: { x: number; y: number }
+  ) => void;
   commitNodeTransform: (nodeId: string, newTransform: string) => void;
   resetNodeTransform: (nodeId: string) => void;
   commitTouchBounds: (
@@ -674,6 +680,27 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
       editingTransformNodeId: nodeId,
       ...(nodeId && { editingTouchBoundsNodeId: null }),
     }),
+
+  rotateNode: (nodeId, angleDeg, center) => {
+    const { svgTree, nodeMap, undoStack } = get();
+    if (!svgTree || angleDeg === 0) return;
+    const node = nodeMap.get(nodeId);
+    if (!node || node.type !== 'element') return;
+
+    const prevValue = node.attributes.transform;
+    node.attributes.transform = applyRotateAroundPoint(
+      prevValue,
+      angleDeg,
+      center.x,
+      center.y
+    );
+
+    set({
+      svgTree: { ...svgTree },
+      undoStack: pushUndo(undoStack, { type: 'transform', nodeId, prevValue }),
+      redoStack: [],
+    });
+  },
 
   commitNodeTransform: (nodeId, newTransform) => {
     const { svgTree, nodeMap, undoStack } = get();
