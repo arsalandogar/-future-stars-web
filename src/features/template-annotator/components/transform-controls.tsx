@@ -24,13 +24,19 @@ import { TEXT_ANCHOR_TO_ALIGN } from '../types';
 import { useAnnotatorStore } from '../stores/annotator-store';
 import { useElementBounds } from '../hooks/use-element-bounds';
 import { getElementBBoxInSvgRoot } from '../utils/get-element-bbox';
-import { parseScaleValues } from '../utils/svg-transform-helpers';
-import { querySvgElement } from '../utils/svg-overlay-helpers';
+import {
+  applyScaleAroundPoint,
+  applyTranslate,
+  parseScaleValues,
+} from '../utils/svg-transform-helpers';
+import { MIN_SIZE, querySvgElement } from '../utils/svg-overlay-helpers';
+import { formatCompactNumber } from '../utils/format-compact-number';
 import {
   ensureTextDimensions,
   resetTextDimensions,
 } from '../utils/text-area-helpers';
 import { BoundsDisplay } from './bounds-display';
+import { NumericInputGrid } from './numeric-input-grid';
 
 const ALIGN_OPTIONS = [
   { value: 'left', label: <AlignLeft size={14} /> },
@@ -54,6 +60,7 @@ export function TransformControls({
   const rotateNode = useAnnotatorStore((s) => s.rotateNode);
   const resetNodeTransform = useAnnotatorStore((s) => s.resetNodeTransform);
   const removeNodeScale = useAnnotatorStore((s) => s.removeNodeScale);
+  const commitNodeTransform = useAnnotatorStore((s) => s.commitNodeTransform);
   const node = nodeMap.get(nodeMeta.nodeId);
   const transformStr =
     node?.type === 'element' ? node.attributes.transform : undefined;
@@ -65,6 +72,7 @@ export function TransformControls({
   const bounds = useElementBounds(nodeMeta.nodeId, isEditing);
 
   const setTextAlign = useAnnotatorStore((s) => s.setTextAlign);
+  const setTextDimensions = useAnnotatorStore((s) => s.setTextDimensions);
   const setFontSize = useAnnotatorStore((s) => s.setFontSize);
   const assignment = useAnnotatorStore((s) =>
     fieldId
@@ -130,6 +138,56 @@ export function TransformControls({
     });
   };
 
+  const handleTransformMove = (axis: 'x' | 'y', value: number) => {
+    if (!bounds) return;
+    const delta = value - bounds[axis];
+    if (Math.abs(delta) < 0.01) return;
+
+    commitNodeTransform(
+      nodeMeta.nodeId,
+      applyTranslate(
+        transformStr,
+        axis === 'x' ? delta : 0,
+        axis === 'y' ? delta : 0
+      )
+    );
+  };
+
+  const handleTransformResize = (axis: 'width' | 'height', value: number) => {
+    if (!bounds) return;
+
+    const current = bounds[axis];
+    if (current <= 0) return;
+
+    const ratio = value / current;
+    if (!Number.isFinite(ratio) || Math.abs(ratio - 1) < 0.001) return;
+
+    if (axis === 'width') {
+      commitNodeTransform(
+        nodeMeta.nodeId,
+        applyScaleAroundPoint(
+          transformStr,
+          bounds.x,
+          bounds.y + bounds.height / 2,
+          ratio,
+          1
+        )
+      );
+      return;
+    }
+
+    commitNodeTransform(
+      nodeMeta.nodeId,
+      applyScaleAroundPoint(
+        transformStr,
+        bounds.x + bounds.width / 2,
+        bounds.y,
+        1,
+        ratio
+      )
+    );
+  };
+
   return (
     <div>
       <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb={4}>
@@ -181,39 +239,107 @@ export function TransformControls({
           </Tooltip>
         )}
       </Group>
-      {isEditing && bounds && <BoundsDisplay bounds={bounds} />}
+      {bounds &&
+        (isEditing ? (
+          <NumericInputGrid
+            fields={[
+              {
+                key: 'x',
+                label: 'X',
+                value: bounds.x,
+                onCommit: (value) => handleTransformMove('x', value),
+              },
+              {
+                key: 'y',
+                label: 'Y',
+                value: bounds.y,
+                onCommit: (value) => handleTransformMove('y', value),
+              },
+              {
+                key: 'width',
+                label: 'W',
+                value: bounds.width,
+                min: MIN_SIZE,
+                onCommit: (value) => handleTransformResize('width', value),
+              },
+              {
+                key: 'height',
+                label: 'H',
+                value: bounds.height,
+                min: MIN_SIZE,
+                onCommit: (value) => handleTransformResize('height', value),
+              },
+            ]}
+          />
+        ) : (
+          <BoundsDisplay bounds={bounds} />
+        ))}
       {scaleValues && (
         <SimpleGrid cols={2} spacing={4} mt="xs">
           <Text size="xs" c="dimmed" ta="center">
             <Text span tt="uppercase" fw={600}>
               Scale X
             </Text>{' '}
-            {scaleValues.sx.toFixed(2)}
+            {formatCompactNumber(scaleValues.sx)}
           </Text>
           <Text size="xs" c="dimmed" ta="center">
             <Text span tt="uppercase" fw={600}>
               Scale Y
             </Text>{' '}
-            {scaleValues.sy.toFixed(2)}
+            {formatCompactNumber(scaleValues.sy)}
           </Text>
         </SimpleGrid>
       )}
-      {isEditing && hasDimensions && (
-        <SimpleGrid cols={2} spacing={4} mt="xs">
-          <Text size="xs" c="dimmed" ta="center">
-            <Text span tt="uppercase" fw={600}>
-              Max W
-            </Text>{' '}
-            {assignment.maxWidth}
-          </Text>
-          <Text size="xs" c="dimmed" ta="center">
-            <Text span tt="uppercase" fw={600}>
-              Max H
-            </Text>{' '}
-            {assignment.maxHeight}
-          </Text>
-        </SimpleGrid>
-      )}
+      {hasDimensions &&
+        assignment &&
+        (isEditing ? (
+          <NumericInputGrid
+            columns={2}
+            fields={[
+              {
+                key: 'maxWidth',
+                label: 'Max W',
+                value: assignment.maxWidth!,
+                min: MIN_SIZE,
+                onCommit: (value) =>
+                  setTextDimensions(
+                    nodeMeta.nodeId,
+                    fieldId!,
+                    value,
+                    assignment.maxHeight!
+                  ),
+              },
+              {
+                key: 'maxHeight',
+                label: 'Max H',
+                value: assignment.maxHeight!,
+                min: MIN_SIZE,
+                onCommit: (value) =>
+                  setTextDimensions(
+                    nodeMeta.nodeId,
+                    fieldId!,
+                    assignment.maxWidth!,
+                    value
+                  ),
+              },
+            ]}
+          />
+        ) : (
+          <SimpleGrid cols={2} spacing={4} mt="xs">
+            <Text size="xs" c="dimmed" ta="center">
+              <Text span tt="uppercase" fw={600}>
+                Max W
+              </Text>{' '}
+              {formatCompactNumber(assignment.maxWidth!)}
+            </Text>
+            <Text size="xs" c="dimmed" ta="center">
+              <Text span tt="uppercase" fw={600}>
+                Max H
+              </Text>{' '}
+              {formatCompactNumber(assignment.maxHeight!)}
+            </Text>
+          </SimpleGrid>
+        ))}
       {fieldId && (
         <SegmentedControl
           size="xs"

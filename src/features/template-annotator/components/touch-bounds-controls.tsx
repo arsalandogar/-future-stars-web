@@ -7,8 +7,9 @@ import type { NodeMeta } from '../types';
 import { useAnnotatorStore } from '../stores/annotator-store';
 import { BoundsDisplay } from './bounds-display';
 import { getElementBBoxInSvgRoot } from '../utils/get-element-bbox';
-import { querySvgElement } from '../utils/svg-overlay-helpers';
+import { MIN_SIZE, querySvgElement } from '../utils/svg-overlay-helpers';
 import { ensureTouchBounds } from '../utils/touch-bounds-helpers';
+import { NumericInputGrid } from './numeric-input-grid';
 
 interface TouchBoundsControlsProps {
   nodeMeta: NodeMeta;
@@ -30,6 +31,7 @@ export function TouchBoundsControls({
   );
   const hasBounds = !!assignment?.touchBounds;
   const isEditing = editingNodeId === nodeMeta.nodeId;
+  const touchBounds = assignment?.touchBounds;
 
   const handleToggleEdit = () => {
     if (isEditing) {
@@ -92,9 +94,29 @@ export function TouchBoundsControls({
           </>
         )}
       </Group>
-      {isEditing && assignment?.touchBounds && (
-        <BoundsDisplay bounds={assignment.touchBounds} />
-      )}
+      {touchBounds &&
+        (isEditing ? (
+          <NumericInputGrid
+            fields={(['x', 'y', 'width', 'height'] as const).map((key) => ({
+              key,
+              label:
+                key === 'width'
+                  ? 'W'
+                  : key === 'height'
+                    ? 'H'
+                    : key.toUpperCase(),
+              value: touchBounds[key],
+              ...(key === 'width' || key === 'height' ? { min: MIN_SIZE } : {}),
+              onCommit: (value: number) =>
+                commitTouchBounds(nodeMeta.nodeId, fieldId, {
+                  ...touchBounds,
+                  [key]: value,
+                }),
+            }))}
+          />
+        ) : (
+          <BoundsDisplay bounds={touchBounds} />
+        ))}
     </div>
   );
 }

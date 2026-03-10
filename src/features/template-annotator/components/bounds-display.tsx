@@ -1,6 +1,7 @@
 import { SimpleGrid, Text } from '@mantine/core';
 
 import type { TouchBounds } from '../types';
+import { formatCompactNumber } from '../utils/format-compact-number';
 
 const LABELS: Record<keyof TouchBounds, string> = {
   x: 'X',
@@ -21,7 +22,7 @@ export function BoundsDisplay({ bounds }: BoundsDisplayProps) {
           <Text span tt="uppercase" fw={600}>
             {LABELS[key]}
           </Text>{' '}
-          {Math.round(bounds[key])}
+          {formatCompactNumber(bounds[key])}
         </Text>
       ))}
     </SimpleGrid>
