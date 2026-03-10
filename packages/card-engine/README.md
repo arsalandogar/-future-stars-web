@@ -371,6 +371,10 @@ import { cleanEditsForSave } from '@arsalandogar/fs-card-engine';
 const cleaned = cleanEditsForSave(edits, fields);
 ```
 
+For persistence, use `cleanEditsForPersistence` instead. It builds on
+`cleanEditsForSave` and also removes image URLs that are only valid in
+the current runtime, such as `blob:` URLs.
+
 To re-apply a full set of edits (for example, when rendering on the
 backend), use `applyEdits`:
 
@@ -384,6 +388,11 @@ applyEdits(fields, edits);
 each `ImageEdit`. It does not replay `zoom`, `offsetX`, or `offsetY`.
 If you persist image positioning, call `applyImageZoom` after
 `applyEdits`.
+
+If you want the engine to replay image transforms too, use
+`applyEditsForRender` instead. If you want one helper that clones the
+template, prepares fields, and reapplies all renderable edits, use
+`renderEditedTemplate`.
 
 ### Compress
 
@@ -571,22 +580,19 @@ responsive while the upload completes in the background:
 4. On success, the store calls `withImageEdit` again with the CDN
    URL, replacing the blob URL.
 
-Before saving, the app strips any remaining blob URLs so only
-stable CDN URLs are persisted:
+Before saving, the app calls `cleanEditsForPersistence` so only fields
+present in the template and persistable image URLs remain:
 
 ```typescript
-import { cleanEditsForSave, getEditValue } from '@arsalandogar/fs-card-engine';
+import { cleanEditsForPersistence } from '@arsalandogar/fs-card-engine';
 
-// Remove edits for fields not in this template
-const cleaned = cleanEditsForSave(edits, fields);
-
-// Remove edits that still reference local blob URLs
-const final = Object.fromEntries(
-  Object.entries(cleaned).filter(
-    ([, value]) => value && !getEditValue(value)?.startsWith('blob:')
-  )
-);
+const final = cleanEditsForPersistence(edits, fields);
 ```
+
+By default, `cleanEditsForPersistence` removes unknown field IDs and
+filters image URLs that start with `blob:`. Pass a custom
+`isPersistableImageUrl` function when your runtime needs a different
+rule.
 
 #### Text compression
 
@@ -718,7 +724,8 @@ store.adjustImageZoom(fieldId, newZoom, pos.offsetX, pos.offsetY);
 ### Node.js backend
 
 The backend receives the `edits` JSON from the API and produces the
-final PNG. Its pipeline is a single pass with no reactivity layer:
+final PNG. Its lowest-level pipeline is a single pass with no
+reactivity layer:
 
 ```typescript
 import {
@@ -732,7 +739,9 @@ import {
 const svgNode = parseSvgSync(templateSvgString);
 
 // 2. Clone and discover fields
-const { workingCopy, fields } = prepareTemplate(svgNode);
+const { workingCopy, fields } = prepareTemplate(svgNode, {
+  includeTouchTargets: false,
+});
 
 // 3. Apply the user's saved edits
 applyEdits(fields, savedEdits);
@@ -745,10 +754,10 @@ const finalSvg = stringifySvg(workingCopy);
 const png = await renderSvgToPng(finalSvg);
 ```
 
-The backend doesn't need the `with*Edit` helpers, zoom/nudge
-functions, or `cleanEditsForSave`. It receives already-cleaned
-edits and applies them in one shot. Image URLs in the edits are
-stable CDN URLs — the backend never sees blob URLs.
+The backend typically doesn't need the `with*Edit` helpers,
+`withZoomEdit`, `withNudgeEdit`, or `cleanEditsForSave`. It receives
+already-cleaned edits and applies them in one shot. Image URLs in the
+edits are stable CDN URLs — the backend never sees blob URLs.
 
 If you need to apply image zoom and offset on the backend (for
 example, when the edits include `ImageEdit` objects with
@@ -766,11 +775,38 @@ for (const field of fields.imageFields) {
 }
 ```
 
+Use this low-level flow when you need explicit control over each replay
+step. If you want a one-call final-render helper, use
+`renderEditedTemplate`. It clones the SVG, discovers fields, reapplies
+text, color, and image edits, and replays persisted image transforms:
+
+```typescript
+import {
+  parseSvgSync,
+  renderEditedTemplate,
+  stringifySvg,
+} from '@arsalandogar/fs-card-engine';
+
+const svgNode = parseSvgSync(templateSvgString);
+const { workingCopy } = renderEditedTemplate(svgNode, savedEdits, {
+  includeTouchTargets: false,
+});
+
+const finalSvg = stringifySvg(workingCopy);
+```
+
+If you already have `fields` from `prepareTemplate`, call
+`applyEditsForRender(fields, savedEdits)` instead of `applyEdits` to
+replay image transforms in place. Text compression is still a separate
+step. Run `applyTextCompression` after `applyEditsForRender` or
+`renderEditedTemplate` and before rasterizing the SVG when the template
+uses `data-max-width` annotations.
+
 #### Text compression on the backend
 
 If the template uses `data-max-width` annotations, run
-`applyTextCompression` after `applyEdits` so that overlong text
-fields are fitted before rendering to PNG:
+`applyTextCompression` after replaying edits and before rendering to
+PNG so that overlong text fields are fitted correctly:
 
 ```typescript
 import {
@@ -810,7 +846,9 @@ const fontResolver = createFontResolver({
 });
 
 const svgNode = parseSvgSync(templateSvgString);
-const { workingCopy, fields } = prepareTemplate(svgNode);
+const { workingCopy, fields } = prepareTemplate(svgNode, {
+  includeTouchTargets: false,
+});
 applyEdits(fields, savedEdits);
 await applyTextCompression(workingCopy, { fontResolver });
 
@@ -1015,9 +1053,12 @@ Functions:
 
 | Export                                                 | Signature                                                                                           |
 | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| `prepareTemplate(node)`                                | `(svgNode: SvgJsonNode) => { workingCopy, fields }`                                                 |
+| `prepareTemplate(node, options?)`                      | `(svgNode: SvgJsonNode, options?: PrepareTemplateOptions) => { workingCopy, fields }`               |
 | `applyEdits(fields, edits)`                            | `(fields: DiscoveredFields, edits: Edits) => void`                                                  |
+| `applyEditsForRender(fields, edits)`                   | `(fields: DiscoveredFields, edits: Edits) => void`                                                  |
 | `cleanEditsForSave(edits, fields)`                     | `(edits: Edits, fields: DiscoveredFields) => Edits`                                                 |
+| `cleanEditsForPersistence(edits, fields, options?)`    | `(edits: Edits, fields: DiscoveredFields, options?: CleanEditsForPersistenceOptions) => Edits`      |
+| `renderEditedTemplate(svgNode, edits, options?)`       | `(svgNode: SvgJsonNode, edits: Edits, options?: PrepareTemplateOptions) => { workingCopy, fields }` |
 | `withColorEdit(edits, field, color)`                   | `(edits: Edits, field: EditableColorField, color: string) => Edits`                                 |
 | `withImageEdit(edits, field, imageUrl)`                | `(edits: Edits, field: EditableImageField, imageUrl: string) => Edits`                              |
 | `withTextEdit(edits, field, value)`                    | `(edits: Edits, field: EditableTextField, value: string) => Edits`                                  |
@@ -1038,10 +1079,28 @@ A plain object mapping field IDs to their edited values.
 colorFields: EditableColorField[], imageFields:
 EditableImageField[] }`.
 
+**`PrepareTemplateOptions`** — includes
+`includeTouchTargets?: boolean`. Set it to `false` for backend or
+export flows that do not need interactive overlay rects. The default
+is `true`.
+
+**`CleanEditsForPersistenceOptions`** — includes
+`isPersistableImageUrl?: (url: string) => boolean`. Use it to
+override the default image URL persistence check.
+
 `prepareTemplate` clones the input SVG and returns the editable
 working copy plus discovered fields. `applyEdits` mutates those field
 nodes in place and replays image URLs only. Use `applyImageZoom` to
 reapply any persisted image positioning.
+
+`applyEditsForRender` builds on `applyEdits` and also replays image
+zoom and offset data from `ImageEdit` values. Use
+`renderEditedTemplate` when you want the package to handle cloning,
+field discovery, and render-time replay in one call.
+
+`cleanEditsForPersistence` first removes unknown field IDs, then
+filters image edits using `isPersistableImageUrl`. By default, image
+URLs that start with `blob:` are removed before persistence.
 
 ### Color math (`color-math.ts`)
 
