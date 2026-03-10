@@ -1,6 +1,13 @@
 import { Fragment, useState } from 'react';
-import { ColorPicker, ColorSwatch, Popover, TextInput } from '@mantine/core';
-import { ArrowLeftRight, Heart, RotateCcw } from 'lucide-react';
+import {
+  ActionIcon,
+  ColorPicker,
+  ColorSwatch,
+  Popover,
+  TextInput,
+} from '@mantine/core';
+import { useEyeDropper } from '@mantine/hooks';
+import { ArrowLeftRight, Heart, Pipette, RotateCcw } from 'lucide-react';
 
 import type { EditableFieldId } from '@/features/templates';
 
@@ -34,6 +41,7 @@ function ColorCircle({ fieldId, originalColor, label }: ColorCircleProps) {
   });
   const [opened, setOpened] = useState(false);
   const [hexInput, setHexInput] = useState(color);
+  const { supported, open } = useEyeDropper();
   const updateColorField = useCardEditorStore((s) => s.updateColorField);
 
   const handleOpen = (isOpen: boolean) => {
@@ -41,7 +49,17 @@ function ColorCircle({ fieldId, originalColor, label }: ColorCircleProps) {
     if (isOpen) setHexInput(color);
   };
 
+  const applyHexColor = (value: string) => {
+    const normalized = normalizeHex(value);
+    if (!normalized) return false;
+
+    updateColorField(fieldId, normalized);
+    setHexInput(normalized);
+    return true;
+  };
+
   const handlePickerChange = (value: string) => {
+    // ColorPicker emits valid #rrggbb — skip normalizeHex on every drag tick.
     updateColorField(fieldId, value);
     setHexInput(value);
   };
@@ -55,13 +73,20 @@ function ColorCircle({ fieldId, originalColor, label }: ColorCircleProps) {
   };
 
   const commitHex = () => {
-    const normalized = normalizeHex(hexInput);
-    if (normalized) {
-      updateColorField(fieldId, normalized);
-      setHexInput(normalized);
-    } else {
+    if (!applyHexColor(hexInput)) {
       setHexInput(color);
     }
+  };
+
+  const handleEyeDropperPick = () => {
+    void (async () => {
+      try {
+        const result = await open();
+        if (result?.sRGBHex) applyHexColor(result.sRGBHex);
+      } catch {
+        // EyeDropper throws when the user cancels; keep the current color unchanged.
+      }
+    })();
   };
 
   return (
@@ -89,30 +114,48 @@ function ColorCircle({ fieldId, originalColor, label }: ColorCircleProps) {
           format="hex"
           size="sm"
         />
-        <TextInput
-          value={hexInput}
-          onChange={(e) => handleHexChange(e.currentTarget.value)}
-          onBlur={commitHex}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              e.stopPropagation();
-              commitHex();
-            }
-          }}
-          placeholder="#000000"
-          size="xs"
-          mt="xs"
-          styles={{
-            input: {
-              backgroundColor: '#0d1117',
-              borderColor: '#2a3045',
-              color: 'white',
-              fontFamily: 'monospace',
-              textAlign: 'center',
-            },
-          }}
-        />
+        <div className="flex items-center gap-2 mt-(--mantine-spacing-xs)">
+          <TextInput
+            value={hexInput}
+            onChange={(e) => handleHexChange(e.currentTarget.value)}
+            onBlur={commitHex}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                e.stopPropagation();
+                commitHex();
+              }
+            }}
+            placeholder="#000000"
+            size="xs"
+            className="flex-1"
+            styles={{
+              input: {
+                backgroundColor: '#0d1117',
+                borderColor: '#2a3045',
+                color: 'white',
+                fontFamily: 'monospace',
+                textAlign: 'center',
+              },
+            }}
+          />
+          {supported ? (
+            <ActionIcon
+              variant="default"
+              size={30}
+              onClick={handleEyeDropperPick}
+              aria-label={`Pick ${label} color from screen`}
+              title="Pick color from screen"
+              style={{
+                borderColor: '#2a3045',
+                backgroundColor: '#111827',
+                color: 'var(--mantine-color-gray-1)',
+              }}
+            >
+              <Pipette size={15} />
+            </ActionIcon>
+          ) : null}
+        </div>
       </Popover.Dropdown>
     </Popover>
   );
