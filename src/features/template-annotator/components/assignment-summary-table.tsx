@@ -200,6 +200,7 @@ function AssignmentCard({
       {field.type === 'text' && (a.maxWidth != null || a.maxHeight != null) && (
         <Text size="xs" c="dimmed" mt={2}>
           {a.maxWidth ?? '–'} × {a.maxHeight ?? '–'}
+          {a.multiline && ' · multiline'}
           {a.textAlign && a.textAlign !== 'left' && ` · ${a.textAlign}`}
         </Text>
       )}

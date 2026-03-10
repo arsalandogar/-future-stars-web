@@ -15,6 +15,7 @@ export const DATA_ATTR_COLOR_TARGET = 'data-color-target';
 export const DATA_ATTR_COLOR_OFFSET = 'data-color-offset';
 export const DATA_ATTR_MAX_WIDTH = 'data-max-width';
 export const DATA_ATTR_MAX_HEIGHT = 'data-max-height';
+export const DATA_ATTR_TEXT_MULTILINE = 'data-text-multiline';
 export const DATA_ATTR_TOUCH_BOUNDS = 'data-touch-bounds';
 export const DATA_ATTR_TEXT_ALIGN = 'data-text-align';
 
@@ -24,6 +25,7 @@ export const ALL_ANNOTATION_ATTRS = [
   DATA_ATTR_COLOR_OFFSET,
   DATA_ATTR_MAX_WIDTH,
   DATA_ATTR_MAX_HEIGHT,
+  DATA_ATTR_TEXT_MULTILINE,
   DATA_ATTR_TOUCH_BOUNDS,
   DATA_ATTR_TEXT_ALIGN,
 ];
@@ -91,6 +93,10 @@ export function buildAnnotatedSvg(
             node.attributes[DATA_ATTR_MAX_HEIGHT] = String(
               assignment.maxHeight
             );
+          }
+
+          if (field.type === 'text' && assignment.multiline) {
+            node.attributes[DATA_ATTR_TEXT_MULTILINE] = 'true';
           }
 
           if (field.type === 'text' && assignment.textAlign) {

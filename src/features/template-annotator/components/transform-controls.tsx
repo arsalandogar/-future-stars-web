@@ -1,6 +1,7 @@
 import {
   ActionIcon,
   Button,
+  Checkbox,
   Group,
   NumberInput,
   SegmentedControl,
@@ -79,6 +80,7 @@ export function TransformControls({
   const bounds = useElementBounds(nodeMeta.nodeId, true);
 
   const setTextAlign = useAnnotatorStore((s) => s.setTextAlign);
+  const setTextMultiline = useAnnotatorStore((s) => s.setTextMultiline);
   const setTextDimensions = useAnnotatorStore((s) => s.setTextDimensions);
   const setFontSize = useAnnotatorStore((s) => s.setFontSize);
   const assignment = useAnnotatorStore((s) =>
@@ -380,6 +382,22 @@ export function TransformControls({
               />
             )}
           </div>
+          <Checkbox
+            mt="xs"
+            size="xs"
+            label="Allow multiline wrap"
+            checked={!!assignment?.multiline}
+            onChange={(event) => {
+              if (event.currentTarget.checked) {
+                ensureTextDimensions(nodeMeta.nodeId, fieldId);
+              }
+              setTextMultiline(
+                nodeMeta.nodeId,
+                fieldId,
+                event.currentTarget.checked
+              );
+            }}
+          />
         </div>
       )}
     </Stack>

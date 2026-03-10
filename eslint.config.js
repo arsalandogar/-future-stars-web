@@ -36,6 +36,7 @@ export default defineConfig([
           './tsconfig.node.json',
           './tsconfig.app.json',
           './packages/card-engine/tsconfig.json',
+          './packages/card-engine/tsconfig.test.json',
         ],
         tsconfigRootDir: import.meta.dirname,
       },

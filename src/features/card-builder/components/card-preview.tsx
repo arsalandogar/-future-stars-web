@@ -31,9 +31,8 @@ function CardContent({
   onRetry,
   options,
 }: CardContentProps) {
-  // Used as key on SvgRenderer to force React to rebuild the SVG tree
-  // after in-place text node mutations (React Compiler skips re-render
-  // when only the interior of an unchanged object reference is mutated).
+  // Passed through to SvgRenderer so React re-renders the mutated SVG tree
+  // without remounting the entire preview subtree on each text edit.
   const revision = useCardEditorStore((s) => s.sides[s.activeSide].revision);
 
   if (isError) {
@@ -64,8 +63,8 @@ function CardContent({
 
   return (
     <SvgRenderer
-      key={revision}
       node={svgNode}
+      revision={revision}
       className={styles.svg}
       options={options}
     />

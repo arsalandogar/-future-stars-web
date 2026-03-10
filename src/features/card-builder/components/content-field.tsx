@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ActionIcon } from '@mantine/core';
 import { X } from 'lucide-react';
 
@@ -11,8 +11,10 @@ interface ContentFieldProps {
   field: EditableTextField;
 }
 
+const MULTILINE_INPUT_MAX_HEIGHT = 144;
+
 export function ContentField({ field }: ContentFieldProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
   const [focused, setFocused] = useState(false);
   const editedValue = useCardEditorStore((s) => {
     const v = s.sides[s.activeSide].edits[field.fieldId];
@@ -41,25 +43,69 @@ export function ContentField({ field }: ContentFieldProps) {
   const currentValue = editedValue ?? field.originalValue;
   const isEdited = editedValue !== undefined;
 
+  useLayoutEffect(() => {
+    const element = inputRef.current;
+    if (!field.multiline || !(element instanceof HTMLTextAreaElement)) return;
+
+    element.style.height = '0px';
+
+    const nextHeight = Math.min(
+      element.scrollHeight,
+      MULTILINE_INPUT_MAX_HEIGHT
+    );
+
+    element.style.height = `${nextHeight}px`;
+    element.style.overflowY =
+      element.scrollHeight > MULTILINE_INPUT_MAX_HEIGHT ? 'auto' : 'hidden';
+  }, [currentValue, field.multiline]);
+
+  function handleChange(value: string) {
+    updateTextField(field.fieldId, value);
+  }
+
+  function handleInputRef(node: HTMLInputElement | HTMLTextAreaElement | null) {
+    inputRef.current = node;
+  }
+
   return (
-    <div className={styles.field} data-focused={focused || undefined}>
+    <div
+      className={styles.field}
+      data-focused={focused || undefined}
+      data-multiline={field.multiline || undefined}
+    >
       <div
         className={styles.indicator}
         data-filled={currentValue.trim().length > 0 || undefined}
       />
-      <input
-        ref={inputRef}
-        className={styles.input}
-        type="text"
-        placeholder={field.label}
-        aria-label={field.label}
-        value={currentValue}
-        onChange={(e) => updateTextField(field.fieldId, e.target.value)}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-      />
+      {field.multiline ? (
+        <textarea
+          ref={handleInputRef}
+          className={styles.input}
+          data-multiline="true"
+          rows={1}
+          placeholder={field.label}
+          aria-label={field.label}
+          value={currentValue}
+          onChange={(e) => handleChange(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+        />
+      ) : (
+        <input
+          ref={handleInputRef}
+          className={styles.input}
+          type="text"
+          placeholder={field.label}
+          aria-label={field.label}
+          value={currentValue}
+          onChange={(e) => handleChange(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+        />
+      )}
       {isEdited && (
         <ActionIcon
+          className={styles.resetButton}
           variant="subtle"
           color="gray"
           size="sm"

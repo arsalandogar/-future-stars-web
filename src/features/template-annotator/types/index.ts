@@ -28,6 +28,7 @@ export interface FieldAssignment {
   colorOffset?: OklabOffset;
   maxWidth?: number;
   maxHeight?: number;
+  multiline?: boolean;
   touchBounds?: TouchBounds;
   textAlign?: TextAlign;
 }

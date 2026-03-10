@@ -13,6 +13,7 @@ import {
   DATA_ATTR_COLOR_OFFSET,
   DATA_ATTR_MAX_WIDTH,
   DATA_ATTR_MAX_HEIGHT,
+  DATA_ATTR_TEXT_MULTILINE,
   DATA_ATTR_TOUCH_BOUNDS,
   DATA_ATTR_TEXT_ALIGN,
 } from './export-annotated-svg';
@@ -62,6 +63,10 @@ export function extractAssignments(
         if (maxHeightStr) {
           const maxHeight = Number(maxHeightStr);
           if (Number.isFinite(maxHeight)) assignment.maxHeight = maxHeight;
+        }
+
+        if (node.attributes[DATA_ATTR_TEXT_MULTILINE] === 'true') {
+          assignment.multiline = true;
         }
 
         const textAlignStr = node.attributes[DATA_ATTR_TEXT_ALIGN];

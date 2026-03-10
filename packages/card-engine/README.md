@@ -2,13 +2,14 @@
 
 Shared card editing engine for Future Stars. It handles SVG
 parsing, field discovery, text/color/image edit application,
-text compression for overlong fields, and serialization as
-pure functions on plain JSON — no DOM, no React, no browser
-APIs. This README covers installation, the core pipeline,
-template annotation, platform integration patterns, and the
-full API reference.
+text compression for overlong fields, and serialization on a
+plain JSON SVG tree — no DOM, no React, no browser APIs. The
+public helpers mutate a prepared working copy in place, while
+leaving the original parsed SVG untouched. This README covers
+installation, the core pipeline, template annotation, platform
+integration patterns, and the full API reference.
 
-## Card Dimensions
+## Card dimensions
 
 Card templates use two sizes:
 
@@ -69,6 +70,8 @@ edits.firstName = 'Marcus';
 
 // Apply all edits to the working copy
 applyEdits(fields, edits);
+// If an image edit also stores zoom/offset, replay that with
+// applyImageZoom after applyEdits.
 
 // Optional: compress overlong text fields (requires a FontResolver)
 // await applyTextCompression(workingCopy, { fontResolver });
@@ -110,14 +113,15 @@ Given a template SVG and a set of edits, the engine:
 2. **Discovers** editable fields by walking the tree for `data-*`
    attributes
 3. **Applies** each edit — replacing text content, computing derived
-   colors, swapping image URLs and adjusting bounds
+   colors, swapping image URLs, and adjusting image bounds
 4. **Compresses** overlong text by measuring glyph widths with
    opentype.js and applying a horizontal scale transform when text
    exceeds its `data-max-width`
 5. **Serializes** the modified tree back to an SVG string
 
-All operations are pure functions on plain JSON. No DOM, no React,
-no browser APIs.
+All operations work on plain JSON. `prepareTemplate` creates an
+isolated working copy, and the edit helpers mutate that copy in
+place. No DOM, no React, no browser APIs.
 
 ## Template annotation reference
 
@@ -142,13 +146,11 @@ Multiple elements can share the same field ID. When the user edits
 the field, the engine updates all elements with that ID. This is
 useful when the same name appears in two places on the card.
 
-#### Max width constraint
+#### Text fit constraints
 
 Add `data-max-width` to a `<text>` element to enable automatic
-text compression. The value is the maximum allowed width in SVG
-user units. When `applyTextCompression` runs, it measures the
-rendered text width using opentype.js and applies a horizontal
-`scale()` transform if the text exceeds the limit:
+text fitting. The value is the maximum allowed width in SVG user
+units.
 
 ```xml
 <text data-text-field="firstName" data-max-width="280">
@@ -156,8 +158,37 @@ rendered text width using opentype.js and applies a horizontal
 </text>
 ```
 
-The compression uses `translate → scale → translate` to scale
-around the element's `x` origin, preserving text alignment.
+When `applyTextCompression` runs, it measures the rendered text
+width using opentype.js and applies a horizontal `scale()`
+transform if the text exceeds the limit.
+
+Add `data-max-height` and `data-text-multiline="true"` when you
+want the engine to treat a field as multiline and keep the text
+inside a fixed text area:
+
+```xml
+<text
+  data-text-field="firstName"
+  data-max-width="280"
+  data-max-height="56"
+  data-text-multiline="true"
+>
+  <tspan x="100" y="200">John Doe</tspan>
+</text>
+```
+
+When the multiline flag is present, the engine first tries to wrap
+text onto multiple `<tspan>` lines that fit inside the width and
+height limits. The fitter now uses one stable solver: it finds the
+largest feasible final scale inside the text area, then applies a
+single wrapped layout and uniform scale for that result. If
+wrapping is not possible, for example because a single word exceeds
+the width, the engine falls back to the single-line horizontal
+`scale()` transform.
+
+If the multiline flag is absent, the engine keeps the field
+single-line and only applies the width-based horizontal scale path,
+even if `data-max-height` is present.
 
 **Limitation:** Text nodes with mixed styles (child `<tspan>` or
 `<textPath>` elements that override `font-family`, `font-size`,
@@ -349,11 +380,16 @@ import { applyEdits } from '@arsalandogar/fs-card-engine';
 applyEdits(fields, edits);
 ```
 
+`applyEdits` replays text edits, color edits, and the image URL from
+each `ImageEdit`. It does not replay `zoom`, `offsetX`, or `offsetY`.
+If you persist image positioning, call `applyImageZoom` after
+`applyEdits`.
+
 ### Compress
 
 If the template uses `data-max-width` annotations on text fields,
-run `applyTextCompression` after editing to horizontally scale any
-text that exceeds the maximum width:
+run `applyTextCompression` after editing to fit any text that
+exceeds the maximum width:
 
 ```typescript
 import { applyTextCompression } from '@arsalandogar/fs-card-engine';
@@ -365,7 +401,9 @@ const result = await applyTextCompression(workingCopy, {
   fontCache,
   onWarning: (w) => console.warn(w.message),
 });
-// result.compressedCount — number of text nodes that were scaled
+// result.compressedCount — number of text nodes that ended scaled
+// result.wrappedCount   — number of text nodes that ended wrapped
+// result.modifiedCount  — number of text nodes whose layout changed
 // result.warningCount   — number of warnings emitted
 ```
 
@@ -387,6 +425,9 @@ const svg = stringifySvg(workingCopy);
 
 ## What's shared vs platform-specific
 
+This table separates the reusable engine behavior from the
+platform-specific pieces that stay outside the package.
+
 | Shared (this package)                    | Platform-specific                  |
 | ---------------------------------------- | ---------------------------------- |
 | SVG parsing and serialization            | SVG → PNG rendering (backend)      |
@@ -398,11 +439,11 @@ const svg = stringifySvg(workingCopy);
 
 ## Platform integration
 
-The engine provides pure functions on plain JSON. Each platform
-wraps these functions with its own state management, rendering,
-and I/O layer. This section documents the patterns used by the
-React web app and outlines how the backend and React Native
-platforms integrate.
+The engine operates on a mutable working SVG tree stored as plain
+JSON. Each platform wraps that behavior with its own state
+management, rendering, and I/O layer. This section documents the
+patterns used by the React web app and outlines how the backend and
+React Native platforms integrate.
 
 ### React web app
 
@@ -448,18 +489,22 @@ const { workingCopy, fields } = prepareTemplate(svgNode);
 applyEdits(fields, previousEdits);
 ```
 
+This restore path reapplies text, colors, and image URLs. If you also
+persist image zoom or pan, replay those values separately with
+`applyImageZoom` after `applyEdits`.
+
 #### Triggering re-renders
 
 The engine mutates the `SvgJsonNode` tree in place. React doesn't
 detect in-place mutations on an unchanged object reference, so the
 store bumps a `revision` counter after every edit. The preview
-component uses `revision` as its React `key`, which forces React to
-rebuild the SVG element tree:
+component passes `revision` through to `SvgRenderer`, which forces a
+normal re-render without remounting the whole SVG tree:
 
 ```tsx
 const revision = useCardEditorStore((s) => s.sides[s.activeSide].revision);
 
-<SvgRenderer key={revision} node={workingCopy} />;
+<SvgRenderer revision={revision} node={workingCopy} />;
 ```
 
 Every store method that calls an engine mutation function (for
@@ -546,8 +591,10 @@ const final = Object.fromEntries(
 #### Text compression
 
 The store runs `applyTextCompression` after every text edit to
-horizontally scale text nodes that exceed their `data-max-width`.
-Because font resolution is async, the store uses a run-loop
+fit text nodes that exceed their `data-max-width`. When
+`data-text-multiline="true"` is also present, the engine uses the
+stable multiline solver and applies one final fitted layout per
+edit. Because font resolution is async, the store uses a run-loop
 pattern to coalesce rapid edits into a single compression pass:
 
 ```typescript
@@ -583,8 +630,8 @@ const scheduleTextCompression = (side: Side): void => {
           continue;
         }
 
-        // Bump revision only when compression modified the tree
-        if (result.compressedCount > 0) {
+        // Bump revision only when fitting modified the tree
+        if (result.modifiedCount > 0) {
           set(commitSide(get(), side, {}));
         }
       }
@@ -723,7 +770,7 @@ for (const field of fields.imageFields) {
 
 If the template uses `data-max-width` annotations, run
 `applyTextCompression` after `applyEdits` so that overlong text
-fields are horizontally scaled before rendering to PNG:
+fields are fitted before rendering to PNG:
 
 ```typescript
 import {
@@ -806,6 +853,9 @@ Every public export is listed below, grouped by module.
 
 ### Types (`types.ts`)
 
+These exports define the shared value shapes and utility helpers used
+throughout the engine.
+
 | Export                   | Kind     | Description                                   |
 | ------------------------ | -------- | --------------------------------------------- |
 | `SvgJsonNode`            | type     | Re-export of svgson's `INode`                 |
@@ -868,6 +918,9 @@ ID, its type, and its label:
 
 ### SVG parsing (`parse-svg.ts`)
 
+Use these helpers to convert between SVG strings and `SvgJsonNode`
+trees.
+
 | Export                    | Signature                                     |
 | ------------------------- | --------------------------------------------- |
 | `parseSvgSync(svgString)` | `(svgString: string) => SvgJsonNode`          |
@@ -875,6 +928,9 @@ ID, its type, and its label:
 | `stringifySvg(node)`      | `(node: SvgJsonNode) => string`               |
 
 ### SVG cloning (`svg-clone.ts`)
+
+Use this helper to create a stable, editable working copy of a parsed
+SVG tree.
 
 | Export                     | Signature                            |
 | -------------------------- | ------------------------------------ |
@@ -903,7 +959,9 @@ missing or malformed. The discovery functions call it internally,
 but it's also exported for direct use.
 
 **`EditableTextField`** — `{ fieldId, label, originalValue,
-elementNodes, touchBounds? }`. The `elementNodes` array contains
+multiline, elementNodes, touchBounds? }`. The `multiline` flag is
+`true` when the first annotated element has
+`data-text-multiline="true"`. The `elementNodes` array contains
 every SVG element annotated with that field ID. The optional
 `touchBounds` is a `TouchBounds` parsed from the first element's
 `data-touch-bounds` attribute.
@@ -936,11 +994,11 @@ These functions mutate SVG nodes in place:
 | `applyColorEdit(field, color)`    | `(field: EditableColorField, color: string) => void`    |
 | `applyImageEdit(field, imageUrl)` | `(field: EditableImageField, imageUrl: string) => void` |
 
-`applyTextEdit` sets the first text node's value in each annotated
-element. `applyColorEdit` writes the color to each element's target
-property, computing OKLAB-derived shades for elements with offsets.
-`applyImageEdit` sets `href` and `xlink:href`, and resizes the
-image to fill the clip bounds when replacing the original.
+`applyTextEdit` updates the text content in each annotated element.
+`applyColorEdit` writes the color to each element's target property,
+computing OKLAB-derived shades for elements with offsets.
+`applyImageEdit` sets `href` and `xlink:href`, and resizes the image
+to fill the clip bounds when replacing the original.
 
 ### Edit helpers (`edit-operations.ts`)
 
@@ -980,6 +1038,11 @@ A plain object mapping field IDs to their edited values.
 colorFields: EditableColorField[], imageFields:
 EditableImageField[] }`.
 
+`prepareTemplate` clones the input SVG and returns the editable
+working copy plus discovered fields. `applyEdits` mutates those field
+nodes in place and replays image URLs only. Use `applyImageZoom` to
+reapply any persisted image positioning.
+
 ### Color math (`color-math.ts`)
 
 Functions for perceptual color operations in OKLAB space:
@@ -1011,8 +1074,8 @@ passing it in.
 
 ### Text compression (`text-compression.ts`)
 
-Functions for measuring text width and applying horizontal scale
-compression to text nodes that exceed their `data-max-width`.
+Functions for measuring text width and fitting text nodes that
+exceed their `data-max-width`.
 
 | Export                                                   | Signature                                                                                          |
 | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
@@ -1029,7 +1092,7 @@ compression to text nodes that exceed their `data-max-width`.
 | `TextCompressionWarningReason` | type      | Union of warning reason strings (see table below)                             |
 | `TextCompressionWarning`       | interface | `{ reason, nodeId?, message }` — compression warning                          |
 | `ApplyTextCompressionOptions`  | interface | `{ fontResolver, onWarning?, fontCache? }`                                    |
-| `ApplyTextCompressionResult`   | interface | `{ compressedCount, warningCount }`                                           |
+| `ApplyTextCompressionResult`   | interface | `{ compressedCount, wrappedCount, modifiedCount, warningCount }`              |
 | `FontLookupResult`             | interface | `{ font, errorReason? }` — cached font resolution result                      |
 
 **Warning reasons:**
@@ -1066,6 +1129,9 @@ candidates from family/weight/style inputs.
 
 ### Font resolver factory (`create-font-resolver.ts`)
 
+Use this factory to bridge platform-specific font loading into the
+engine's `FontResolver` interface.
+
 | Export                        | Signature                                              |
 | ----------------------------- | ------------------------------------------------------ |
 | `createFontResolver(options)` | `(options: CreateFontResolverOptions) => FontResolver` |
@@ -1088,17 +1154,22 @@ filename-based fallback when no exact registry match is found.
 Per-side editing state used by platform integrations to track the
 working copy, discovered fields, and edits for each card side.
 
-| Export                                  | Kind      | Description                                                     |
-| --------------------------------------- | --------- | --------------------------------------------------------------- |
-| `Side`                                  | type      | `'front' \| 'back'`                                             |
-| `SideState`                             | interface | Per-side state: working copy, fields, edits, revision, preset   |
-| `createEmptySideState()`                | function  | Returns a blank `SideState` with no fields or edits             |
-| `initializeSideSnapshot(svgNode, prev)` | function  | Rebuilds a side from SVG, re-applying edits from previous state |
+| Export                                  | Kind      | Description                                                                                     |
+| --------------------------------------- | --------- | ----------------------------------------------------------------------------------------------- |
+| `Side`                                  | type      | `'front' \| 'back'`                                                                             |
+| `SideState`                             | interface | Per-side state: working copy, fields, edits, revision, preset                                   |
+| `createEmptySideState()`                | function  | Returns a blank `SideState` with no fields or edits                                             |
+| `initializeSideSnapshot(svgNode, prev)` | function  | Rebuilds a side from SVG, re-applying preset colors and stored text, color, and image URL edits |
 
 **`SideState`** — `{ workingCopy, editableFields,
 editableColorFields, editableImageFields, edits, revision,
 appliedPresetId, appliedPresetColors }`. The `revision` counter
 increments on each rebuild, letting renderers detect changes.
+
+`initializeSideSnapshot` uses `applyEdits` internally, so it restores
+text, colors, and image URLs from `previous.edits`. If your platform
+also persists image zoom or pan, replay those values after
+initialization.
 
 ## OKLAB color math
 
@@ -1147,6 +1218,9 @@ range (`~0–0.5`) to `~0–100`. The default clustering threshold of
 
 ## Dependencies
 
+These libraries back the package's SVG parsing, color math, and font
+measurement features.
+
 - [**culori**](https://culorijs.org/) — pure JS OKLAB color conversions
 - [**nanoid**](https://github.com/ai/nanoid) — unique ID generation for SVG node cloning
 - [**opentype.js**](https://opentype.js.org/) — OpenType font
@@ -1157,6 +1231,9 @@ No native modules, no DOM APIs. Works in Node.js, browsers,
 and React Native (Hermes/JSC).
 
 ## Next steps
+
+Use these references to dig deeper into the engine and its consuming
+apps.
 
 - Browse the source code in `packages/card-engine/src/` to see
   the implementation details

@@ -9,6 +9,8 @@ export interface SvgRenderOptions {
 
 interface SvgRendererProps {
   node: SvgJsonNode;
+  /** Changing this value forces a re-render of the mutated SVG tree. */
+  revision?: number;
   className?: string;
   options?: SvgRenderOptions;
 }
@@ -48,7 +50,15 @@ function renderNode(
   return createElement(node.name, finalProps, ...children);
 }
 
-export function SvgRenderer({ node, className, options }: SvgRendererProps) {
+export function SvgRenderer({
+  node,
+  revision = 0,
+  className,
+  options,
+}: SvgRendererProps) {
+  // revision is read here so React re-renders when the SVG tree is mutated
+  void revision;
+
   const children = node.children.map((child, i) =>
     renderNode(child, i, options)
   );

@@ -6,7 +6,8 @@ import type {
 } from './types.ts';
 import { applyOklabOffset, parseOffset } from './color-math.ts';
 import { EDITABLE_FIELDS, type EditableFieldId } from './vocabulary.ts';
-import { collectTextContent } from './svg-text-utils.ts';
+import { collectTextContent, setTextElementContent } from './svg-text-utils.ts';
+import { MULTILINE_ATTR } from './text-compression.ts';
 
 function buildFieldOrder(type: string): Map<EditableFieldId, number> {
   const ids = Object.entries(EDITABLE_FIELDS)
@@ -36,17 +37,9 @@ export interface EditableTextField {
   fieldId: EditableFieldId;
   label: string;
   originalValue: string;
+  multiline: boolean;
   elementNodes: SvgJsonNode[];
   touchBounds?: TouchBounds;
-}
-
-function findFirstTextNode(node: SvgJsonNode): SvgJsonNode | null {
-  if (node.type === 'text') return node;
-  for (const child of node.children) {
-    const found = findFirstTextNode(child);
-    if (found) return found;
-  }
-  return null;
 }
 
 export function discoverEditableTextFields(
@@ -80,6 +73,7 @@ export function discoverEditableTextFields(
   for (const [fieldId, elementNodes] of fieldMap) {
     const fieldDef = EDITABLE_FIELDS[fieldId];
     const originalValue = collectTextContent(elementNodes[0]);
+    const multiline = elementNodes[0].attributes[MULTILINE_ATTR] === 'true';
     const touchBounds = parseTouchBounds(
       elementNodes[0].attributes['data-touch-bounds']
     );
@@ -88,6 +82,7 @@ export function discoverEditableTextFields(
       fieldId,
       label: fieldDef.label,
       originalValue,
+      multiline,
       elementNodes,
       ...(touchBounds && { touchBounds }),
     });
@@ -104,10 +99,7 @@ export function discoverEditableTextFields(
 
 export function applyTextEdit(field: EditableTextField, value: string): void {
   for (const elementNode of field.elementNodes) {
-    const textNode = findFirstTextNode(elementNode);
-    if (textNode) {
-      textNode.value = value;
-    }
+    setTextElementContent(elementNode, value);
   }
 }
 

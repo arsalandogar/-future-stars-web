@@ -148,6 +148,11 @@ interface AnnotatorState {
     fieldId: EditableFieldId,
     align: TextAlign
   ) => void;
+  setTextMultiline: (
+    nodeId: string,
+    fieldId: EditableFieldId,
+    multiline: boolean
+  ) => void;
   setFontSize: (nodeId: string, fontSize: number) => void;
   deleteNode: (nodeId: string) => void;
   undo: () => void;
@@ -307,6 +312,21 @@ function updateAssignmentDimensions(
       ? { ...a, maxWidth, maxHeight }
       : a
   );
+}
+
+function updateAssignmentMultiline(
+  assignments: FieldAssignment[],
+  nodeId: string,
+  fieldId: EditableFieldId,
+  multiline: boolean
+): FieldAssignment[] {
+  return assignments.map((a) => {
+    if (a.nodeId !== nodeId || a.fieldId !== fieldId) return a;
+    if (multiline) return { ...a, multiline: true };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { multiline: _omit, ...rest } = a;
+    return rest;
+  });
 }
 
 function clearIfDeleted(
@@ -852,6 +872,20 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
         prevAssignments,
         prevSnapshot,
       }),
+      redoStack: [],
+    });
+  },
+
+  setTextMultiline: (nodeId, fieldId, multiline) => {
+    const { assignments, undoStack } = get();
+    set({
+      assignments: updateAssignmentMultiline(
+        assignments,
+        nodeId,
+        fieldId,
+        multiline
+      ),
+      undoStack: pushUndo(undoStack, { type: 'assignments', assignments }),
       redoStack: [],
     });
   },

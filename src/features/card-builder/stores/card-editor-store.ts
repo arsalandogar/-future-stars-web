@@ -172,7 +172,7 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => {
             continue;
           }
 
-          if (result.compressedCount > 0) {
+          if (result.modifiedCount > 0) {
             const latestState = get();
             set(commitSide(latestState, side, {}));
           }
