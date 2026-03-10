@@ -92,6 +92,7 @@ export function toReactAttributes(
   const props: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(attributes)) {
     if (key.startsWith('data-') || key === '__nodeId') continue;
+    if (value == null) continue;
     if (key === 'style') {
       props.style = parseStyleString(value);
     } else {
