@@ -4,7 +4,7 @@ import {
   Group,
   NumberInput,
   SegmentedControl,
-  SimpleGrid,
+  Stack,
   Text,
   Tooltip,
 } from '@mantine/core';
@@ -30,7 +30,6 @@ import {
   parseScaleValues,
 } from '../utils/svg-transform-helpers';
 import { MIN_SIZE, querySvgElement } from '../utils/svg-overlay-helpers';
-import { formatCompactNumber } from '../utils/format-compact-number';
 import {
   ensureTextDimensions,
   resetTextDimensions,
@@ -44,6 +43,14 @@ const ALIGN_OPTIONS = [
   { value: 'right', label: <AlignRight size={14} /> },
 ];
 const ROTATE_STEP_DEGREES = 15;
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb={4}>
+      {children}
+    </Text>
+  );
+}
 
 interface TransformControlsProps {
   nodeMeta: NodeMeta;
@@ -69,7 +76,7 @@ export function TransformControls({
   const hasScale = !!scaleValues;
   const isEditing = editingNodeId === nodeMeta.nodeId;
 
-  const bounds = useElementBounds(nodeMeta.nodeId, isEditing);
+  const bounds = useElementBounds(nodeMeta.nodeId, true);
 
   const setTextAlign = useAnnotatorStore((s) => s.setTextAlign);
   const setTextDimensions = useAnnotatorStore((s) => s.setTextDimensions);
@@ -189,10 +196,8 @@ export function TransformControls({
   };
 
   return (
-    <div>
-      <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb={4}>
-        Transform
-      </Text>
+    <Stack gap="lg">
+      {/* Actions row */}
       <Group gap="xs">
         <Button
           size="xs"
@@ -239,134 +244,144 @@ export function TransformControls({
           </Tooltip>
         )}
       </Group>
-      {bounds &&
-        (isEditing ? (
-          <NumericInputGrid
-            fields={[
-              {
-                key: 'x',
-                label: 'X',
-                value: bounds.x,
-                onCommit: (value) => handleTransformMove('x', value),
-              },
-              {
-                key: 'y',
-                label: 'Y',
-                value: bounds.y,
-                onCommit: (value) => handleTransformMove('y', value),
-              },
-              {
-                key: 'width',
-                label: 'W',
-                value: bounds.width,
-                min: MIN_SIZE,
-                onCommit: (value) => handleTransformResize('width', value),
-              },
-              {
-                key: 'height',
-                label: 'H',
-                value: bounds.height,
-                min: MIN_SIZE,
-                onCommit: (value) => handleTransformResize('height', value),
-              },
-            ]}
-          />
-        ) : (
-          <BoundsDisplay bounds={bounds} />
-        ))}
-      {scaleValues && (
-        <SimpleGrid cols={2} spacing={4} mt="xs">
-          <Text size="xs" c="dimmed" ta="center">
-            <Text span tt="uppercase" fw={600}>
-              Scale X
-            </Text>{' '}
-            {formatCompactNumber(scaleValues.sx)}
-          </Text>
-          <Text size="xs" c="dimmed" ta="center">
-            <Text span tt="uppercase" fw={600}>
-              Scale Y
-            </Text>{' '}
-            {formatCompactNumber(scaleValues.sy)}
-          </Text>
-        </SimpleGrid>
+
+      {/* Position & Size section */}
+      {bounds && (
+        <div>
+          <SectionLabel>Position &amp; Size</SectionLabel>
+          <Stack gap="xs">
+            {isEditing ? (
+              <NumericInputGrid
+                fields={[
+                  {
+                    key: 'x',
+                    label: 'X',
+                    value: bounds.x,
+                    onCommit: (value) => handleTransformMove('x', value),
+                  },
+                  {
+                    key: 'y',
+                    label: 'Y',
+                    value: bounds.y,
+                    onCommit: (value) => handleTransformMove('y', value),
+                  },
+                  {
+                    key: 'width',
+                    label: 'W',
+                    value: bounds.width,
+                    min: MIN_SIZE,
+                    onCommit: (value) => handleTransformResize('width', value),
+                  },
+                  {
+                    key: 'height',
+                    label: 'H',
+                    value: bounds.height,
+                    min: MIN_SIZE,
+                    onCommit: (value) => handleTransformResize('height', value),
+                  },
+                ]}
+              />
+            ) : (
+              <BoundsDisplay
+                items={[
+                  { label: 'X', value: bounds.x },
+                  { label: 'Y', value: bounds.y },
+                  { label: 'W', value: bounds.width },
+                  { label: 'H', value: bounds.height },
+                ]}
+              />
+            )}
+            {scaleValues && (
+              <BoundsDisplay
+                items={[
+                  { label: 'Scale X', value: scaleValues.sx },
+                  { label: 'Scale Y', value: scaleValues.sy },
+                ]}
+              />
+            )}
+          </Stack>
+        </div>
       )}
-      {hasDimensions &&
-        assignment &&
-        (isEditing ? (
-          <NumericInputGrid
-            columns={2}
-            fields={[
-              {
-                key: 'maxWidth',
-                label: 'Max W',
-                value: assignment.maxWidth!,
-                min: MIN_SIZE,
-                onCommit: (value) =>
-                  setTextDimensions(
-                    nodeMeta.nodeId,
-                    fieldId!,
-                    value,
-                    assignment.maxHeight!
-                  ),
-              },
-              {
-                key: 'maxHeight',
-                label: 'Max H',
-                value: assignment.maxHeight!,
-                min: MIN_SIZE,
-                onCommit: (value) =>
-                  setTextDimensions(
-                    nodeMeta.nodeId,
-                    fieldId!,
-                    assignment.maxWidth!,
-                    value
-                  ),
-              },
-            ]}
-          />
-        ) : (
-          <SimpleGrid cols={2} spacing={4} mt="xs">
-            <Text size="xs" c="dimmed" ta="center">
-              <Text span tt="uppercase" fw={600}>
-                Max W
-              </Text>{' '}
-              {formatCompactNumber(assignment.maxWidth!)}
-            </Text>
-            <Text size="xs" c="dimmed" ta="center">
-              <Text span tt="uppercase" fw={600}>
-                Max H
-              </Text>{' '}
-              {formatCompactNumber(assignment.maxHeight!)}
-            </Text>
-          </SimpleGrid>
-        ))}
+
+      {/* Text Area section */}
+      {hasDimensions && assignment && (
+        <div>
+          <SectionLabel>Text Area</SectionLabel>
+          {isEditing ? (
+            <NumericInputGrid
+              columns={2}
+              fields={[
+                {
+                  key: 'maxWidth',
+                  label: 'Max W',
+                  value: assignment.maxWidth!,
+                  min: MIN_SIZE,
+                  onCommit: (value) =>
+                    setTextDimensions(
+                      nodeMeta.nodeId,
+                      fieldId!,
+                      value,
+                      assignment.maxHeight!
+                    ),
+                },
+                {
+                  key: 'maxHeight',
+                  label: 'Max H',
+                  value: assignment.maxHeight!,
+                  min: MIN_SIZE,
+                  onCommit: (value) =>
+                    setTextDimensions(
+                      nodeMeta.nodeId,
+                      fieldId!,
+                      assignment.maxWidth!,
+                      value
+                    ),
+                },
+              ]}
+            />
+          ) : (
+            <BoundsDisplay
+              items={[
+                { label: 'Max W', value: assignment.maxWidth! },
+                { label: 'Max H', value: assignment.maxHeight! },
+              ]}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Text Settings section */}
       {fieldId && (
-        <SegmentedControl
-          size="xs"
-          value={currentAlign}
-          onChange={(value) => {
-            ensureTextDimensions(nodeMeta.nodeId, fieldId);
-            setTextAlign(nodeMeta.nodeId, fieldId, value as TextAlign);
-          }}
-          data={ALIGN_OPTIONS}
-          mt="xs"
-        />
+        <div>
+          <SectionLabel>Text</SectionLabel>
+          <div className="flex items-center gap-2">
+            <SegmentedControl
+              size="xs"
+              value={currentAlign}
+              onChange={(value) => {
+                ensureTextDimensions(nodeMeta.nodeId, fieldId);
+                setTextAlign(nodeMeta.nodeId, fieldId, value as TextAlign);
+              }}
+              data={ALIGN_OPTIONS}
+            />
+            {currentFontSize != null && (
+              <NumberInput
+                size="xs"
+                label="Size"
+                value={currentFontSize}
+                onChange={(value) => {
+                  if (typeof value === 'number' && value > 0) {
+                    setFontSize(nodeMeta.nodeId, value);
+                  }
+                }}
+                min={1}
+                step={1}
+                className="flex-1"
+              />
+            )}
+          </div>
+        </div>
       )}
-      {fieldId && currentFontSize != null && (
-        <NumberInput
-          size="xs"
-          label="Font Size"
-          value={currentFontSize}
-          onChange={(value) => {
-            if (typeof value === 'number' && value > 0) {
-              setFontSize(nodeMeta.nodeId, value);
-            }
-          }}
-          min={1}
-          step={1}
-          mt="xs"
-        />
-      )}
-    </div>
+    </Stack>
   );
 }

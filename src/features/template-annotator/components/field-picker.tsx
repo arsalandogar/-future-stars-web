@@ -7,7 +7,7 @@ import {
   ThemeIcon,
   Tooltip,
 } from '@mantine/core';
-import { Check } from 'lucide-react';
+import { Check, Image, Palette, Type } from 'lucide-react';
 
 import { EDITABLE_FIELDS, type EditableFieldId } from '@/features/templates';
 
@@ -36,26 +36,35 @@ const DETAIL_FIELDS: EditableFieldId[] = ALL_FIELD_IDS.filter(
     !TEXT_SLOT_FIELDS.includes(id)
 );
 
-const FIELD_GROUPS: { label: string; fields: EditableFieldId[] }[] = [
+const FIELD_GROUPS: {
+  label: string;
+  fields: EditableFieldId[];
+  icon: typeof Type;
+}[] = [
   {
     label: 'Names',
     fields: ALL_FIELD_IDS.filter((id) => NAME_FIELDS.includes(id)),
+    icon: Type,
   },
   {
     label: 'Details',
     fields: DETAIL_FIELDS,
+    icon: Type,
   },
   {
     label: 'Text Slots',
     fields: TEXT_SLOT_FIELDS,
+    icon: Type,
   },
   {
     label: 'Images',
     fields: ALL_FIELD_IDS.filter((id) => EDITABLE_FIELDS[id].type === 'image'),
+    icon: Image,
   },
   {
     label: 'Colors',
     fields: ALL_FIELD_IDS.filter((id) => EDITABLE_FIELDS[id].type === 'color'),
+    icon: Palette,
   },
 ];
 
@@ -139,17 +148,22 @@ function FieldItem({ fieldId, nodeMeta, assignments }: FieldItemProps) {
       data-assigned-elsewhere={isAssignedElsewhere && !isAssignedHere}
       onClick={isDisabled ? undefined : handleClick}
     >
-      <div className="w-4 shrink-0">
+      <div className="w-5 shrink-0">
         {isAssignedHere && (
-          <ThemeIcon size={16} radius="xl" variant="filled" color="primary">
-            <Check size={10} />
+          <ThemeIcon size={20} radius="xl" variant="filled" color="primary">
+            <Check size={12} />
           </ThemeIcon>
         )}
       </div>
 
-      <Text size="sm" className="flex-1">
-        {field.label}
-      </Text>
+      <div className="flex-1 min-w-0">
+        <Text size="sm">{field.label}</Text>
+        {isAssignedElsewhere && isDisabled && (
+          <Text size="xs" c="dimmed" truncate>
+            &rarr; {assignedToLabel}
+          </Text>
+        )}
+      </div>
 
       {field.type === 'color' && colorCount > 0 && (
         <Badge size="xs" variant="light" circle>
@@ -258,6 +272,10 @@ export function FieldPicker({ nodeMeta }: FieldPickerProps) {
           <Accordion.Item key={group.label} value={group.label}>
             <Accordion.Control>
               <div className="flex items-center gap-2">
+                <group.icon
+                  size={14}
+                  className="text-(--mantine-color-dimmed)"
+                />
                 <span>{group.label}</span>
                 {count && count.assigned > 0 && (
                   <Badge size="xs" variant="light" color="primary">

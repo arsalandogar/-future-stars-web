@@ -15,6 +15,9 @@ import {
   getCardBounds,
 } from '../utils/svg-overlay-helpers';
 
+const TOUCH_BOUNDS_COLOR = 'rgb(18, 184, 134)';
+const TOUCH_BOUNDS_FILL = 'rgba(18, 184, 134, 0.08)';
+
 interface TouchBoundsOverlayProps {
   viewBox: string;
   bounds: TouchBounds;
@@ -184,8 +187,8 @@ export function TouchBoundsOverlay({
         y={activeBounds.y}
         width={activeBounds.width}
         height={activeBounds.height}
-        fill="rgba(80, 70, 255, 0.08)"
-        stroke="var(--mantine-color-primary-4)"
+        fill={TOUCH_BOUNDS_FILL}
+        stroke={TOUCH_BOUNDS_COLOR}
         strokeWidth={handleSize / 4}
         strokeDasharray={`${handleSize} ${handleSize / 2}`}
         style={{
@@ -215,7 +218,7 @@ export function TouchBoundsOverlay({
             width={handleSize}
             height={handleSize}
             fill="white"
-            stroke="var(--mantine-color-primary-4)"
+            stroke={TOUCH_BOUNDS_COLOR}
             strokeWidth={handleSize / 6}
             style={{
               cursor: HANDLE_CURSORS[h.id],

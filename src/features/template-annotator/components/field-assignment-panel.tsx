@@ -144,12 +144,17 @@ export function FieldAssignmentPanel() {
               fieldId={textAssignment?.fieldId}
             />
 
-            {touchBoundsAssignment && (
-              <TouchBoundsControls
-                nodeMeta={meta}
-                fieldId={touchBoundsAssignment.fieldId}
-              />
-            )}
+            <div
+              className={styles.touchBoundsWrapper}
+              data-visible={!!touchBoundsAssignment}
+            >
+              {touchBoundsAssignment && (
+                <TouchBoundsControls
+                  nodeMeta={meta}
+                  fieldId={touchBoundsAssignment.fieldId}
+                />
+              )}
+            </div>
 
             <Divider />
 

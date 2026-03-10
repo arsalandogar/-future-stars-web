@@ -1,30 +1,34 @@
-import { SimpleGrid, Text } from '@mantine/core';
+import { Text } from '@mantine/core';
 
-import type { TouchBounds } from '../types';
 import { formatCompactNumber } from '../utils/format-compact-number';
 
-const LABELS: Record<keyof TouchBounds, string> = {
-  x: 'X',
-  y: 'Y',
-  width: 'W',
-  height: 'H',
-};
-
-interface BoundsDisplayProps {
-  bounds: TouchBounds;
+interface BoundsDisplayItem {
+  label: string;
+  value: number;
 }
 
-export function BoundsDisplay({ bounds }: BoundsDisplayProps) {
+interface BoundsDisplayProps {
+  items: BoundsDisplayItem[];
+}
+
+export function BoundsDisplay({ items }: BoundsDisplayProps) {
   return (
-    <SimpleGrid cols={4} spacing={4} mt="xs">
-      {(['x', 'y', 'width', 'height'] as const).map((key) => (
-        <Text key={key} size="xs" c="dimmed" ta="center">
-          <Text span tt="uppercase" fw={600}>
-            {LABELS[key]}
-          </Text>{' '}
-          {formatCompactNumber(bounds[key])}
-        </Text>
+    <div className="flex items-center gap-1 flex-wrap">
+      {items.map(({ label, value }, i) => (
+        <span key={label} className="flex items-center gap-1">
+          {i > 0 && (
+            <Text span size="xs" c="dimmed">
+              &middot;
+            </Text>
+          )}
+          <Text span size="xs" c="dimmed" tt="uppercase" fw={600}>
+            {label}
+          </Text>
+          <Text span size="xs">
+            {formatCompactNumber(value)}
+          </Text>
+        </span>
       ))}
-    </SimpleGrid>
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Group, Text, Tooltip } from '@mantine/core';
+import { ActionIcon, Button, Group, Stack, Text, Tooltip } from '@mantine/core';
 import { RotateCcw, Trash2 } from 'lucide-react';
 
 import type { EditableFieldId } from '@/features/templates';
@@ -61,62 +61,74 @@ export function TouchBoundsControls({
       <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb={4}>
         Touch Area
       </Text>
-      <Group gap="xs">
-        <Button
-          size="xs"
-          variant={isEditing ? 'filled' : 'light'}
-          onClick={handleToggleEdit}
-        >
-          {isEditing ? 'Done' : 'Edit Touch Area'}
-        </Button>
-        {hasBounds && (
-          <>
-            <Tooltip label="Reset to element bounds">
-              <ActionIcon
-                size="sm"
-                variant="subtle"
-                color="gray"
-                onClick={handleReset}
-              >
-                <RotateCcw size={14} />
-              </ActionIcon>
-            </Tooltip>
-            <Tooltip label="Remove touch area">
-              <ActionIcon
-                size="sm"
-                variant="subtle"
-                color="red"
-                onClick={handleRemove}
-              >
-                <Trash2 size={14} />
-              </ActionIcon>
-            </Tooltip>
-          </>
-        )}
-      </Group>
-      {touchBounds &&
-        (isEditing ? (
-          <NumericInputGrid
-            fields={(['x', 'y', 'width', 'height'] as const).map((key) => ({
-              key,
-              label:
-                key === 'width'
-                  ? 'W'
-                  : key === 'height'
-                    ? 'H'
-                    : key.toUpperCase(),
-              value: touchBounds[key],
-              ...(key === 'width' || key === 'height' ? { min: MIN_SIZE } : {}),
-              onCommit: (value: number) =>
-                commitTouchBounds(nodeMeta.nodeId, fieldId, {
-                  ...touchBounds,
-                  [key]: value,
-                }),
-            }))}
-          />
-        ) : (
-          <BoundsDisplay bounds={touchBounds} />
-        ))}
+      <Stack gap="xs">
+        <Group gap="xs">
+          <Button
+            size="xs"
+            variant={isEditing ? 'filled' : 'light'}
+            color="teal"
+            onClick={handleToggleEdit}
+          >
+            {isEditing ? 'Done' : 'Edit Touch Area'}
+          </Button>
+          {hasBounds && (
+            <>
+              <Tooltip label="Reset to element bounds">
+                <ActionIcon
+                  size="sm"
+                  variant="subtle"
+                  color="gray"
+                  onClick={handleReset}
+                >
+                  <RotateCcw size={14} />
+                </ActionIcon>
+              </Tooltip>
+              <Tooltip label="Remove touch area">
+                <ActionIcon
+                  size="sm"
+                  variant="subtle"
+                  color="red"
+                  onClick={handleRemove}
+                >
+                  <Trash2 size={14} />
+                </ActionIcon>
+              </Tooltip>
+            </>
+          )}
+        </Group>
+        {touchBounds &&
+          (isEditing ? (
+            <NumericInputGrid
+              fields={(['x', 'y', 'width', 'height'] as const).map((key) => ({
+                key,
+                label:
+                  key === 'width'
+                    ? 'W'
+                    : key === 'height'
+                      ? 'H'
+                      : key.toUpperCase(),
+                value: touchBounds[key],
+                ...(key === 'width' || key === 'height'
+                  ? { min: MIN_SIZE }
+                  : {}),
+                onCommit: (value: number) =>
+                  commitTouchBounds(nodeMeta.nodeId, fieldId, {
+                    ...touchBounds,
+                    [key]: value,
+                  }),
+              }))}
+            />
+          ) : (
+            <BoundsDisplay
+              items={[
+                { label: 'X', value: touchBounds.x },
+                { label: 'Y', value: touchBounds.y },
+                { label: 'W', value: touchBounds.width },
+                { label: 'H', value: touchBounds.height },
+              ]}
+            />
+          ))}
+      </Stack>
     </div>
   );
 }

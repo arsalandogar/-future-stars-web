@@ -3,7 +3,7 @@
   align-items: center;
   gap: 0.5rem;
   border-radius: var(--mantine-radius-xs);
-  padding: 6px 8px;
+  padding: 8px 10px;
   border: 1px solid transparent;
   cursor: pointer;
   transition:
@@ -24,12 +24,12 @@
 
 /* Assigned state */
 .fieldItem[data-assigned='true'] {
-  background-color: rgba(80, 70, 255, 0.08);
-  border-left: 2px solid var(--mantine-color-primary-4);
+  background-color: rgba(80, 70, 255, 0.12);
+  border-left: 3px solid var(--mantine-color-primary-4);
 }
 
 :global([data-mantine-color-scheme='dark']) .fieldItem[data-assigned='true'] {
-  background-color: rgba(80, 70, 255, 0.12);
+  background-color: rgba(80, 70, 255, 0.18);
 }
 
 /* Disabled state */
@@ -44,7 +44,7 @@
 
 /* Assigned elsewhere — dashed left border */
 .fieldItem[data-assigned-elsewhere='true'] {
-  border-left: 2px dashed var(--mantine-color-gray-5);
+  border-left: 3px dashed var(--mantine-color-gray-5);
 }
 
 :global([data-mantine-color-scheme='dark'])
