@@ -10,7 +10,10 @@ export { TemplateRow } from './components/template-row';
 // API
 export { templateQuery, useTemplate } from './api/get-template';
 export { useTemplates } from './api/get-templates';
-export { useTemplateSvgJson } from './api/get-template-svg-json';
+export {
+  templateSvgJsonQuery,
+  useTemplateSvgJson,
+} from './api/get-template-svg-json';
 export { useUpdateTemplateSvgJson } from './api/update-template-svg-json';
 export { useSetDefaultBack } from './api/set-default-back';
 

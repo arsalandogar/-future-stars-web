@@ -1,17 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { useTemplateSvgJson } from '@/features/templates';
+import { templateSvgJsonQuery } from '@/features/templates';
 import {
-  TemplateAnnotatePage,
   loadSvgJson,
+  TemplateAnnotatePage,
 } from '@/features/template-annotator';
 
 export const Route = createFileRoute(
   '/_authenticated/admin/templates/$id/annotate'
 )({
   loader: async ({ context: { queryClient }, params: { id } }) => {
-    const svgJson = await queryClient.ensureQueryData(
-      useTemplateSvgJson.getOptions(Number(id))
+    const svgJson = await queryClient.fetchQuery(
+      templateSvgJsonQuery.getOptions(Number(id))
     );
     loadSvgJson(svgJson);
   },

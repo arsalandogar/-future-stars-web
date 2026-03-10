@@ -27,7 +27,6 @@ import styles from './card-builder-layout.module.css';
 interface TemplateDefaultsPageProps {
   id: number;
   svgNode: SvgJsonNode;
-  templateName?: string;
   onSave: (params: { id: number; svgJson: SvgJsonNode }) => void;
   onBack: () => void;
   isSaving: boolean;
@@ -36,16 +35,13 @@ interface TemplateDefaultsPageProps {
 export function TemplateDefaultsPage({
   id,
   svgNode,
-  templateName,
   onSave,
   onBack,
   isSaving,
 }: TemplateDefaultsPageProps) {
   usePageHeader({
     title: 'Edit Defaults',
-    description: templateName
-      ? `Editing default values for "${templateName}"`
-      : 'Edit template default values',
+    description: 'Edit template default values',
   });
 
   const resetBuilder = useCardBuilderStore((s) => s.reset);
@@ -93,11 +89,7 @@ export function TemplateDefaultsPage({
 
   return (
     <>
-      <Head
-        title={
-          templateName ? `Edit Defaults - ${templateName}` : 'Edit Defaults'
-        }
-      />
+      <Head title="Edit Defaults" />
       <Container size="xl" className={styles.container}>
         <Group justify="space-between" mb="md">
           <Button

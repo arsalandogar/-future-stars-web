@@ -3,7 +3,7 @@ import { createQuery } from '@/lib/react-query';
 
 import type { SvgJsonNode } from '@/types/svg';
 
-export const useTemplateSvgJson = createQuery({
+export const templateSvgJsonQuery = createQuery({
   queryKey: ['templates', 'svg-json'],
   fetcher: async (id: number): Promise<SvgJsonNode> => {
     const response: { data: SvgJsonNode } = await api.get(
@@ -12,3 +12,5 @@ export const useTemplateSvgJson = createQuery({
     return response.data;
   },
 });
+
+export const useTemplateSvgJson = templateSvgJsonQuery;
