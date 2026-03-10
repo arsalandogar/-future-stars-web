@@ -7,7 +7,7 @@ import type {
 import type { Edits } from './edit-operations.ts';
 import {
   prepareTemplate,
-  applyEdits,
+  applyEditsForRender,
   withPresetColors,
 } from './edit-operations.ts';
 
@@ -52,7 +52,7 @@ export function initializeSideSnapshot(
     // when some preset colors were not stored in edits on the previous template.
     withPresetColors({}, fields.colorFields, previous.appliedPresetColors);
   }
-  applyEdits(fields, preservedEdits);
+  applyEditsForRender(fields, preservedEdits);
 
   return {
     workingCopy,

@@ -6,13 +6,7 @@ import { Head } from '@/components/seo/head';
 import { usePageHeader } from '@/hooks/use-page-header';
 import type { SvgJsonNode } from '@/types/svg';
 
-import {
-  cloneWithStableIds,
-  discoverEditableTextFields,
-  discoverEditableColorFields,
-  discoverEditableImageFields,
-  applyEdits,
-} from '@fs-card-engine';
+import { renderEditedTemplate } from '@fs-card-engine';
 
 import { BuilderTabsPanel } from '../components/builder-tabs-panel';
 import { CardPreview } from '../components/card-preview';
@@ -69,22 +63,11 @@ export function TemplateDefaultsPage({
   }, [resetBuilder, resetEditor]);
 
   const handleSave = () => {
-    // Clone the original SVG (clean copy without touch targets)
-    const clone = cloneWithStableIds(svgNode);
-
-    // Discover editable fields on the clone
-    const fields = {
-      textFields: discoverEditableTextFields(clone),
-      colorFields: discoverEditableColorFields(clone),
-      imageFields: discoverEditableImageFields(clone),
-    };
-
-    // Apply current edits to the clone
     const { frontEdits } = useCardEditorStore.getState().getEditsForSave();
-    applyEdits(fields, frontEdits);
+    const { workingCopy } = renderEditedTemplate(svgNode, frontEdits);
 
     // Save the modified SVG
-    onSave({ id, svgJson: clone });
+    onSave({ id, svgJson: workingCopy });
   };
 
   return (

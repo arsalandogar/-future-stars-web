@@ -29,23 +29,43 @@ export interface DiscoveredFields {
   imageFields: EditableImageField[];
 }
 
+export interface PrepareTemplateOptions {
+  includeTouchTargets?: boolean;
+}
+
+export interface CleanEditsForPersistenceOptions {
+  isPersistableImageUrl?: (url: string) => boolean;
+}
+
 /** Attribute used to mark touch target overlay rects. */
 export const TOUCH_TARGET_ATTR = 'data-touch-target';
 
 /** Attribute that stores the field type ('image' | 'text') on touch target rects. */
 export const TOUCH_TARGET_TYPE_ATTR = 'data-touch-target-type';
 
-/** Clone an SVG node and discover all editable fields in one call. */
-export function prepareTemplate(svgNode: SvgJsonNode): {
-  workingCopy: SvgJsonNode;
-  fields: DiscoveredFields;
-} {
-  const workingCopy = cloneWithStableIds(svgNode);
-  const fields: DiscoveredFields = {
+function discoverFields(workingCopy: SvgJsonNode): DiscoveredFields {
+  return {
     textFields: discoverEditableTextFields(workingCopy),
     colorFields: discoverEditableColorFields(workingCopy),
     imageFields: discoverEditableImageFields(workingCopy),
   };
+}
+
+/** Clone an SVG node and discover all editable fields in one call. */
+export function prepareTemplate(
+  svgNode: SvgJsonNode,
+  options: PrepareTemplateOptions = {}
+): {
+  workingCopy: SvgJsonNode;
+  fields: DiscoveredFields;
+} {
+  const workingCopy = cloneWithStableIds(svgNode);
+  const fields = discoverFields(workingCopy);
+  const { includeTouchTargets = true } = options;
+
+  if (!includeTouchTargets) {
+    return { workingCopy, fields };
+  }
 
   // Inject transparent touch target rects for fields with touch bounds.
   // Image targets are pushed first so they sit below text targets in SVG
@@ -113,6 +133,27 @@ export function applyEdits(fields: DiscoveredFields, edits: Edits): void {
   }
 }
 
+/** Re-apply edits including image zoom/offset transforms for final rendering. */
+export function applyEditsForRender(
+  fields: DiscoveredFields,
+  edits: Edits
+): void {
+  applyEdits(fields, edits);
+
+  for (const field of fields.imageFields) {
+    const editedValue = edits[field.fieldId];
+    if (!isImageEdit(editedValue)) continue;
+    if (!editedValue.url) continue;
+
+    applyImageZoom(
+      field.elementNodes,
+      editedValue.zoom,
+      editedValue.offsetX,
+      editedValue.offsetY
+    );
+  }
+}
+
 /** Strip edits whose field ids don't exist in the template. */
 export function cleanEditsForSave(
   edits: Edits,
@@ -130,6 +171,54 @@ export function cleanEditsForSave(
     }
   }
   return cleaned;
+}
+
+/**
+ * Strip edits that are invalid for persistence, including unknown fields and
+ * image URLs that are only valid in the current runtime such as blob URLs.
+ */
+export function cleanEditsForPersistence(
+  edits: Edits,
+  fields: DiscoveredFields,
+  options: CleanEditsForPersistenceOptions = {}
+): Edits {
+  const cleaned = cleanEditsForSave(edits, fields);
+  const imageFieldIds = new Set(
+    fields.imageFields.map((field) => field.fieldId)
+  );
+  const isPersistableImageUrl =
+    options.isPersistableImageUrl ??
+    ((url: string) => !url.startsWith('blob:'));
+
+  const persistable: Edits = {};
+  for (const [key, value] of Object.entries(cleaned)) {
+    const fieldId = key as EditableFieldId;
+    if (!imageFieldIds.has(fieldId)) {
+      persistable[fieldId] = value;
+      continue;
+    }
+
+    const url = getEditValue(value);
+    if (url && isPersistableImageUrl(url)) {
+      persistable[fieldId] = value;
+    }
+  }
+
+  return persistable;
+}
+
+/** Clone a template, apply edits, and return a clean edited SVG tree. */
+export function renderEditedTemplate(
+  svgNode: SvgJsonNode,
+  edits: Edits,
+  options: PrepareTemplateOptions = {}
+): {
+  workingCopy: SvgJsonNode;
+  fields: DiscoveredFields;
+} {
+  const { workingCopy, fields } = prepareTemplate(svgNode, options);
+  applyEditsForRender(fields, edits);
+  return { workingCopy, fields };
 }
 
 /** Returns new Edits with a color edit applied. Also mutates SVG nodes. */

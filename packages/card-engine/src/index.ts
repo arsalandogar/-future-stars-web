@@ -112,7 +112,10 @@ export {
   TOUCH_TARGET_TYPE_ATTR,
   prepareTemplate,
   applyEdits,
+  applyEditsForRender,
   cleanEditsForSave,
+  cleanEditsForPersistence,
+  renderEditedTemplate,
   withColorEdit,
   withImageEdit,
   applyImageZoom,
@@ -127,4 +130,6 @@ export {
   withTextFieldReset,
   type Edits,
   type DiscoveredFields,
+  type PrepareTemplateOptions,
+  type CleanEditsForPersistenceOptions,
 } from './edit-operations.ts';

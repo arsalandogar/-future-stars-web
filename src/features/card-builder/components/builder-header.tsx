@@ -3,11 +3,8 @@ import { useNavigate } from '@tanstack/react-router';
 import { Save } from 'lucide-react';
 
 import {
-  type EditValue,
   type DiscoveredFields,
-  type Edits,
-  getEditValue,
-  cleanEditsForSave,
+  cleanEditsForPersistence,
 } from '@fs-card-engine';
 
 import { useSaveCard } from '../api/save-card';
@@ -20,14 +17,6 @@ interface BuilderHeaderProps {
   canSave: boolean;
   templateId?: number;
   backTemplateId: number | null;
-}
-
-function cleanBlobEdits(edits: Edits): Record<string, EditValue> {
-  return Object.fromEntries(
-    Object.entries(edits).filter(
-      ([, value]) => value && !getEditValue(value)?.startsWith('blob:')
-    )
-  ) as Record<string, EditValue>;
 }
 
 export function BuilderHeader({
@@ -59,10 +48,8 @@ export function BuilderHeader({
       imageFields: sides.back.editableImageFields,
     };
 
-    const cleanFront = cleanBlobEdits(
-      cleanEditsForSave(frontEdits, frontFields)
-    );
-    const cleanBack = cleanBlobEdits(cleanEditsForSave(backEdits, backFields));
+    const cleanFront = cleanEditsForPersistence(frontEdits, frontFields);
+    const cleanBack = cleanEditsForPersistence(backEdits, backFields);
 
     saveCard.mutate(
       {
