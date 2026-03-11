@@ -1,12 +1,35 @@
 import type { EditableFieldId } from '@/features/templates';
-import type { SvgJsonNode } from '@/types/svg';
+import type { SvgJsonNode, TouchBounds } from '@/types/svg';
 import type { SvgRenderOptions } from '@/components/svg-renderer/svg-renderer';
 
-import { TOUCH_TARGET_ATTR, TOUCH_TARGET_TYPE_ATTR } from '@fs-card-engine';
+import {
+  TOUCH_TARGET_ATTR,
+  TOUCH_TARGET_TYPE_ATTR,
+  getCardBounds,
+  hasBleeds,
+} from '@fs-card-engine';
 
 import { IMAGE_FIELD_ATTR } from './use-preview-gestures';
 import { useCardBuilderStore } from '../stores/card-builder-store';
 import { useCardEditorStore } from '../stores/card-editor-store';
+
+function parseViewBox(viewBox: string | undefined): TouchBounds | null {
+  if (!viewBox) return null;
+
+  const parts = viewBox.split(/[\s,]+/).map(Number);
+  if (parts.length < 4 || parts.some((part) => !Number.isFinite(part))) {
+    return null;
+  }
+
+  const [x, y, width, height] = parts;
+  if (width <= 0 || height <= 0) return null;
+
+  return { x, y, width, height };
+}
+
+function formatViewBox(bounds: TouchBounds): string {
+  return `${bounds.x} ${bounds.y} ${bounds.width} ${bounds.height}`;
+}
 
 export function useCardPreviewRenderOptions(
   wasDragRef: React.RefObject<boolean>
@@ -36,6 +59,14 @@ export function useCardPreviewRenderOptions(
   });
 
   return {
+    getRootProps: (node: SvgJsonNode) => {
+      const viewBox = parseViewBox(node.attributes.viewBox);
+      if (!viewBox || !hasBleeds(viewBox)) return undefined;
+
+      return {
+        viewBox: formatViewBox(getCardBounds(viewBox)),
+      };
+    },
     getNodeProps: (node: SvgJsonNode) => {
       // Touch target overlay rects injected by prepareTemplate
       const touchTarget = node.attributes[TOUCH_TARGET_ATTR] as

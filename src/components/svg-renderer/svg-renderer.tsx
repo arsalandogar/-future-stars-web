@@ -4,6 +4,7 @@ import type { SvgJsonNode } from '@/types/svg';
 import { toReactAttributes } from '@/utils/svg-attributes';
 
 export interface SvgRenderOptions {
+  getRootProps?: (node: SvgJsonNode) => Record<string, unknown> | undefined;
   getNodeProps?: (node: SvgJsonNode) => Record<string, unknown> | undefined;
 }
 
@@ -13,6 +14,23 @@ interface SvgRendererProps {
   revision?: number;
   className?: string;
   options?: SvgRenderOptions;
+}
+
+function mergeProps(
+  baseProps: Record<string, unknown>,
+  extraProps?: Record<string, unknown>
+): Record<string, unknown> {
+  if (!extraProps) return baseProps;
+
+  const mergedProps = { ...baseProps, ...extraProps };
+  if (baseProps.style || extraProps.style) {
+    mergedProps.style = {
+      ...(baseProps.style as object),
+      ...(extraProps.style as object),
+    };
+  }
+
+  return mergedProps;
 }
 
 function renderNode(
@@ -32,20 +50,7 @@ function renderNode(
 
   const baseProps = toReactAttributes(node.attributes);
   const extraProps = options?.getNodeProps?.(node);
-
-  let finalProps: Record<string, unknown>;
-  if (extraProps) {
-    finalProps = { ...baseProps, ...extraProps, key };
-    // Merge style objects so getNodeProps doesn't overwrite original styles
-    if (baseProps.style || extraProps.style) {
-      finalProps.style = {
-        ...(baseProps.style as object),
-        ...(extraProps.style as object),
-      };
-    }
-  } else {
-    finalProps = { ...baseProps, key };
-  }
+  const finalProps = { ...mergeProps(baseProps, extraProps), key };
 
   return createElement(node.name, finalProps, ...children);
 }
@@ -62,9 +67,12 @@ export function SvgRenderer({
   const children = node.children.map((child, i) =>
     renderNode(child, i, options)
   );
+  const baseRootProps = toReactAttributes(node.attributes);
+  const extraRootProps = options?.getRootProps?.(node);
+  const mergedRootProps = mergeProps(baseRootProps, extraRootProps);
 
   const props = {
-    ...toReactAttributes(node.attributes),
+    ...mergedRootProps,
     width: '100%',
     height: '100%',
     preserveAspectRatio:
