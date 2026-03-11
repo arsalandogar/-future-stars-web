@@ -1,4 +1,5 @@
 import type { PaginationMeta } from './pagination';
+import type { CardPreviewStatus } from './card';
 
 export type OrderStatus =
   | 'created'
@@ -34,7 +35,11 @@ export interface ShippingAddress {
 export interface PackCardSnapshot {
   cardId: number;
   quantity: number;
-  svgString: string;
+  frontCardImage: string | null;
+  backCardImage: string | null;
+  svgString: string | null;
+  backSvgString: string | null;
+  status: CardPreviewStatus;
 }
 
 export interface PackSnapshot {

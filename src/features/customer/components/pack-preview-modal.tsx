@@ -4,7 +4,6 @@ import type { EmblaCarouselType } from 'embla-carousel';
 import {
   ActionIcon,
   Drawer,
-  Image,
   Menu,
   Modal,
   Text,
@@ -25,6 +24,7 @@ import {
 } from 'lucide-react';
 
 import { FlipIcon } from '@/components/icons/flip-icon';
+import { CardSidePreview } from '@/components/card-side-preview';
 import type { Pack } from '@/types';
 
 import { useRemoveCardFromPack } from '../api/remove-card-from-pack';
@@ -232,19 +232,25 @@ export function PackPreviewModal({
           <div className={styles.flipCard} data-flipped={isFlipped}>
             <div className={styles.flipCardInner}>
               <div className={styles.flipCardFront}>
-                <Image
-                  src={currentPackCard.card.frontCardImage}
+                <CardSidePreview
+                  imageUrl={currentPackCard.card.frontCardImage}
+                  svgString={currentPackCard.card.svgString}
+                  status={currentPackCard.card.status}
                   alt="Card front"
                   fit="contain"
                   className={styles.cardImage}
+                  badgeSize="sm"
                 />
               </div>
               <div className={styles.flipCardBack}>
-                <Image
-                  src={currentPackCard.card.backCardImage}
+                <CardSidePreview
+                  imageUrl={currentPackCard.card.backCardImage}
+                  svgString={currentPackCard.card.backSvgString}
+                  status={currentPackCard.card.status}
                   alt="Card back"
                   fit="contain"
                   className={styles.cardImage}
+                  badgeSize="sm"
                 />
               </div>
             </div>
@@ -261,19 +267,25 @@ export function PackPreviewModal({
       ) : (
         <div className={styles.previewSection}>
           <div className={styles.previewCard}>
-            <Image
-              src={currentPackCard.card.frontCardImage}
+            <CardSidePreview
+              imageUrl={currentPackCard.card.frontCardImage}
+              svgString={currentPackCard.card.svgString}
+              status={currentPackCard.card.status}
               alt="Card front"
               fit="contain"
               className={styles.cardImage}
+              badgeSize="sm"
             />
           </div>
           <div className={styles.previewCard}>
-            <Image
-              src={currentPackCard.card.backCardImage}
+            <CardSidePreview
+              imageUrl={currentPackCard.card.backCardImage}
+              svgString={currentPackCard.card.backSvgString}
+              status={currentPackCard.card.status}
               alt="Card back"
               fit="contain"
               className={styles.cardImage}
+              badgeSize="sm"
             />
           </div>
         </div>
@@ -309,11 +321,13 @@ export function PackPreviewModal({
                   data-selected={isSelected}
                   onClick={() => handleThumbnailClick(index)}
                 >
-                  <img
-                    src={packCard.card.frontCardImage}
+                  <CardSidePreview
+                    imageUrl={packCard.card.frontCardImage}
+                    svgString={packCard.card.svgString}
+                    status={packCard.card.status}
                     alt={`Card ${index + 1}`}
-                    loading="lazy"
-                    decoding="async"
+                    className={styles.thumbnailPreview}
+                    badgeSize="xs"
                   />
                   <span className={styles.quantityPill}>
                     x{packCard.quantity}

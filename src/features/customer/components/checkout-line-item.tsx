@@ -1,7 +1,8 @@
-import { Image, Text } from '@mantine/core';
+import { Text } from '@mantine/core';
 import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 
+import { CardSidePreview } from '@/components/card-side-preview';
 import type { CartItem } from '@/types';
 
 import styles from './checkout-line-item.module.css';
@@ -26,11 +27,13 @@ export function CheckoutLineItem({ item }: CheckoutLineItemProps) {
       <div className={styles.mainContent}>
         <div className={styles.thumbnail}>
           {firstCard ? (
-            <Image
-              src={firstCard.frontCardImage}
+            <CardSidePreview
+              imageUrl={firstCard.frontCardImage}
+              svgString={firstCard.svgString}
+              status={firstCard.status}
               alt={item.pack.name}
-              fit="cover"
               className={styles.thumbnailImage}
+              badgeSize="xs"
             />
           ) : (
             <div className={styles.thumbnailPlaceholder} />
@@ -67,10 +70,13 @@ export function CheckoutLineItem({ item }: CheckoutLineItemProps) {
             <div className={styles.cardsGrid}>
               {item.pack.packCards.map((packCard) => (
                 <div key={packCard.cardId} className={styles.cardItem}>
-                  <img
-                    src={packCard.card.frontCardImage}
+                  <CardSidePreview
+                    imageUrl={packCard.card.frontCardImage}
+                    svgString={packCard.card.svgString}
+                    status={packCard.card.status}
                     alt={`Card ${packCard.cardId}`}
                     className={styles.cardImage}
+                    badgeSize="xs"
                   />
                   {packCard.quantity > 1 && (
                     <span className={styles.quantityBadge}>

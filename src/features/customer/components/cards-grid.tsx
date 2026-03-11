@@ -41,6 +41,8 @@ export function CardsGrid({
           <CardItem
             key={card.id}
             imageUrl={card.frontCardImage}
+            svgString={card.svgString}
+            status={card.status}
             onClick={() => onCardClick(card)}
           />
         ))}

@@ -1,10 +1,14 @@
 import { api } from '@/lib/api-client';
 import { createQuery } from '@/lib/react-query';
+import type { CardPreviewStatus, OrderStatus } from '@/types';
 
 interface OrderCardSnapshot {
   id: number;
-  frontCardImage: string;
-  backCardImage: string;
+  frontCardImage: string | null;
+  backCardImage: string | null;
+  svgString: string | null;
+  backSvgString: string | null;
+  status: CardPreviewStatus;
 }
 
 interface OrderPackSnapshot {
@@ -26,7 +30,7 @@ export interface OrderLineItem {
 export interface Order {
   id: number;
   orderNumber: string;
-  status: string;
+  status: OrderStatus;
   totalAmount: number;
   lineItems: OrderLineItem[];
   createdAt: string;

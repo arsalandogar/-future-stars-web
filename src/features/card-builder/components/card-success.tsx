@@ -1,5 +1,6 @@
 import { Check } from 'lucide-react';
 
+import { CardSidePreview } from '@/components/card-side-preview';
 import {
   BuyCardButton,
   EditCardButton,
@@ -24,15 +25,21 @@ export function CardSuccess({ card }: CardSuccessProps) {
       </h2>
 
       <div className={styles.cardsStage}>
-        <img
-          src={card.frontCardImage}
+        <CardSidePreview
+          imageUrl={card.frontCardImage}
+          svgString={card.svgString}
+          status={card.status}
           alt="Created card front"
           className={`${styles.cardImage} ${styles.frontCard}`}
+          style={{ width: 'auto' }}
         />
-        <img
-          src={card.backCardImage}
+        <CardSidePreview
+          imageUrl={card.backCardImage}
+          svgString={card.backSvgString}
+          status={card.status}
           alt="Created card back"
           className={`${styles.cardImage} ${styles.backCard}`}
+          style={{ width: 'auto' }}
         />
       </div>
 

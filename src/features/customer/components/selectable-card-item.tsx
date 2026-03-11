@@ -1,6 +1,7 @@
-import { Image, Text } from '@mantine/core';
+import { Text } from '@mantine/core';
 import { Check, Minus, Plus } from 'lucide-react';
 
+import { CardSidePreview } from '@/components/card-side-preview';
 import type { Card } from '@/types';
 
 import styles from './selectable-card-item.module.css';
@@ -60,12 +61,12 @@ export function SelectableCardItem({
       tabIndex={0}
     >
       <div className={styles.imageContainer}>
-        <Image
-          src={card.frontCardImage}
+        <CardSidePreview
+          imageUrl={card.frontCardImage}
+          svgString={card.svgString}
+          status={card.status}
           alt="Card"
-          fit="cover"
           className={styles.image}
-          loading="lazy"
         />
 
         {isSelected && (

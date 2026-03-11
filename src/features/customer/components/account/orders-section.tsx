@@ -2,7 +2,9 @@ import { Button, Collapse, Loader, Text } from '@mantine/core';
 import { ChevronDown, ChevronUp, SlidersHorizontal, Truck } from 'lucide-react';
 import { useState } from 'react';
 
-import { type Order, type OrderStatus, useOrders } from '../../api/get-orders';
+import type { OrderStatus } from '@/types';
+
+import { type Order, useOrders } from '../../api/get-orders';
 import { OrderPackItem } from '../order-pack-item';
 import { AccountSectionHeader } from './account-section-header';
 import styles from './account-section.module.css';

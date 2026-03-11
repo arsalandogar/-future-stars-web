@@ -1,14 +1,23 @@
-import { Image } from '@mantine/core';
+import { CardSidePreview } from '@/components/card-side-preview';
+import type { CardPreviewStatus } from '@/types';
 
 import styles from './card-item.module.css';
 
 interface CardItemProps {
-  imageUrl: string;
+  imageUrl: string | null;
+  svgString: string | null;
+  status: CardPreviewStatus;
   alt?: string;
   onClick?: () => void;
 }
 
-export function CardItem({ imageUrl, alt = 'Card', onClick }: CardItemProps) {
+export function CardItem({
+  imageUrl,
+  svgString,
+  status,
+  alt = 'Card',
+  onClick,
+}: CardItemProps) {
   return (
     <div
       className={styles.card}
@@ -22,12 +31,12 @@ export function CardItem({ imageUrl, alt = 'Card', onClick }: CardItemProps) {
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
     >
-      <Image
-        src={imageUrl}
+      <CardSidePreview
+        imageUrl={imageUrl}
+        svgString={svgString}
+        status={status}
         alt={alt}
-        fit="cover"
         className={styles.image}
-        loading="lazy"
       />
     </div>
   );

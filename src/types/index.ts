@@ -5,7 +5,7 @@ export type {
   UpdateAddressParams,
 } from './address';
 export type { Token, User, UserRole } from './auth';
-export type { Card } from './card';
+export type { Card, CardPreviewStatus } from './card';
 export type { CartItem } from './cart-item';
 export type { CheckoutParams, CheckoutResponse } from './checkout';
 export type { FeaturedItem } from './featured-item';

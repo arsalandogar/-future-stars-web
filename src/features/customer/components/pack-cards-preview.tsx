@@ -1,4 +1,4 @@
-import { Image } from '@mantine/core';
+import { CardSidePreview } from '@/components/card-side-preview';
 
 import type { Card } from '@/types';
 
@@ -16,11 +16,13 @@ export function PackCardsPreview({ cards }: PackCardsPreviewProps) {
       <div className={styles.scrollContainer}>
         {cards.map((card) => (
           <div key={card.id} className={styles.card}>
-            <Image
-              src={card.frontCardImage}
+            <CardSidePreview
+              imageUrl={card.frontCardImage}
+              svgString={card.svgString}
+              status={card.status}
               alt="Card"
-              fit="cover"
               className={styles.cardImage}
+              badgeSize="xs"
             />
           </div>
         ))}

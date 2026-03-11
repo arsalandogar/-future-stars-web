@@ -1,6 +1,7 @@
 import { Container, Loader, Text, Title } from '@mantine/core';
 import { Check } from 'lucide-react';
 
+import { CardSidePreview } from '@/components/card-side-preview';
 import { Head } from '@/components/seo/head';
 
 import { type Order, useOrder } from '../api/get-order';
@@ -11,26 +12,29 @@ interface OrderSuccessPageProps {
   orderId: number;
 }
 
-function getCardImages(order: Order | undefined): string[] {
+type OrderCardPreview =
+  Order['lineItems'][number]['packSnapshot']['cardSnapshots'][number];
+
+function getCardPreviews(order: Order | undefined): OrderCardPreview[] {
   if (!order) return [];
 
-  const images: string[] = [];
+  const previews: OrderCardPreview[] = [];
+  const seen = new Set<number>();
 
   for (const item of order.lineItems) {
     for (const card of item.packSnapshot.cardSnapshots) {
-      if (!images.includes(card.frontCardImage)) {
-        images.push(card.frontCardImage);
-      }
-      if (images.length >= 3) break;
+      if (seen.has(card.id)) continue;
+      seen.add(card.id);
+      previews.push(card);
+      if (previews.length >= 3) break;
     }
-    if (images.length >= 3) break;
+    if (previews.length >= 3) break;
   }
 
-  // If we have fewer than 3 images, repeat to fill
-  if (images.length === 0) return [];
-  if (images.length === 1) return [images[0], images[0], images[0]];
-  if (images.length === 2) return [images[0], images[1], images[0]];
-  return images.slice(0, 3);
+  if (previews.length === 0) return [];
+  if (previews.length === 1) return [previews[0], previews[0], previews[0]];
+  if (previews.length === 2) return [previews[0], previews[1], previews[0]];
+  return previews.slice(0, 3);
 }
 
 function getOrderSummary(order: Order | undefined) {
@@ -51,7 +55,7 @@ function getOrderSummary(order: Order | undefined) {
 export function OrderSuccessPage({ orderId }: OrderSuccessPageProps) {
   const { data: order, isLoading } = useOrder({ variables: orderId });
 
-  const cardImages = getCardImages(order);
+  const cardPreviews = getCardPreviews(order);
   const summary = getOrderSummary(order);
 
   if (isLoading) {
@@ -77,22 +81,31 @@ export function OrderSuccessPage({ orderId }: OrderSuccessPageProps) {
           <div className={styles.topRow}>
             {/* Card Fan */}
             <div className={styles.cardFan}>
-              {cardImages.length > 0 && (
+              {cardPreviews.length > 0 && (
                 <>
-                  <img
-                    src={cardImages[0]}
+                  <CardSidePreview
+                    imageUrl={cardPreviews[0].frontCardImage}
+                    svgString={cardPreviews[0].svgString}
+                    status={cardPreviews[0].status}
                     alt="Card"
                     className={`${styles.fanCard} ${styles.leftCard}`}
+                    style={{ width: 'auto' }}
                   />
-                  <img
-                    src={cardImages[1]}
+                  <CardSidePreview
+                    imageUrl={cardPreviews[1].frontCardImage}
+                    svgString={cardPreviews[1].svgString}
+                    status={cardPreviews[1].status}
                     alt="Card"
                     className={`${styles.fanCard} ${styles.centerCard}`}
+                    style={{ width: 'auto' }}
                   />
-                  <img
-                    src={cardImages[2]}
+                  <CardSidePreview
+                    imageUrl={cardPreviews[2].frontCardImage}
+                    svgString={cardPreviews[2].svgString}
+                    status={cardPreviews[2].status}
                     alt="Card"
                     className={`${styles.fanCard} ${styles.rightCard}`}
+                    style={{ width: 'auto' }}
                   />
                 </>
               )}

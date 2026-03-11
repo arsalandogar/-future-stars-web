@@ -1,7 +1,6 @@
 import {
   ActionIcon,
   Drawer,
-  Image,
   Menu,
   Modal,
   Text,
@@ -22,6 +21,7 @@ import {
 import { useEffect, useRef, useState } from 'react';
 
 import { FlipIcon } from '@/components/icons/flip-icon';
+import { CardSidePreview } from '@/components/card-side-preview';
 import {
   BuyCardButton,
   EditCardButton,
@@ -206,19 +206,25 @@ export function CardPreviewModal({
                 <div className={styles.flipCard} data-flipped={isFlipped}>
                   <div className={styles.flipCardInner}>
                     <div className={styles.flipCardFront}>
-                      <Image
-                        src={card.frontCardImage}
+                      <CardSidePreview
+                        imageUrl={card.frontCardImage}
+                        svgString={card.svgString}
+                        status={card.status}
                         alt="Card front"
                         fit="contain"
                         className={styles.cardImage}
+                        badgeSize="sm"
                       />
                     </div>
                     <div className={styles.flipCardBack}>
-                      <Image
-                        src={card.backCardImage}
+                      <CardSidePreview
+                        imageUrl={card.backCardImage}
+                        svgString={card.backSvgString}
+                        status={card.status}
                         alt="Card back"
                         fit="contain"
                         className={styles.cardImage}
+                        badgeSize="sm"
                       />
                     </div>
                   </div>
@@ -235,19 +241,25 @@ export function CardPreviewModal({
             ) : (
               <div className={styles.cardsRow}>
                 <div className={styles.cardImageWrapper}>
-                  <Image
-                    src={card.frontCardImage}
+                  <CardSidePreview
+                    imageUrl={card.frontCardImage}
+                    svgString={card.svgString}
+                    status={card.status}
                     alt="Card front"
                     fit="contain"
                     className={styles.cardImage}
+                    badgeSize="sm"
                   />
                 </div>
                 <div className={styles.cardImageWrapper}>
-                  <Image
-                    src={card.backCardImage}
+                  <CardSidePreview
+                    imageUrl={card.backCardImage}
+                    svgString={card.backSvgString}
+                    status={card.status}
                     alt="Card back"
                     fit="contain"
                     className={styles.cardImage}
+                    badgeSize="sm"
                   />
                 </div>
               </div>

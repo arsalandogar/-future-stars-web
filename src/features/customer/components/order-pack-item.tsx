@@ -1,7 +1,8 @@
-import { Collapse, Image, Text } from '@mantine/core';
+import { Collapse, Text } from '@mantine/core';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 
+import { CardSidePreview } from '@/components/card-side-preview';
 import type { OrderLineItem } from '../api/get-orders';
 import styles from './checkout-line-item.module.css';
 
@@ -27,11 +28,13 @@ export function OrderPackItem({ item }: OrderPackItemProps) {
       <div className={styles.mainContent}>
         <div className={styles.thumbnail}>
           {firstCard ? (
-            <Image
-              src={firstCard.frontCardImage}
+            <CardSidePreview
+              imageUrl={firstCard.frontCardImage}
+              svgString={firstCard.svgString}
+              status={firstCard.status}
               alt={item.packName}
-              fit="cover"
               className={styles.thumbnailImage}
+              badgeSize="xs"
             />
           ) : (
             <div className={styles.thumbnailPlaceholder} />
@@ -62,10 +65,13 @@ export function OrderPackItem({ item }: OrderPackItemProps) {
           <div className={styles.cardsGrid}>
             {item.packSnapshot.cardSnapshots.map((cardSnapshot) => (
               <div key={cardSnapshot.id} className={styles.cardItem}>
-                <img
-                  src={cardSnapshot.frontCardImage}
+                <CardSidePreview
+                  imageUrl={cardSnapshot.frontCardImage}
+                  svgString={cardSnapshot.svgString}
+                  status={cardSnapshot.status}
                   alt={`Card ${cardSnapshot.originalCardId}`}
                   className={styles.cardImage}
+                  badgeSize="xs"
                 />
                 {cardSnapshot.quantity > 1 && (
                   <span className={styles.quantityBadge}>

@@ -4,6 +4,7 @@ import { RefreshCcw, X } from 'lucide-react';
 import { MdOutlineShoppingCart } from 'react-icons/md';
 import { useEffect, useRef, useState } from 'react';
 
+import { CardSidePreview } from '@/components/card-side-preview';
 import { MAX_PACK_CARDS, type Pack } from '@/types';
 
 import { useAddCartItem } from '../api/add-cart-item';
@@ -182,10 +183,13 @@ export function PackCreatedModal({
           <div className={styles.packPreview}>
             <div className={styles.thumbnail}>
               {firstCard && (
-                <img
-                  src={firstCard.frontCardImage}
+                <CardSidePreview
+                  imageUrl={firstCard.frontCardImage}
+                  svgString={firstCard.svgString}
+                  status={firstCard.status}
                   alt={pack.name}
                   className={styles.thumbnailImage}
+                  badgeSize="xs"
                 />
               )}
             </div>

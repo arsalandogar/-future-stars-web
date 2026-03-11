@@ -1,8 +1,8 @@
-import { Image } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 
+import { CardSidePreview } from '@/components/card-side-preview';
 import type { CartItem as CartItemType } from '@/types';
 
 import { formatDate } from '../utils/format-date';
@@ -49,11 +49,13 @@ export function CartItem({
       <div className={styles.mainContent}>
         <button type="button" className={styles.thumbnail} onClick={onViewPack}>
           {firstCard ? (
-            <Image
-              src={firstCard.frontCardImage}
+            <CardSidePreview
+              imageUrl={firstCard.frontCardImage}
+              svgString={firstCard.svgString}
+              status={firstCard.status}
               alt={item.pack.name}
-              fit="cover"
               className={styles.thumbnailImage}
+              badgeSize="xs"
             />
           ) : (
             <div className={styles.thumbnailPlaceholder} />

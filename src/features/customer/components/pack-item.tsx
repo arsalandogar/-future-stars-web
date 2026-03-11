@@ -1,11 +1,4 @@
-import {
-  ActionIcon,
-  Button,
-  Image,
-  Menu,
-  Text,
-  TextInput,
-} from '@mantine/core';
+import { ActionIcon, Button, Menu, Text, TextInput } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
   Check,
@@ -20,6 +13,7 @@ import {
 import { useCallback, useState } from 'react';
 import { MdOutlineShoppingCart } from 'react-icons/md';
 
+import { CardSidePreview } from '@/components/card-side-preview';
 import type { Pack } from '@/types';
 
 import { useUpdatePack } from '../api/update-pack';
@@ -122,11 +116,13 @@ export function PackItem({
           disabled={readOnly}
         >
           {firstCard ? (
-            <Image
-              src={firstCard.frontCardImage}
+            <CardSidePreview
+              imageUrl={firstCard.frontCardImage}
+              svgString={firstCard.svgString}
+              status={firstCard.status}
               alt={pack.name}
-              fit="cover"
               className={styles.thumbnailImage}
+              badgeSize="xs"
             />
           ) : (
             <div className={styles.thumbnailPlaceholder} />
