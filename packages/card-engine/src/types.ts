@@ -26,11 +26,6 @@ export interface ImageEdit {
   offsetY: number;
   sourceWidth?: number;
   sourceHeight?: number;
-  /** Pre-computed cover-aware SVG attributes from frontend. */
-  computedX?: number;
-  computedY?: number;
-  computedWidth?: number;
-  computedHeight?: number;
 }
 
 export type EditValue = string | ImageEdit;

@@ -260,14 +260,14 @@ export function withImageEdit(
 }
 
 /** Mutate SVG image nodes to apply zoom and offset.
- *  When computedAttrs contains pre-computed cover-aware values from the
- *  frontend, they are applied directly instead of the simple zoom formula. */
+ *  When the edit includes sourceWidth/sourceHeight, uses cover-aware scaling
+ *  so the image isn't distorted when source AR differs from element AR. */
 export function applyImageZoom(
   nodes: SvgJsonNode[],
   zoom: number,
   offsetX: number,
   offsetY: number,
-  computedAttrs?: Partial<ImageEdit>
+  edit?: Partial<ImageEdit>
 ): void {
   for (const node of nodes) {
     if (!node.attributes['data-orig-width']) {
@@ -277,41 +277,32 @@ export function applyImageZoom(
       node.attributes['data-orig-y'] = node.attributes.y ?? '0';
     }
 
-    // 1. Best: use pre-computed cover-aware attributes directly
-    if (computedAttrs?.computedWidth != null) {
-      node.attributes.width = String(computedAttrs.computedWidth);
-      node.attributes.height = String(computedAttrs.computedHeight);
-      node.attributes.x = String(computedAttrs.computedX);
-      node.attributes.y = String(computedAttrs.computedY);
+    const origW = parseFloat(node.attributes['data-orig-width']);
+    const origH = parseFloat(node.attributes['data-orig-height']);
+    const origX = parseFloat(node.attributes['data-orig-x']);
+    const origY = parseFloat(node.attributes['data-orig-y']);
+
+    let newW: number;
+    let newH: number;
+
+    // Cover-aware zoom when source dimensions are known
+    if (edit?.sourceWidth && edit?.sourceHeight) {
+      const coverScale = Math.max(
+        origW / edit.sourceWidth,
+        origH / edit.sourceHeight
+      );
+      newW = edit.sourceWidth * coverScale * zoom;
+      newH = edit.sourceHeight * coverScale * zoom;
     } else {
-      const origW = parseFloat(node.attributes['data-orig-width']);
-      const origH = parseFloat(node.attributes['data-orig-height']);
-      const origX = parseFloat(node.attributes['data-orig-x']);
-      const origY = parseFloat(node.attributes['data-orig-y']);
-
-      let newW: number;
-      let newH: number;
-
-      // 2. Cover-aware zoom when source dimensions are known
-      if (computedAttrs?.sourceWidth && computedAttrs?.sourceHeight) {
-        const coverScale = Math.max(
-          origW / computedAttrs.sourceWidth,
-          origH / computedAttrs.sourceHeight
-        );
-        newW = computedAttrs.sourceWidth * coverScale * zoom;
-        newH = computedAttrs.sourceHeight * coverScale * zoom;
-      } else {
-        // 3. Fallback: simple zoom (backward compatible)
-        newW = origW * zoom;
-        newH = origH * zoom;
-      }
-
-      node.attributes.width = String(newW);
-      node.attributes.height = String(newH);
-      node.attributes.x = String(origX - (newW - origW) / 2 + offsetX);
-      node.attributes.y = String(origY - (newH - origH) / 2 + offsetY);
+      // Fallback: simple zoom (backward compatible)
+      newW = origW * zoom;
+      newH = origH * zoom;
     }
 
+    node.attributes.width = String(newW);
+    node.attributes.height = String(newH);
+    node.attributes.x = String(origX - (newW - origW) / 2 + offsetX);
+    node.attributes.y = String(origY - (newH - origH) / 2 + offsetY);
     node.attributes.preserveAspectRatio = 'none';
   }
 }
