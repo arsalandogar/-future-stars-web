@@ -1,6 +1,5 @@
 import {
   QueryClient,
-  useQueryClient,
   type DefaultOptions,
   type InfiniteData,
   type MutationFunctionContext,
@@ -72,8 +71,6 @@ export function invalidateQueries<
 ): Middleware<MutationHook<TData, TVariables, TError, TOnMutateResult>> {
   return (useMutationNext) => {
     return (options) => {
-      const queryClient = useQueryClient();
-
       const onSuccess = (
         data: TData,
         variables: TVariables,
@@ -96,6 +93,39 @@ export function invalidateQueries<
             }
           }
         }
+        options.onSuccess?.(data, variables, onMutateResult, mutationContext);
+      };
+
+      return useMutationNext({ ...options, onSuccess });
+    };
+  };
+}
+
+/**
+ * Middleware that seeds query data after a successful mutation.
+ * @example use: [seedQueryData<Card, SaveCardParams>((card) => ({ queryKey: cardQuery.getKey(card.id), data: card }))]
+ */
+export function seedQueryData<
+  TData = unknown,
+  TVariables = unknown,
+  TError = unknown,
+  TOnMutateResult = unknown,
+>(
+  resolver: (
+    data: TData,
+    variables: TVariables
+  ) => { queryKey: QueryKey; data: TData }
+): Middleware<MutationHook<TData, TVariables, TError, TOnMutateResult>> {
+  return (useMutationNext) => {
+    return (options) => {
+      const onSuccess = (
+        data: TData,
+        variables: TVariables,
+        onMutateResult: TOnMutateResult,
+        mutationContext: MutationFunctionContext
+      ) => {
+        const { queryKey, data: queryData } = resolver(data, variables);
+        queryClient.setQueryData(queryKey, queryData);
         options.onSuccess?.(data, variables, onMutateResult, mutationContext);
       };
 
