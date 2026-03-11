@@ -1,5 +1,5 @@
 import { Anchor, PinInput, Stack, Text } from '@mantine/core';
-import { useNavigate } from '@tanstack/react-router';
+import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 
@@ -18,8 +18,11 @@ function formatCountdown(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
+const routeApi = getRouteApi('/login');
+
 export function OtpVerifyForm() {
   const navigate = useNavigate();
+  const { redirectTo } = routeApi.useSearch();
   const queryClient = useQueryClient();
   const mergeGuest = useMergeGuest();
   const verifyOtp = useVerifyOtp();
@@ -43,7 +46,7 @@ export function OtpVerifyForm() {
     const onSuccess = () => {
       void queryClient.clear();
       reset();
-      void navigate({ to: '/' });
+      void navigate({ to: redirectTo || '/' });
     };
 
     const onError = () => {

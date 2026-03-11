@@ -1,3 +1,11 @@
+export interface SharedLinkInfo {
+  id: number;
+  code: string;
+  message: string | null;
+  isActive: boolean;
+  addToCartCount: number;
+  addToCollectionCount: number;
+}
 export type CardPreviewStatus = 'draft' | 'processing' | 'completed' | 'failed';
 
 export interface Card {
@@ -10,6 +18,7 @@ export interface Card {
   backSvgString: string | null;
   status: CardPreviewStatus;
   hiddenFromGallery: boolean;
+  sharedLink?: SharedLinkInfo;
   createdAt: string;
   updatedAt: string;
 }

@@ -1,7 +1,9 @@
 .content {
-  background-color: var(--mantine-color-dark-9);
-  border: none;
-  border-radius: var(--mantine-radius-lg);
+  background: #000;
+  border: 1px solid
+    color-mix(in srgb, var(--mantine-color-primaryLight-4) 68%, transparent);
+  border-radius: 20px;
+  box-shadow: 0 0 42px rgba(36, 72, 251, 0.28);
   overflow: hidden;
 }
 
@@ -14,7 +16,8 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--mantine-spacing-md) var(--mantine-spacing-lg);
-  border-bottom: 2px solid var(--mantine-color-primary-4);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--mantine-color-primaryLight-4) 68%, transparent);
 }
 
 .headerTitle {
@@ -58,4 +61,14 @@
 
 .confirmButton {
   font-weight: 600;
+}
+
+@media (max-width: 48em) {
+  .content {
+    border-radius: 0;
+  }
+
+  .headerTitle {
+    font-size: var(--mantine-font-size-md);
+  }
 }

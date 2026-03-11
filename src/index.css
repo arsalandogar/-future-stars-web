@@ -1,5 +1,11 @@
 @import 'tailwind-preset-mantine';
 
+html,
+body,
+#root {
+  overflow-x: clip;
+}
+
 /* Customer site variables */
 :root {
   --customer-bg-gradient-start: #000000;

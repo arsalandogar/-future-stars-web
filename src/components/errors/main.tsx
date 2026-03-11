@@ -22,7 +22,7 @@ export const MainErrorFallback = ({ error }: { error: Error }) => {
   const message = getErrorMessage(error);
 
   return (
-    <Center h="100vh" w="100vw">
+    <Center h="100dvh" w="100%">
       <Stack align="center" gap="md" maw={600}>
         <Title order={1}>Something went wrong</Title>
         <Text c="dimmed">{message}</Text>

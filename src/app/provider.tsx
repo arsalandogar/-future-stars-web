@@ -19,7 +19,7 @@ export function AppProvider({ children }: AppProviderProps) {
   return (
     <Suspense
       fallback={
-        <Center h="100vh" w="100vw">
+        <Center h="100dvh" w="100%">
           <Loader size="xl" />
         </Center>
       }

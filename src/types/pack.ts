@@ -1,4 +1,4 @@
-import type { Card } from './card';
+import type { Card, SharedLinkInfo } from './card';
 
 export interface PackCard {
   packId: number;
@@ -12,6 +12,7 @@ export interface Pack {
   userId: number;
   name: string;
   packCards: PackCard[];
+  sharedLink?: SharedLinkInfo;
   createdAt: string;
   updatedAt: string;
 }

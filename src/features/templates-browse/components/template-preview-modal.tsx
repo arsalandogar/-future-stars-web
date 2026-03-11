@@ -248,7 +248,12 @@ export function TemplatePreviewModal({
       size="xl"
       centered
       withCloseButton={false}
-      classNames={{ root: styles.modal }}
+      overlayProps={{ backgroundOpacity: 1 }}
+      classNames={{
+        overlay: styles.overlay,
+        content: styles.content,
+        body: styles.body,
+      }}
     >
       {content}
     </Modal>

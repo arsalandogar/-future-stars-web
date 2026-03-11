@@ -21,6 +21,7 @@ import {
 import { useEffect, useRef, useState } from 'react';
 
 import { FlipIcon } from '@/components/icons/flip-icon';
+import { useShareModalStore } from '@/stores/share-modal-store';
 import { CardSidePreview } from '@/components/card-side-preview';
 import {
   BuyCardButton,
@@ -54,6 +55,7 @@ export function CardPreviewModal({
 }: CardPreviewModalProps) {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
+  const openShareCard = useShareModalStore((s) => s.openCard);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [quantity, setQuantity] = useState(1);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -170,6 +172,7 @@ export function CardPreviewModal({
             <Menu.Item
               leftSection={<Share2 size={16} />}
               className={styles.menuItem}
+              onClick={() => openShareCard(card)}
             >
               Share Card
             </Menu.Item>
@@ -197,7 +200,7 @@ export function CardPreviewModal({
 
           <div className={styles.cardsContent}>
             <div className={styles.actionsRow}>
-              <ShareCardButton />
+              <ShareCardButton onClick={() => openShareCard(card)} />
               <EditCardButton cardId={card.id} />
             </div>
 

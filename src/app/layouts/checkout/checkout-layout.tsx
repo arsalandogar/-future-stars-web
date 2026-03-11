@@ -21,7 +21,7 @@ export function CheckoutLayout() {
         main: {
           background:
             'linear-gradient(to bottom, var(--customer-bg-gradient-start), var(--customer-bg-gradient-end))',
-          minHeight: '100vh',
+          minHeight: '100dvh',
           fontFamily:
             'Montserrat, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
         },

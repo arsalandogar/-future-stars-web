@@ -1,0 +1,21 @@
+.cards {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+}
+
+.cardImage {
+  width: 282px;
+  max-width: 100%;
+}
+
+@media (max-width: 48em) {
+  .cards {
+    gap: 14px;
+  }
+
+  .cardImage {
+    width: 168px;
+  }
+}

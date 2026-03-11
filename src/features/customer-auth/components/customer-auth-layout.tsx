@@ -20,8 +20,8 @@ export function CustomerAuthLayout({
     <>
       <Head title={title} description={description} />
       <Center
-        h="100vh"
-        w="100vw"
+        h="100dvh"
+        w="100%"
         p="md"
         style={{
           background:

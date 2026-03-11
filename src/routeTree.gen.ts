@@ -13,6 +13,8 @@ import { Route as TermsAndConditionsRouteImport } from './routes/terms-and-condi
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as SharedRouteRouteImport } from './routes/shared/route'
+import { Route as SharedCodeRouteImport } from './routes/shared/$code'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AuthenticatedCustomerRouteImport } from './routes/_authenticated/_customer'
 import { Route as AuthenticatedCheckoutRouteImport } from './routes/_authenticated/_checkout'
@@ -73,6 +75,16 @@ const LoginRoute = LoginRouteImport.update({
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
+} as any)
+const SharedRouteRoute = SharedRouteRouteImport.update({
+  id: '/shared',
+  path: '/shared',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SharedCodeRoute = SharedCodeRouteImport.update({
+  id: '/$code',
+  path: '/$code',
+  getParentRoute: () => SharedRouteRoute,
 } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
@@ -314,11 +326,13 @@ const AuthenticatedAdmin_legalTypeIdEditRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/shared': typeof SharedRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/admin': typeof AuthenticatedAdminListingRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/shared/$code': typeof SharedCodeRoute
   '/checkout': typeof AuthenticatedCheckoutCheckoutRoute
   '/account': typeof AuthenticatedCustomerAccountRoute
   '/cart': typeof AuthenticatedCustomerCartRoute
@@ -356,10 +370,12 @@ export interface FileRoutesByFullPath {
   '/admin/users/$id': typeof AuthenticatedAdminListingUsersIdIndexRoute
 }
 export interface FileRoutesByTo {
+  '/shared': typeof SharedRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/shared/$code': typeof SharedCodeRoute
   '/checkout': typeof AuthenticatedCheckoutCheckoutRoute
   '/account': typeof AuthenticatedCustomerAccountRoute
   '/cart': typeof AuthenticatedCustomerCartRoute
@@ -397,6 +413,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/shared': typeof SharedRouteRouteWithChildren
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
@@ -405,6 +422,7 @@ export interface FileRoutesById {
   '/_authenticated/_checkout': typeof AuthenticatedCheckoutRouteWithChildren
   '/_authenticated/_customer': typeof AuthenticatedCustomerRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/shared/$code': typeof SharedCodeRoute
   '/_authenticated/_checkout/checkout': typeof AuthenticatedCheckoutCheckoutRoute
   '/_authenticated/_customer/account': typeof AuthenticatedCustomerAccountRoute
   '/_authenticated/_customer/cart': typeof AuthenticatedCustomerCartRoute
@@ -446,11 +464,13 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/shared'
     | '/login'
     | '/privacy-policy'
     | '/terms-and-conditions'
     | '/admin'
     | '/admin/login'
+    | '/shared/$code'
     | '/checkout'
     | '/account'
     | '/cart'
@@ -488,10 +508,12 @@ export interface FileRouteTypes {
     | '/admin/users/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/shared'
     | '/login'
     | '/privacy-policy'
     | '/terms-and-conditions'
     | '/admin/login'
+    | '/shared/$code'
     | '/checkout'
     | '/account'
     | '/cart'
@@ -528,6 +550,7 @@ export interface FileRouteTypes {
     | '/admin/users/$id'
   id:
     | '__root__'
+    | '/shared'
     | '/_authenticated'
     | '/login'
     | '/privacy-policy'
@@ -536,6 +559,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_checkout'
     | '/_authenticated/_customer'
     | '/admin/login'
+    | '/shared/$code'
     | '/_authenticated/_checkout/checkout'
     | '/_authenticated/_customer/account'
     | '/_authenticated/_customer/cart'
@@ -576,6 +600,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  SharedRouteRoute: typeof SharedRouteRouteWithChildren
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
@@ -612,6 +637,20 @@ declare module '@tanstack/react-router' {
       fullPath: ''
       preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/shared': {
+      id: '/shared'
+      path: '/shared'
+      fullPath: '/shared'
+      preLoaderRoute: typeof SharedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shared/$code': {
+      id: '/shared/$code'
+      path: '/$code'
+      fullPath: '/shared/$code'
+      preLoaderRoute: typeof SharedCodeRouteImport
+      parentRoute: typeof SharedRouteRoute
     }
     '/admin/login': {
       id: '/admin/login'
@@ -903,6 +942,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface SharedRouteRouteChildren {
+  SharedCodeRoute: typeof SharedCodeRoute
+}
+
+const SharedRouteRouteChildren: SharedRouteRouteChildren = {
+  SharedCodeRoute: SharedCodeRoute,
+}
+
+const SharedRouteRouteWithChildren = SharedRouteRoute._addFileChildren(
+  SharedRouteRouteChildren,
+)
+
 interface AuthenticatedAdminListingRouteChildren {
   AuthenticatedAdminListingBatchesRoute: typeof AuthenticatedAdminListingBatchesRoute
   AuthenticatedAdminListingColorLeaguesRoute: typeof AuthenticatedAdminListingColorLeaguesRoute
@@ -1086,6 +1137,7 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 )
 
 const rootRouteChildren: RootRouteChildren = {
+  SharedRouteRoute: SharedRouteRouteWithChildren,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,

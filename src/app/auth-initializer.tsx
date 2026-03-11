@@ -40,7 +40,7 @@ export function AuthInitializer({ children }: { children: ReactNode }) {
 
   if (!isAuthenticated && !guestLoginDone) {
     return (
-      <Center h="100vh" w="100vw">
+      <Center h="100dvh" w="100%">
         <Loader size="xl" />
       </Center>
     );

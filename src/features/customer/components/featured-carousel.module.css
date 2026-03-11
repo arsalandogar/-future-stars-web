@@ -4,7 +4,7 @@
 }
 
 .carousel {
-  overflow: visible;
+  overflow: hidden;
 }
 
 .slide {

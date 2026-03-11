@@ -14,7 +14,7 @@ export function AuthLayout({ title, description, children }: AuthLayoutProps) {
   return (
     <>
       <Head title={title} description={description} />
-      <Center h="100vh" w="100vw" p="md">
+      <Center h="100dvh" w="100%" p="md">
         <Paper
           shadow="xl"
           p={{ base: 'lg', sm: 'xl' }}

@@ -18,12 +18,14 @@ import {
   MinusCircle,
   MoreVertical,
   Pencil,
+  Share2,
   SquarePen,
   Trash2,
   X,
 } from 'lucide-react';
 
 import { FlipIcon } from '@/components/icons/flip-icon';
+import { useShareModalStore } from '@/stores/share-modal-store';
 import { CardSidePreview } from '@/components/card-side-preview';
 import type { Pack } from '@/types';
 
@@ -57,6 +59,7 @@ export function PackPreviewModal({
   ] = useDisclosure(false);
 
   const removeCardFromPack = useRemoveCardFromPack();
+  const openSharePack = useShareModalStore((s) => s.openPack);
 
   const packCards = pack?.packCards ?? [];
   const currentPackCard = packCards[currentCardIndex];
@@ -214,6 +217,12 @@ export function PackPreviewModal({
               onClick={openDeleteCardModal}
             >
               Delete Card
+            </Menu.Item>
+            <Menu.Item
+              leftSection={<Share2 size={14} />}
+              onClick={() => pack && openSharePack(pack)}
+            >
+              Share Pack
             </Menu.Item>
           </Menu.Dropdown>
         </Menu>

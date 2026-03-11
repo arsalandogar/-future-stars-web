@@ -13,7 +13,7 @@ function RootComponent() {
 
 function PendingComponent() {
   return (
-    <Center h="100vh" w="100vw">
+    <Center h="100dvh" w="100%">
       <Loader size="xl" />
     </Center>
   );
@@ -21,7 +21,7 @@ function PendingComponent() {
 
 function NotFoundComponent() {
   return (
-    <Center h="100vh" w="100vw">
+    <Center h="100dvh" w="100%">
       <NotFound />
     </Center>
   );

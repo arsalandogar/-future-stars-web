@@ -1,0 +1,117 @@
+.wrapper {
+  min-height: calc(100vh - 84px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: linear-gradient(to bottom, #05070f 0%, #161748 100%);
+}
+
+.card {
+  width: min(100%, 720px);
+  border: 1px solid
+    color-mix(in srgb, var(--mantine-color-primaryLight-4) 65%, transparent);
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.78);
+  box-shadow: 0 0 42px rgba(36, 72, 251, 0.24);
+  padding: 30px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 999px;
+  background: #4f46e5;
+  color: #fff;
+}
+
+.title {
+  margin: 0;
+  color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(1.7rem, 2.6vw, 2.2rem);
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.description {
+  margin: 0;
+  color: #d1d5db;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px;
+  line-height: 1.35;
+  font-weight: 500;
+}
+
+.actions {
+  margin-top: 6px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.openAppButton,
+.webButton {
+  min-height: 58px;
+  border-radius: 999px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.openAppButton {
+  background: #4f46e5;
+  color: #e5e7eb;
+  border: 0;
+  font-weight: 700;
+}
+
+.webButton {
+  border: 2px solid #e5e7eb;
+  color: #e5e7eb;
+  background: transparent;
+  font-weight: 500;
+}
+
+.fallback {
+  margin: 0;
+  color: #9ca3af;
+  font-family: Montserrat, sans-serif;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.fallbackLink {
+  color: #e5e7eb;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (max-width: 48em) {
+  .card {
+    padding: 22px 16px;
+    gap: 14px;
+  }
+
+  .description {
+    font-size: 16px;
+  }
+
+  .actions {
+    grid-template-columns: 1fr;
+  }
+
+  .openAppButton,
+  .webButton {
+    min-height: 54px;
+    font-size: 16px;
+  }
+}

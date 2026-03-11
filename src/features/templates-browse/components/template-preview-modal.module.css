@@ -1,12 +1,20 @@
-.modal {
-  & :global(.mantine-Modal-content) {
-    border-radius: var(--mantine-radius-lg);
-    overscroll-behavior: contain;
-  }
+.overlay {
+  backdrop-filter: blur(8px);
+  background: rgba(60, 68, 81, 0.76);
+}
 
-  & :global(.mantine-Modal-body) {
-    padding: 0;
-  }
+.content {
+  background: #000;
+  border: 1px solid
+    color-mix(in srgb, var(--mantine-color-primaryLight-4) 68%, transparent);
+  border-radius: 20px;
+  box-shadow: 0 0 42px rgba(36, 72, 251, 0.28);
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+.body {
+  padding: 0;
 }
 
 .header {
@@ -14,7 +22,8 @@
   align-items: center;
   gap: var(--mantine-spacing-md);
   padding: var(--mantine-spacing-lg) var(--mantine-spacing-xl);
-  border-bottom: 2px solid var(--mantine-color-primaryAlt-0);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--mantine-color-primaryLight-4) 68%, transparent);
 }
 
 .title {
@@ -39,7 +48,8 @@
 
 .tabsSection {
   padding: 0 var(--mantine-spacing-xl);
-  border-bottom: 1px solid var(--mantine-color-dark-6);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--mantine-color-primaryLight-4) 68%, transparent);
 
   & :global(.mantine-Tabs-list) {
     gap: var(--mantine-spacing-xl);
@@ -61,7 +71,8 @@
 
     &[data-active] {
       color: var(--mantine-color-white);
-      border-bottom: 2px solid var(--mantine-color-primaryAlt-0);
+      border-bottom: 2px solid
+        color-mix(in srgb, var(--mantine-color-primaryLight-4) 68%, transparent);
     }
   }
 }
@@ -128,6 +139,8 @@
 /* Drawer styles for mobile */
 .drawer {
   overscroll-behavior: contain;
+  background: #000;
+  box-shadow: 0 -16px 40px rgba(36, 72, 251, 0.25);
 
   & :global(.mantine-Drawer-body) {
     padding: 0;

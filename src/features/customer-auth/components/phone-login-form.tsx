@@ -1,5 +1,5 @@
 import { Button, Divider, Stack, Text } from '@mantine/core';
-import { useNavigate } from '@tanstack/react-router';
+import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { revalidateLogic } from '@tanstack/react-form';
 import * as v from 'valibot';
 
@@ -19,8 +19,11 @@ const phoneSchema = v.object({
   ),
 });
 
+const routeApi = getRouteApi('/login');
+
 export function PhoneLoginForm() {
   const navigate = useNavigate();
+  const { redirectTo } = routeApi.useSearch();
   const checkPhone = useCheckPhone();
   const guestLogin = useGuestLogin();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -50,7 +53,7 @@ export function PhoneLoginForm() {
   const handleContinueAsGuest = () => {
     guestLogin.mutate(undefined, {
       onSuccess: () => {
-        void navigate({ to: '/' });
+        void navigate({ to: redirectTo || '/' });
       },
     });
   };

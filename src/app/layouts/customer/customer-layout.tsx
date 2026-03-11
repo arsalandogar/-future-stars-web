@@ -6,6 +6,7 @@ import {
   GlobalCreatePackModal,
   GlobalPackAutofillModal,
 } from '@/features/customer';
+import { GlobalShareModal } from '@/features/shared-links';
 
 import { CustomerFooter } from './components/customer-footer';
 import { CustomerHeader } from './components/customer-header';
@@ -23,7 +24,7 @@ export function CustomerLayout() {
         main: {
           background:
             'linear-gradient(to bottom, var(--customer-bg-gradient-start), var(--customer-bg-gradient-end))',
-          minHeight: '100vh',
+          minHeight: '100dvh',
           fontFamily:
             'Montserrat, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
         },
@@ -50,6 +51,7 @@ export function CustomerLayout() {
       <GlobalCreatePackModal />
       <GlobalAddedToCartPopup />
       <GlobalPackAutofillModal />
+      <GlobalShareModal />
     </AppShell>
   );
 }

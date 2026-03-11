@@ -243,6 +243,18 @@ Uses **Tailwind CSS v4** with **Mantine v7** via `tailwind-preset-mantine`. See 
 | Complex hover/focus combinations            | CSS Modules         |
 | 5+ style modifications                      | CSS Modules         |
 
+### Modal Styling
+
+Customer-facing modals use a standardized dark style:
+
+- **Content background**: `#000` (pure black)
+- **Content border**: `1px solid color-mix(in srgb, var(--mantine-color-primaryLight-4) 68%, transparent)`
+- **Content border-radius**: `20px`
+- **Content box-shadow**: `0 0 42px rgba(36, 72, 251, 0.28)`
+- **Header border**: `1px solid color-mix(in srgb, var(--mantine-color-primaryLight-4) 68%, transparent)`
+- **Overlay**: `backdrop-filter: blur(8px); background: rgba(60, 68, 81, 0.76)`
+- **Drawer (mobile)**: Same `#000` background, no border-top, no border-radius, `box-shadow: 0 -16px 40px rgba(36, 72, 251, 0.25)`
+
 ### Environment Variables
 
 Environment variables are accessed via `src/config/env.ts`:
