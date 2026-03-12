@@ -310,9 +310,7 @@ Each feature must have an `index.ts` barrel file that exports its public API (co
 The codebase follows a unidirectional architecture: `shared → features → app`
 
 - **Shared modules** (`components`, `hooks`, `utils`, etc.) can be imported anywhere
-- **Features** can import from shared modules but NOT from:
-  - Other features (to maintain independence)
-  - The app layer (to maintain unidirectional flow)
+- **Features** can import from shared modules or from other modules public api but NOT from the app layer.
 - **App layer** can import from both features and shared modules
 
 These rules are enforced by ESLint via `no-restricted-imports`.
