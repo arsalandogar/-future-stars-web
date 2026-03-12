@@ -1,12 +1,16 @@
 import { api } from '@/lib/api-client';
-import { createMutation, seedQueryData } from '@/lib/react-query';
+import {
+  createMutation,
+  invalidateQueries,
+  seedQueryData,
+} from '@/lib/react-query';
 import type { Card } from '@/types';
 
 import type { Edits } from '@fs-card-engine';
 
 import { cardQuery } from './get-card';
 
-interface SaveCardParams {
+export interface PersistCardPayload {
   templateId: number;
   editsJson: Edits;
   backTemplateId: number | null;
@@ -14,14 +18,15 @@ interface SaveCardParams {
 }
 
 export const useSaveCard = createMutation({
-  mutationFn: async (params: SaveCardParams): Promise<Card> => {
+  mutationFn: async (params: PersistCardPayload): Promise<Card> => {
     const response: { data: Card } = await api.post('cards/v2', params);
     return response.data;
   },
   use: [
-    seedQueryData<Card, SaveCardParams>((card) => ({
+    seedQueryData<Card, PersistCardPayload>((card) => ({
       queryKey: cardQuery.getKey(card.id),
       data: card,
     })),
+    invalidateQueries([['customer', 'cards']]),
   ],
 });

@@ -16,7 +16,7 @@ import { useCardBuilderStore } from '../stores/card-builder-store';
 import { useCardEditorStore } from '../stores/card-editor-store';
 import { useImageUploadStore } from '../stores/image-upload-store';
 
-import styles from './card-builder-layout.module.css';
+import styles from '../components/card-builder-layout.module.css';
 
 interface TemplateDefaultsPageProps {
   id: number;

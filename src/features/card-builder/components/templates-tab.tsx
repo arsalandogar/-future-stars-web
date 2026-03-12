@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { AspectRatio, Loader, SimpleGrid, Skeleton, Text } from '@mantine/core';
 import { useQueryClient } from '@tanstack/react-query';
-import { getRouteApi } from '@tanstack/react-router';
+import { getRouteApi, useNavigate } from '@tanstack/react-router';
 
 import { ContentTabs } from '@/components/ui/content-tabs';
 import { useTemplateTags, useTemplates } from '@/features/templates-browse';
@@ -15,7 +15,7 @@ import { TemplateThumbnail } from './template-thumbnail';
 
 import styles from './templates-tab.module.css';
 
-const routeApi = getRouteApi('/_authenticated/_customer/create-card');
+const routeApi = getRouteApi('/_authenticated/_customer/_card-builder');
 
 const TEMPLATE_GRID_COLS = { base: 2, xs: 3, sm: 4, md: 5 } as const;
 const TEMPLATE_GRID_SPACING = 'md';
@@ -27,7 +27,7 @@ const TEMPLATE_SKELETON_KEYS = Array.from(
 
 export function TemplatesTab() {
   const { templateId } = routeApi.useSearch();
-  const navigate = routeApi.useNavigate();
+  const navigate = useNavigate();
   const activeTagFilter = useCardBuilderStore((s) => s.activeTagFilter);
   const setActiveTagFilter = useCardBuilderStore((s) => s.setActiveTagFilter);
   const setActiveSide = useCardEditorStore((s) => s.setActiveSide);
@@ -69,6 +69,7 @@ export function TemplatesTab() {
   const selectTemplate = (id: number) => {
     setActiveSide('front');
     void navigate({
+      to: '.',
       search: (prev) => ({ ...prev, templateId: id }),
       replace: true,
     });

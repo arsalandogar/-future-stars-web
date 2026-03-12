@@ -9,6 +9,7 @@ import {
   type SideState,
   createEmptySideState,
   initializeSideSnapshot,
+  applyEditsForRender,
   applyTextCompression,
   withColorEdit,
   withImageEdit,
@@ -36,6 +37,8 @@ interface CardEditorState {
   focusedFieldId: EditableFieldId | null;
 
   initializeSideFromSvg: (side: Side, svgNode: SvgJsonNode | undefined) => void;
+  resetSide: (side: Side) => void;
+  hydrateSavedEdits: (frontEdits: Edits, backEdits: Edits) => void;
   setActiveSide: (side: Side) => void;
   getEditsForSave: () => {
     frontEdits: Edits;
@@ -204,6 +207,60 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => {
         set(commitSide(current, side, {}));
         scheduleTextCompression(side);
       });
+    },
+
+    resetSide: (side) => {
+      const state = get();
+      const nextActiveSide =
+        side === 'back' && state.activeSide === 'back'
+          ? 'front'
+          : state.activeSide;
+
+      set({
+        activeSide: nextActiveSide,
+        focusedFieldId:
+          nextActiveSide === state.activeSide ? state.focusedFieldId : null,
+        sides: {
+          ...state.sides,
+          [side]: createEmptySideState(),
+        },
+      });
+    },
+
+    hydrateSavedEdits: (frontEdits, backEdits) => {
+      const state = get();
+      const sides = { ...state.sides };
+
+      for (const [side, edits] of [
+        ['front', frontEdits],
+        ['back', backEdits],
+      ] as const) {
+        const current = sides[side];
+        const hydratedEdits = { ...edits };
+
+        // If the working copy is already initialized, re-apply edits to the
+        // SVG tree so the preview reflects the hydrated values immediately.
+        if (current.workingCopy) {
+          applyEditsForRender(
+            {
+              textFields: current.editableFields,
+              colorFields: current.editableColorFields,
+              imageFields: current.editableImageFields,
+            },
+            hydratedEdits
+          );
+        }
+
+        sides[side] = {
+          ...current,
+          edits: hydratedEdits,
+          appliedPresetId: null,
+          appliedPresetColors: null,
+          revision: current.revision + 1,
+        };
+      }
+
+      set({ sides });
     },
 
     setActiveSide: (side) => {
