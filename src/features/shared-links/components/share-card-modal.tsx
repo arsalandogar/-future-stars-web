@@ -79,6 +79,7 @@ export function ShareCardModal({ card, opened, onClose }: ShareCardModalProps) {
   };
 
   const handleCopyImage = async () => {
+    if (!card.frontCardImage) return;
     try {
       const response = await fetch(card.frontCardImage);
       const blob = await response.blob();
