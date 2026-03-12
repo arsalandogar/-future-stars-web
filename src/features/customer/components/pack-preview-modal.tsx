@@ -133,13 +133,15 @@ export function PackPreviewModal({
     }
   };
 
-  // Sync carousel with current card index
+  // Sync carousel with current card index — imperative embla scrollTo requires effect
+  /* eslint-disable react-you-might-not-need-an-effect/no-event-handler -- imperative carousel sync */
   useEffect(() => {
     if (!embla || currentCardIndex < 0) return;
     const indicesInView = embla.slidesInView();
     if (indicesInView.includes(currentCardIndex)) return;
     embla.scrollTo(currentCardIndex, false);
   }, [embla, currentCardIndex]);
+  /* eslint-enable react-you-might-not-need-an-effect/no-event-handler */
 
   function handleThumbnailClick(index: number): void {
     setCurrentCardIndex(index);

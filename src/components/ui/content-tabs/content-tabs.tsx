@@ -1,7 +1,7 @@
 import {
   type ComponentProps,
   useCallback,
-  useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
@@ -56,11 +56,11 @@ export function ContentTabs({
     }
   }, [activeValue]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     updateIndicator();
   }, [updateIndicator]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const container = containerRef.current;
     if (!container) return;
     const observer = new ResizeObserver(updateIndicator);

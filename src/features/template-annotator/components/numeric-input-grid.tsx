@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { NumberInput, SimpleGrid } from '@mantine/core';
 
 interface NumericInputField {
@@ -44,10 +44,12 @@ export function NumericInputGrid({
   const syncKey = fields
     .map((field) => `${field.key}:${field.value}`)
     .join('|');
+  const [prevSyncKey, setPrevSyncKey] = useState(syncKey);
 
-  useEffect(() => {
+  if (syncKey !== prevSyncKey) {
+    setPrevSyncKey(syncKey);
     setDrafts(buildDrafts(fields));
-  }, [syncKey]);
+  }
 
   return (
     <SimpleGrid cols={columns} spacing={4} mt={mt}>

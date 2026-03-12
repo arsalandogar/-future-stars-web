@@ -8,7 +8,7 @@ import { Button, Group, Loader, Modal, Text, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ArrowLeft, CreditCard, Trash2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { getStripePromise, stripeAppearance } from '@/lib/stripe';
 
@@ -53,17 +53,14 @@ export function PaymentMethodsSection() {
   const setDefaultPayment = useSetDefaultPayment();
   const createSetupIntent = useCreateSetupIntent();
 
-  // Fetch SetupIntent when modal opens
-  useEffect(() => {
-    if (modalOpened && !clientSecret) {
-      createSetupIntent.mutate(undefined, {
-        onSuccess: (response) => {
-          setClientSecret(response.data.setupIntentSecret);
-        },
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Only fetch when modal opens, clientSecret check is inside
-  }, [modalOpened]);
+  const handleOpenModal = () => {
+    openModal();
+    createSetupIntent.mutate(undefined, {
+      onSuccess: (response) => {
+        setClientSecret(response.data.setupIntentSecret);
+      },
+    });
+  };
 
   const handleCloseModal = () => {
     closeModal();
@@ -153,7 +150,7 @@ export function PaymentMethodsSection() {
           variant="filled"
           radius="xl"
           leftSection={<CreditCard size={18} />}
-          onClick={openModal}
+          onClick={handleOpenModal}
         >
           Add Payment Method
         </Button>

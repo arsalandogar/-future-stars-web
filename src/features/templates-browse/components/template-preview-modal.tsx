@@ -67,12 +67,14 @@ export function TemplatePreviewModal({
     ? carouselTemplates.findIndex((tpl) => tpl.id === template.id)
     : 0;
 
-  // Scroll carousel to match selected template
+  // Scroll carousel to match selected template — imperative embla scrollTo requires effect
+  /* eslint-disable react-you-might-not-need-an-effect/no-event-handler -- imperative carousel sync */
   useEffect(() => {
     if (!embla || currentIndex < 0) return;
     if (embla.slidesInView().includes(currentIndex)) return;
     embla.scrollTo(currentIndex, false);
   }, [embla, currentIndex]);
+  /* eslint-enable react-you-might-not-need-an-effect/no-event-handler */
 
   function handleThumbnailClick(tpl: BrowseTemplate): void {
     onTemplateChange?.(tpl.id);

@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 
 import { Center, Loader } from '@mantine/core';
 
@@ -13,17 +13,13 @@ interface GuestLoginResponse {
 
 export function AuthInitializer({ children }: { children: ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const setAuth = useAuthStore((s) => s.setAuth);
   const [guestLoginDone, setGuestLoginDone] = useState(
     () => window.location.pathname === '/login'
   );
-  const guestLoginAttempted = useRef(false);
 
   useEffect(() => {
-    if (isAuthenticated || guestLoginAttempted.current || guestLoginDone)
-      return;
-
-    guestLoginAttempted.current = true;
+    const { isAuthenticated, setAuth } = useAuthStore.getState();
+    if (isAuthenticated) return;
 
     api
       .post<unknown, GuestLoginResponse>('auth/guest')
@@ -36,7 +32,7 @@ export function AuthInitializer({ children }: { children: ReactNode }) {
       .finally(() => {
         setGuestLoginDone(true);
       });
-  }, [isAuthenticated, setAuth]);
+  }, []);
 
   if (!isAuthenticated && !guestLoginDone) {
     return (

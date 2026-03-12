@@ -83,19 +83,6 @@ export function CardPreviewModal({
     }
   }, [cards.length]);
 
-  // Load more cards when approaching the end (with guard against duplicate calls)
-  useEffect(() => {
-    if (
-      currentIndex >= cards.length - 2 &&
-      hasNextPage &&
-      onLoadMore &&
-      !isLoadingMoreRef.current
-    ) {
-      isLoadingMoreRef.current = true;
-      onLoadMore();
-    }
-  }, [currentIndex, cards.length, hasNextPage, onLoadMore]);
-
   // Close preview when the pack modal opens (triggered by BuyCardButton)
   const packModalOpened = useCreatePackModalStore((s) => s.opened);
   useEffect(() => {
@@ -118,8 +105,20 @@ export function CardPreviewModal({
 
   const handleNext = () => {
     if (currentIndex < totalCards - 1) {
-      setCurrentIndex((prev) => prev + 1);
+      const newIndex = currentIndex + 1;
+      setCurrentIndex(newIndex);
       setIsFlipped(false);
+
+      // Load more cards when approaching the end
+      if (
+        newIndex >= cards.length - 2 &&
+        hasNextPage &&
+        onLoadMore &&
+        !isLoadingMoreRef.current
+      ) {
+        isLoadingMoreRef.current = true;
+        onLoadMore();
+      }
     }
   };
 
