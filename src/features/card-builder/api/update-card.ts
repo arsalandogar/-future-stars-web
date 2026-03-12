@@ -16,7 +16,7 @@ export interface UpdateCardParams extends PersistCardPayload {
 
 export const useUpdateCard = createMutation({
   mutationFn: async ({ id, ...data }: UpdateCardParams): Promise<Card> => {
-    const response: { data: Card } = await api.put(`cards/${id}`, data);
+    const response: { data: Card } = await api.put(`cards/v2/${id}`, data);
     return response.data;
   },
   use: [
