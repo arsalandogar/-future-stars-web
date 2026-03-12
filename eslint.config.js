@@ -8,6 +8,7 @@ import reactDom from 'eslint-plugin-react-dom';
 import checkFile from 'eslint-plugin-check-file';
 import tseslint from 'typescript-eslint';
 import prettier from 'eslint-config-prettier';
+import reactYouMightNotNeedAnEffect from "eslint-plugin-react-you-might-not-need-an-effect";
 import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
@@ -22,6 +23,7 @@ export default defineConfig([
       reactX.configs['recommended-typescript'],
       reactDom.configs.recommended,
       pluginRouter.configs['flat/recommended'],
+      reactYouMightNotNeedAnEffect.configs.recommended,
       prettier,
     ],
     plugins: {
