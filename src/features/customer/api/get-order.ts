@@ -1,15 +1,6 @@
 import { api } from '@/lib/api-client';
 import { createQuery } from '@/lib/react-query';
-import type { CardPreviewStatus, OrderStatus } from '@/types';
-
-interface OrderCardSnapshot {
-  id: number;
-  frontCardImage: string | null;
-  backCardImage: string | null;
-  svgString: string | null;
-  backSvgString: string | null;
-  status: CardPreviewStatus;
-}
+import type { OrderCardSnapshot, OrderStatus } from '@/types';
 
 interface OrderPackSnapshot {
   id: number;

@@ -17,10 +17,7 @@ export function PackCardsPreview({ cards }: PackCardsPreviewProps) {
         {cards.map((card) => (
           <div key={card.id} className={styles.card}>
             <CardSidePreview
-              imageUrl={card.frontCardImage}
-              svgString={card.svgString}
-              status={card.status}
-              alt="Card"
+              card={card}
               className={styles.cardImage}
               badgeSize="xs"
             />

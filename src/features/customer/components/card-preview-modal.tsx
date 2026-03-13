@@ -209,22 +209,15 @@ export function CardPreviewModal({
                   <div className={styles.flipCardInner}>
                     <div className={styles.flipCardFront}>
                       <CardSidePreview
-                        imageUrl={card.frontCardImage}
-                        svgString={card.svgString}
-                        status={card.status}
-                        alt="Card front"
-                        fit="contain"
+                        card={card}
                         className={styles.cardImage}
                         badgeSize="sm"
                       />
                     </div>
                     <div className={styles.flipCardBack}>
                       <CardSidePreview
-                        imageUrl={card.backCardImage}
-                        svgString={card.backSvgString}
-                        status={card.status}
-                        alt="Card back"
-                        fit="contain"
+                        card={card}
+                        side="back"
                         className={styles.cardImage}
                         badgeSize="sm"
                       />
@@ -244,22 +237,15 @@ export function CardPreviewModal({
               <div className={styles.cardsRow}>
                 <div className={styles.cardImageWrapper}>
                   <CardSidePreview
-                    imageUrl={card.frontCardImage}
-                    svgString={card.svgString}
-                    status={card.status}
-                    alt="Card front"
-                    fit="contain"
+                    card={card}
                     className={styles.cardImage}
                     badgeSize="sm"
                   />
                 </div>
                 <div className={styles.cardImageWrapper}>
                   <CardSidePreview
-                    imageUrl={card.backCardImage}
-                    svgString={card.backSvgString}
-                    status={card.status}
-                    alt="Card back"
-                    fit="contain"
+                    card={card}
+                    side="back"
                     className={styles.cardImage}
                     badgeSize="sm"
                   />

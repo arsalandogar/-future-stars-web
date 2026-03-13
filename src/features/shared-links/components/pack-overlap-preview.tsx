@@ -24,10 +24,7 @@ export function PackOverlapPreview({
   const canGoPrev = currentCardIndex > 0;
   const canGoNext = currentCardIndex < totalCards - 1;
 
-  const frontCardImage = currentPackCard?.card.frontCardImage;
-  const backCardImage = currentPackCard?.card.backCardImage;
-
-  if (!currentPackCard || !frontCardImage || !backCardImage) return null;
+  if (!currentPackCard) return null;
 
   return (
     <div className={`flex flex-col items-center gap-2 ${className ?? ''}`}>
@@ -42,11 +39,7 @@ export function PackOverlapPreview({
           <ChevronLeft size={24} />
         </button>
 
-        <CardOverlapPreview
-          frontImage={frontCardImage}
-          backImage={backCardImage}
-          cardWidth={cardWidth}
-        />
+        <CardOverlapPreview card={currentPackCard.card} cardWidth={cardWidth} />
 
         <button
           type="button"

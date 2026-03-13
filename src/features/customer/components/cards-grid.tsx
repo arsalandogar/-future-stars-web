@@ -40,9 +40,7 @@ export function CardsGrid({
         {cards.map((card) => (
           <CardItem
             key={card.id}
-            imageUrl={card.frontCardImage}
-            svgString={card.svgString}
-            status={card.status}
+            card={card}
             onClick={() => onCardClick(card)}
           />
         ))}

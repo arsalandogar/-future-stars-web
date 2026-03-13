@@ -50,10 +50,7 @@ export function CartItem({
         <button type="button" className={styles.thumbnail} onClick={onViewPack}>
           {firstCard ? (
             <CardSidePreview
-              imageUrl={firstCard.frontCardImage}
-              svgString={firstCard.svgString}
-              status={firstCard.status}
-              alt={item.pack.name}
+              card={firstCard}
               className={styles.thumbnailImage}
               badgeSize="xs"
             />

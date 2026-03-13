@@ -32,6 +32,15 @@ export interface ShippingAddress {
   country: string;
 }
 
+export interface OrderCardSnapshot {
+  id: number;
+  frontCardImage: string | null;
+  backCardImage: string | null;
+  svgString: string | null;
+  backSvgString: string | null;
+  status: CardPreviewStatus;
+}
+
 export interface PackCardSnapshot {
   cardId: number;
   quantity: number;

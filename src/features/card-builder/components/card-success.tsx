@@ -26,18 +26,13 @@ export function CardSuccess({ card }: CardSuccessProps) {
 
       <div className={styles.cardsStage}>
         <CardSidePreview
-          imageUrl={card.frontCardImage}
-          svgString={card.svgString}
-          status={card.status}
-          alt="Created card front"
+          card={card}
           className={`${styles.cardImage} ${styles.frontCard}`}
           style={{ width: 'auto' }}
         />
         <CardSidePreview
-          imageUrl={card.backCardImage}
-          svgString={card.backSvgString}
-          status={card.status}
-          alt="Created card back"
+          card={card}
+          side="back"
           className={`${styles.cardImage} ${styles.backCard}`}
           style={{ width: 'auto' }}
         />

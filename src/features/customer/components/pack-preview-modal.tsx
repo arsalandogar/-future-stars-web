@@ -244,22 +244,15 @@ export function PackPreviewModal({
             <div className={styles.flipCardInner}>
               <div className={styles.flipCardFront}>
                 <CardSidePreview
-                  imageUrl={currentPackCard.card.frontCardImage}
-                  svgString={currentPackCard.card.svgString}
-                  status={currentPackCard.card.status}
-                  alt="Card front"
-                  fit="contain"
+                  card={currentPackCard.card}
                   className={styles.cardImage}
                   badgeSize="sm"
                 />
               </div>
               <div className={styles.flipCardBack}>
                 <CardSidePreview
-                  imageUrl={currentPackCard.card.backCardImage}
-                  svgString={currentPackCard.card.backSvgString}
-                  status={currentPackCard.card.status}
-                  alt="Card back"
-                  fit="contain"
+                  card={currentPackCard.card}
+                  side="back"
                   className={styles.cardImage}
                   badgeSize="sm"
                 />
@@ -279,22 +272,15 @@ export function PackPreviewModal({
         <div className={styles.previewSection}>
           <div className={styles.previewCard}>
             <CardSidePreview
-              imageUrl={currentPackCard.card.frontCardImage}
-              svgString={currentPackCard.card.svgString}
-              status={currentPackCard.card.status}
-              alt="Card front"
-              fit="contain"
+              card={currentPackCard.card}
               className={styles.cardImage}
               badgeSize="sm"
             />
           </div>
           <div className={styles.previewCard}>
             <CardSidePreview
-              imageUrl={currentPackCard.card.backCardImage}
-              svgString={currentPackCard.card.backSvgString}
-              status={currentPackCard.card.status}
-              alt="Card back"
-              fit="contain"
+              card={currentPackCard.card}
+              side="back"
               className={styles.cardImage}
               badgeSize="sm"
             />
@@ -333,10 +319,7 @@ export function PackPreviewModal({
                   onClick={() => handleThumbnailClick(index)}
                 >
                   <CardSidePreview
-                    imageUrl={packCard.card.frontCardImage}
-                    svgString={packCard.card.svgString}
-                    status={packCard.card.status}
-                    alt={`Card ${index + 1}`}
+                    card={packCard.card}
                     className={styles.thumbnailPreview}
                     badgeSize="xs"
                   />

@@ -184,10 +184,7 @@ export function PackCreatedModal({
             <div className={styles.thumbnail}>
               {firstCard && (
                 <CardSidePreview
-                  imageUrl={firstCard.frontCardImage}
-                  svgString={firstCard.svgString}
-                  status={firstCard.status}
-                  alt={pack.name}
+                  card={firstCard}
                   className={styles.thumbnailImage}
                   badgeSize="xs"
                 />

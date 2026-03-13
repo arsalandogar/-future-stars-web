@@ -29,10 +29,7 @@ export function OrderPackItem({ item }: OrderPackItemProps) {
         <div className={styles.thumbnail}>
           {firstCard ? (
             <CardSidePreview
-              imageUrl={firstCard.frontCardImage}
-              svgString={firstCard.svgString}
-              status={firstCard.status}
-              alt={item.packName}
+              card={firstCard}
               className={styles.thumbnailImage}
               badgeSize="xs"
             />
@@ -66,10 +63,7 @@ export function OrderPackItem({ item }: OrderPackItemProps) {
             {item.packSnapshot.cardSnapshots.map((cardSnapshot) => (
               <div key={cardSnapshot.id} className={styles.cardItem}>
                 <CardSidePreview
-                  imageUrl={cardSnapshot.frontCardImage}
-                  svgString={cardSnapshot.svgString}
-                  status={cardSnapshot.status}
-                  alt={`Card ${cardSnapshot.originalCardId}`}
+                  card={cardSnapshot}
                   className={styles.cardImage}
                   badgeSize="xs"
                 />

@@ -28,10 +28,7 @@ export function CheckoutLineItem({ item }: CheckoutLineItemProps) {
         <div className={styles.thumbnail}>
           {firstCard ? (
             <CardSidePreview
-              imageUrl={firstCard.frontCardImage}
-              svgString={firstCard.svgString}
-              status={firstCard.status}
-              alt={item.pack.name}
+              card={firstCard}
               className={styles.thumbnailImage}
               badgeSize="xs"
             />
@@ -71,10 +68,7 @@ export function CheckoutLineItem({ item }: CheckoutLineItemProps) {
               {item.pack.packCards.map((packCard) => (
                 <div key={packCard.cardId} className={styles.cardItem}>
                   <CardSidePreview
-                    imageUrl={packCard.card.frontCardImage}
-                    svgString={packCard.card.svgString}
-                    status={packCard.card.status}
-                    alt={`Card ${packCard.cardId}`}
+                    card={packCard.card}
                     className={styles.cardImage}
                     badgeSize="xs"
                   />

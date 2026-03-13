@@ -22,14 +22,7 @@
 .image {
   width: 100%;
   height: 100%;
-}
-
-.root[data-fit='cover'] .image {
   object-fit: cover;
-}
-
-.root[data-fit='contain'] .image {
-  object-fit: contain;
 }
 
 .svg {

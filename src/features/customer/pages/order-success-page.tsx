@@ -84,26 +84,17 @@ export function OrderSuccessPage({ orderId }: OrderSuccessPageProps) {
               {cardPreviews.length > 0 && (
                 <>
                   <CardSidePreview
-                    imageUrl={cardPreviews[0].frontCardImage}
-                    svgString={cardPreviews[0].svgString}
-                    status={cardPreviews[0].status}
-                    alt="Card"
+                    card={cardPreviews[0]}
                     className={`${styles.fanCard} ${styles.leftCard}`}
                     style={{ width: 'auto' }}
                   />
                   <CardSidePreview
-                    imageUrl={cardPreviews[1].frontCardImage}
-                    svgString={cardPreviews[1].svgString}
-                    status={cardPreviews[1].status}
-                    alt="Card"
+                    card={cardPreviews[1]}
                     className={`${styles.fanCard} ${styles.centerCard}`}
                     style={{ width: 'auto' }}
                   />
                   <CardSidePreview
-                    imageUrl={cardPreviews[2].frontCardImage}
-                    svgString={cardPreviews[2].svgString}
-                    status={cardPreviews[2].status}
-                    alt="Card"
+                    card={cardPreviews[2]}
                     className={`${styles.fanCard} ${styles.rightCard}`}
                     style={{ width: 'auto' }}
                   />

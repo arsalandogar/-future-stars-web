@@ -3,7 +3,6 @@ import {
   ActionIcon,
   Button,
   Drawer,
-  Image,
   Modal,
   Textarea,
   useMantineTheme,
@@ -12,6 +11,7 @@ import { useMediaQuery } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { ArrowLeft, Check, Copy, Link2, X } from 'lucide-react';
 
+import { CardSidePreview } from '@/components/card-side-preview';
 import type { Card } from '@/types';
 
 import { useCreateSharedLink } from '../api/create-shared-link';
@@ -119,18 +119,12 @@ export function ShareCardModal({ card, opened, onClose }: ShareCardModalProps) {
       <div className={styles.contentArea}>
         <div className={styles.cardsRow}>
           <div className={styles.cardImageWrapper}>
-            <Image
-              src={card.frontCardImage}
-              alt="Card front"
-              fit="contain"
-              className={styles.cardImage}
-            />
+            <CardSidePreview card={card} className={styles.cardImage} />
           </div>
           <div className={styles.cardImageWrapper}>
-            <Image
-              src={card.backCardImage}
-              alt="Card back"
-              fit="contain"
+            <CardSidePreview
+              card={card}
+              side="back"
               className={styles.cardImage}
             />
           </div>

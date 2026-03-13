@@ -1,15 +1,14 @@
-import { Image } from '@mantine/core';
+import { CardSidePreview } from '@/components/card-side-preview';
+import type { Card } from '@/types';
 
 interface CardOverlapPreviewProps {
-  frontImage: string;
-  backImage: string;
+  card: Card;
   cardWidth?: number;
   className?: string;
 }
 
 export function CardOverlapPreview({
-  frontImage,
-  backImage,
+  card,
   cardWidth = 180,
   className,
 }: CardOverlapPreviewProps) {
@@ -19,10 +18,9 @@ export function CardOverlapPreview({
         className="relative flex items-center justify-center"
         style={{ width: cardWidth * 2, height: cardWidth * 1.6 }}
       >
-        <Image
-          src={backImage}
-          alt="Card back"
-          fit="contain"
+        <CardSidePreview
+          card={card}
+          side="back"
           style={{
             width: cardWidth,
             position: 'absolute',
@@ -30,10 +28,8 @@ export function CardOverlapPreview({
             zIndex: 1,
           }}
         />
-        <Image
-          src={frontImage}
-          alt="Card front"
-          fit="contain"
+        <CardSidePreview
+          card={card}
           style={{
             width: cardWidth,
             position: 'absolute',

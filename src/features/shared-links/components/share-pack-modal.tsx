@@ -3,7 +3,6 @@ import {
   ActionIcon,
   Button,
   Drawer,
-  Image,
   Modal,
   Textarea,
   useMantineTheme,
@@ -19,6 +18,7 @@ import {
   X,
 } from 'lucide-react';
 
+import { CardSidePreview } from '@/components/card-side-preview';
 import type { Pack } from '@/types';
 
 import { useCreateSharedLink } from '../api/create-shared-link';
@@ -118,18 +118,15 @@ export function SharePackModal({ pack, opened, onClose }: SharePackModalProps) {
             {currentPackCard && (
               <div className={styles.cardsRow}>
                 <div className={styles.cardImageWrapper}>
-                  <Image
-                    src={currentPackCard.card.frontCardImage}
-                    alt="Card front"
-                    fit="contain"
+                  <CardSidePreview
+                    card={currentPackCard.card}
                     className={styles.cardImage}
                   />
                 </div>
                 <div className={styles.cardImageWrapper}>
-                  <Image
-                    src={currentPackCard.card.backCardImage}
-                    alt="Card back"
-                    fit="contain"
+                  <CardSidePreview
+                    card={currentPackCard.card}
+                    side="back"
                     className={styles.cardImage}
                   />
                 </div>

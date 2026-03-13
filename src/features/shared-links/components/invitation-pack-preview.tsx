@@ -1,6 +1,6 @@
-import { Image } from '@mantine/core';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+import { CardSidePreview } from '@/components/card-side-preview';
 import type { Pack } from '@/types';
 
 import styles from './invitation-pack-preview.module.css';
@@ -39,16 +39,13 @@ export function InvitationPackPreview({
       </button>
 
       <div className={styles.cards}>
-        <Image
-          src={currentPackCard.card.frontCardImage}
-          alt="Card front"
-          fit="contain"
+        <CardSidePreview
+          card={currentPackCard.card}
           className={styles.cardImage}
         />
-        <Image
-          src={currentPackCard.card.backCardImage}
-          alt="Card back"
-          fit="contain"
+        <CardSidePreview
+          card={currentPackCard.card}
+          side="back"
           className={styles.cardImage}
         />
       </div>

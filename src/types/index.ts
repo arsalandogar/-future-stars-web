@@ -11,6 +11,7 @@ export type { CheckoutParams, CheckoutResponse } from './checkout';
 export type { FeaturedItem } from './featured-item';
 export type {
   Order,
+  OrderCardSnapshot,
   OrderLineItem,
   OrderResponse,
   OrdersListParams,

@@ -1,23 +1,16 @@
-import { CardSidePreview } from '@/components/card-side-preview';
-import type { CardPreviewStatus } from '@/types';
+import {
+  CardSidePreview,
+  type CardSidePreviewProps,
+} from '@/components/card-side-preview';
 
 import styles from './card-item.module.css';
 
 interface CardItemProps {
-  imageUrl: string | null;
-  svgString: string | null;
-  status: CardPreviewStatus;
-  alt?: string;
+  card: CardSidePreviewProps['card'];
   onClick?: () => void;
 }
 
-export function CardItem({
-  imageUrl,
-  svgString,
-  status,
-  alt = 'Card',
-  onClick,
-}: CardItemProps) {
+export function CardItem({ card, onClick }: CardItemProps) {
   return (
     <div
       className={styles.card}
@@ -31,13 +24,7 @@ export function CardItem({
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
     >
-      <CardSidePreview
-        imageUrl={imageUrl}
-        svgString={svgString}
-        status={status}
-        alt={alt}
-        className={styles.image}
-      />
+      <CardSidePreview card={card} className={styles.image} />
     </div>
   );
 }

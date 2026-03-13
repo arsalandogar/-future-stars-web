@@ -15,9 +15,10 @@ import {
 } from 'lucide-react';
 
 import { SvgPreview } from '@/components/svg-preview';
-import type { CardPreviewStatus } from '@/types';
+import type { Card, CardPreviewStatus, OrderCardSnapshot } from '@/types';
 
 import styles from './card-side-preview.module.css';
+import type { Side } from '@fs-card-engine';
 
 type PreviewSource = 'image' | 'svg' | 'unavailable';
 
@@ -28,17 +29,11 @@ interface PreviewIndicator {
 }
 
 export interface CardSidePreviewProps {
-  imageUrl?: string | null;
-  svgString?: string | null;
-  status: CardPreviewStatus;
-  alt: string;
+  card: Card | OrderCardSnapshot;
+  side?: Side;
   className?: string;
   style?: CSSProperties;
-  fit?: 'cover' | 'contain';
-  loading?: 'eager' | 'lazy';
-  decoding?: 'async' | 'auto' | 'sync';
   badgeSize?: MantineSize;
-  hideBadge?: boolean;
 }
 
 function getIndicator(
@@ -103,20 +98,17 @@ function getPreviewSource(
 }
 
 export function CardSidePreview({
-  imageUrl,
-  svgString,
-  status,
-  alt,
+  card,
+  side = 'front',
   className,
   style,
-  fit = 'cover',
-  loading = 'lazy',
-  decoding = 'async',
   badgeSize = 'xs',
-  hideBadge = false,
 }: CardSidePreviewProps) {
-  const normalizedImageUrl = imageUrl?.trim() || null;
-  const normalizedSvgString = svgString?.trim() || null;
+  const rawImageUrl =
+    side === 'back' ? card.backCardImage : card.frontCardImage;
+  const rawSvgString = side === 'back' ? card.backSvgString : card.svgString;
+  const normalizedImageUrl = rawImageUrl?.trim() || null;
+  const normalizedSvgString = rawSvgString?.trim() || null;
   const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
   const imageFailed =
     normalizedImageUrl != null && failedImageUrl === normalizedImageUrl;
@@ -126,7 +118,7 @@ export function CardSidePreview({
     normalizedSvgString,
     imageFailed
   );
-  const indicator = getIndicator(status, source);
+  const indicator = getIndicator(card.status, source);
   const iconOnly = badgeSize === 'xs';
   const badgeIconSize = iconOnly ? 12 : 14;
   const IndicatorIcon = indicator?.icon;
@@ -134,10 +126,9 @@ export function CardSidePreview({
   return (
     <div
       className={`${styles.root}${className ? ` ${className}` : ''}`}
-      data-fit={fit}
       style={style}
     >
-      {!hideBadge && indicator && IndicatorIcon ? (
+      {indicator && IndicatorIcon ? (
         <Tooltip
           label={indicator.label}
           withArrow
@@ -168,9 +159,9 @@ export function CardSidePreview({
       {source === 'image' ? (
         <img
           src={normalizedImageUrl ?? undefined}
-          alt={alt}
-          loading={loading}
-          decoding={decoding}
+          alt={`Card ${side}`}
+          loading="lazy"
+          decoding="async"
           className={`${styles.media} ${styles.image}`}
           onError={() => {
             setFailedImageUrl(normalizedImageUrl);

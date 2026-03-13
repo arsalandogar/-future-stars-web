@@ -61,13 +61,7 @@ export function SelectableCardItem({
       tabIndex={0}
     >
       <div className={styles.imageContainer}>
-        <CardSidePreview
-          imageUrl={card.frontCardImage}
-          svgString={card.svgString}
-          status={card.status}
-          alt="Card"
-          className={styles.image}
-        />
+        <CardSidePreview card={card} className={styles.image} />
 
         {isSelected && (
           <>
