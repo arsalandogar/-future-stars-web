@@ -18,12 +18,14 @@ import { measureTextBounds } from '../utils/measure-text-bounds';
 import {
   buildNodeIndex,
   collectDescendantNodeIds,
+  collectTextContent,
 } from '../utils/svg-node-helpers';
 import {
   applyRotateAroundPoint,
   applyTranslate,
   removeScaleFromTransform,
 } from '../utils/svg-transform-helpers';
+import { getComputedTextAnchor } from '../utils/svg-overlay-helpers';
 
 type UndoEntry =
   | { type: 'assignments'; assignments: FieldAssignment[] }
@@ -219,33 +221,28 @@ function applyTransformEntry(
 interface TextAlignSnapshot {
   textAnchor: string | undefined;
   x: string | undefined;
-  tspanXValues: { index: number; x: string }[];
+  children: SvgJsonNode[];
 }
 
 function snapshotTextAlign(
-  node: SvgJsonNode & { type: 'element' }
+  node: SvgJsonNode & { type: 'element' },
+  computedAnchor?: 'start' | 'middle' | 'end'
 ): TextAlignSnapshot {
-  const tspanXValues: { index: number; x: string }[] = [];
-  node.children.forEach((child, index) => {
-    if (
-      child.type === 'element' &&
-      child.name === 'tspan' &&
-      child.attributes.x != null
-    ) {
-      tspanXValues.push({ index, x: child.attributes.x });
-    }
-  });
-  // Inline style text-anchor takes CSS precedence over the SVG attribute
-  const styleAnchorMatch = node.attributes.style?.match(
-    /text-anchor\s*:\s*(\w+)/
-  );
-  const effectiveTextAnchor =
-    styleAnchorMatch?.[1] ?? node.attributes['text-anchor'];
+  // Prefer the live DOM computed anchor (handles CSS <style> blocks and
+  // inheritance from parent groups) over JSON-based detection.
+  let effectiveTextAnchor: string | undefined = computedAnchor;
+  if (!effectiveTextAnchor) {
+    const styleAnchorMatch = node.attributes.style?.match(
+      /text-anchor\s*:\s*(\w+)/
+    );
+    effectiveTextAnchor =
+      styleAnchorMatch?.[1] ?? node.attributes['text-anchor'];
+  }
 
   return {
     textAnchor: effectiveTextAnchor,
     x: node.attributes.x,
-    tspanXValues,
+    children: [...node.children],
   };
 }
 
@@ -253,6 +250,9 @@ function restoreTextAlign(
   node: SvgJsonNode & { type: 'element' },
   snapshot: TextAlignSnapshot
 ): void {
+  // Restore original children first (reverses tspan collapsing)
+  node.children = snapshot.children;
+
   if (snapshot.textAnchor != null) {
     node.attributes['text-anchor'] = snapshot.textAnchor;
   } else {
@@ -262,12 +262,6 @@ function restoreTextAlign(
     node.attributes.x = snapshot.x;
   } else {
     delete node.attributes.x;
-  }
-  for (const { index, x } of snapshot.tspanXValues) {
-    const child = node.children[index];
-    if (child?.type === 'element' && child.name === 'tspan') {
-      child.attributes.x = x;
-    }
   }
 }
 
@@ -792,7 +786,8 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
     const node = asElementNode(rawNode);
     if (!node) return;
 
-    const prevSnapshot = snapshotTextAlign(node);
+    const computedAnchor = getComputedTextAnchor(nodeId);
+    const prevSnapshot = snapshotTextAlign(node, computedAnchor);
     const prevAssignments = assignments;
 
     // Calculate new x position when local maxWidth is available.
@@ -826,19 +821,22 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
       }
 
       const newXStr = String(newX);
-      const originalXStr = prevSnapshot.x ?? String(originalX);
 
-      // Update x on the text element and matching tspan children
+      // Collapse all tspan children into a single text node to avoid
+      // garbled text from individually kerned tspans with different x values.
+      // Card engine's setTextElementContent() and applyWrappedTextLayout()
+      // rebuild tspans from scratch, so original kerning is irrelevant.
+      const collectedText = collectTextContent(node);
+      node.children = [
+        {
+          type: 'text',
+          value: collectedText,
+          name: '',
+          attributes: {},
+          children: [],
+        },
+      ];
       node.attributes.x = newXStr;
-      for (const child of node.children) {
-        if (
-          child.type === 'element' &&
-          child.name === 'tspan' &&
-          child.attributes.x === originalXStr
-        ) {
-          child.attributes.x = newXStr;
-        }
-      }
     }
 
     // Remove text-anchor from inline style so SVG attribute takes effect

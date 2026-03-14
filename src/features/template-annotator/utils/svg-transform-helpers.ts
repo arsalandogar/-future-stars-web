@@ -149,6 +149,45 @@ export function transformPoint(
   return { x: pt.x, y: pt.y };
 }
 
+/**
+ * Transforms a direction vector through the linear part of a matrix
+ * (ignoring translation). Use to convert deltas between coordinate spaces.
+ */
+export function transformVector(
+  matrix: DOMMatrix,
+  dx: number,
+  dy: number
+): SvgPoint {
+  return {
+    x: matrix.a * dx + matrix.c * dy,
+    y: matrix.b * dx + matrix.d * dy,
+  };
+}
+
+/**
+ * Converts an SVG-root-space affine operation to parent space
+ * via conjugation: svgToParent * svgOp * svgToParent^-1
+ */
+export function conjugateTransform(
+  svgToParent: DOMMatrix,
+  svgOp: DOMMatrix
+): DOMMatrix {
+  const parentToSvg = svgToParent.inverse();
+  return svgToParent.multiply(svgOp).multiply(parentToSvg);
+}
+
+/**
+ * Prepends a DOMMatrix as matrix(a,b,c,d,e,f) to an existing transform string.
+ */
+export function applyMatrixPrepend(
+  existingTransform: string | undefined,
+  matrix: DOMMatrix
+): string {
+  const matrixStr = `matrix(${matrix.a},${matrix.b},${matrix.c},${matrix.d},${matrix.e},${matrix.f})`;
+  if (!existingTransform) return matrixStr;
+  return `${matrixStr} ${existingTransform}`;
+}
+
 export function getTransformBasis(matrix: DOMMatrix): TransformBasis {
   const origin = transformPoint(matrix, 0, 0);
   const xPt = transformPoint(matrix, 1, 0);

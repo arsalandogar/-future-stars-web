@@ -24,13 +24,24 @@ import type { NodeMeta, TextAlign, SvgTextAnchor } from '../types';
 import { TEXT_ANCHOR_TO_ALIGN } from '../types';
 import { useAnnotatorStore } from '../stores/annotator-store';
 import { useElementBounds } from '../hooks/use-element-bounds';
-import { getElementBBoxInSvgRoot } from '../utils/get-element-bbox';
+import {
+  getElementBBoxInSvgRoot,
+  computeSvgToParent,
+} from '../utils/get-element-bbox';
 import {
   applyScaleAroundPoint,
+  applyMatrixPrepend,
   applyTranslate,
+  conjugateTransform,
   parseScaleValues,
+  transformPoint,
+  transformVector,
 } from '../utils/svg-transform-helpers';
-import { MIN_SIZE, querySvgElement } from '../utils/svg-overlay-helpers';
+import {
+  MIN_SIZE,
+  querySvgElement,
+  getComputedTextAnchor,
+} from '../utils/svg-overlay-helpers';
 import {
   ensureTextDimensions,
   resetTextDimensions,
@@ -105,15 +116,9 @@ export function TransformControls({
   const currentAlign: TextAlign = (() => {
     if (!fieldId) return 'left';
     if (assignment?.textAlign) return assignment.textAlign;
-    if (node?.type === 'element') {
-      // Check inline style first (CSS precedence), then SVG attribute
-      const styleMatch = node.attributes.style?.match(
-        /text-anchor\s*:\s*(\w+)/
-      );
-      const anchor = styleMatch?.[1] ?? node.attributes['text-anchor'];
-      if (anchor && anchor in TEXT_ANCHOR_TO_ALIGN) {
-        return TEXT_ANCHOR_TO_ALIGN[anchor as SvgTextAnchor];
-      }
+    const anchor = getComputedTextAnchor(nodeMeta.nodeId);
+    if (anchor in TEXT_ANCHOR_TO_ALIGN) {
+      return TEXT_ANCHOR_TO_ALIGN[anchor as SvgTextAnchor];
     }
     return 'left';
   })();
@@ -141,10 +146,11 @@ export function TransformControls({
     if (!svgEl) return;
     const bbox = getElementBBoxInSvgRoot(svgEl, nodeMeta.nodeId);
     if (!bbox) return;
-    rotateNode(nodeMeta.nodeId, ROTATE_STEP_DEGREES, {
-      x: bbox.x + bbox.width / 2,
-      y: bbox.y + bbox.height / 2,
-    });
+    const cx = bbox.x + bbox.width / 2;
+    const cy = bbox.y + bbox.height / 2;
+    const svgToParent = computeSvgToParent(svgEl, nodeMeta.nodeId);
+    const parentCenter = transformPoint(svgToParent, cx, cy);
+    rotateNode(nodeMeta.nodeId, ROTATE_STEP_DEGREES, parentCenter);
   };
 
   const handleTransformMove = (axis: 'x' | 'y', value: number) => {
@@ -152,13 +158,18 @@ export function TransformControls({
     const delta = value - bounds[axis];
     if (Math.abs(delta) < 0.01) return;
 
+    const svgEl = querySvgElement();
+    const svgToParent = svgEl
+      ? computeSvgToParent(svgEl, nodeMeta.nodeId)
+      : new DOMMatrix();
+    const parentDelta = transformVector(
+      svgToParent,
+      axis === 'x' ? delta : 0,
+      axis === 'y' ? delta : 0
+    );
     commitNodeTransform(
       nodeMeta.nodeId,
-      applyTranslate(
-        transformStr,
-        axis === 'x' ? delta : 0,
-        axis === 'y' ? delta : 0
-      )
+      applyTranslate(transformStr, parentDelta.x, parentDelta.y)
     );
   };
 
@@ -171,30 +182,32 @@ export function TransformControls({
     const ratio = value / current;
     if (!Number.isFinite(ratio) || Math.abs(ratio - 1) < 0.001) return;
 
-    if (axis === 'width') {
+    const ax = axis === 'width' ? bounds.x : bounds.x + bounds.width / 2;
+    const ay = axis === 'width' ? bounds.y + bounds.height / 2 : bounds.y;
+    const sx = axis === 'width' ? ratio : 1;
+    const sy = axis === 'width' ? 1 : ratio;
+
+    const svgEl = querySvgElement();
+    const svgToParent = svgEl
+      ? computeSvgToParent(svgEl, nodeMeta.nodeId)
+      : new DOMMatrix();
+
+    if (!svgToParent.isIdentity) {
+      const svgScaleOp = new DOMMatrix()
+        .translateSelf(ax, ay)
+        .scaleSelf(sx, sy)
+        .translateSelf(-ax, -ay);
+      const parentOp = conjugateTransform(svgToParent, svgScaleOp);
       commitNodeTransform(
         nodeMeta.nodeId,
-        applyScaleAroundPoint(
-          transformStr,
-          bounds.x,
-          bounds.y + bounds.height / 2,
-          ratio,
-          1
-        )
+        applyMatrixPrepend(transformStr, parentOp)
       );
-      return;
+    } else {
+      commitNodeTransform(
+        nodeMeta.nodeId,
+        applyScaleAroundPoint(transformStr, ax, ay, sx, sy)
+      );
     }
-
-    commitNodeTransform(
-      nodeMeta.nodeId,
-      applyScaleAroundPoint(
-        transformStr,
-        bounds.x + bounds.width / 2,
-        bounds.y,
-        1,
-        ratio
-      )
-    );
   };
 
   return (

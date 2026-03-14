@@ -147,3 +147,19 @@ export function querySvgElement(): SVGSVGElement | null {
     `.${ANNOTATOR_SVG_WRAPPER_CLASS} svg`
   );
 }
+
+/**
+ * Reads the effective text-anchor for a node from the live DOM via
+ * `getComputedStyle`. This handles CSS `<style>` blocks, inheritance
+ * from parent `<g>` elements, inline styles, and SVG attributes.
+ */
+export function getComputedTextAnchor(
+  nodeId: string
+): 'start' | 'middle' | 'end' {
+  const svgEl = querySvgElement();
+  if (!svgEl) return 'start';
+  const el = svgEl.querySelector<SVGElement>(`[data-node-id="${nodeId}"]`);
+  if (!el) return 'start';
+  const value = getComputedStyle(el).getPropertyValue('text-anchor').trim();
+  return value === 'middle' || value === 'end' ? value : 'start';
+}

@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import type { SvgJsonNode } from '@/types/svg';
-
 import type { FieldAssignment, TouchBounds } from '../types';
 import { useAnnotatorStore } from '../stores/annotator-store';
 import {
@@ -18,11 +16,15 @@ import {
 import {
   applyTranslate,
   applyScaleAroundPoint,
+  applyMatrixPrepend,
+  conjugateTransform,
+  transformVector,
   getBoundsFromPoints,
   getTransformedRectPoints,
   transformPoint,
   type SvgPoint,
 } from '../utils/svg-transform-helpers';
+import { computeSvgToParent } from '../utils/get-element-bbox';
 import {
   type HandleId,
   HANDLES,
@@ -33,6 +35,7 @@ import {
   querySvgElement,
   getCardBounds,
   getHandleCursor,
+  getComputedTextAnchor,
 } from '../utils/svg-overlay-helpers';
 
 function getAnchor(
@@ -62,16 +65,10 @@ function getAnchor(
 
 function getEffectiveTextAnchor(
   assignment: FieldAssignment | null | undefined,
-  nodeMap: Map<string, SvgJsonNode>,
   nodeId: string
 ): 'start' | 'middle' | 'end' {
   if (!assignment) return 'start';
-  const node = nodeMap.get(nodeId);
-  if (!node || node.type !== 'element') return 'start';
-
-  const styleMatch = node.attributes.style?.match(/text-anchor\s*:\s*(\w+)/);
-  const anchor = styleMatch?.[1] ?? node.attributes['text-anchor'];
-  return anchor === 'middle' || anchor === 'end' ? anchor : 'start';
+  return getComputedTextAnchor(nodeId);
 }
 
 function buildTextLocalRect(
@@ -196,6 +193,7 @@ type DraggingState =
       startPt: DOMPoint;
       ctmInverse: DOMMatrix;
       snapTargets: SnapTargets;
+      svgToParent: DOMMatrix;
     }
   | {
       kind: 'axis';
@@ -204,6 +202,7 @@ type DraggingState =
       startPt: DOMPoint;
       ctmInverse: DOMMatrix;
       snapTargets: SnapTargets;
+      svgToParent: DOMMatrix;
     }
   | {
       kind: 'text';
@@ -214,6 +213,7 @@ type DraggingState =
       startBounds: TouchBounds;
       localToSvg: DOMMatrix;
       svgToLocal: DOMMatrix;
+      svgToParent: DOMMatrix;
     }
   | {
       kind: 'text';
@@ -224,6 +224,7 @@ type DraggingState =
       localToSvg: DOMMatrix;
       svgToLocal: DOMMatrix;
       snapTargets: SnapTargets;
+      svgToParent: DOMMatrix;
     };
 
 interface TransformOverlayProps {
@@ -240,7 +241,6 @@ export function TransformOverlay({
   const commitNodeTransform = useAnnotatorStore((s) => s.commitNodeTransform);
   const commitTextAreaResize = useAnnotatorStore((s) => s.commitTextAreaResize);
   const setEditingTransform = useAnnotatorStore((s) => s.setEditingTransform);
-  const nodeMap = useAnnotatorStore((s) => s.nodeMap);
 
   const elementBounds = useElementBounds(nodeId, true);
   const elementGeometry = useElementGeometry(nodeId, !!assignment);
@@ -255,7 +255,7 @@ export function TransformOverlay({
       return null;
     }
 
-    const anchor = getEffectiveTextAnchor(assignment, nodeMap, nodeId);
+    const anchor = getEffectiveTextAnchor(assignment, nodeId);
     const localRect = buildTextLocalRect(
       elementGeometry.localBounds,
       assignment.maxWidth,
@@ -269,7 +269,7 @@ export function TransformOverlay({
       elementGeometry.svgToLocal,
       elementGeometry.rotation
     );
-  }, [assignment, elementGeometry, nodeMap, nodeId]);
+  }, [assignment, elementGeometry, nodeId]);
 
   const [previewBounds, setPreviewBounds] = useState<TouchBounds | null>(null);
   const [previewLocalRect, setPreviewLocalRect] = useState<TouchBounds | null>(
@@ -329,6 +329,9 @@ export function TransformOverlay({
       const snapTargets = svgEl
         ? collectSnapTargets(svgEl, nodeIndex, nodeId, cardBounds)
         : { x: [], y: [] };
+      const svgToParent = svgEl
+        ? computeSvgToParent(svgEl, nodeId)
+        : new DOMMatrix();
 
       if (assignment && activeTextGeometry) {
         const startLocalPt = result.svgPt.matrixTransform(
@@ -341,6 +344,7 @@ export function TransformOverlay({
           startBounds: activeTextGeometry.bounds,
           localToSvg: activeTextGeometry.localToSvg,
           svgToLocal: activeTextGeometry.svgToLocal,
+          svgToParent,
         };
 
         setDragging(
@@ -361,6 +365,7 @@ export function TransformOverlay({
           startPt: result.svgPt,
           ctmInverse: result.ctmInverse,
           snapTargets,
+          svgToParent,
         });
       } else {
         setDragging({
@@ -371,6 +376,7 @@ export function TransformOverlay({
           startPt: result.svgPt,
           ctmInverse: result.ctmInverse,
           snapTargets,
+          svgToParent,
         });
       }
     },
@@ -494,11 +500,20 @@ export function TransformOverlay({
         const existingTransform =
           node?.type === 'element' ? node.attributes.transform : undefined;
 
+        const parentDelta = transformVector(
+          dragging.svgToParent,
+          translateDx,
+          translateDy
+        );
+
         if (dragging.mode === 'move') {
-          if (Math.abs(translateDx) > 0.01 || Math.abs(translateDy) > 0.01) {
+          if (
+            Math.abs(parentDelta.x) > 0.01 ||
+            Math.abs(parentDelta.y) > 0.01
+          ) {
             commitNodeTransform(
               nodeId,
-              applyTranslate(existingTransform, translateDx, translateDy)
+              applyTranslate(existingTransform, parentDelta.x, parentDelta.y)
             );
           }
         } else if (assignment) {
@@ -507,8 +522,8 @@ export function TransformOverlay({
             assignment.fieldId,
             Math.round(finalLocalRect.width),
             Math.round(finalLocalRect.height),
-            translateDx,
-            translateDy
+            parentDelta.x,
+            parentDelta.y
           );
         }
 
@@ -587,10 +602,11 @@ export function TransformOverlay({
       if (dragging.mode === 'move') {
         const tdx = finalBounds.x - baseBounds.x;
         const tdy = finalBounds.y - baseBounds.y;
-        if (Math.abs(tdx) > 0.01 || Math.abs(tdy) > 0.01) {
+        const parentDelta = transformVector(dragging.svgToParent, tdx, tdy);
+        if (Math.abs(parentDelta.x) > 0.01 || Math.abs(parentDelta.y) > 0.01) {
           commitNodeTransform(
             nodeId,
-            applyTranslate(existingTransform, tdx, tdy)
+            applyTranslate(existingTransform, parentDelta.x, parentDelta.y)
           );
         }
       } else {
@@ -598,10 +614,25 @@ export function TransformOverlay({
         const sy = finalBounds.height / baseBounds.height;
         if (Math.abs(sx - 1) > 0.001 || Math.abs(sy - 1) > 0.001) {
           const { ax, ay } = getAnchor(dragging.handle, baseBounds);
-          commitNodeTransform(
-            nodeId,
-            applyScaleAroundPoint(existingTransform, ax, ay, sx, sy)
-          );
+          if (!dragging.svgToParent.isIdentity) {
+            const svgScaleOp = new DOMMatrix()
+              .translateSelf(ax, ay)
+              .scaleSelf(sx, sy)
+              .translateSelf(-ax, -ay);
+            const parentOp = conjugateTransform(
+              dragging.svgToParent,
+              svgScaleOp
+            );
+            commitNodeTransform(
+              nodeId,
+              applyMatrixPrepend(existingTransform, parentOp)
+            );
+          } else {
+            commitNodeTransform(
+              nodeId,
+              applyScaleAroundPoint(existingTransform, ax, ay, sx, sy)
+            );
+          }
         }
       }
 
