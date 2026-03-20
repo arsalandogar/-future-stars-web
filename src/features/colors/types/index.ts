@@ -1,5 +1,7 @@
-// Color League types
-export interface ColorLeague {
+import type { PaginationMeta } from '@/types';
+
+// League types (renamed from ColorLeague)
+export interface League {
   id: number;
   name: string;
   label: string;
@@ -9,22 +11,16 @@ export interface ColorLeague {
   updatedAt?: string;
 }
 
-export type ColorLeaguesListResponse = { data: ColorLeague[] };
+export type LeaguesListResponse = { data: League[] };
 
-export interface ColorLeaguesListParams {
-  page?: number;
-  limit?: number;
-  search?: string;
-}
-
-export interface CreateColorLeagueParams {
+export interface CreateLeagueParams {
   name: string;
   label: string;
   rank: number;
   isActive: boolean;
 }
 
-export interface UpdateColorLeagueParams {
+export interface UpdateLeagueParams {
   id: number;
   name?: string;
   label?: string;
@@ -32,46 +28,65 @@ export interface UpdateColorLeagueParams {
   isActive?: boolean;
 }
 
-// Color Preset types
-export interface ColorPreset {
+// Minimal palette shape as seen from the colors feature
+export interface TeamPalette {
   id: number;
-  colorLeagueId: number;
+  name: string;
+  colorPairs: { bg: string; fg: string; rank: number }[];
+  isActive: boolean;
+}
+
+// Color Team types (renamed from ColorPreset)
+export interface ColorTeam {
+  id: number;
   name: string;
   abbreviation: string;
-  colors: string[];
+  colorPaletteId: number;
+  leagueId: number | null;
+  userId: number | null;
   rank: number;
   isFeatured: boolean;
   isActive: boolean;
-  league: ColorLeague;
+  palette?: TeamPalette;
+  league?: League;
   createdAt?: string;
   updatedAt?: string;
 }
 
-export type ColorPresetsListResponse = { data: ColorPreset[] };
+export interface ColorTeamsListResponse {
+  meta: PaginationMeta;
+  data: ColorTeam[];
+}
 
-export interface ColorPresetsListParams {
+export interface ColorTeamsListParams {
   page?: number;
   limit?: number;
   search?: string;
 }
 
-export interface CreateColorPresetParams {
-  colorLeagueId: number;
+export interface CreateColorTeamParams {
   name: string;
   abbreviation: string;
-  colors: string[];
+  colorPaletteId: number;
+  leagueId: number | null;
   rank: number;
   isFeatured?: boolean;
   isActive?: boolean;
 }
 
-export interface UpdateColorPresetParams {
+export interface UpdateColorTeamParams {
   id: number;
-  colorLeagueId?: number;
   name?: string;
   abbreviation?: string;
-  colors?: string[];
+  colorPaletteId?: number;
+  leagueId?: number | null;
   rank?: number;
   isFeatured?: boolean;
   isActive?: boolean;
+}
+
+export interface PaletteOption {
+  id: number;
+  name: string;
+  colorPairs: { bg: string; fg: string }[];
 }

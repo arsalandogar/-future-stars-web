@@ -5,9 +5,11 @@ import {
   type MutationFunctionContext,
   type QueryKey,
 } from '@tanstack/react-query';
+import { notifications } from '@mantine/notifications';
 import type { Middleware, MutationHook } from 'react-query-kit';
 
 import type { PaginationMeta } from '@/types';
+import { api } from '@/lib/api-client';
 
 export {
   createQuery,
@@ -16,6 +18,7 @@ export {
   createSuspenseQuery,
   createSuspenseInfiniteQuery,
 } from 'react-query-kit';
+import { createMutation } from 'react-query-kit';
 export type { inferData, inferVariables } from 'react-query-kit';
 
 export const DEFAULT_PAGE = 1;
@@ -132,4 +135,66 @@ export function seedQueryData<
       return useMutationNext({ ...options, onSuccess });
     };
   };
+}
+
+interface CrudMutationsConfig {
+  endpoint: string;
+  entityName: string;
+  listQueryKey: QueryKey;
+  extraInvalidations?: QueryKey[];
+}
+
+export function createCrudMutations<
+  TCreateParams,
+  TUpdateParams extends { id: number },
+  TEntity,
+>(config: CrudMutationsConfig) {
+  const {
+    endpoint,
+    entityName,
+    listQueryKey,
+    extraInvalidations = [],
+  } = config;
+
+  const allKeys = [listQueryKey, ...extraInvalidations];
+
+  const useCreate = createMutation({
+    mutationFn: (params: TCreateParams): Promise<TEntity> =>
+      api.post(endpoint, params),
+    use: [invalidateQueries(allKeys)],
+    onSuccess: () => {
+      notifications.show({
+        title: `${entityName} created`,
+        message: `${entityName} has been created successfully.`,
+        color: 'green',
+      });
+    },
+  });
+
+  const useUpdate = createMutation({
+    mutationFn: ({ id, ...params }: TUpdateParams): Promise<TEntity> =>
+      api.put(`${endpoint}/${id}`, params),
+    use: [invalidateQueries(allKeys)],
+    onSuccess: () => {
+      notifications.show({
+        title: `${entityName} updated`,
+        message: `${entityName} has been saved successfully.`,
+        color: 'green',
+      });
+    },
+  });
+
+  const useDelete = createMutation({
+    mutationFn: (id: number): Promise<void> => api.delete(`${endpoint}/${id}`),
+    use: [invalidateQueries(allKeys)],
+    onSuccess: () => {
+      notifications.show({
+        title: `${entityName} deleted`,
+        message: `${entityName} has been deleted successfully.`,
+        color: 'green',
+      });
+    },
+  });
+
+  return { useCreate, useUpdate, useDelete };
 }

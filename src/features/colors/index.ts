@@ -1,31 +1,32 @@
 // Pages
-export { ColorLeaguesPage } from './pages/color-leagues-list-page';
-export { ColorPresetsPage } from './pages/color-presets-list-page';
+export { LeaguesListPage } from './pages/leagues-list-page';
+export { ColorTeamsListPage } from './pages/color-teams-list-page';
 
 // Components
-export { ColorLeaguesList } from './components/color-leagues-list';
-export { ColorPresetsList } from './components/color-presets-list';
+export { LeaguesList } from './components/leagues-list';
+export { ColorTeamsList } from './components/color-teams-list';
 
 // API
-export { useColorLeagues } from './api/get-color-leagues';
-export { useCreateColorLeague } from './api/create-color-league';
-export { useUpdateColorLeague } from './api/update-color-league';
-export { useDeleteColorLeague } from './api/delete-color-league';
-export { useColorPresets } from './api/get-color-presets';
-export { useCreateColorPreset } from './api/create-color-preset';
-export { useUpdateColorPreset } from './api/update-color-preset';
-export { useDeleteColorPreset } from './api/delete-color-preset';
+export { useLeagues } from './api/get-leagues';
+export { useCreateLeague } from './api/create-league';
+export { useUpdateLeague } from './api/update-league';
+export { useDeleteLeague } from './api/delete-league';
+export { useColorTeams } from './api/get-color-teams';
+export { useCreateColorTeam } from './api/create-color-team';
+export { useUpdateColorTeam } from './api/update-color-team';
+export { useDeleteColorTeam } from './api/delete-color-team';
 
 // Types
 export type {
-  ColorLeague,
-  ColorLeaguesListResponse,
-  ColorLeaguesListParams,
-  CreateColorLeagueParams,
-  UpdateColorLeagueParams,
-  ColorPreset,
-  ColorPresetsListResponse,
-  ColorPresetsListParams,
-  CreateColorPresetParams,
-  UpdateColorPresetParams,
+  League,
+  LeaguesListResponse,
+  CreateLeagueParams,
+  UpdateLeagueParams,
+  TeamPalette,
+  ColorTeam,
+  ColorTeamsListResponse,
+  ColorTeamsListParams,
+  CreateColorTeamParams,
+  UpdateColorTeamParams,
+  PaletteOption,
 } from './types';

@@ -34,9 +34,10 @@ import { Route as AuthenticatedAdminTemplatesCreateRouteImport } from './routes/
 import { Route as AuthenticatedAdminListingTemplatesRouteImport } from './routes/_authenticated/admin/_listing/templates'
 import { Route as AuthenticatedAdminListingTagsRouteImport } from './routes/_authenticated/admin/_listing/tags'
 import { Route as AuthenticatedAdminListingOrdersRouteImport } from './routes/_authenticated/admin/_listing/orders'
+import { Route as AuthenticatedAdminListingLeaguesRouteImport } from './routes/_authenticated/admin/_listing/leagues'
 import { Route as AuthenticatedAdminListingFeaturedItemsRouteImport } from './routes/_authenticated/admin/_listing/featured-items'
-import { Route as AuthenticatedAdminListingColorPresetsRouteImport } from './routes/_authenticated/admin/_listing/color-presets'
-import { Route as AuthenticatedAdminListingColorLeaguesRouteImport } from './routes/_authenticated/admin/_listing/color-leagues'
+import { Route as AuthenticatedAdminListingColorTeamsRouteImport } from './routes/_authenticated/admin/_listing/color-teams'
+import { Route as AuthenticatedAdminListingColorPalettesRouteImport } from './routes/_authenticated/admin/_listing/color-palettes'
 import { Route as AuthenticatedAdminListingBatchesRouteImport } from './routes/_authenticated/admin/_listing/batches'
 import { Route as AuthenticatedCustomerOrderSuccessOrderIdRouteImport } from './routes/_authenticated/_customer/order-success.$orderId'
 import { Route as AuthenticatedCustomerCardCardIdRouteImport } from './routes/_authenticated/_customer/card.$cardId'
@@ -44,6 +45,7 @@ import { Route as AuthenticatedCustomerCardBuilderCreateCardRouteImport } from '
 import { Route as AuthenticatedAdmin_legalTypeRouteRouteImport } from './routes/_authenticated/admin/__legal/$type/route'
 import { Route as AuthenticatedAdminTemplatesIdIndexRouteImport } from './routes/_authenticated/admin/templates/$id/index'
 import { Route as AuthenticatedAdminTagsIdIndexRouteImport } from './routes/_authenticated/admin/tags/$id/index'
+import { Route as AuthenticatedAdminColorPalettesIdIndexRouteImport } from './routes/_authenticated/admin/color-palettes/$id/index'
 import { Route as AuthenticatedAdminBatchesBatchIdIndexRouteImport } from './routes/_authenticated/admin/batches/$batchId/index'
 import { Route as AuthenticatedAdminListingUsersIndexRouteImport } from './routes/_authenticated/admin/_listing/users/index'
 import { Route as AuthenticatedAdminTemplatesIdEditRouteImport } from './routes/_authenticated/admin/templates/$id/edit'
@@ -192,22 +194,28 @@ const AuthenticatedAdminListingOrdersRoute =
     path: '/orders',
     getParentRoute: () => AuthenticatedAdminListingRoute,
   } as any)
+const AuthenticatedAdminListingLeaguesRoute =
+  AuthenticatedAdminListingLeaguesRouteImport.update({
+    id: '/leagues',
+    path: '/leagues',
+    getParentRoute: () => AuthenticatedAdminListingRoute,
+  } as any)
 const AuthenticatedAdminListingFeaturedItemsRoute =
   AuthenticatedAdminListingFeaturedItemsRouteImport.update({
     id: '/featured-items',
     path: '/featured-items',
     getParentRoute: () => AuthenticatedAdminListingRoute,
   } as any)
-const AuthenticatedAdminListingColorPresetsRoute =
-  AuthenticatedAdminListingColorPresetsRouteImport.update({
-    id: '/color-presets',
-    path: '/color-presets',
+const AuthenticatedAdminListingColorTeamsRoute =
+  AuthenticatedAdminListingColorTeamsRouteImport.update({
+    id: '/color-teams',
+    path: '/color-teams',
     getParentRoute: () => AuthenticatedAdminListingRoute,
   } as any)
-const AuthenticatedAdminListingColorLeaguesRoute =
-  AuthenticatedAdminListingColorLeaguesRouteImport.update({
-    id: '/color-leagues',
-    path: '/color-leagues',
+const AuthenticatedAdminListingColorPalettesRoute =
+  AuthenticatedAdminListingColorPalettesRouteImport.update({
+    id: '/color-palettes',
+    path: '/color-palettes',
     getParentRoute: () => AuthenticatedAdminListingRoute,
   } as any)
 const AuthenticatedAdminListingBatchesRoute =
@@ -250,6 +258,12 @@ const AuthenticatedAdminTagsIdIndexRoute =
   AuthenticatedAdminTagsIdIndexRouteImport.update({
     id: '/tags/$id/',
     path: '/tags/$id/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminColorPalettesIdIndexRoute =
+  AuthenticatedAdminColorPalettesIdIndexRouteImport.update({
+    id: '/color-palettes/$id/',
+    path: '/color-palettes/$id/',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminBatchesBatchIdIndexRoute =
@@ -353,9 +367,10 @@ export interface FileRoutesByFullPath {
   '/card/$cardId': typeof AuthenticatedCustomerCardCardIdRoute
   '/order-success/$orderId': typeof AuthenticatedCustomerOrderSuccessOrderIdRoute
   '/admin/batches': typeof AuthenticatedAdminListingBatchesRoute
-  '/admin/color-leagues': typeof AuthenticatedAdminListingColorLeaguesRoute
-  '/admin/color-presets': typeof AuthenticatedAdminListingColorPresetsRoute
+  '/admin/color-palettes': typeof AuthenticatedAdminListingColorPalettesRoute
+  '/admin/color-teams': typeof AuthenticatedAdminListingColorTeamsRoute
   '/admin/featured-items': typeof AuthenticatedAdminListingFeaturedItemsRoute
+  '/admin/leagues': typeof AuthenticatedAdminListingLeaguesRoute
   '/admin/orders': typeof AuthenticatedAdminListingOrdersRoute
   '/admin/tags': typeof AuthenticatedAdminListingTagsRoute
   '/admin/templates': typeof AuthenticatedAdminListingTemplatesRoute
@@ -369,6 +384,7 @@ export interface FileRoutesByFullPath {
   '/admin/templates/$id/edit': typeof AuthenticatedAdminTemplatesIdEditRoute
   '/admin/users': typeof AuthenticatedAdminListingUsersIndexRoute
   '/admin/batches/$batchId': typeof AuthenticatedAdminBatchesBatchIdIndexRoute
+  '/admin/color-palettes/$id': typeof AuthenticatedAdminColorPalettesIdIndexRoute
   '/admin/tags/$id': typeof AuthenticatedAdminTagsIdIndexRoute
   '/admin/templates/$id': typeof AuthenticatedAdminTemplatesIdIndexRoute
   '/admin/$type/$id/edit': typeof AuthenticatedAdmin_legalTypeIdEditRoute
@@ -396,9 +412,10 @@ export interface FileRoutesByTo {
   '/card/$cardId': typeof AuthenticatedCustomerCardCardIdRoute
   '/order-success/$orderId': typeof AuthenticatedCustomerOrderSuccessOrderIdRoute
   '/admin/batches': typeof AuthenticatedAdminListingBatchesRoute
-  '/admin/color-leagues': typeof AuthenticatedAdminListingColorLeaguesRoute
-  '/admin/color-presets': typeof AuthenticatedAdminListingColorPresetsRoute
+  '/admin/color-palettes': typeof AuthenticatedAdminListingColorPalettesRoute
+  '/admin/color-teams': typeof AuthenticatedAdminListingColorTeamsRoute
   '/admin/featured-items': typeof AuthenticatedAdminListingFeaturedItemsRoute
+  '/admin/leagues': typeof AuthenticatedAdminListingLeaguesRoute
   '/admin/orders': typeof AuthenticatedAdminListingOrdersRoute
   '/admin/tags': typeof AuthenticatedAdminListingTagsRoute
   '/admin/templates': typeof AuthenticatedAdminListingTemplatesRoute
@@ -411,6 +428,7 @@ export interface FileRoutesByTo {
   '/admin/templates/$id/edit': typeof AuthenticatedAdminTemplatesIdEditRoute
   '/admin/users': typeof AuthenticatedAdminListingUsersIndexRoute
   '/admin/batches/$batchId': typeof AuthenticatedAdminBatchesBatchIdIndexRoute
+  '/admin/color-palettes/$id': typeof AuthenticatedAdminColorPalettesIdIndexRoute
   '/admin/tags/$id': typeof AuthenticatedAdminTagsIdIndexRoute
   '/admin/templates/$id': typeof AuthenticatedAdminTemplatesIdIndexRoute
   '/admin/$type/$id/edit': typeof AuthenticatedAdmin_legalTypeIdEditRoute
@@ -445,9 +463,10 @@ export interface FileRoutesById {
   '/_authenticated/_customer/card/$cardId': typeof AuthenticatedCustomerCardCardIdRoute
   '/_authenticated/_customer/order-success/$orderId': typeof AuthenticatedCustomerOrderSuccessOrderIdRoute
   '/_authenticated/admin/_listing/batches': typeof AuthenticatedAdminListingBatchesRoute
-  '/_authenticated/admin/_listing/color-leagues': typeof AuthenticatedAdminListingColorLeaguesRoute
-  '/_authenticated/admin/_listing/color-presets': typeof AuthenticatedAdminListingColorPresetsRoute
+  '/_authenticated/admin/_listing/color-palettes': typeof AuthenticatedAdminListingColorPalettesRoute
+  '/_authenticated/admin/_listing/color-teams': typeof AuthenticatedAdminListingColorTeamsRoute
   '/_authenticated/admin/_listing/featured-items': typeof AuthenticatedAdminListingFeaturedItemsRoute
+  '/_authenticated/admin/_listing/leagues': typeof AuthenticatedAdminListingLeaguesRoute
   '/_authenticated/admin/_listing/orders': typeof AuthenticatedAdminListingOrdersRoute
   '/_authenticated/admin/_listing/tags': typeof AuthenticatedAdminListingTagsRoute
   '/_authenticated/admin/_listing/templates': typeof AuthenticatedAdminListingTemplatesRoute
@@ -462,6 +481,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/templates/$id/edit': typeof AuthenticatedAdminTemplatesIdEditRoute
   '/_authenticated/admin/_listing/users/': typeof AuthenticatedAdminListingUsersIndexRoute
   '/_authenticated/admin/batches/$batchId/': typeof AuthenticatedAdminBatchesBatchIdIndexRoute
+  '/_authenticated/admin/color-palettes/$id/': typeof AuthenticatedAdminColorPalettesIdIndexRoute
   '/_authenticated/admin/tags/$id/': typeof AuthenticatedAdminTagsIdIndexRoute
   '/_authenticated/admin/templates/$id/': typeof AuthenticatedAdminTemplatesIdIndexRoute
   '/_authenticated/admin/__legal/$type/$id/edit': typeof AuthenticatedAdmin_legalTypeIdEditRoute
@@ -492,9 +512,10 @@ export interface FileRouteTypes {
     | '/card/$cardId'
     | '/order-success/$orderId'
     | '/admin/batches'
-    | '/admin/color-leagues'
-    | '/admin/color-presets'
+    | '/admin/color-palettes'
+    | '/admin/color-teams'
     | '/admin/featured-items'
+    | '/admin/leagues'
     | '/admin/orders'
     | '/admin/tags'
     | '/admin/templates'
@@ -508,6 +529,7 @@ export interface FileRouteTypes {
     | '/admin/templates/$id/edit'
     | '/admin/users'
     | '/admin/batches/$batchId'
+    | '/admin/color-palettes/$id'
     | '/admin/tags/$id'
     | '/admin/templates/$id'
     | '/admin/$type/$id/edit'
@@ -535,9 +557,10 @@ export interface FileRouteTypes {
     | '/card/$cardId'
     | '/order-success/$orderId'
     | '/admin/batches'
-    | '/admin/color-leagues'
-    | '/admin/color-presets'
+    | '/admin/color-palettes'
+    | '/admin/color-teams'
     | '/admin/featured-items'
+    | '/admin/leagues'
     | '/admin/orders'
     | '/admin/tags'
     | '/admin/templates'
@@ -550,6 +573,7 @@ export interface FileRouteTypes {
     | '/admin/templates/$id/edit'
     | '/admin/users'
     | '/admin/batches/$batchId'
+    | '/admin/color-palettes/$id'
     | '/admin/tags/$id'
     | '/admin/templates/$id'
     | '/admin/$type/$id/edit'
@@ -583,9 +607,10 @@ export interface FileRouteTypes {
     | '/_authenticated/_customer/card/$cardId'
     | '/_authenticated/_customer/order-success/$orderId'
     | '/_authenticated/admin/_listing/batches'
-    | '/_authenticated/admin/_listing/color-leagues'
-    | '/_authenticated/admin/_listing/color-presets'
+    | '/_authenticated/admin/_listing/color-palettes'
+    | '/_authenticated/admin/_listing/color-teams'
     | '/_authenticated/admin/_listing/featured-items'
+    | '/_authenticated/admin/_listing/leagues'
     | '/_authenticated/admin/_listing/orders'
     | '/_authenticated/admin/_listing/tags'
     | '/_authenticated/admin/_listing/templates'
@@ -600,6 +625,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/templates/$id/edit'
     | '/_authenticated/admin/_listing/users/'
     | '/_authenticated/admin/batches/$batchId/'
+    | '/_authenticated/admin/color-palettes/$id/'
     | '/_authenticated/admin/tags/$id/'
     | '/_authenticated/admin/templates/$id/'
     | '/_authenticated/admin/__legal/$type/$id/edit'
@@ -793,6 +819,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminListingOrdersRouteImport
       parentRoute: typeof AuthenticatedAdminListingRoute
     }
+    '/_authenticated/admin/_listing/leagues': {
+      id: '/_authenticated/admin/_listing/leagues'
+      path: '/leagues'
+      fullPath: '/admin/leagues'
+      preLoaderRoute: typeof AuthenticatedAdminListingLeaguesRouteImport
+      parentRoute: typeof AuthenticatedAdminListingRoute
+    }
     '/_authenticated/admin/_listing/featured-items': {
       id: '/_authenticated/admin/_listing/featured-items'
       path: '/featured-items'
@@ -800,18 +833,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminListingFeaturedItemsRouteImport
       parentRoute: typeof AuthenticatedAdminListingRoute
     }
-    '/_authenticated/admin/_listing/color-presets': {
-      id: '/_authenticated/admin/_listing/color-presets'
-      path: '/color-presets'
-      fullPath: '/admin/color-presets'
-      preLoaderRoute: typeof AuthenticatedAdminListingColorPresetsRouteImport
+    '/_authenticated/admin/_listing/color-teams': {
+      id: '/_authenticated/admin/_listing/color-teams'
+      path: '/color-teams'
+      fullPath: '/admin/color-teams'
+      preLoaderRoute: typeof AuthenticatedAdminListingColorTeamsRouteImport
       parentRoute: typeof AuthenticatedAdminListingRoute
     }
-    '/_authenticated/admin/_listing/color-leagues': {
-      id: '/_authenticated/admin/_listing/color-leagues'
-      path: '/color-leagues'
-      fullPath: '/admin/color-leagues'
-      preLoaderRoute: typeof AuthenticatedAdminListingColorLeaguesRouteImport
+    '/_authenticated/admin/_listing/color-palettes': {
+      id: '/_authenticated/admin/_listing/color-palettes'
+      path: '/color-palettes'
+      fullPath: '/admin/color-palettes'
+      preLoaderRoute: typeof AuthenticatedAdminListingColorPalettesRouteImport
       parentRoute: typeof AuthenticatedAdminListingRoute
     }
     '/_authenticated/admin/_listing/batches': {
@@ -861,6 +894,13 @@ declare module '@tanstack/react-router' {
       path: '/tags/$id'
       fullPath: '/admin/tags/$id'
       preLoaderRoute: typeof AuthenticatedAdminTagsIdIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/color-palettes/$id/': {
+      id: '/_authenticated/admin/color-palettes/$id/'
+      path: '/color-palettes/$id'
+      fullPath: '/admin/color-palettes/$id'
+      preLoaderRoute: typeof AuthenticatedAdminColorPalettesIdIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/batches/$batchId/': {
@@ -971,9 +1011,10 @@ const SharedRouteRouteWithChildren = SharedRouteRoute._addFileChildren(
 
 interface AuthenticatedAdminListingRouteChildren {
   AuthenticatedAdminListingBatchesRoute: typeof AuthenticatedAdminListingBatchesRoute
-  AuthenticatedAdminListingColorLeaguesRoute: typeof AuthenticatedAdminListingColorLeaguesRoute
-  AuthenticatedAdminListingColorPresetsRoute: typeof AuthenticatedAdminListingColorPresetsRoute
+  AuthenticatedAdminListingColorPalettesRoute: typeof AuthenticatedAdminListingColorPalettesRoute
+  AuthenticatedAdminListingColorTeamsRoute: typeof AuthenticatedAdminListingColorTeamsRoute
   AuthenticatedAdminListingFeaturedItemsRoute: typeof AuthenticatedAdminListingFeaturedItemsRoute
+  AuthenticatedAdminListingLeaguesRoute: typeof AuthenticatedAdminListingLeaguesRoute
   AuthenticatedAdminListingOrdersRoute: typeof AuthenticatedAdminListingOrdersRoute
   AuthenticatedAdminListingTagsRoute: typeof AuthenticatedAdminListingTagsRoute
   AuthenticatedAdminListingTemplatesRoute: typeof AuthenticatedAdminListingTemplatesRoute
@@ -986,12 +1027,14 @@ const AuthenticatedAdminListingRouteChildren: AuthenticatedAdminListingRouteChil
   {
     AuthenticatedAdminListingBatchesRoute:
       AuthenticatedAdminListingBatchesRoute,
-    AuthenticatedAdminListingColorLeaguesRoute:
-      AuthenticatedAdminListingColorLeaguesRoute,
-    AuthenticatedAdminListingColorPresetsRoute:
-      AuthenticatedAdminListingColorPresetsRoute,
+    AuthenticatedAdminListingColorPalettesRoute:
+      AuthenticatedAdminListingColorPalettesRoute,
+    AuthenticatedAdminListingColorTeamsRoute:
+      AuthenticatedAdminListingColorTeamsRoute,
     AuthenticatedAdminListingFeaturedItemsRoute:
       AuthenticatedAdminListingFeaturedItemsRoute,
+    AuthenticatedAdminListingLeaguesRoute:
+      AuthenticatedAdminListingLeaguesRoute,
     AuthenticatedAdminListingOrdersRoute: AuthenticatedAdminListingOrdersRoute,
     AuthenticatedAdminListingTagsRoute: AuthenticatedAdminListingTagsRoute,
     AuthenticatedAdminListingTemplatesRoute:
@@ -1059,6 +1102,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminTemplatesIdDefaultsRoute: typeof AuthenticatedAdminTemplatesIdDefaultsRoute
   AuthenticatedAdminTemplatesIdEditRoute: typeof AuthenticatedAdminTemplatesIdEditRoute
   AuthenticatedAdminBatchesBatchIdIndexRoute: typeof AuthenticatedAdminBatchesBatchIdIndexRoute
+  AuthenticatedAdminColorPalettesIdIndexRoute: typeof AuthenticatedAdminColorPalettesIdIndexRoute
   AuthenticatedAdminTagsIdIndexRoute: typeof AuthenticatedAdminTagsIdIndexRoute
   AuthenticatedAdminTemplatesIdIndexRoute: typeof AuthenticatedAdminTemplatesIdIndexRoute
 }
@@ -1081,6 +1125,8 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
       AuthenticatedAdminTemplatesIdEditRoute,
     AuthenticatedAdminBatchesBatchIdIndexRoute:
       AuthenticatedAdminBatchesBatchIdIndexRoute,
+    AuthenticatedAdminColorPalettesIdIndexRoute:
+      AuthenticatedAdminColorPalettesIdIndexRoute,
     AuthenticatedAdminTagsIdIndexRoute: AuthenticatedAdminTagsIdIndexRoute,
     AuthenticatedAdminTemplatesIdIndexRoute:
       AuthenticatedAdminTemplatesIdIndexRoute,

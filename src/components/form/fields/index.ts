@@ -11,5 +11,6 @@ export { ColorInputField } from './color-input-field';
 export { RadioGroupField } from './radio-group-field';
 export { TemplateSelectField } from './template-select-field';
 export { PhoneField } from './phone-field';
+export { ColorPaletteSelectField } from './color-palette-select-field';
 export { SubmitButton } from './submit-button';
 export { Form } from './form';
