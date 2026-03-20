@@ -29,7 +29,7 @@ interface ShareCardModalProps {
 export function ShareCardModal({ card, opened, onClose }: ShareCardModalProps) {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
-  const [shareMode, setShareMode] = useState<ShareMode>('image');
+  const [shareMode, setShareMode] = useState<ShareMode>('link');
   const [message, setMessage] = useState('');
   const [linkCopied, setLinkCopied] = useState(false);
   const [imageCopied, setImageCopied] = useState(false);
@@ -39,7 +39,7 @@ export function ShareCardModal({ card, opened, onClose }: ShareCardModalProps) {
   if (opened !== prevOpened) {
     setPrevOpened(opened);
     if (opened) {
-      setShareMode('image');
+      setShareMode('link');
       setMessage('');
       setLinkCopied(false);
       setImageCopied(false);
@@ -192,7 +192,7 @@ export function ShareCardModal({ card, opened, onClose }: ShareCardModalProps) {
             onKeyDown={(event) => {
               if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault();
-                setShareMode('image');
+                setShareMode('link');
               }
             }}
             aria-pressed={shareMode === 'image'}

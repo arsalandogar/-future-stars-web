@@ -12,13 +12,14 @@ export function SharedLinkLayout() {
       header={{ height: HEADER_HEIGHT }}
       styles={{
         root: {
-          minHeight: 'auto',
+          minHeight: '100dvh',
         },
         main: {
+          display: 'flex',
+          flexDirection: 'column',
           background:
             'linear-gradient(to bottom, var(--customer-bg-gradient-start), var(--customer-bg-gradient-end))',
-          minHeight: 'auto',
-          height: 'auto',
+          minHeight: '100dvh',
           fontFamily:
             'Montserrat, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
         },
