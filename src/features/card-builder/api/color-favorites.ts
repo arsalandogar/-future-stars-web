@@ -5,20 +5,20 @@ import {
   invalidateQueries,
 } from '@/lib/react-query';
 
-import type { ColorPreset } from '@/features/colors';
+import type { ColorPalette } from '@/features/color-palettes';
 
-type ColorFavoritesResponse = { data: ColorPreset[] };
+type ColorFavoritesResponse = { data: ColorPalette[] };
 
 export const useColorFavorites = createQuery({
-  queryKey: ['color-presets', 'favorites'],
+  queryKey: ['color-teams', 'favorites'],
   fetcher: (): Promise<ColorFavoritesResponse> =>
-    api.get('color-presets/favorites'),
+    api.get('color-teams/favorites'),
 });
 
 export const useAddColorFavorite = createMutation({
-  mutationFn: async (params: { colorPresetId: number }): Promise<void> => {
-    await api.post('color-presets/favorites', {
-      color_preset_id: params.colorPresetId,
+  mutationFn: async (params: { colorPaletteId: number }): Promise<void> => {
+    await api.post('color-teams/favorites', {
+      colorPaletteId: params.colorPaletteId,
     });
   },
   use: [invalidateQueries([useColorFavorites.getKey()])],
@@ -26,7 +26,7 @@ export const useAddColorFavorite = createMutation({
 
 export const useRemoveColorFavorite = createMutation({
   mutationFn: async (params: { id: number }): Promise<void> => {
-    await api.delete(`color-presets/favorites/${params.id}`);
+    await api.delete(`color-teams/favorites/${params.id}`);
   },
   use: [invalidateQueries([useColorFavorites.getKey()])],
 });

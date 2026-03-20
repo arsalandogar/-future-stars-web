@@ -186,7 +186,7 @@ export function ActiveColorsBar() {
     if (isFavorited) {
       removeFavorite.mutate({ id: appliedPresetId });
     } else {
-      addFavorite.mutate({ colorPresetId: appliedPresetId });
+      addFavorite.mutate({ colorPaletteId: appliedPresetId });
     }
   };
 

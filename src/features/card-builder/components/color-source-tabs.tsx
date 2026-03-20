@@ -3,18 +3,16 @@ import { Loader, SimpleGrid, Text } from '@mantine/core';
 
 import { ContentTabs } from '@/components/ui/content-tabs';
 
-import type { ColorPreset } from '@/features/colors';
-
 import type { ColorSubTab } from '../types';
 import { useCardBuilderStore } from '../stores/card-builder-store';
 import { useCardEditorStore } from '../stores/card-editor-store';
 import {
-  useBrowseColorPresets,
-  useBrowseColorLeagues,
-} from '../api/browse-color-presets';
+  useBrowseColorTeams,
+  useBrowseLeagues,
+} from '../api/browse-color-teams';
 import { useColorFavorites } from '../api/color-favorites';
-import { ColorPresetSwatch } from './color-preset-swatch';
-import swatchStyles from './color-preset-swatch.module.css';
+import { ColorPaletteSwatch } from './color-palette-swatch';
+import swatchStyles from './color-palette-swatch.module.css';
 
 import styles from './color-source-tabs.module.css';
 
@@ -25,20 +23,22 @@ const SUB_TAB_ITEMS: { label: string; value: ColorSubTab }[] = [
 ];
 
 interface SwatchGridProps {
-  presets: ColorPreset[];
+  items: { paletteId: number; colors: string[]; label?: string }[];
   appliedPresetId: number | null;
-  showLabel?: boolean;
+  children?: React.ReactNode;
 }
 
-function SwatchGrid({ presets, appliedPresetId, showLabel }: SwatchGridProps) {
+function SwatchGrid({ items, appliedPresetId, children }: SwatchGridProps) {
   return (
     <SimpleGrid cols={{ base: 3, xs: 4, sm: 5 }} spacing="sm">
-      {presets.map((preset) => (
-        <ColorPresetSwatch
-          key={preset.id}
-          preset={preset}
-          selected={appliedPresetId === preset.id}
-          showLabel={showLabel}
+      {children}
+      {items.map((item) => (
+        <ColorPaletteSwatch
+          key={item.paletteId}
+          paletteId={item.paletteId}
+          colors={item.colors}
+          selected={appliedPresetId === item.paletteId}
+          label={item.label}
         />
       ))}
     </SimpleGrid>
@@ -99,43 +99,38 @@ function OriginalSwatch() {
 }
 
 function PopularContent() {
-  const { data, isLoading } = useBrowseColorPresets();
+  const { data, isLoading } = useBrowseColorTeams();
   const appliedPresetId = useCardEditorStore(
     (s) => s.sides[s.activeSide].appliedPresetId
   );
 
   if (isLoading) return <LoadingState />;
 
-  const featured = (data?.data ?? []).filter((p) => p.isFeatured);
+  const featured = (data?.data ?? []).filter((t) => t.isFeatured);
+  const items = featured.map((t) => ({
+    paletteId: t.colorPaletteId,
+    colors: t.palette?.colorPairs.map((p) => p.bg) ?? [],
+  }));
 
   return (
-    <SimpleGrid cols={{ base: 3, xs: 4, sm: 5 }} spacing="sm">
+    <SwatchGrid items={items} appliedPresetId={appliedPresetId}>
       <OriginalSwatch />
-      {featured.map((preset) => (
-        <ColorPresetSwatch
-          key={preset.id}
-          preset={preset}
-          selected={appliedPresetId === preset.id}
-        />
-      ))}
-    </SimpleGrid>
+    </SwatchGrid>
   );
 }
 
 function TeamContent() {
-  const { data: leaguesData, isLoading: leaguesLoading } =
-    useBrowseColorLeagues();
-  const { data: presetsData, isLoading: presetsLoading } =
-    useBrowseColorPresets();
+  const { data: leaguesData, isLoading: leaguesLoading } = useBrowseLeagues();
+  const { data: teamsData, isLoading: teamsLoading } = useBrowseColorTeams();
   const appliedPresetId = useCardEditorStore(
     (s) => s.sides[s.activeSide].appliedPresetId
   );
   const [activeLeagueId, setActiveLeagueId] = useState<number | null>(null);
 
-  if (leaguesLoading || presetsLoading) return <LoadingState />;
+  if (leaguesLoading || teamsLoading) return <LoadingState />;
 
   const leagues = leaguesData?.data ?? [];
-  const presets = presetsData?.data ?? [];
+  const teams = teamsData?.data ?? [];
 
   if (leagues.length === 0) {
     return <EmptyState message="No team colors available" />;
@@ -144,9 +139,15 @@ function TeamContent() {
   // Default to first league if none selected
   const selectedLeagueId = activeLeagueId ?? leagues[0]?.id ?? null;
 
-  const filteredPresets = selectedLeagueId
-    ? presets.filter((p) => p.colorLeagueId === selectedLeagueId)
+  const filtered = selectedLeagueId
+    ? teams.filter((t) => t.leagueId === selectedLeagueId)
     : [];
+
+  const items = filtered.map((t) => ({
+    paletteId: t.colorPaletteId,
+    colors: t.palette?.colorPairs.map((p) => p.bg) ?? [],
+    label: t.abbreviation,
+  }));
 
   return (
     <>
@@ -165,14 +166,10 @@ function TeamContent() {
           </button>
         ))}
       </div>
-      {filteredPresets.length === 0 ? (
+      {items.length === 0 ? (
         <EmptyState message="No team colors in this league" />
       ) : (
-        <SwatchGrid
-          presets={filteredPresets}
-          appliedPresetId={appliedPresetId}
-          showLabel
-        />
+        <SwatchGrid items={items} appliedPresetId={appliedPresetId} />
       )}
     </>
   );
@@ -192,7 +189,12 @@ function MyColorsContent() {
     return <EmptyState message="No saved colors yet" />;
   }
 
-  return <SwatchGrid presets={favorites} appliedPresetId={appliedPresetId} />;
+  const items = favorites.map((p) => ({
+    paletteId: p.id,
+    colors: p.colorPairs.map((c) => c.bg),
+  }));
+
+  return <SwatchGrid items={items} appliedPresetId={appliedPresetId} />;
 }
 
 export function ColorSourceTabs() {
