@@ -22,6 +22,7 @@ import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedCustomerIndexRouteImport } from './routes/_authenticated/_customer/index'
 import { Route as AuthenticatedAdminTemplateTypesRouteImport } from './routes/_authenticated/admin/template-types'
+import { Route as AuthenticatedAdminTeamColorsRouteImport } from './routes/_authenticated/admin/team-colors'
 import { Route as AuthenticatedAdminConfigsRouteImport } from './routes/_authenticated/admin/configs'
 import { Route as AuthenticatedAdminListingRouteImport } from './routes/_authenticated/admin/_listing'
 import { Route as AuthenticatedCustomerTemplatesRouteImport } from './routes/_authenticated/_customer/templates'
@@ -122,6 +123,12 @@ const AuthenticatedAdminTemplateTypesRoute =
   AuthenticatedAdminTemplateTypesRouteImport.update({
     id: '/template-types',
     path: '/template-types',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminTeamColorsRoute =
+  AuthenticatedAdminTeamColorsRouteImport.update({
+    id: '/team-colors',
+    path: '/team-colors',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminConfigsRoute =
@@ -359,6 +366,7 @@ export interface FileRoutesByFullPath {
   '/my-cards': typeof AuthenticatedCustomerMyCardsRoute
   '/templates': typeof AuthenticatedCustomerTemplatesRoute
   '/admin/configs': typeof AuthenticatedAdminConfigsRoute
+  '/admin/team-colors': typeof AuthenticatedAdminTeamColorsRoute
   '/admin/template-types': typeof AuthenticatedAdminTemplateTypesRoute
   '/': typeof AuthenticatedCustomerIndexRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -405,6 +413,7 @@ export interface FileRoutesByTo {
   '/templates': typeof AuthenticatedCustomerTemplatesRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/configs': typeof AuthenticatedAdminConfigsRoute
+  '/admin/team-colors': typeof AuthenticatedAdminTeamColorsRoute
   '/admin/template-types': typeof AuthenticatedAdminTemplateTypesRoute
   '/': typeof AuthenticatedCustomerIndexRoute
   '/admin/$type': typeof AuthenticatedAdminListing_legalTypeRoute
@@ -455,6 +464,7 @@ export interface FileRoutesById {
   '/_authenticated/_customer/templates': typeof AuthenticatedCustomerTemplatesRoute
   '/_authenticated/admin/_listing': typeof AuthenticatedAdminListingRouteWithChildren
   '/_authenticated/admin/configs': typeof AuthenticatedAdminConfigsRoute
+  '/_authenticated/admin/team-colors': typeof AuthenticatedAdminTeamColorsRoute
   '/_authenticated/admin/template-types': typeof AuthenticatedAdminTemplateTypesRoute
   '/_authenticated/_customer/': typeof AuthenticatedCustomerIndexRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -504,6 +514,7 @@ export interface FileRouteTypes {
     | '/my-cards'
     | '/templates'
     | '/admin/configs'
+    | '/admin/team-colors'
     | '/admin/template-types'
     | '/'
     | '/admin/'
@@ -550,6 +561,7 @@ export interface FileRouteTypes {
     | '/templates'
     | '/admin'
     | '/admin/configs'
+    | '/admin/team-colors'
     | '/admin/template-types'
     | '/'
     | '/admin/$type'
@@ -599,6 +611,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_customer/templates'
     | '/_authenticated/admin/_listing'
     | '/_authenticated/admin/configs'
+    | '/_authenticated/admin/team-colors'
     | '/_authenticated/admin/template-types'
     | '/_authenticated/_customer/'
     | '/_authenticated/admin/'
@@ -733,6 +746,13 @@ declare module '@tanstack/react-router' {
       path: '/template-types'
       fullPath: '/admin/template-types'
       preLoaderRoute: typeof AuthenticatedAdminTemplateTypesRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/team-colors': {
+      id: '/_authenticated/admin/team-colors'
+      path: '/team-colors'
+      fullPath: '/admin/team-colors'
+      preLoaderRoute: typeof AuthenticatedAdminTeamColorsRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/configs': {
@@ -1094,6 +1114,7 @@ const AuthenticatedAdmin_legalTypeRouteRouteWithChildren =
 interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminListingRoute: typeof AuthenticatedAdminListingRouteWithChildren
   AuthenticatedAdminConfigsRoute: typeof AuthenticatedAdminConfigsRoute
+  AuthenticatedAdminTeamColorsRoute: typeof AuthenticatedAdminTeamColorsRoute
   AuthenticatedAdminTemplateTypesRoute: typeof AuthenticatedAdminTemplateTypesRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdmin_legalTypeRouteRoute: typeof AuthenticatedAdmin_legalTypeRouteRouteWithChildren
@@ -1111,6 +1132,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
   {
     AuthenticatedAdminListingRoute: AuthenticatedAdminListingRouteWithChildren,
     AuthenticatedAdminConfigsRoute: AuthenticatedAdminConfigsRoute,
+    AuthenticatedAdminTeamColorsRoute: AuthenticatedAdminTeamColorsRoute,
     AuthenticatedAdminTemplateTypesRoute: AuthenticatedAdminTemplateTypesRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
     AuthenticatedAdmin_legalTypeRouteRoute:

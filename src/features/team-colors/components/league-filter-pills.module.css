@@ -1,0 +1,30 @@
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mantine-spacing-xs);
+  flex-shrink: 0;
+}
+
+.pill {
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: none;
+  background: #2a3045;
+  color: var(--mantine-color-dark-1);
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+
+  &:hover {
+    background: #353d55;
+  }
+
+  &[data-active] {
+    background: var(--mantine-color-primary-4);
+    color: var(--mantine-color-white);
+  }
+}

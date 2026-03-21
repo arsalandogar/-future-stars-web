@@ -67,6 +67,7 @@ const menuItems: NavItem[] = [
     label: 'Colors',
     icon: Palette,
     children: [
+      { label: 'Team Colors', href: '/admin/team-colors' },
       { label: 'Color Palettes', href: '/admin/color-palettes' },
       { label: 'Leagues', href: '/admin/leagues' },
       { label: 'Color Teams', href: '/admin/color-teams' },

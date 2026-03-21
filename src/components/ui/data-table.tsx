@@ -1,27 +1,14 @@
 import { type ReactNode, use } from 'react';
-import {
-  Group,
-  Pagination,
-  Select,
-  Skeleton,
-  Table,
-  Text,
-} from '@mantine/core';
+import { Skeleton, Table, Text } from '@mantine/core';
 import type { PaginationMeta } from '@/types';
 
 import { ListingContext } from './listing/listing-context';
+import { ListingPagination } from './listing/listing-pagination';
 
 export interface Column {
   label: string;
   width?: number | string;
 }
-
-const PAGE_SIZE_OPTIONS = [
-  { value: '10', label: '10' },
-  { value: '25', label: '25' },
-  { value: '50', label: '50' },
-  { value: '100', label: '100' },
-];
 
 export interface DataTableProps<T> {
   queryResult: {
@@ -154,32 +141,13 @@ export function DataTable<T>({
       </Table>
 
       {meta && listingContext && (
-        <Group justify="center" gap="lg">
-          <Group gap="xs">
-            <Text size="sm" c="dimmed">
-              Show
-            </Text>
-            <Select
-              data={PAGE_SIZE_OPTIONS}
-              value={String(listingContext.limit)}
-              onChange={(value) => {
-                if (value) listingContext.setLimit(Number(value));
-              }}
-              size="xs"
-              w={70}
-            />
-            <Text size="sm" c="dimmed">
-              per page
-            </Text>
-          </Group>
-          {meta.lastPage > 1 && (
-            <Pagination
-              value={meta.currentPage}
-              onChange={listingContext.setPage}
-              total={meta.lastPage}
-            />
-          )}
-        </Group>
+        <ListingPagination
+          meta={meta}
+          page={meta.currentPage}
+          limit={listingContext.limit}
+          onPageChange={listingContext.setPage}
+          onLimitChange={listingContext.setLimit}
+        />
       )}
     </div>
   );

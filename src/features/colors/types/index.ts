@@ -62,6 +62,8 @@ export interface ColorTeamsListParams {
   page?: number;
   limit?: number;
   search?: string;
+  leagueId?: number;
+  featured?: boolean;
 }
 
 export interface CreateColorTeamParams {
