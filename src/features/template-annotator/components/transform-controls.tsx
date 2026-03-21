@@ -28,6 +28,7 @@ import {
   getElementBBoxInSvgRoot,
   computeSvgToParent,
 } from '../utils/get-element-bbox';
+import { getNodeFontSize } from '../utils/node-color-helpers';
 import {
   applyScaleAroundPoint,
   applyMatrixPrepend,
@@ -47,6 +48,8 @@ import {
   resetTextDimensions,
 } from '../utils/text-area-helpers';
 import { BoundsDisplay } from './bounds-display';
+import { ColorAreaSelect } from './color-area-select';
+import { useColorAreaOptions } from '../hooks/use-color-area-options';
 import { NumericInputGrid } from './numeric-input-grid';
 
 const ALIGN_OPTIONS = [
@@ -92,6 +95,7 @@ export function TransformControls({
 
   const setTextAlign = useAnnotatorStore((s) => s.setTextAlign);
   const setTextMultiline = useAnnotatorStore((s) => s.setTextMultiline);
+  const setTextColorArea = useAnnotatorStore((s) => s.setTextColorArea);
   const setTextDimensions = useAnnotatorStore((s) => s.setTextDimensions);
   const setFontSize = useAnnotatorStore((s) => s.setFontSize);
   const assignment = useAnnotatorStore((s) =>
@@ -101,17 +105,11 @@ export function TransformControls({
         )
       : undefined
   );
+  const colorAreaOptions = useColorAreaOptions();
   const hasDimensions =
     assignment?.maxWidth != null && assignment?.maxHeight != null;
 
-  const currentFontSize = (() => {
-    if (!fieldId || node?.type !== 'element') return undefined;
-    const fromAttr = node.attributes['font-size'];
-    if (fromAttr) return Number(fromAttr);
-    const styleMatch = node.attributes.style?.match(/font-size:\s*([\d.]+)/);
-    if (styleMatch) return Number(styleMatch[1]);
-    return undefined;
-  })();
+  const currentFontSize = fieldId && node ? getNodeFontSize(node) : undefined;
 
   const currentAlign: TextAlign = (() => {
     if (!fieldId) return 'left';
@@ -410,6 +408,16 @@ export function TransformControls({
                 event.currentTarget.checked
               );
             }}
+          />
+          <ColorAreaSelect
+            mt="xs"
+            label="Color area"
+            description="Foreground color source for team colors"
+            currentValue={assignment?.textColorArea}
+            colorAreaOptions={colorAreaOptions}
+            onChange={(value) =>
+              setTextColorArea(nodeMeta.nodeId, fieldId, value)
+            }
           />
         </div>
       )}

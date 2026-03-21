@@ -37,6 +37,10 @@ export function AnnotatorCanvas() {
   const editingTransformNodeId = useAnnotatorStore(
     (s) => s.editingTransformNodeId
   );
+  const bulkTouchBoundsEditing = useAnnotatorStore(
+    (s) => s.bulkTouchBoundsEditing
+  );
+  const bulkTransformEditing = useAnnotatorStore((s) => s.bulkTransformEditing);
   const assignments = useAnnotatorStore((s) => s.assignments);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -109,6 +113,25 @@ export function AnnotatorCanvas() {
     );
   }, [editingTransformNodeId, assignments]);
 
+  // Bulk editing: all text assignments with touch bounds / text dimensions
+  const bulkTouchAssignments = useMemo(() => {
+    if (!bulkTouchBoundsEditing) return [];
+    return assignments.filter(
+      (a) =>
+        a.touchBounds && supportsTouchBounds(EDITABLE_FIELDS[a.fieldId].type)
+    );
+  }, [bulkTouchBoundsEditing, assignments]);
+
+  const bulkTransformAssignments = useMemo(() => {
+    if (!bulkTransformEditing) return [];
+    return assignments.filter(
+      (a) =>
+        EDITABLE_FIELDS[a.fieldId].type === 'text' &&
+        a.maxWidth != null &&
+        a.maxHeight != null
+    );
+  }, [bulkTransformEditing, assignments]);
+
   // Track which svgTree identity we've already normalized for, so the effect
   // doesn't re-run after it mutates assignments (which is its own dependency).
   const normalizedForTreeRef = useRef<SvgJsonNode | null>(null);
@@ -172,7 +195,10 @@ export function AnnotatorCanvas() {
   // Hide the selection outline when an overlay (touch bounds or transform) is active
   // to avoid visual clutter — the overlay already highlights the element.
   const isOverlayActive =
-    !!editingTouchBoundsNodeId || !!editingTransformNodeId;
+    !!editingTouchBoundsNodeId ||
+    !!editingTransformNodeId ||
+    bulkTouchBoundsEditing ||
+    bulkTransformEditing;
   const highlightStyle = useMemo(() => {
     const rules: string[] = [];
     if (selectedNodeId && !isOverlayActive) {
@@ -213,21 +239,50 @@ export function AnnotatorCanvas() {
             inner={bleedInfo.cardBounds}
           />
         )}
-        {editingAssignment?.touchBounds && viewBox && (
-          <TouchBoundsOverlay
-            viewBox={viewBox}
-            bounds={editingAssignment.touchBounds}
-            nodeId={editingAssignment.nodeId}
-            fieldId={editingAssignment.fieldId}
-          />
-        )}
-        {editingTransformNodeId && viewBox && (
+        {/* Single-element touch bounds overlay */}
+        {editingAssignment?.touchBounds &&
+          viewBox &&
+          !bulkTouchBoundsEditing && (
+            <TouchBoundsOverlay
+              viewBox={viewBox}
+              bounds={editingAssignment.touchBounds}
+              nodeId={editingAssignment.nodeId}
+              fieldId={editingAssignment.fieldId}
+            />
+          )}
+        {/* Bulk touch bounds overlays */}
+        {bulkTouchBoundsEditing &&
+          viewBox &&
+          bulkTouchAssignments.map((a) => (
+            <TouchBoundsOverlay
+              key={`touch-${a.nodeId}`}
+              viewBox={viewBox}
+              bounds={a.touchBounds!}
+              nodeId={a.nodeId}
+              fieldId={a.fieldId}
+              hideBackground
+            />
+          ))}
+        {/* Single-element transform overlay */}
+        {editingTransformNodeId && viewBox && !bulkTransformEditing && (
           <TransformOverlay
             viewBox={viewBox}
             nodeId={editingTransformNodeId}
             assignment={editingTransformAssignment}
           />
         )}
+        {/* Bulk transform overlays */}
+        {bulkTransformEditing &&
+          viewBox &&
+          bulkTransformAssignments.map((a) => (
+            <TransformOverlay
+              key={`transform-${a.nodeId}`}
+              viewBox={viewBox}
+              nodeId={a.nodeId}
+              assignment={a}
+              hideBackground
+            />
+          ))}
       </div>
     </div>
   );

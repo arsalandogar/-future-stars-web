@@ -23,7 +23,7 @@ The card engine later reads those attributes to discover what's editable and app
 Route: /admin/templates/$id/annotate
   └─ TemplateAnnotatePage         (saves via useUpdateTemplateSvgJson)
        └─ AnnotatorPage           (layout: toolbar + tree + canvas + right panel)
-            ├─ AnnotatorToolbar    (export, detect, save)
+            ├─ AnnotatorToolbar    (export, detect, text settings, save)
             ├─ ElementTree         (left panel — SVG node hierarchy)
             ├─ AnnotatorCanvas     (center — interactive SVG rendering)
             │   ├─ SvgRenderer     (renders SvgJsonNode tree)
@@ -31,6 +31,7 @@ Route: /admin/templates/$id/annotate
             │   └─ TransformOverlay
             ├─ FieldAssignmentPanel (right "Assign" tab)
             ├─ AssignmentSummaryTable (right "Review" tab)
+            ├─ BulkTextSettingsPanel (text settings side panel — color areas + text color)
             ├─ DetectionWizardModal (3-step auto-detection)
             └─ ExportModal
 ```
@@ -57,6 +58,7 @@ interface FieldAssignment {
   multiline?: boolean; // wrap text across lines
   touchBounds?: TouchBounds; // { x, y, width, height } interactive tap area
   textAlign?: TextAlign; // 'left' | 'center' | 'right'
+  textColorArea?: EditableFieldId; // links text to a color area for fg color
 }
 ```
 
@@ -114,9 +116,10 @@ The store holds the SVG tree, node indices, selection state, assignments, and un
 - **Loading:** `loadSvg()` — hydrates store with parsed SVG + pre-extracted assignments
 - **Assignment:** `assignField()`, `removeAssignment()` — single node
 - **Bulk:** `bulkAssignColors()`, `bulkAssignTexts()`, `bulkAssignImages()` — from detection wizard
-- **Text:** `setTextDimensions()`, `commitTextAreaResize()`, `setTextAlign()`, `setTextMultiline()`, `setFontSize()`
+- **Text:** `setTextDimensions()`, `commitTextAreaResize()`, `setTextAlign()`, `setTextMultiline()`, `setTextColorArea()`, `setFontSize()`
 - **Transform:** `rotateNode()`, `commitNodeTransform()`, `resetNodeTransform()`, `removeNodeScale()`
 - **Touch bounds:** `commitTouchBounds()`, `removeTouchBounds()`
+- **Bulk editing:** `setBulkTouchBoundsEditing()`, `setBulkTransformEditing()` — for text settings panel
 - **Node ops:** `deleteNode()`, `undo()`, `redo()`
 
 ### Assignment rules:
@@ -192,6 +195,7 @@ data-color-target="fill"        data-color-offset="0.05,-0.02,0.01"
 data-max-width="200"            data-max-height="40"
 data-text-multiline="true"      data-text-align="center"
 data-touch-bounds="100,50,200,100"
+data-text-color-area="colorOne"
 ```
 
 ## Color System
@@ -244,6 +248,53 @@ Interactive tap areas for text and image fields on the final card.
 - Coordinates are in SVG viewBox space
 - Serialized as `"x,y,width,height"` string in `data-touch-bounds` attribute
 
+## Text-to-Color-Area Linking (Foreground Colors)
+
+Connects text elements to color areas so team color palettes can apply the correct foreground color to text sitting on each colored area.
+
+### How it works
+
+1. **In the annotator:** Each text assignment can have a `textColorArea` linking it to a color field (e.g., `textColorArea: 'colorOne'`)
+2. **Persisted as:** `data-text-color-area="colorOne"` attribute on the text SVG element
+3. **At render time:** `withPresetTextColors(textFields, colorFields, colorPairs)` applies `fg` color from the matching `ColorPair` to the text element's fill
+
+### Data flow
+
+```
+Annotator → data-text-color-area="colorOne" on <text> node
+Card Engine → discoverEditableTextFields() reads it into EditableTextField.textColorArea
+Team Colors → withPresetTextColors() finds colorOne's index, applies colorPairs[index].fg as text fill
+```
+
+### Key files
+
+- `FieldAssignment.textColorArea` — annotator-side storage
+- `EditableTextField.textColorArea` — card-engine-side discovery
+- `withPresetTextColors()` in `edit-operations.ts` — applies fg colors at render time
+- `data-text-color-area` constant in `export-annotated-svg.ts`
+
+### Bulk Text Settings Panel
+
+`BulkTextSettingsPanel` (`components/bulk-text-settings-modal.tsx`) is a side panel (replaces the right panel when active) toggled via the Palette icon in the toolbar. It provides:
+
+- **Color area assignment** for all text fields at once, with color swatches showing each area's color
+- **Auto-detect** button that uses spatial overlap (bounding boxes) to guess which color area each text sits on
+- **Text color picker** to set each text element's default fill color
+- **Bulk touch bounds / transform editing** modes
+
+### Team Colors Integration
+
+`ColoredTemplateThumbnail` receives full `ColorPair[]` (not just bg strings) and calls:
+
+```typescript
+const bgColors = colorPairs.map((p) => p.bg);
+const edits = withPresetColors({}, fields.colorFields, bgColors);
+withPresetTextColors(fields.textFields, fields.colorFields, colorPairs);
+applyEditsForRender(fields, edits);
+```
+
+The `ColorPair { bg, fg, rank }` type is from `src/features/color-palettes/types/`.
+
 ## @fs-card-engine Dependencies
 
 The template annotator imports these from `@fs-card-engine`:
@@ -255,6 +306,7 @@ The template annotator imports these from `@fs-card-engine`:
 | `CARD_WIDTH/HEIGHT`          | 750×1050 safe zone dimensions                      |
 | `CARD_BLEED_WIDTH/HEIGHT`    | 833.34×1133.34 with print bleeds                   |
 | `hasBleeds`, `getCardBounds` | Viewport/bounds calculations                       |
+| `withPresetTextColors`       | Apply fg colors from palette pairs to linked text  |
 
 Types re-exported through `src/types/svg.ts`:
 
@@ -307,6 +359,8 @@ Color math re-exported through `src/utils/color-math.ts`:
 - `components/annotator-canvas.tsx` — SVG rendering + click/hover + overlays
 - `components/field-assignment-panel.tsx` — Right panel field picker
 - `components/detection-wizard-modal.tsx` — 3-step auto-detection
+- `components/bulk-text-settings-modal.tsx` — Bulk text settings side panel (color areas, text color, auto-detect)
+- `components/transform-controls.tsx` — Per-node text controls (alignment, font size, multiline, color area select)
 - `components/element-tree.tsx` — Left panel node hierarchy
 - `components/touch-bounds-overlay.tsx` — Touch bounds editing
 - `components/transform-overlay.tsx` — Scale/rotate/move editing

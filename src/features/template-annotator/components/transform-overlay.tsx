@@ -231,12 +231,15 @@ interface TransformOverlayProps {
   viewBox: string;
   nodeId: string;
   assignment?: FieldAssignment | null;
+  /** Hide the full-viewport click-away background (used in bulk mode). */
+  hideBackground?: boolean;
 }
 
 export function TransformOverlay({
   viewBox,
   nodeId,
   assignment,
+  hideBackground,
 }: TransformOverlayProps) {
   const commitNodeTransform = useAnnotatorStore((s) => s.commitNodeTransform);
   const commitTextAreaResize = useAnnotatorStore((s) => s.commitTextAreaResize);
@@ -680,18 +683,20 @@ export function TransformOverlay({
         pointerEvents: 'none',
       }}
     >
-      <rect
-        x={vb.x}
-        y={vb.y}
-        width={vb.width}
-        height={vb.height}
-        fill="transparent"
-        style={{ pointerEvents: 'all' }}
-        onPointerDown={(e) => {
-          e.stopPropagation();
-          setEditingTransform(null);
-        }}
-      />
+      {!hideBackground && (
+        <rect
+          x={vb.x}
+          y={vb.y}
+          width={vb.width}
+          height={vb.height}
+          fill="transparent"
+          style={{ pointerEvents: 'all' }}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            setEditingTransform(null);
+          }}
+        />
+      )}
 
       {activeTextGeometry ? (
         <>

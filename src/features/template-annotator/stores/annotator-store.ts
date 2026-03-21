@@ -54,6 +54,11 @@ type UndoEntry =
       nodeId: string;
       prevStyle: string | undefined;
       prevFontSize: string | undefined;
+    }
+  | {
+      type: 'fillChange';
+      nodeId: string;
+      prevFill: string | undefined;
     };
 
 interface AnnotatorState {
@@ -75,6 +80,10 @@ interface AnnotatorState {
 
   // Transform editing
   editingTransformNodeId: string | null;
+
+  // Bulk editing (shows overlays for ALL text assignments at once)
+  bulkTouchBoundsEditing: boolean;
+  bulkTransformEditing: boolean;
 
   // Tree state
   expandedNodeIds: Set<string>;
@@ -132,6 +141,8 @@ interface AnnotatorState {
   ) => void;
   setEditingTouchBounds: (nodeId: string | null) => void;
   setEditingTransform: (nodeId: string | null) => void;
+  setBulkTouchBoundsEditing: (active: boolean) => void;
+  setBulkTransformEditing: (active: boolean) => void;
   rotateNode: (
     nodeId: string,
     angleDeg: number,
@@ -155,7 +166,13 @@ interface AnnotatorState {
     fieldId: EditableFieldId,
     multiline: boolean
   ) => void;
+  setTextColorArea: (
+    nodeId: string,
+    fieldId: EditableFieldId,
+    colorArea: EditableFieldId | undefined
+  ) => void;
   setFontSize: (nodeId: string, fontSize: number) => void;
+  setTextFillColor: (nodeId: string, fillColor: string) => void;
   deleteNode: (nodeId: string) => void;
   undo: () => void;
   redo: () => void;
@@ -323,6 +340,21 @@ function updateAssignmentMultiline(
   });
 }
 
+function updateAssignmentTextColorArea(
+  assignments: FieldAssignment[],
+  nodeId: string,
+  fieldId: EditableFieldId,
+  colorArea: EditableFieldId | undefined
+): FieldAssignment[] {
+  return assignments.map((a) => {
+    if (a.nodeId !== nodeId || a.fieldId !== fieldId) return a;
+    if (colorArea) return { ...a, textColorArea: colorArea };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { textColorArea: _omit, ...rest } = a;
+    return rest;
+  });
+}
+
 function clearIfDeleted(
   value: string | null,
   deletedIds: Set<string>
@@ -412,6 +444,8 @@ const initialState = {
   hoveredNodeId: null as string | null,
   editingTouchBoundsNodeId: null as string | null,
   editingTransformNodeId: null as string | null,
+  bulkTouchBoundsEditing: false,
+  bulkTransformEditing: false,
   expandedNodeIds: new Set<string>(),
   assignments: [] as FieldAssignment[],
   undoStack: [] as UndoEntry[],
@@ -686,13 +720,41 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
   setEditingTouchBounds: (nodeId) =>
     set({
       editingTouchBoundsNodeId: nodeId,
-      ...(nodeId && { editingTransformNodeId: null }),
+      ...(nodeId && {
+        editingTransformNodeId: null,
+        bulkTransformEditing: false,
+      }),
+      ...(!nodeId && { bulkTouchBoundsEditing: false }),
     }),
 
   setEditingTransform: (nodeId) =>
     set({
       editingTransformNodeId: nodeId,
-      ...(nodeId && { editingTouchBoundsNodeId: null }),
+      ...(nodeId && {
+        editingTouchBoundsNodeId: null,
+        bulkTouchBoundsEditing: false,
+      }),
+      ...(!nodeId && { bulkTransformEditing: false }),
+    }),
+
+  setBulkTouchBoundsEditing: (active) =>
+    set({
+      bulkTouchBoundsEditing: active,
+      ...(active && {
+        editingTransformNodeId: null,
+        bulkTransformEditing: false,
+      }),
+      ...(!active && { editingTouchBoundsNodeId: null }),
+    }),
+
+  setBulkTransformEditing: (active) =>
+    set({
+      bulkTransformEditing: active,
+      ...(active && {
+        editingTouchBoundsNodeId: null,
+        bulkTouchBoundsEditing: false,
+      }),
+      ...(!active && { editingTransformNodeId: null }),
     }),
 
   rotateNode: (nodeId, angleDeg, center) => {
@@ -888,6 +950,20 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
     });
   },
 
+  setTextColorArea: (nodeId, fieldId, colorArea) => {
+    const { assignments, undoStack } = get();
+    set({
+      assignments: updateAssignmentTextColorArea(
+        assignments,
+        nodeId,
+        fieldId,
+        colorArea
+      ),
+      undoStack: pushUndo(undoStack, { type: 'assignments', assignments }),
+      redoStack: [],
+    });
+  },
+
   setFontSize: (nodeId, fontSize) => {
     const { svgTree, nodeMap, undoStack } = get();
     if (!svgTree) return;
@@ -914,6 +990,26 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
         nodeId,
         prevStyle,
         prevFontSize,
+      }),
+      redoStack: [],
+    });
+  },
+
+  setTextFillColor: (nodeId, fillColor) => {
+    const { svgTree, nodeMap, undoStack } = get();
+    if (!svgTree) return;
+    const node = nodeMap.get(nodeId);
+    if (!node || node.type !== 'element') return;
+
+    const prevFill = node.attributes.fill;
+    node.attributes.fill = fillColor;
+
+    set({
+      svgTree: { ...svgTree },
+      undoStack: pushUndo(undoStack, {
+        type: 'fillChange',
+        nodeId,
+        prevFill,
       }),
       redoStack: [],
     });
@@ -1049,6 +1145,20 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
             prevStyle: result.currentStyle,
             prevFontSize: result.currentFontSize,
           },
+        ],
+      });
+    } else if (entry.type === 'fillChange') {
+      if (!svgTree) return;
+      const node = nodeMap.get(entry.nodeId);
+      if (!node || node.type !== 'element') return;
+      const currentFill = node.attributes.fill;
+      node.attributes.fill = entry.prevFill;
+      set({
+        svgTree: { ...svgTree },
+        undoStack: newUndoStack,
+        redoStack: [
+          ...redoStack,
+          { type: 'fillChange', nodeId: entry.nodeId, prevFill: currentFill },
         ],
       });
     } else if (entry.type === 'deleteNode') {
@@ -1190,6 +1300,20 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
             prevStyle: result.currentStyle,
             prevFontSize: result.currentFontSize,
           },
+        ],
+      });
+    } else if (entry.type === 'fillChange') {
+      if (!svgTree) return;
+      const node = nodeMap.get(entry.nodeId);
+      if (!node || node.type !== 'element') return;
+      const currentFill = node.attributes.fill;
+      node.attributes.fill = entry.prevFill;
+      set({
+        svgTree: { ...svgTree },
+        redoStack: newRedoStack,
+        undoStack: [
+          ...undoStack,
+          { type: 'fillChange', nodeId: entry.nodeId, prevFill: currentFill },
         ],
       });
     } else if (entry.type === 'deleteNode') {

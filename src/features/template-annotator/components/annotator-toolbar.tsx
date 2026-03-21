@@ -1,7 +1,15 @@
 import { useMemo } from 'react';
 import { ActionIcon, Badge, Group, Text, Tooltip } from '@mantine/core';
 import { modals } from '@mantine/modals';
-import { Download, Redo2, RotateCcw, Save, Undo2, Wand2 } from 'lucide-react';
+import {
+  Download,
+  Palette,
+  Redo2,
+  RotateCcw,
+  Save,
+  Undo2,
+  Wand2,
+} from 'lucide-react';
 
 import { EDITABLE_FIELDS } from '@/features/templates';
 
@@ -12,6 +20,8 @@ import { parseViewBox, hasBleeds } from '../utils/svg-overlay-helpers';
 interface AnnotatorToolbarProps {
   onExport: () => void;
   onDetect: () => void;
+  onTextSettings: () => void;
+  textSettingsActive?: boolean;
   onSave?: () => void;
   isSaving?: boolean;
 }
@@ -19,6 +29,8 @@ interface AnnotatorToolbarProps {
 export function AnnotatorToolbar({
   onExport,
   onDetect,
+  onTextSettings,
+  textSettingsActive,
   onSave,
   isSaving,
 }: AnnotatorToolbarProps) {
@@ -141,6 +153,17 @@ export function AnnotatorToolbar({
           <Tooltip label="Auto-Detect">
             <ActionIcon variant="subtle" onClick={onDetect} size="md">
               <Wand2 size={18} />
+            </ActionIcon>
+          </Tooltip>
+
+          <Tooltip label="Text Settings">
+            <ActionIcon
+              variant={textSettingsActive ? 'filled' : 'subtle'}
+              color={textSettingsActive ? 'primary' : undefined}
+              onClick={onTextSettings}
+              size="md"
+            >
+              <Palette size={18} />
             </ActionIcon>
           </Tooltip>
 

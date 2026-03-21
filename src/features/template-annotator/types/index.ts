@@ -31,6 +31,8 @@ export interface FieldAssignment {
   multiline?: boolean;
   touchBounds?: TouchBounds;
   textAlign?: TextAlign;
+  /** Links this text element to a color area for foreground color application. */
+  textColorArea?: EditableFieldId;
 }
 
 export interface NodeMeta {

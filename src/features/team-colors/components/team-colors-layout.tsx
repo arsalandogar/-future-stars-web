@@ -52,8 +52,8 @@ export function TeamColorsLayout() {
   );
   const teamsMeta = teamsData?.meta;
   const selectedTeam = teams.find((t) => t.colorPaletteId === paletteId);
-  const presetColors = useMemo(
-    () => selectedTeam?.palette?.colorPairs.map((p) => p.bg) ?? [],
+  const colorPairs = useMemo(
+    () => selectedTeam?.palette?.colorPairs ?? [],
     [selectedTeam?.palette?.colorPairs]
   );
 
@@ -151,7 +151,7 @@ export function TeamColorsLayout() {
                 }),
               })
             }
-            presetColors={presetColors}
+            colorPairs={colorPairs}
           />
         </div>
       </div>

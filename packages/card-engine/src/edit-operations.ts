@@ -436,3 +436,29 @@ export function withTextFieldReset(
   delete newEdits[field.fieldId];
   return newEdits;
 }
+
+/**
+ * Apply foreground colors from color pairs to text elements linked to color areas.
+ * Text elements with a `textColorArea` get the `fg` color from the matching
+ * color pair at the same index as their linked color field.
+ * Mutates SVG nodes directly.
+ */
+export function withPresetTextColors(
+  textFields: EditableTextField[],
+  colorFields: EditableColorField[],
+  colorPairs: { fg: string }[]
+): void {
+  const colorIndexMap = new Map(colorFields.map((cf, i) => [cf.fieldId, i]));
+
+  for (const textField of textFields) {
+    if (!textField.textColorArea) continue;
+
+    const colorIndex = colorIndexMap.get(textField.textColorArea);
+    if (colorIndex == null || colorIndex >= colorPairs.length) continue;
+
+    const fgColor = colorPairs[colorIndex].fg;
+    for (const node of textField.elementNodes) {
+      node.attributes.fill = fgColor;
+    }
+  }
+}

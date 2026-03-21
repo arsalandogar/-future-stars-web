@@ -23,6 +23,8 @@ interface TouchBoundsOverlayProps {
   bounds: TouchBounds;
   nodeId: string;
   fieldId: EditableFieldId;
+  /** Hide the full-viewport click-away background (used in bulk mode). */
+  hideBackground?: boolean;
 }
 
 export function TouchBoundsOverlay({
@@ -30,6 +32,7 @@ export function TouchBoundsOverlay({
   bounds,
   nodeId,
   fieldId,
+  hideBackground,
 }: TouchBoundsOverlayProps) {
   const commitTouchBounds = useAnnotatorStore((s) => s.commitTouchBounds);
   const setEditingTouchBounds = useAnnotatorStore(
@@ -168,18 +171,20 @@ export function TouchBoundsOverlay({
       }}
     >
       {/* Full overlay background to capture clicks on empty area */}
-      <rect
-        x={vb.x}
-        y={vb.y}
-        width={vb.width}
-        height={vb.height}
-        fill="transparent"
-        style={{ pointerEvents: 'all' }}
-        onPointerDown={(e) => {
-          e.stopPropagation();
-          setEditingTouchBounds(null);
-        }}
-      />
+      {!hideBackground && (
+        <rect
+          x={vb.x}
+          y={vb.y}
+          width={vb.width}
+          height={vb.height}
+          fill="transparent"
+          style={{ pointerEvents: 'all' }}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            setEditingTouchBounds(null);
+          }}
+        />
+      )}
 
       {/* Bounds rectangle — draggable to move */}
       <rect

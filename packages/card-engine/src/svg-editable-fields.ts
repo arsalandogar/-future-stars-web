@@ -40,6 +40,8 @@ export interface EditableTextField {
   multiline: boolean;
   elementNodes: SvgJsonNode[];
   touchBounds?: TouchBounds;
+  /** Links this text field to a color area for foreground color application. */
+  textColorArea?: EditableFieldId;
 }
 
 export function discoverEditableTextFields(
@@ -78,6 +80,15 @@ export function discoverEditableTextFields(
       elementNodes[0].attributes['data-touch-bounds']
     );
 
+    const textColorAreaRaw = elementNodes[0].attributes[
+      'data-text-color-area'
+    ] as string | undefined;
+    const textColorArea =
+      textColorAreaRaw &&
+      COLOR_FIELD_ORDER.has(textColorAreaRaw as EditableFieldId)
+        ? (textColorAreaRaw as EditableFieldId)
+        : undefined;
+
     fields.push({
       fieldId,
       label: fieldDef.label,
@@ -85,6 +96,7 @@ export function discoverEditableTextFields(
       multiline,
       elementNodes,
       ...(touchBounds && { touchBounds }),
+      ...(textColorArea && { textColorArea }),
     });
   }
 

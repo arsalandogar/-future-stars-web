@@ -124,6 +124,7 @@ export {
   withNudgeEdit,
   withTextEdit,
   withPresetColors,
+  withPresetTextColors,
   withSwappedColors,
   withAllColorsReset,
   withImageRemoved,

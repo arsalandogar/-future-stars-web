@@ -16,6 +16,7 @@ import {
   DATA_ATTR_TEXT_MULTILINE,
   DATA_ATTR_TOUCH_BOUNDS,
   DATA_ATTR_TEXT_ALIGN,
+  DATA_ATTR_TEXT_COLOR_AREA,
 } from './export-annotated-svg';
 
 function isEditableFieldId(value: string): value is EditableFieldId {
@@ -76,6 +77,15 @@ export function extractAssignments(
           textAlignStr === 'right'
         ) {
           assignment.textAlign = textAlignStr as TextAlign;
+        }
+
+        const textColorArea = node.attributes[DATA_ATTR_TEXT_COLOR_AREA];
+        if (
+          textColorArea &&
+          isEditableFieldId(textColorArea) &&
+          EDITABLE_FIELDS[textColorArea].type === 'color'
+        ) {
+          assignment.textColorArea = textColorArea;
         }
       }
 

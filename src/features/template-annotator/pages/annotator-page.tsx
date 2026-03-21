@@ -9,6 +9,7 @@ import { useAnnotatorStore } from '../stores/annotator-store';
 import { AnnotatorCanvas } from '../components/annotator-canvas';
 import { AnnotatorToolbar } from '../components/annotator-toolbar';
 import { AssignmentSummaryTable } from '../components/assignment-summary-table';
+import { BulkTextSettingsPanel } from '../components/bulk-text-settings-modal';
 import { DetectionWizardModal } from '../components/detection-wizard-modal';
 import { ElementTree } from '../components/element-tree';
 import { ExportModal } from '../components/export-modal';
@@ -42,6 +43,7 @@ export function AnnotatorPage({ onSave, isSaving }: AnnotatorPageProps) {
     useDisclosure(false);
   const [wizardOpened, { open: openWizard, close: closeWizard }] =
     useDisclosure(false);
+  const [textSettingsOpen, setTextSettingsOpen] = useState(false);
   const [rightTab, setRightTab] = useState<RightPanelTab>('assign');
 
   // Auto-open wizard when a new SVG is loaded (reference identity check)
@@ -80,6 +82,8 @@ export function AnnotatorPage({ onSave, isSaving }: AnnotatorPageProps) {
           <AnnotatorToolbar
             onExport={openExport}
             onDetect={openWizard}
+            onTextSettings={() => setTextSettingsOpen((prev) => !prev)}
+            textSettingsActive={textSettingsOpen}
             onSave={onSave}
             isSaving={isSaving}
           />
@@ -94,44 +98,48 @@ export function AnnotatorPage({ onSave, isSaving }: AnnotatorPageProps) {
         </div>
 
         <div className={styles.panel}>
-          <Stack gap={0} h="100%">
-            <div className={styles.tabBar} role="tablist">
-              {TABS.map((tab) => (
-                <button
-                  key={tab.value}
-                  className={styles.tab}
-                  role="tab"
-                  aria-selected={rightTab === tab.value}
-                  data-active={rightTab === tab.value}
-                  onClick={() => setRightTab(tab.value)}
-                >
-                  {tab.label}
-                  {tab.value === 'review' && assignments.length > 0 && (
-                    <Badge
-                      size="xs"
-                      variant="filled"
-                      circle
-                      className={styles.tabBadge}
-                    >
-                      {assignments.length}
-                    </Badge>
-                  )}
-                </button>
-              ))}
-            </div>
+          {textSettingsOpen ? (
+            <BulkTextSettingsPanel onClose={() => setTextSettingsOpen(false)} />
+          ) : (
+            <Stack gap={0} h="100%">
+              <div className={styles.tabBar} role="tablist">
+                {TABS.map((tab) => (
+                  <button
+                    key={tab.value}
+                    className={styles.tab}
+                    role="tab"
+                    aria-selected={rightTab === tab.value}
+                    data-active={rightTab === tab.value}
+                    onClick={() => setRightTab(tab.value)}
+                  >
+                    {tab.label}
+                    {tab.value === 'review' && assignments.length > 0 && (
+                      <Badge
+                        size="xs"
+                        variant="filled"
+                        circle
+                        className={styles.tabBadge}
+                      >
+                        {assignments.length}
+                      </Badge>
+                    )}
+                  </button>
+                ))}
+              </div>
 
-            <div className={styles.tabContent}>
-              {rightTab === 'assign' && <FieldAssignmentPanel />}
+              <div className={styles.tabContent}>
+                {rightTab === 'assign' && <FieldAssignmentPanel />}
 
-              {rightTab === 'review' && (
-                <ScrollArea h="100%">
-                  <div className="p-3">
-                    <AssignmentSummaryTable />
-                  </div>
-                </ScrollArea>
-              )}
-            </div>
-          </Stack>
+                {rightTab === 'review' && (
+                  <ScrollArea h="100%">
+                    <div className="p-3">
+                      <AssignmentSummaryTable />
+                    </div>
+                  </ScrollArea>
+                )}
+              </div>
+            </Stack>
+          )}
         </div>
       </div>
 

@@ -10,6 +10,7 @@ import {
 import { GalleryHorizontalEnd, Image as ImageIcon } from 'lucide-react';
 
 import { ContentTabs } from '@/components/ui/content-tabs';
+import type { ColorPair } from '@/features/color-palettes';
 import { useTemplates, type TemplateSide } from '@/features/templates';
 
 import { ColoredTemplateThumbnail } from './colored-template-thumbnail';
@@ -24,14 +25,14 @@ const SIDE_TABS = [
 interface TemplatePreviewGridProps {
   side: 'all' | TemplateSide;
   onSideChange: (side: 'all' | TemplateSide) => void;
-  /** Flat array of preset color hex strings to apply to template previews. */
-  presetColors: string[];
+  /** Color pairs from the palette (bg + fg per area). */
+  colorPairs: ColorPair[];
 }
 
 export function TemplatePreviewGrid({
   side,
   onSideChange,
-  presetColors,
+  colorPairs,
 }: TemplatePreviewGridProps) {
   const { data, isLoading } = useTemplates({
     variables: {
@@ -41,7 +42,7 @@ export function TemplatePreviewGrid({
   });
 
   const templates = data?.data ?? [];
-  const hasColors = presetColors.length > 0;
+  const hasColors = colorPairs.length > 0;
 
   return (
     <div className="flex flex-col gap-md" style={{ minHeight: 0 }}>
@@ -91,7 +92,7 @@ export function TemplatePreviewGrid({
                     <ColoredTemplateThumbnail
                       templateId={template.id}
                       templateName={template.name}
-                      presetColors={presetColors}
+                      colorPairs={colorPairs}
                     />
                   ) : template.templateImageMedium ? (
                     <Image

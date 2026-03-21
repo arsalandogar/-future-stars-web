@@ -3,23 +3,26 @@ import { Loader, Text } from '@mantine/core';
 import {
   prepareTemplate,
   withPresetColors,
+  withPresetTextColors,
   applyEditsForRender,
 } from '@fs-card-engine';
 
 import { SvgRenderer } from '@/components/svg-renderer/svg-renderer';
 import { useTemplateSvgJson } from '@/features/templates';
 
+import type { ColorPair } from '@/features/color-palettes';
+
 interface ColoredTemplateThumbnailProps {
   templateId: number;
   templateName: string;
-  /** Flat array of color hex strings (bg values from color pairs). */
-  presetColors: string[];
+  /** Color pairs from the palette (bg + fg per area). */
+  colorPairs: ColorPair[];
 }
 
 export function ColoredTemplateThumbnail({
   templateId,
   templateName,
-  presetColors,
+  colorPairs,
 }: ColoredTemplateThumbnailProps) {
   const { data: svgNode, isLoading } = useTemplateSvgJson({
     variables: templateId,
@@ -32,14 +35,15 @@ export function ColoredTemplateThumbnail({
       includeTouchTargets: false,
     });
 
-    if (fields.colorFields.length > 0 && presetColors.length > 0) {
-      const edits = withPresetColors({}, fields.colorFields, presetColors);
+    if (fields.colorFields.length > 0 && colorPairs.length > 0) {
+      const bgColors = colorPairs.map((p) => p.bg);
+      const edits = withPresetColors({}, fields.colorFields, bgColors);
+      withPresetTextColors(fields.textFields, fields.colorFields, colorPairs);
       applyEditsForRender(fields, edits);
     }
 
     return workingCopy;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [svgNode, JSON.stringify(presetColors)]);
+  }, [svgNode, colorPairs]);
 
   if (isLoading) {
     return (
