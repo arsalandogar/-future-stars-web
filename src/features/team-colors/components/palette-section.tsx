@@ -17,9 +17,14 @@ import {
 interface PaletteSectionProps {
   colorPairs: ColorPair[];
   paletteId: number;
+  onLivePairsChange?: (pairs: ColorPair[]) => void;
 }
 
-export function PaletteSection({ colorPairs, paletteId }: PaletteSectionProps) {
+export function PaletteSection({
+  colorPairs,
+  paletteId,
+  onLivePairsChange,
+}: PaletteSectionProps) {
   const [localPairs, setLocalPairs] = useState<ColorPair[]>(colorPairs);
   const [editingIndex, setEditingIndex] = useState<{
     index: number;
@@ -34,32 +39,38 @@ export function PaletteSection({ colorPairs, paletteId }: PaletteSectionProps) {
 
   const isDirty = JSON.stringify(localPairs) !== JSON.stringify(colorPairs);
 
+  // Helper: update local pairs and notify parent in one batch (avoids effect cascade)
+  const updatePairs = (next: ColorPair[]) => {
+    setLocalPairs(next);
+    onLivePairsChange?.(next);
+  };
+
   const handleColorChange = (
     index: number,
     field: 'bg' | 'fg',
     color: string
   ) => {
-    setLocalPairs((prev) =>
-      prev.map((p, i) => (i === index ? { ...p, [field]: color } : p))
+    updatePairs(
+      localPairs.map((p, i) => (i === index ? { ...p, [field]: color } : p))
     );
   };
 
   const handleSwap = (index: number) => {
-    setLocalPairs((prev) =>
-      prev.map((p, i) => (i === index ? { ...p, bg: p.fg, fg: p.bg } : p))
+    updatePairs(
+      localPairs.map((p, i) => (i === index ? { ...p, bg: p.fg, fg: p.bg } : p))
     );
   };
 
   const handleReset = (index: number) => {
-    setLocalPairs((prev) =>
-      prev.map((p, i) => (i === index ? colorPairs[index] : p))
+    updatePairs(
+      localPairs.map((p, i) => (i === index ? colorPairs[index] : p))
     );
   };
 
   const handleAdd = () => {
-    setLocalPairs((prev) => [
-      ...prev,
-      { bg: '#5046FF', fg: '#FFFFFF', rank: prev.length },
+    updatePairs([
+      ...localPairs,
+      { bg: '#5046FF', fg: '#FFFFFF', rank: localPairs.length },
     ]);
   };
 

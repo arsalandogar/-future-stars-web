@@ -1,6 +1,6 @@
 import { Badge, Group, Loader, Text } from '@mantine/core';
 
-import { useColorPalette } from '@/features/color-palettes';
+import { useColorPalette, type ColorPair } from '@/features/color-palettes';
 import type { ColorTeam } from '@/features/colors';
 
 import { PaletteSection } from './palette-section';
@@ -9,11 +9,15 @@ import { ColorSchemeSection } from './color-scheme-section';
 interface PaletteDetailPanelProps {
   paletteId: number | undefined;
   selectedTeam: ColorTeam | undefined;
+  livePairs?: ColorPair[];
+  onLivePairsChange?: (pairs: ColorPair[]) => void;
 }
 
 export function PaletteDetailPanel({
   paletteId,
   selectedTeam,
+  livePairs,
+  onLivePairsChange,
 }: PaletteDetailPanelProps) {
   const { data, isLoading } = useColorPalette({
     variables: paletteId!,
@@ -70,10 +74,14 @@ export function PaletteDetailPanel({
         </Group>
       </Group>
 
-      <PaletteSection colorPairs={palette.colorPairs} paletteId={palette.id} />
+      <PaletteSection
+        colorPairs={palette.colorPairs}
+        paletteId={palette.id}
+        onLivePairsChange={onLivePairsChange}
+      />
 
       <ColorSchemeSection
-        colorPairs={palette.colorPairs}
+        colorPairs={livePairs ?? palette.colorPairs}
         paletteName={palette.name}
       />
     </div>

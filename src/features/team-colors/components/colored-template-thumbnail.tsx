@@ -38,8 +38,8 @@ export function ColoredTemplateThumbnail({
     if (fields.colorFields.length > 0 && colorPairs.length > 0) {
       const bgColors = colorPairs.map((p) => p.bg);
       const edits = withPresetColors({}, fields.colorFields, bgColors);
-      withPresetTextColors(fields.textFields, fields.colorFields, colorPairs);
       applyEditsForRender(fields, edits);
+      withPresetTextColors(fields.textFields, fields.colorFields, colorPairs);
     }
 
     return workingCopy;

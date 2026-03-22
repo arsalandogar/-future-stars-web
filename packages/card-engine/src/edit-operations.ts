@@ -13,6 +13,7 @@ import {
   applyTextEdit,
   applyColorEdit,
   applyImageEdit,
+  writeColorValue,
   type EditableTextField,
   type EditableColorField,
   type EditableImageField,
@@ -458,7 +459,7 @@ export function withPresetTextColors(
 
     const fgColor = colorPairs[colorIndex].fg;
     for (const node of textField.elementNodes) {
-      node.attributes.fill = fgColor;
+      writeColorValue(node, 'fill', fgColor);
     }
   }
 }

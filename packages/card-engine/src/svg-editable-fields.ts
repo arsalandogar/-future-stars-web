@@ -156,27 +156,35 @@ function readColorValue(node: SvgJsonNode, target: ColorTarget): string {
   return match ? match[1].trim() : '';
 }
 
-function writeColorValue(
+export function writeColorValue(
   node: SvgJsonNode,
   target: ColorTarget,
   color: string
 ): void {
-  // If direct attribute exists, write there
+  let wrote = false;
+
+  // Update direct attribute if it exists
   if (node.attributes[target] != null) {
     node.attributes[target] = color;
-    return;
+    wrote = true;
   }
-  // Otherwise update style string
+
+  // Also update style string if it contains the target (inline style has
+  // higher CSS specificity than presentation attributes, so both must be
+  // kept in sync to avoid the style overriding the attribute).
   const style = node.attributes.style;
   if (style && style.includes(`${target}:`)) {
     node.attributes.style = style.replace(
       new RegExp(`${target}:\\s*[^;]+`),
       `${target}: ${color}`
     );
-    return;
+    wrote = true;
   }
+
   // No existing value — set as direct attribute
-  node.attributes[target] = color;
+  if (!wrote) {
+    node.attributes[target] = color;
+  }
 }
 
 export function discoverEditableColorFields(

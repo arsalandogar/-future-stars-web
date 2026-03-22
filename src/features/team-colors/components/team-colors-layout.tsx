@@ -1,9 +1,10 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { TextInput } from '@mantine/core';
 import { useDebouncedCallback } from '@mantine/hooks';
 import { getRouteApi } from '@tanstack/react-router';
 import { Search } from 'lucide-react';
 
+import type { ColorPair } from '@/features/color-palettes';
 import { useLeagues, useColorTeams } from '@/features/colors';
 import { ListingPagination } from '@/components/ui/listing';
 
@@ -52,10 +53,16 @@ export function TeamColorsLayout() {
   );
   const teamsMeta = teamsData?.meta;
   const selectedTeam = teams.find((t) => t.colorPaletteId === paletteId);
-  const colorPairs = useMemo(
+  const apiColorPairs = useMemo(
     () => selectedTeam?.palette?.colorPairs ?? [],
     [selectedTeam?.palette?.colorPairs]
   );
+  const [livePairs, setLivePairs] = useState<ColorPair[]>(apiColorPairs);
+
+  // Reset live pairs when switching palettes
+  useEffect(() => {
+    setLivePairs(apiColorPairs);
+  }, [apiColorPairs]);
 
   // Auto-select first team when none is selected
   useEffect(() => {
@@ -135,6 +142,8 @@ export function TeamColorsLayout() {
               <PaletteDetailPanel
                 paletteId={paletteId}
                 selectedTeam={selectedTeam}
+                livePairs={livePairs}
+                onLivePairsChange={setLivePairs}
               />
             </div>
           </div>
@@ -151,7 +160,7 @@ export function TeamColorsLayout() {
                 }),
               })
             }
-            colorPairs={colorPairs}
+            colorPairs={livePairs}
           />
         </div>
       </div>

@@ -21,9 +21,9 @@ const listingSearchSchema = v.object({
   limit: v.optional(
     v.fallback(
       v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(100)),
-      10
+      50
     ),
-    10
+    50
   ),
   search: v.optional(v.fallback(v.string(), ''), ''),
 });
