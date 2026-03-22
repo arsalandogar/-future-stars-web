@@ -1,4 +1,5 @@
 import { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import {
   parseViewBox,
   getCardBounds,
@@ -26,22 +27,31 @@ import { TransformOverlay } from './transform-overlay';
 import styles from './annotator-canvas.module.css';
 
 export function AnnotatorCanvas() {
-  const svgTree = useAnnotatorStore((s) => s.svgTree);
-  const selectedNodeId = useAnnotatorStore((s) => s.selectedNodeId);
-  const hoveredNodeId = useAnnotatorStore((s) => s.hoveredNodeId);
-  const selectNode = useAnnotatorStore((s) => s.selectNode);
-  const hoverNode = useAnnotatorStore((s) => s.hoverNode);
-  const editingTouchBoundsNodeId = useAnnotatorStore(
-    (s) => s.editingTouchBoundsNodeId
+  const {
+    svgTree,
+    selectedNodeId,
+    hoveredNodeId,
+    selectNode,
+    hoverNode,
+    editingTouchBoundsNodeId,
+    editingTransformNodeId,
+    bulkTouchBoundsEditing,
+    bulkTransformEditing,
+    assignments,
+  } = useAnnotatorStore(
+    useShallow((s) => ({
+      svgTree: s.svgTree,
+      selectedNodeId: s.selectedNodeId,
+      hoveredNodeId: s.hoveredNodeId,
+      selectNode: s.selectNode,
+      hoverNode: s.hoverNode,
+      editingTouchBoundsNodeId: s.editingTouchBoundsNodeId,
+      editingTransformNodeId: s.editingTransformNodeId,
+      bulkTouchBoundsEditing: s.bulkTouchBoundsEditing,
+      bulkTransformEditing: s.bulkTransformEditing,
+      assignments: s.assignments,
+    }))
   );
-  const editingTransformNodeId = useAnnotatorStore(
-    (s) => s.editingTransformNodeId
-  );
-  const bulkTouchBoundsEditing = useAnnotatorStore(
-    (s) => s.bulkTouchBoundsEditing
-  );
-  const bulkTransformEditing = useAnnotatorStore((s) => s.bulkTransformEditing);
-  const assignments = useAnnotatorStore((s) => s.assignments);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const getNodeProps = useCallback(

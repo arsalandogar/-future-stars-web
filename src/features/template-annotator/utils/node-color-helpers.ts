@@ -47,7 +47,10 @@ export function getTextFillColor(node: SvgJsonNode): string {
 export function getNodeFontSize(node: SvgJsonNode): number | undefined {
   if (node.type !== 'element') return undefined;
   const fromAttr = node.attributes['font-size'];
-  if (fromAttr) return Number(fromAttr);
+  if (fromAttr) {
+    const parsed = parseFloat(fromAttr);
+    if (!Number.isNaN(parsed)) return parsed;
+  }
   const styleMatch = node.attributes.style?.match(/font-size:\s*([\d.]+)/);
   if (styleMatch) return Number(styleMatch[1]);
   return undefined;

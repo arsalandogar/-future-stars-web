@@ -11,7 +11,6 @@ const PAGE_SIZE_OPTIONS = [
 
 export interface ListingPaginationProps {
   meta: PaginationMeta;
-  page: number;
   limit: number;
   onPageChange: (page: number) => void;
   onLimitChange: (limit: number) => void;
@@ -19,7 +18,6 @@ export interface ListingPaginationProps {
 
 export function ListingPagination({
   meta,
-  page,
   limit,
   onPageChange,
   onLimitChange,
@@ -33,8 +31,12 @@ export function ListingPagination({
         <Select
           data={PAGE_SIZE_OPTIONS}
           value={String(limit)}
+          allowDeselect={false}
           onChange={(value) => {
-            if (value) onLimitChange(Number(value));
+            if (value) {
+              onLimitChange(Number(value));
+              onPageChange(1);
+            }
           }}
           size="xs"
           w={70}
@@ -45,7 +47,7 @@ export function ListingPagination({
       </Group>
       {meta.lastPage > 1 && (
         <Pagination
-          value={page}
+          value={meta.currentPage}
           onChange={onPageChange}
           total={meta.lastPage}
         />

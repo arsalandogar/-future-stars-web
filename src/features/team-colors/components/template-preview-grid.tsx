@@ -41,7 +41,8 @@ export function TemplatePreviewGrid({
     },
   });
 
-  const templates = data?.data ?? [];
+  // Only show annotated templates for now
+  const templates = (data?.data ?? []).filter((t) => [5, 9, 42].includes(t.id));
   const hasColors = colorPairs.length > 0;
 
   return (

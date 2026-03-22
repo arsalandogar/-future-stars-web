@@ -155,5 +155,5 @@ export function downloadJson(json: string, fileName: string): void {
   a.href = url;
   a.download = fileName.replace(/\.svg$/i, '') + '.json';
   a.click();
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

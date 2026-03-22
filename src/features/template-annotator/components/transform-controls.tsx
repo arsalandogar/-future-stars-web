@@ -9,19 +9,12 @@ import {
   Text,
   Tooltip,
 } from '@mantine/core';
-import {
-  AlignCenter,
-  AlignLeft,
-  AlignRight,
-  RotateCw,
-  Scaling,
-  Undo2,
-} from 'lucide-react';
+import { RotateCw, Scaling, Undo2 } from 'lucide-react';
+import { useShallow } from 'zustand/react/shallow';
 
 import type { EditableFieldId } from '@/features/templates';
 
-import type { NodeMeta, TextAlign, SvgTextAnchor } from '../types';
-import { TEXT_ANCHOR_TO_ALIGN } from '../types';
+import type { NodeMeta, TextAlign } from '../types';
 import { useAnnotatorStore } from '../stores/annotator-store';
 import { useElementBounds } from '../hooks/use-element-bounds';
 import {
@@ -38,25 +31,16 @@ import {
   transformPoint,
   transformVector,
 } from '../utils/svg-transform-helpers';
-import {
-  MIN_SIZE,
-  querySvgElement,
-  getComputedTextAnchor,
-} from '../utils/svg-overlay-helpers';
+import { MIN_SIZE, querySvgElement } from '../utils/svg-overlay-helpers';
 import {
   ensureTextDimensions,
   resetTextDimensions,
 } from '../utils/text-area-helpers';
+import { ALIGN_OPTIONS, getCurrentAlign } from '../utils/text-align-helpers';
 import { BoundsDisplay } from './bounds-display';
 import { ColorAreaSelect } from './color-area-select';
 import { useColorAreaOptions } from '../hooks/use-color-area-options';
 import { NumericInputGrid } from './numeric-input-grid';
-
-const ALIGN_OPTIONS = [
-  { value: 'left', label: <AlignLeft size={14} /> },
-  { value: 'center', label: <AlignCenter size={14} /> },
-  { value: 'right', label: <AlignRight size={14} /> },
-];
 const ROTATE_STEP_DEGREES = 15;
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
@@ -76,13 +60,41 @@ export function TransformControls({
   nodeMeta,
   fieldId,
 }: TransformControlsProps) {
-  const editingNodeId = useAnnotatorStore((s) => s.editingTransformNodeId);
-  const setEditing = useAnnotatorStore((s) => s.setEditingTransform);
-  const nodeMap = useAnnotatorStore((s) => s.nodeMap);
-  const rotateNode = useAnnotatorStore((s) => s.rotateNode);
-  const resetNodeTransform = useAnnotatorStore((s) => s.resetNodeTransform);
-  const removeNodeScale = useAnnotatorStore((s) => s.removeNodeScale);
-  const commitNodeTransform = useAnnotatorStore((s) => s.commitNodeTransform);
+  const {
+    editingNodeId,
+    setEditing,
+    nodeMap,
+    rotateNode,
+    resetNodeTransform,
+    removeNodeScale,
+    commitNodeTransform,
+    setTextAlign,
+    setTextMultiline,
+    setTextColorArea,
+    setTextDimensions,
+    setFontSize,
+    assignment,
+  } = useAnnotatorStore(
+    useShallow((s) => ({
+      editingNodeId: s.editingTransformNodeId,
+      setEditing: s.setEditingTransform,
+      nodeMap: s.nodeMap,
+      rotateNode: s.rotateNode,
+      resetNodeTransform: s.resetNodeTransform,
+      removeNodeScale: s.removeNodeScale,
+      commitNodeTransform: s.commitNodeTransform,
+      setTextAlign: s.setTextAlign,
+      setTextMultiline: s.setTextMultiline,
+      setTextColorArea: s.setTextColorArea,
+      setTextDimensions: s.setTextDimensions,
+      setFontSize: s.setFontSize,
+      assignment: fieldId
+        ? s.assignments.find(
+            (a) => a.nodeId === nodeMeta.nodeId && a.fieldId === fieldId
+          )
+        : undefined,
+    }))
+  );
   const node = nodeMap.get(nodeMeta.nodeId);
   const transformStr =
     node?.type === 'element' ? node.attributes.transform : undefined;
@@ -92,34 +104,15 @@ export function TransformControls({
   const isEditing = editingNodeId === nodeMeta.nodeId;
 
   const bounds = useElementBounds(nodeMeta.nodeId, true);
-
-  const setTextAlign = useAnnotatorStore((s) => s.setTextAlign);
-  const setTextMultiline = useAnnotatorStore((s) => s.setTextMultiline);
-  const setTextColorArea = useAnnotatorStore((s) => s.setTextColorArea);
-  const setTextDimensions = useAnnotatorStore((s) => s.setTextDimensions);
-  const setFontSize = useAnnotatorStore((s) => s.setFontSize);
-  const assignment = useAnnotatorStore((s) =>
-    fieldId
-      ? s.assignments.find(
-          (a) => a.nodeId === nodeMeta.nodeId && a.fieldId === fieldId
-        )
-      : undefined
-  );
   const colorAreaOptions = useColorAreaOptions();
   const hasDimensions =
     assignment?.maxWidth != null && assignment?.maxHeight != null;
 
   const currentFontSize = fieldId && node ? getNodeFontSize(node) : undefined;
 
-  const currentAlign: TextAlign = (() => {
-    if (!fieldId) return 'left';
-    if (assignment?.textAlign) return assignment.textAlign;
-    const anchor = getComputedTextAnchor(nodeMeta.nodeId);
-    if (anchor in TEXT_ANCHOR_TO_ALIGN) {
-      return TEXT_ANCHOR_TO_ALIGN[anchor as SvgTextAnchor];
-    }
-    return 'left';
-  })();
+  const currentAlign: TextAlign = fieldId
+    ? getCurrentAlign(assignment, nodeMeta.nodeId)
+    : 'left';
 
   const handleToggleEdit = () => {
     if (isEditing) {

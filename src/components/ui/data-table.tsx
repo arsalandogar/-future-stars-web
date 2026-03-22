@@ -143,7 +143,6 @@ export function DataTable<T>({
       {meta && listingContext && (
         <ListingPagination
           meta={meta}
-          page={meta.currentPage}
           limit={listingContext.limit}
           onPageChange={listingContext.setPage}
           onLimitChange={listingContext.setLimit}

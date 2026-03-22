@@ -334,7 +334,12 @@ export function withZoomEdit(
   const url = getEditValue(prev) ?? '';
   if (!url) return edits;
   const newEdits = { ...edits };
-  newEdits[fieldId] = { url, zoom, offsetX, offsetY } satisfies ImageEdit;
+  const edit: ImageEdit = { url, zoom, offsetX, offsetY };
+  if (isImageEdit(prev)) {
+    if (prev.sourceWidth != null) edit.sourceWidth = prev.sourceWidth;
+    if (prev.sourceHeight != null) edit.sourceHeight = prev.sourceHeight;
+  }
+  newEdits[fieldId] = edit;
   return newEdits;
 }
 
@@ -348,14 +353,19 @@ export function withNudgeEdit(
   const prev = edits[fieldId];
   const url = getEditValue(prev) ?? '';
   if (!url) return edits;
-  const pos = isImageEdit(prev) ? prev : DEFAULT_IMAGE_POSITION;
+  const prevImage = isImageEdit(prev) ? prev : null;
+  const pos = prevImage ?? DEFAULT_IMAGE_POSITION;
   const newEdits = { ...edits };
-  newEdits[fieldId] = {
+  const edit: ImageEdit = {
     url,
     zoom: pos.zoom,
     offsetX: pos.offsetX + dx,
     offsetY: pos.offsetY + dy,
-  } satisfies ImageEdit;
+  };
+  if (prevImage?.sourceWidth != null) edit.sourceWidth = prevImage.sourceWidth;
+  if (prevImage?.sourceHeight != null)
+    edit.sourceHeight = prevImage.sourceHeight;
+  newEdits[fieldId] = edit;
   return newEdits;
 }
 

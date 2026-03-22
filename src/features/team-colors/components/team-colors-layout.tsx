@@ -168,7 +168,6 @@ export function TeamColorsLayout() {
       {teamsMeta && (
         <ListingPagination
           meta={teamsMeta}
-          page={teamsMeta.currentPage}
           limit={teamLimit}
           onPageChange={(page) =>
             void navigate({

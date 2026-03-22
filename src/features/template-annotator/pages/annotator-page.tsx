@@ -46,7 +46,9 @@ export function AnnotatorPage({ onSave, isSaving }: AnnotatorPageProps) {
   const [textSettingsOpen, setTextSettingsOpen] = useState(false);
   const [rightTab, setRightTab] = useState<RightPanelTab>('assign');
 
-  // Auto-open wizard when a new SVG is loaded (reference identity check)
+  // Auto-open wizard when a new SVG is loaded (reference identity check).
+  // Using setState-during-render is the React-recommended pattern for derived
+  // state — openWizard only triggers a disclosure toggle (state-only, no side effects).
   const [autoOpenedForMap, setAutoOpenedForMap] = useState<
     typeof nodeMap | null
   >(null);

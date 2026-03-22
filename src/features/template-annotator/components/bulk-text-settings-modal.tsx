@@ -12,58 +12,22 @@ import {
   Text,
   Tooltip,
 } from '@mantine/core';
-import {
-  AlignCenter,
-  AlignLeft,
-  AlignRight,
-  RotateCcw,
-  Trash2,
-  X,
-} from 'lucide-react';
+import { RotateCcw, Trash2, X } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { EDITABLE_FIELDS, type EditableFieldId } from '@/features/templates';
 
 import type { TextAlign } from '../types';
-import { TEXT_ANCHOR_TO_ALIGN } from '../types';
 import { useAnnotatorStore } from '../stores/annotator-store';
 import { getTextFillColor, getNodeFontSize } from '../utils/node-color-helpers';
 import { getElementBBoxInSvgRoot } from '../utils/get-element-bbox';
-import {
-  querySvgElement,
-  getComputedTextAnchor,
-} from '../utils/svg-overlay-helpers';
+import { querySvgElement } from '../utils/svg-overlay-helpers';
+import { ALIGN_OPTIONS, getCurrentAlign } from '../utils/text-align-helpers';
 import { ensureTextDimensions } from '../utils/text-area-helpers';
 import { ensureTouchBounds } from '../utils/touch-bounds-helpers';
 import { BoundsDisplay } from './bounds-display';
 import { ColorAreaSelect } from './color-area-select';
 import { useColorAreaOptions } from '../hooks/use-color-area-options';
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function getCurrentAlign(
-  assignment: { textAlign?: TextAlign },
-  nodeId: string
-): TextAlign {
-  if (assignment.textAlign) return assignment.textAlign;
-  const anchor = getComputedTextAnchor(nodeId);
-  if (anchor && anchor in TEXT_ANCHOR_TO_ALIGN) {
-    return TEXT_ANCHOR_TO_ALIGN[anchor as keyof typeof TEXT_ANCHOR_TO_ALIGN];
-  }
-  return 'left';
-}
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-const ALIGN_OPTIONS = [
-  { value: 'left', label: <AlignLeft size={14} /> },
-  { value: 'center', label: <AlignCenter size={14} /> },
-  { value: 'right', label: <AlignRight size={14} /> },
-];
 
 // ---------------------------------------------------------------------------
 // Component

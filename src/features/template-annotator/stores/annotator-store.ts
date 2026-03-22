@@ -1012,7 +1012,16 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
     if (!node || node.type !== 'element') return;
 
     const prevFill = node.attributes.fill;
-    node.attributes.fill = fillColor;
+
+    // If fill is defined in inline style, update it there (style wins over attribute)
+    if (node.attributes.style && /fill\s*:/.test(node.attributes.style)) {
+      node.attributes.style = node.attributes.style.replace(
+        /fill\s*:\s*[^;]+/,
+        `fill: ${fillColor}`
+      );
+    } else {
+      node.attributes.fill = fillColor;
+    }
 
     set({
       svgTree: { ...svgTree },
@@ -1162,7 +1171,11 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
       const node = nodeMap.get(entry.nodeId);
       if (!node || node.type !== 'element') return;
       const currentFill = node.attributes.fill;
-      node.attributes.fill = entry.prevFill;
+      if (entry.prevFill != null) {
+        node.attributes.fill = entry.prevFill;
+      } else {
+        delete node.attributes.fill;
+      }
       set({
         svgTree: { ...svgTree },
         undoStack: newUndoStack,
@@ -1317,7 +1330,11 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
       const node = nodeMap.get(entry.nodeId);
       if (!node || node.type !== 'element') return;
       const currentFill = node.attributes.fill;
-      node.attributes.fill = entry.prevFill;
+      if (entry.prevFill != null) {
+        node.attributes.fill = entry.prevFill;
+      } else {
+        delete node.attributes.fill;
+      }
       set({
         svgTree: { ...svgTree },
         redoStack: newRedoStack,

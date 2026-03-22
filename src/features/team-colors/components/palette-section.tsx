@@ -62,6 +62,7 @@ export function PaletteSection({
   };
 
   const handleReset = (index: number) => {
+    if (index >= colorPairs.length) return; // newly-added pair has no original to reset to
     updatePairs(
       localPairs.map((p, i) => (i === index ? colorPairs[index] : p))
     );
