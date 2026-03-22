@@ -223,6 +223,26 @@ export function discoverEditableColorFields(
 
   walk(root);
 
+  // Also discover color areas referenced by data-text-color-area so they
+  // occupy a positional slot even when no element has data-color-field for
+  // them.  This lets withPresetTextColors() find the correct palette index.
+  function walkTextColorAreas(node: SvgJsonNode) {
+    if (node.type === 'text') return;
+    const tca = node.attributes['data-text-color-area'] as string | undefined;
+    if (
+      tca &&
+      COLOR_FIELD_ORDER.has(tca as EditableFieldId) &&
+      !fieldMap.has(tca as EditableFieldId)
+    ) {
+      fieldMap.set(tca as EditableFieldId, []);
+    }
+    for (const child of node.children) {
+      walkTextColorAreas(child);
+    }
+  }
+
+  walkTextColorAreas(root);
+
   const fields: EditableColorField[] = [];
 
   for (const [fieldId, elements] of fieldMap) {

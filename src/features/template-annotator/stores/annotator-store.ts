@@ -346,23 +346,13 @@ function updateAssignmentTextColorArea(
   fieldId: EditableFieldId,
   colorArea: EditableFieldId | undefined
 ): FieldAssignment[] {
-  return assignments
-    .filter((a) => {
-      // When setting a textColorArea, remove any color field assignment on the
-      // same node that targets fill — they conflict since both control fill.
-      if (colorArea && a.nodeId === nodeId && a.colorTarget === 'fill') {
-        const field = EDITABLE_FIELDS[a.fieldId];
-        if (field?.type === 'color') return false;
-      }
-      return true;
-    })
-    .map((a) => {
-      if (a.nodeId !== nodeId || a.fieldId !== fieldId) return a;
-      if (colorArea) return { ...a, textColorArea: colorArea };
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { textColorArea: _omit, ...rest } = a;
-      return rest;
-    });
+  return assignments.map((a) => {
+    if (a.nodeId !== nodeId || a.fieldId !== fieldId) return a;
+    if (colorArea) return { ...a, textColorArea: colorArea };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { textColorArea: _omit, ...rest } = a;
+    return rest;
+  });
 }
 
 function clearIfDeleted(
