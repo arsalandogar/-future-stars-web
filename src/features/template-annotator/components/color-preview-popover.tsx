@@ -2,12 +2,13 @@ import {
   ActionIcon,
   Button,
   ColorPicker,
+  Group,
   Popover,
   Stack,
   Tooltip,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, X } from 'lucide-react';
 
 import type { EditableFieldId } from '@/features/templates';
 
@@ -37,7 +38,7 @@ export function ColorPreviewPopover({
   const setPreviewColor = useAnnotatorStore((s) => s.setPreviewColor);
   const previewColors = useAnnotatorStore((s) => s.previewColors);
   const previewColor = previewColors.get(fieldId)?.bg;
-  const [opened, { open, close }] = useDisclosure(false);
+  const [opened, { toggle, close }] = useDisclosure(false);
 
   return (
     <Popover
@@ -58,11 +59,12 @@ export function ColorPreviewPopover({
             color="violet"
             size={size}
             onClick={() => {
-              if (previewColor) {
-                setPreviewColor(fieldId, null);
+              if (opened) {
                 close();
+              } else if (previewColor) {
+                setPreviewColor(fieldId, null);
               } else {
-                open();
+                toggle();
               }
             }}
             style={
@@ -81,6 +83,11 @@ export function ColorPreviewPopover({
       </Popover.Target>
       <Popover.Dropdown p="sm">
         <Stack gap="xs">
+          <Group justify="flex-end">
+            <ActionIcon variant="subtle" color="gray" size="xs" onClick={close}>
+              <X size={12} />
+            </ActionIcon>
+          </Group>
           <ColorPicker
             format="hex"
             value={previewColor ?? '#2563eb'}
