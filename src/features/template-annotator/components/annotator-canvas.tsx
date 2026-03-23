@@ -11,6 +11,11 @@ import type { TouchBounds } from '../types';
 import type { SvgJsonNode } from '@/types/svg';
 import { SvgRenderer } from '@/components/svg-renderer/svg-renderer';
 import { EDITABLE_FIELDS } from '@/features/templates';
+import {
+  writeColorValue,
+  applyOklabOffset,
+  isZeroOffset,
+} from '@fs-card-engine';
 
 import { useAnnotatorStore } from '../stores/annotator-store';
 import {
@@ -26,6 +31,16 @@ import { TransformOverlay } from './transform-overlay';
 
 import styles from './annotator-canvas.module.css';
 
+/** Distinct outline colors for multi-field highlighting. */
+const HIGHLIGHT_COLORS = [
+  'var(--mantine-color-violet-5)',
+  'var(--mantine-color-teal-5)',
+  'var(--mantine-color-orange-5)',
+  'var(--mantine-color-pink-5)',
+  'var(--mantine-color-cyan-5)',
+  'var(--mantine-color-yellow-5)',
+];
+
 export function AnnotatorCanvas() {
   const {
     svgTree,
@@ -38,6 +53,11 @@ export function AnnotatorCanvas() {
     bulkTouchBoundsEditing,
     bulkTransformEditing,
     assignments,
+    highlightedFieldIds,
+    hoveredHighlightFieldId,
+    nodeIndex,
+    nodeMap,
+    previewColors,
   } = useAnnotatorStore(
     useShallow((s) => ({
       svgTree: s.svgTree,
@@ -50,6 +70,11 @@ export function AnnotatorCanvas() {
       bulkTouchBoundsEditing: s.bulkTouchBoundsEditing,
       bulkTransformEditing: s.bulkTransformEditing,
       assignments: s.assignments,
+      highlightedFieldIds: s.highlightedFieldIds,
+      hoveredHighlightFieldId: s.hoveredHighlightFieldId,
+      nodeIndex: s.nodeIndex,
+      nodeMap: s.nodeMap,
+      previewColors: s.previewColors,
     }))
   );
 
@@ -221,9 +246,152 @@ export function AnnotatorCanvas() {
         `[data-node-id="${hoveredNodeId}"] { outline: 2px dashed var(--mantine-color-primary-3); }`
       );
     }
+    // Color area highlights — each active field gets a distinct color
+    const activeFieldIds = new Set(highlightedFieldIds);
+    if (hoveredHighlightFieldId) activeFieldIds.add(hoveredHighlightFieldId);
+
+    if (activeFieldIds.size > 0) {
+      // Assign a distinct color to each highlighted field
+      const fieldColors = new Map<string, string>();
+      let idx = 0;
+      for (const fid of activeFieldIds) {
+        fieldColors.set(fid, HIGHLIGHT_COLORS[idx % HIGHLIGHT_COLORS.length]);
+        idx++;
+      }
+
+      // Build gradient-to-visible-elements map for stop assignments.
+      // Gradient stops are inside <defs> and invisible — we need to find
+      // which visible elements reference the parent gradient via fill/stroke url().
+      const gradientVisibleNodes = new Map<string, string[]>();
+      const stopGradientIds = new Set<string>();
+
+      for (const a of assignments) {
+        if (!fieldColors.has(a.fieldId)) continue;
+        const meta = nodeIndex.get(a.nodeId);
+        if (meta?.tagName !== 'stop' || !meta.parentNodeId) continue;
+        const parentNode = nodeMap.get(meta.parentNodeId);
+        const gradId = parentNode?.attributes?.id;
+        if (gradId) stopGradientIds.add(gradId);
+      }
+
+      if (stopGradientIds.size > 0) {
+        for (const [nid, node] of nodeMap) {
+          if (node.type === 'text') continue;
+          const fill = node.attributes?.fill ?? '';
+          const stroke = node.attributes?.stroke ?? '';
+          for (const gradId of stopGradientIds) {
+            const ref = `url(#${gradId})`;
+            if (fill.includes(ref) || stroke.includes(ref)) {
+              let arr = gradientVisibleNodes.get(gradId);
+              if (!arr) {
+                arr = [];
+                gradientVisibleNodes.set(gradId, arr);
+              }
+              arr.push(nid);
+            }
+          }
+        }
+      }
+
+      const emitted = new Set<string>();
+      for (const a of assignments) {
+        const color = fieldColors.get(a.fieldId);
+        if (color) {
+          const meta = nodeIndex.get(a.nodeId);
+          if (meta?.tagName === 'stop' && meta.parentNodeId) {
+            // Gradient stop → highlight visible elements using this gradient
+            const parentNode = nodeMap.get(meta.parentNodeId);
+            const gradId = parentNode?.attributes?.id;
+            if (gradId) {
+              const visibleNodes = gradientVisibleNodes.get(gradId);
+              if (visibleNodes) {
+                for (const vNodeId of visibleNodes) {
+                  const key = `${vNodeId}-${color}`;
+                  if (emitted.has(key)) continue;
+                  emitted.add(key);
+                  rules.push(
+                    `[data-node-id="${vNodeId}"] { outline: 2px solid ${color}; }`
+                  );
+                }
+              }
+            }
+          } else {
+            // Direct visible element
+            rules.push(
+              `[data-node-id="${a.nodeId}"] { outline: 2px solid ${color}; }`
+            );
+          }
+        }
+        const textColor = a.textColorArea
+          ? fieldColors.get(a.textColorArea)
+          : undefined;
+        if (textColor) {
+          rules.push(
+            `[data-node-id="${a.nodeId}"] { outline: 2px dashed ${textColor}; }`
+          );
+        }
+      }
+    }
     if (rules.length === 0) return null;
     return <style>{rules.join('\n')}</style>;
-  }, [selectedNodeId, hoveredNodeId, isOverlayActive]);
+  }, [
+    selectedNodeId,
+    hoveredNodeId,
+    isOverlayActive,
+    highlightedFieldIds,
+    hoveredHighlightFieldId,
+    assignments,
+    nodeIndex,
+    nodeMap,
+  ]);
+
+  // Live color preview — clone the SVG tree and apply preview colors.
+  // Non-destructive: the real svgTree is never modified.
+  const previewTree = useMemo(() => {
+    if (!svgTree || previewColors.size === 0) return null;
+
+    const clone = structuredClone(svgTree);
+
+    // Build a nodeMap for the clone
+    const cloneNodes = new Map<string, SvgJsonNode>();
+    function walkClone(node: SvgJsonNode) {
+      const id = node.attributes?.['__nodeId'];
+      if (id) cloneNodes.set(id, node);
+      if (node.children) {
+        for (const child of node.children) walkClone(child);
+      }
+    }
+    walkClone(clone);
+
+    // Apply preview colors to color field assignments
+    for (const a of assignments) {
+      const preview = previewColors.get(a.fieldId);
+      if (!preview) continue;
+
+      const node = cloneNodes.get(a.nodeId);
+      if (!node) continue;
+
+      const target = a.colorTarget ?? 'fill';
+      const derived =
+        a.colorOffset && !isZeroOffset(a.colorOffset)
+          ? applyOklabOffset(preview.bg, a.colorOffset)
+          : preview.bg;
+      writeColorValue(node, target, derived);
+    }
+
+    // Apply text foreground color for text fields linked via textColorArea
+    for (const a of assignments) {
+      if (!a.textColorArea) continue;
+      const preview = previewColors.get(a.textColorArea);
+      if (!preview) continue;
+
+      const node = cloneNodes.get(a.nodeId);
+      if (!node) continue;
+      writeColorValue(node, 'fill', preview.fg);
+    }
+
+    return clone;
+  }, [svgTree, previewColors, assignments]);
 
   const bleedInfo = useMemo(() => {
     if (!viewBox) return null;
@@ -241,7 +409,7 @@ export function AnnotatorCanvas() {
         className={`${styles.svgWrapper} ${ANNOTATOR_SVG_WRAPPER_CLASS}`}
         ref={wrapperRef}
       >
-        <SvgRenderer node={svgTree} options={{ getNodeProps }} />
+        <SvgRenderer node={previewTree ?? svgTree} options={{ getNodeProps }} />
         {bleedInfo && (
           <BleedOverlay
             viewBox={viewBox!}

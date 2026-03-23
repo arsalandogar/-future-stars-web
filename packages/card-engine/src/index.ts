@@ -47,6 +47,7 @@ export {
   applyTextEdit,
   discoverEditableColorFields,
   applyColorEdit,
+  writeColorValue,
   discoverEditableImageFields,
   applyImageEdit,
   parseTouchBounds,

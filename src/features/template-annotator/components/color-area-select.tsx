@@ -4,6 +4,8 @@ import { Check } from 'lucide-react';
 import type { EditableFieldId } from '@/features/templates';
 
 import type { ColorAreaOption } from '../hooks/use-color-area-options';
+import { useAnnotatorStore } from '../stores/annotator-store';
+import { ColorPreviewPopover } from './color-preview-popover';
 
 export function ColorAreaSelect({
   currentValue,
@@ -20,38 +22,54 @@ export function ColorAreaSelect({
   label?: string;
   description?: string;
 }) {
+  const hoverHighlightField = useAnnotatorStore((s) => s.hoverHighlightField);
+
   if (colorAreaOptions.length === 0) return null;
 
   return (
-    <Select
-      mt={mt}
-      size="xs"
-      label={label}
-      description={description}
-      placeholder="None"
-      clearable
-      data={colorAreaOptions}
-      value={currentValue ?? null}
-      onChange={(value) => onChange((value as EditableFieldId) || undefined)}
-      renderOption={({ option, checked }) => {
-        const opt = colorAreaOptions.find((o) => o.value === option.value);
-        return (
-          <Group gap="xs" wrap="nowrap">
-            {opt?.hex && (
-              <ColorSwatch color={opt.hex} size={14} withShadow={false} />
-            )}
-            <span>{option.label}</span>
-            {checked && <Check size={12} style={{ marginLeft: 'auto' }} />}
-          </Group>
-        );
-      }}
-      leftSection={(() => {
-        if (!currentValue) return null;
-        const opt = colorAreaOptions.find((o) => o.value === currentValue);
-        return opt?.hex ? (
-          <ColorSwatch color={opt.hex} size={12} withShadow={false} />
-        ) : null;
-      })()}
-    />
+    <Group gap={4} align="end" mt={mt} wrap="nowrap">
+      <Select
+        size="xs"
+        label={label}
+        description={description}
+        placeholder="None"
+        clearable
+        data={colorAreaOptions}
+        value={currentValue ?? null}
+        onChange={(value) => onChange((value as EditableFieldId) || undefined)}
+        onDropdownClose={() => hoverHighlightField(null)}
+        style={{ flex: 1 }}
+        renderOption={({ option, checked }) => {
+          const opt = colorAreaOptions.find((o) => o.value === option.value);
+          return (
+            <Group
+              gap="xs"
+              wrap="nowrap"
+              style={{ width: '100%' }}
+              onMouseEnter={() =>
+                hoverHighlightField(option.value as EditableFieldId)
+              }
+              onMouseLeave={() => hoverHighlightField(null)}
+            >
+              {opt?.hex && (
+                <ColorSwatch color={opt.hex} size={14} withShadow={false} />
+              )}
+              <span>{option.label}</span>
+              {checked && <Check size={12} style={{ marginLeft: 'auto' }} />}
+            </Group>
+          );
+        }}
+        leftSection={(() => {
+          if (!currentValue) return null;
+          const opt = colorAreaOptions.find((o) => o.value === currentValue);
+          return opt?.hex ? (
+            <ColorSwatch color={opt.hex} size={12} withShadow={false} />
+          ) : null;
+        })()}
+      />
+      {currentValue && (
+        <ColorPreviewPopover fieldId={currentValue} size="sm" iconSize={14} />
+      )}
+    </Group>
   );
 }

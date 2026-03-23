@@ -27,6 +27,7 @@ import { ensureTextDimensions } from '../utils/text-area-helpers';
 import { ensureTouchBounds } from '../utils/touch-bounds-helpers';
 import { BoundsDisplay } from './bounds-display';
 import { ColorAreaSelect } from './color-area-select';
+import { ColorAreaPreviewList } from './color-area-preview-list';
 import { useColorAreaOptions } from '../hooks/use-color-area-options';
 
 // ---------------------------------------------------------------------------
@@ -208,6 +209,11 @@ export function BulkTextSettingsPanel({ onClose }: BulkTextSettingsPanelProps) {
             </Button>
           </Stack>
         </div>
+
+        {/* ---- Color Area Preview ---- */}
+        {colorAreaOptions.length > 0 && (
+          <ColorAreaPreviewList colorAreaOptions={colorAreaOptions} />
+        )}
 
         <Divider />
 

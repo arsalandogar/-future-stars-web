@@ -75,6 +75,13 @@ interface AnnotatorState {
   selectedNodeId: string | null;
   hoveredNodeId: string | null;
 
+  // Color area highlight (hover/click to show which elements belong to a color area)
+  highlightedFieldIds: Set<EditableFieldId>;
+  hoveredHighlightFieldId: EditableFieldId | null;
+
+  // Live color preview for color areas
+  previewColors: Map<EditableFieldId, { bg: string; fg: string }>;
+
   // Touch bounds editing
   editingTouchBoundsNodeId: string | null;
 
@@ -166,6 +173,17 @@ interface AnnotatorState {
     fieldId: EditableFieldId,
     multiline: boolean
   ) => void;
+  hoverHighlightField: (fieldId: EditableFieldId | null) => void;
+  toggleHighlightField: (fieldId: EditableFieldId) => void;
+  setPreviewColor: (
+    fieldId: EditableFieldId,
+    color: { bg: string; fg: string } | null
+  ) => void;
+  applyTeamPalette: (
+    colorPairs: { bg: string; fg: string }[],
+    colorAreaFieldIds: EditableFieldId[]
+  ) => void;
+  clearPreviewColors: () => void;
   setTextColorArea: (
     nodeId: string,
     fieldId: EditableFieldId,
@@ -442,6 +460,9 @@ const initialState = {
   nodeMap: new Map<string, SvgJsonNode>(),
   selectedNodeId: null as string | null,
   hoveredNodeId: null as string | null,
+  highlightedFieldIds: new Set<EditableFieldId>(),
+  hoveredHighlightFieldId: null as EditableFieldId | null,
+  previewColors: new Map<EditableFieldId, { bg: string; fg: string }>(),
   editingTouchBoundsNodeId: null as string | null,
   editingTransformNodeId: null as string | null,
   bulkTouchBoundsEditing: false,
@@ -469,6 +490,9 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
       nodeMap: opts.nodeMap,
       selectedNodeId: null,
       hoveredNodeId: null,
+      highlightedFieldIds: new Set<EditableFieldId>(),
+      hoveredHighlightFieldId: null,
+      previewColors: new Map<EditableFieldId, { bg: string; fg: string }>(),
       expandedNodeIds: expanded,
       assignments: opts.assignments ?? [],
       undoStack: [],
@@ -500,6 +524,53 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
   },
 
   hoverNode: (nodeId) => set({ hoveredNodeId: nodeId }),
+
+  hoverHighlightField: (fieldId) => {
+    set({ hoveredHighlightFieldId: fieldId });
+  },
+
+  toggleHighlightField: (fieldId) => {
+    const { highlightedFieldIds } = get();
+    const next = new Set(highlightedFieldIds);
+    if (next.has(fieldId)) {
+      next.delete(fieldId);
+    } else {
+      next.add(fieldId);
+    }
+    set({ highlightedFieldIds: next });
+  },
+
+  setPreviewColor: (fieldId, color) => {
+    const { previewColors } = get();
+    const next = new Map(previewColors);
+    if (color) {
+      next.set(fieldId, color);
+    } else {
+      next.delete(fieldId);
+    }
+    set({ previewColors: next });
+  },
+
+  applyTeamPalette: (colorPairs, colorAreaFieldIds) => {
+    const next = new Map<EditableFieldId, { bg: string; fg: string }>();
+    for (
+      let i = 0;
+      i < colorAreaFieldIds.length && i < colorPairs.length;
+      i++
+    ) {
+      next.set(colorAreaFieldIds[i], {
+        bg: colorPairs[i].bg,
+        fg: colorPairs[i].fg,
+      });
+    }
+    set({ previewColors: next });
+  },
+
+  clearPreviewColors: () => {
+    set({
+      previewColors: new Map<EditableFieldId, { bg: string; fg: string }>(),
+    });
+  },
 
   toggleExpanded: (nodeId) => {
     const { expandedNodeIds } = get();
