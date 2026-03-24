@@ -13,7 +13,7 @@ export const Route = createFileRoute(
     const svgJson = await queryClient.fetchQuery(
       templateSvgJsonQuery.getOptions(Number(id))
     );
-    loadSvgJson(svgJson);
+    if (svgJson) loadSvgJson(svgJson);
   },
   component: RouteComponent,
 });

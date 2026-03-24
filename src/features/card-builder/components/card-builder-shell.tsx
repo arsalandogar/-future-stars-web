@@ -69,7 +69,7 @@ export function CardBuilderShell({
       return;
     }
 
-    initializeSideFromSvg('front', originalSvgNode);
+    initializeSideFromSvg('front', originalSvgNode ?? undefined);
   }, [templateId, originalSvgNode, initializeSideFromSvg, resetSide]);
 
   useEffect(() => {
@@ -78,7 +78,7 @@ export function CardBuilderShell({
       return;
     }
 
-    initializeSideFromSvg('back', backSvgNode);
+    initializeSideFromSvg('back', backSvgNode ?? undefined);
   }, [backTemplateId, backSvgNode, initializeSideFromSvg, resetSide]);
 
   useEffect(() => {

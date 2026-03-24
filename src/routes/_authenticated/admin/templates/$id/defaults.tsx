@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useSuspenseQuery } from '@tanstack/react-query';
+import { Text } from '@mantine/core';
 
 import { TemplateDefaultsPage } from '@/features/card-builder';
 import {
@@ -28,6 +29,14 @@ function RouteComponent() {
 
   const navigateToTemplate = () =>
     void navigate({ to: '/admin/templates/$id', params: { id } });
+
+  if (!svgNode) {
+    return (
+      <Text c="dimmed" p="lg">
+        No SVG available for this template.
+      </Text>
+    );
+  }
 
   return (
     <TemplateDefaultsPage

@@ -5,8 +5,8 @@ import type { SvgJsonNode } from '@/types/svg';
 
 export const templateSvgJsonQuery = createQuery({
   queryKey: ['templates', 'svg-json'],
-  fetcher: async (id: number): Promise<SvgJsonNode> => {
-    const response: { data: SvgJsonNode } = await api.get(
+  fetcher: async (id: number): Promise<SvgJsonNode | null> => {
+    const response: { data: SvgJsonNode | null } = await api.get(
       `templates/${id}/svg-json`
     );
     return response.data;
