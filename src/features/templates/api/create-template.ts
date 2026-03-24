@@ -7,8 +7,13 @@ import { useTemplates } from './get-templates';
 import type { Template, CreateTemplateParams } from '../types';
 
 export const useCreateTemplate = createMutation({
-  mutationFn: (params: CreateTemplateParams): Promise<Template> =>
-    api.post('admin/templates', params),
+  mutationFn: async (params: CreateTemplateParams): Promise<Template> => {
+    const response: { data: Template } = await api.post(
+      'admin/templates',
+      params
+    );
+    return response.data;
+  },
   use: [invalidateQueries([useTemplates.getKey()])],
   onSuccess: () => {
     notifications.show({
