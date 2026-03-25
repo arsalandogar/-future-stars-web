@@ -116,7 +116,7 @@ The store holds the SVG tree, node indices, selection state, assignments, and un
 - **Loading:** `loadSvg()` — hydrates store with parsed SVG + pre-extracted assignments
 - **Assignment:** `assignField()`, `removeAssignment()` — single node
 - **Bulk:** `bulkAssignColors()`, `bulkAssignTexts()`, `bulkAssignImages()` — from detection wizard
-- **Text:** `setTextDimensions()`, `commitTextAreaResize()`, `setTextAlign()`, `setTextMultiline()`, `setTextColorArea()`, `setFontSize()`
+- **Text:** `setTextDimensions()`, `commitTextAreaResize()`, `setTextAlign()`, `setTextMultiline()`, `setTextColorArea()`, `setTextFillColor()`, `setFontSize()`
 - **Transform:** `rotateNode()`, `commitNodeTransform()`, `resetNodeTransform()`, `removeNodeScale()`
 - **Touch bounds:** `commitTouchBounds()`, `removeTouchBounds()`
 - **Bulk editing:** `setBulkTouchBoundsEditing()`, `setBulkTransformEditing()` — for text settings panel
@@ -347,6 +347,11 @@ Color math re-exported through `src/utils/color-math.ts`:
 - `utils/extract-svg-texts.ts` — `extractSvgTexts()`
 - `utils/extract-svg-images.ts` — `extractSvgImages()`
 
+### Color & Text Utils
+
+- `utils/node-color-helpers.ts` — `getTextFillColor()`, `getNodeColor()` for extracting colors from SVG nodes
+- `utils/detect-foreground-colors.ts` — Spatial overlap detection (text center inside color element bounds)
+
 ### Geometry & Transform Utils
 
 - `utils/get-element-bbox.ts` — `getElementGeometryInSvgRoot()`, `computeSvgToParent()`
@@ -354,12 +359,21 @@ Color math re-exported through `src/utils/color-math.ts`:
 - `utils/svg-overlay-helpers.ts` — Handle cursors, resize deltas, coordinate conversions
 - `utils/measure-text-bounds.ts` — Offscreen SVG measurement
 
+### Hooks
+
+- `hooks/use-color-area-options.ts` — Builds `ColorAreaOption[]` with bg/fg hex for color area selects
+- `hooks/use-element-bounds.ts` — Element bounding box calculations
+- `hooks/use-svg-file-reader.ts` — File upload parsing
+
 ### Components
 
 - `components/annotator-canvas.tsx` — SVG rendering + click/hover + overlays
 - `components/field-assignment-panel.tsx` — Right panel field picker
 - `components/detection-wizard-modal.tsx` — 3-step auto-detection
+- `components/fg-color-substep.tsx` — Detection wizard sub-step for setting default foreground colors
 - `components/bulk-text-settings-modal.tsx` — Bulk text settings side panel (color areas, text color, auto-detect)
+- `components/color-area-select.tsx` — Dropdown to link a text field to a color area
+- `components/color-area-preview-list.tsx` — Color area palette preview with BG/FG swatches
 - `components/transform-controls.tsx` — Per-node text controls (alignment, font size, multiline, color area select)
 - `components/element-tree.tsx` — Left panel node hierarchy
 - `components/touch-bounds-overlay.tsx` — Touch bounds editing

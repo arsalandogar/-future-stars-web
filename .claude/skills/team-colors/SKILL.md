@@ -145,7 +145,17 @@ The `ColoredTemplateThumbnail` component:
 1. Fetches SVG JSON via `useTemplateSvgJson(templateId)`
 2. Runs `prepareTemplate()` to get editable fields
 3. Applies `withPresetColors()` using the selected palette's bg colors
-4. Renders via `<SvgRenderer />`
+4. Applies `withPresetTextColors()` to set foreground colors on text elements linked to color areas (via `data-text-color-area` annotations)
+5. Renders via `<SvgRenderer />`
+
+The component receives full `ColorPair[]` (not just bg strings). The flow:
+
+```typescript
+const bgColors = colorPairs.map((p) => p.bg);
+const edits = withPresetColors({}, fields.colorFields, bgColors);
+withPresetTextColors(fields.textFields, fields.colorFields, colorPairs);
+applyEditsForRender(fields, edits);
+```
 
 The `presetColors` array should be stabilized with `useMemo` in the parent to avoid unnecessary re-renders.
 
