@@ -31,8 +31,7 @@ export function getNodeColor(
 }
 
 export function getTextFillColor(node: SvgJsonNode): string {
-  const fill = node.attributes.fill;
-  if (isDirectColor(fill)) return fill;
+  // Inline style takes CSS precedence over fill attribute — check style first
   const style = node.attributes.style;
   if (style) {
     const match = style.match(STYLE_REGEXES.fill);
@@ -41,7 +40,28 @@ export function getTextFillColor(node: SvgJsonNode): string {
       if (isDirectColor(val)) return val;
     }
   }
+  const fill = node.attributes.fill;
+  if (isDirectColor(fill)) return fill;
   return '#000000';
+}
+
+/**
+ * Write a fill color to a node, respecting CSS specificity:
+ * inline style > attribute. Mutates node in place.
+ */
+export function applyNodeFill(node: SvgJsonNode, color: string): void {
+  if (node.attributes.style) {
+    if (/fill\s*:/.test(node.attributes.style)) {
+      node.attributes.style = node.attributes.style.replace(
+        /fill\s*:\s*[^;]+/,
+        `fill: ${color}`
+      );
+    } else {
+      node.attributes.style = `fill: ${color}; ${node.attributes.style}`;
+    }
+  } else {
+    node.attributes.fill = color;
+  }
 }
 
 export function getNodeFontSize(node: SvgJsonNode): number | undefined {

@@ -21,6 +21,7 @@ export interface ColorAreaOption {
 export function useColorAreaOptions(): ColorAreaOption[] {
   const assignments = useAnnotatorStore((s) => s.assignments);
   const nodeMap = useAnnotatorStore((s) => s.nodeMap);
+  const defaultPaletteFg = useAnnotatorStore((s) => s.defaultPaletteFg);
 
   return useMemo(() => {
     // Collect BG color per color field
@@ -54,7 +55,8 @@ export function useColorAreaOptions(): ColorAreaOption[] {
         value: id,
         label: EDITABLE_FIELDS[id].label,
         hex,
-        fgHex: fgMap.get(id),
+        // Use text-linked fg first, then default palette fg as fallback
+        fgHex: fgMap.get(id) ?? defaultPaletteFg.get(id),
       }));
-  }, [assignments, nodeMap]);
+  }, [assignments, nodeMap, defaultPaletteFg]);
 }

@@ -25,6 +25,7 @@ import {
   applyTranslate,
   removeScaleFromTransform,
 } from '../utils/svg-transform-helpers';
+import { applyNodeFill } from '../utils/node-color-helpers';
 import { getComputedTextAnchor } from '../utils/svg-overlay-helpers';
 
 type UndoEntry =
@@ -81,6 +82,9 @@ interface AnnotatorState {
 
   // Live color preview for color areas
   previewColors: Map<EditableFieldId, { bg: string; fg: string }>;
+
+  // Default palette foreground colors per color area (independent of text links)
+  defaultPaletteFg: Map<EditableFieldId, string>;
 
   // Touch bounds editing
   editingTouchBoundsNodeId: string | null;
@@ -141,7 +145,9 @@ interface AnnotatorState {
     mappings: { fieldId: EditableFieldId; members: ClusterMember[] }[]
   ) => void;
   bulkAssignTexts: (
-    mappings: { fieldId: EditableFieldId; nodeId: string }[]
+    mappings: { fieldId: EditableFieldId; nodeId: string }[],
+    textColorAreaMap?: Map<string, EditableFieldId>,
+    fgColorMap?: Map<EditableFieldId, string>
   ) => void;
   bulkAssignImages: (
     mappings: { fieldId: EditableFieldId; nodeId: string }[]
@@ -184,6 +190,9 @@ interface AnnotatorState {
     colorAreaFieldIds: EditableFieldId[]
   ) => void;
   clearPreviewColors: () => void;
+  setDefaultPaletteFg: (fieldId: EditableFieldId, fg: string) => void;
+  bulkSetDefaultPaletteFg: (fgMap: Map<EditableFieldId, string>) => void;
+  applyFgToColorArea: (fieldId: EditableFieldId, fgHex: string) => void;
   setTextColorArea: (
     nodeId: string,
     fieldId: EditableFieldId,
@@ -463,6 +472,7 @@ const initialState = {
   highlightedFieldIds: new Set<EditableFieldId>(),
   hoveredHighlightFieldId: null as EditableFieldId | null,
   previewColors: new Map<EditableFieldId, { bg: string; fg: string }>(),
+  defaultPaletteFg: new Map<EditableFieldId, string>(),
   editingTouchBoundsNodeId: null as string | null,
   editingTransformNodeId: null as string | null,
   bulkTouchBoundsEditing: false,
@@ -493,6 +503,7 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
       highlightedFieldIds: new Set<EditableFieldId>(),
       hoveredHighlightFieldId: null,
       previewColors: new Map<EditableFieldId, { bg: string; fg: string }>(),
+      defaultPaletteFg: new Map<EditableFieldId, string>(),
       expandedNodeIds: expanded,
       assignments: opts.assignments ?? [],
       undoStack: [],
@@ -569,6 +580,47 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
   clearPreviewColors: () => {
     set({
       previewColors: new Map<EditableFieldId, { bg: string; fg: string }>(),
+    });
+  },
+
+  setDefaultPaletteFg: (fieldId, fg) => {
+    const next = new Map(get().defaultPaletteFg);
+    next.set(fieldId, fg);
+    set({ defaultPaletteFg: next });
+  },
+
+  bulkSetDefaultPaletteFg: (fgMap) => {
+    const next = new Map(get().defaultPaletteFg);
+    for (const [fieldId, fg] of fgMap) {
+      next.set(fieldId, fg);
+    }
+    set({ defaultPaletteFg: next });
+  },
+
+  applyFgToColorArea: (fieldId, fgHex) => {
+    const { assignments, nodeMap, svgTree, defaultPaletteFg } = get();
+    if (!svgTree) return;
+
+    let mutated = false;
+    for (const a of assignments) {
+      if (
+        a.textColorArea === fieldId &&
+        EDITABLE_FIELDS[a.fieldId].type === 'text'
+      ) {
+        const node = nodeMap.get(a.nodeId);
+        if (node && node.type === 'element') {
+          applyNodeFill(node, fgHex);
+          mutated = true;
+        }
+      }
+    }
+
+    const nextFg = new Map(defaultPaletteFg);
+    nextFg.set(fieldId, fgHex);
+
+    set({
+      ...(mutated ? { svgTree: { ...svgTree } } : {}),
+      defaultPaletteFg: nextFg,
     });
   },
 
@@ -755,10 +807,14 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
     });
   },
 
-  bulkAssignTexts: (mappings) => {
+  bulkAssignTexts: (mappings, textColorAreaMap, fgColorMap) => {
     const { assignments, undoStack, nodeMap, svgTree } = get();
-    set(
-      bulkAssignByType(assignments, undoStack, 'text', mappings, (m) => {
+    const result = bulkAssignByType(
+      assignments,
+      undoStack,
+      'text',
+      mappings,
+      (m) => {
         const assignment: FieldAssignment = {
           nodeId: m.nodeId,
           fieldId: m.fieldId,
@@ -773,9 +829,28 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
             }
           }
         }
+        if (textColorAreaMap?.has(m.nodeId)) {
+          assignment.textColorArea = textColorAreaMap.get(m.nodeId)!;
+        }
         return assignment;
-      })
+      }
     );
+    set(result);
+
+    if (fgColorMap && fgColorMap.size > 0 && svgTree) {
+      let mutated = false;
+      for (const m of mappings) {
+        const colorArea = textColorAreaMap?.get(m.nodeId);
+        if (!colorArea) continue;
+        const fgHex = fgColorMap.get(colorArea);
+        if (!fgHex) continue;
+        const node = nodeMap.get(m.nodeId);
+        if (!node || node.type !== 'element') continue;
+        applyNodeFill(node, fgHex);
+        mutated = true;
+      }
+      if (mutated) set({ svgTree: { ...get().svgTree! } });
+    }
   },
 
   bulkAssignImages: (mappings) => {
@@ -1073,16 +1148,7 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
     if (!node || node.type !== 'element') return;
 
     const prevFill = node.attributes.fill;
-
-    // If fill is defined in inline style, update it there (style wins over attribute)
-    if (node.attributes.style && /fill\s*:/.test(node.attributes.style)) {
-      node.attributes.style = node.attributes.style.replace(
-        /fill\s*:\s*[^;]+/,
-        `fill: ${fillColor}`
-      );
-    } else {
-      node.attributes.fill = fillColor;
-    }
+    applyNodeFill(node, fillColor);
 
     set({
       svgTree: { ...svgTree },

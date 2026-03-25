@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import {
   ActionIcon,
   Button,
-  ColorInput,
   Divider,
   Group,
   NumberInput,
@@ -19,7 +18,7 @@ import { EDITABLE_FIELDS, type EditableFieldId } from '@/features/templates';
 
 import type { TextAlign } from '../types';
 import { useAnnotatorStore } from '../stores/annotator-store';
-import { getTextFillColor, getNodeFontSize } from '../utils/node-color-helpers';
+import { getNodeFontSize } from '../utils/node-color-helpers';
 import { getElementBBoxInSvgRoot } from '../utils/get-element-bbox';
 import { querySvgElement } from '../utils/svg-overlay-helpers';
 import { ALIGN_OPTIONS, getCurrentAlign } from '../utils/text-align-helpers';
@@ -222,7 +221,6 @@ export function BulkTextSettingsPanel({ onClose }: BulkTextSettingsPanelProps) {
           const node = nodeMap.get(a.nodeId);
           const meta = nodeIndex.get(a.nodeId);
           const fontSize = node ? getNodeFontSize(node) : undefined;
-          const fillColor = node ? getTextFillColor(node) : '#000000';
           const align = getCurrentAlign(a, a.nodeId);
           const isEditingTransform = editingTransformNodeId === a.nodeId;
           const isEditingTouch = editingTouchBoundsNodeId === a.nodeId;
@@ -284,25 +282,21 @@ export function BulkTextSettingsPanel({ onClose }: BulkTextSettingsPanelProps) {
                   <ColorAreaSelect
                     currentValue={a.textColorArea}
                     colorAreaOptions={colorAreaOptions}
-                    onChange={(value) =>
-                      store
-                        .getState()
-                        .setTextColorArea(a.nodeId, a.fieldId, value)
-                    }
+                    onChange={(value) => {
+                      const s = store.getState();
+                      s.setTextColorArea(a.nodeId, a.fieldId, value);
+                      // Auto-apply fg color from the linked area
+                      if (value) {
+                        const opt = colorAreaOptions.find(
+                          (o) => o.value === value
+                        );
+                        if (opt?.fgHex) {
+                          s.setTextFillColor(a.nodeId, opt.fgHex);
+                        }
+                      }
+                    }}
                   />
                 )}
-
-                {/* Fill color */}
-                <ColorInput
-                  size="xs"
-                  label="Text color"
-                  value={fillColor}
-                  onChange={(v) =>
-                    store.getState().setTextFillColor(a.nodeId, v)
-                  }
-                  withEyeDropper={false}
-                  format="hex"
-                />
 
                 {/* Touch area */}
                 <div>

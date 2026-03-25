@@ -2,6 +2,7 @@ import { type ReactNode, useMemo, useState } from 'react';
 import {
   Alert,
   Button,
+  ColorSwatch,
   Group,
   Modal,
   ScrollArea,
@@ -31,11 +32,15 @@ import { EDITABLE_FIELDS, type EditableFieldId } from '@/features/templates';
 
 import { useAnnotatorStore } from '../stores/annotator-store';
 import type { FieldAssignment } from '../types';
+import { detectForegroundColors } from '../utils/detect-foreground-colors';
 import { extractColorClusters } from '../utils/extract-svg-colors';
 import { extractSvgImages } from '../utils/extract-svg-images';
 import { extractSvgTexts } from '../utils/extract-svg-texts';
+import { querySvgElement } from '../utils/svg-overlay-helpers';
+import { FgColorSubStep } from './fg-color-substep';
 
 const SKIP_VALUE = '__skip__' as const;
+const NONE_AREA = '__none__' as const;
 
 type SelectionValue = EditableFieldId | typeof SKIP_VALUE;
 
@@ -320,16 +325,34 @@ function ColorStepContent({
 
 // ── Text step ─────────────────────────────────────────────────────
 
+export interface ColorAreaBrief {
+  fieldId: EditableFieldId;
+  label: string;
+  bgHex: string;
+}
+
 function TextStepContent({
   detectedTexts,
   selections,
   onSelectionsChange,
+  colorAreaOptions,
+  textAreaSelections,
+  onTextAreaSelectionsChange,
 }: {
   detectedTexts: { nodeId: string; textContent: string; tagName: string }[];
   selections: Record<number, SelectionValue>;
   onSelectionsChange: (s: Record<number, SelectionValue>) => void;
+  colorAreaOptions: ColorAreaBrief[];
+  textAreaSelections: Record<number, string>;
+  onTextAreaSelectionsChange: (s: Record<number, string>) => void;
 }) {
   const duplicates = hasDuplicates(selections);
+  const hasColorAreas = colorAreaOptions.length > 0;
+
+  const areaSelectData = [
+    { value: NONE_AREA, label: 'None' },
+    ...colorAreaOptions.map((o) => ({ value: o.fieldId, label: o.label })),
+  ];
 
   return (
     <Stack gap="md">
@@ -353,19 +376,19 @@ function TextStepContent({
                   ? detected.textContent.slice(0, 30) + '...'
                   : detected.textContent;
 
+              const areaValue = textAreaSelections[index] ?? NONE_AREA;
+              const areaOpt = colorAreaOptions.find(
+                (o) => o.fieldId === areaValue
+              );
+
               return (
                 <tr key={detected.nodeId}>
-                  <td className="whitespace-nowrap py-1.5 pr-2 align-middle">
-                    <Text size="xs" c="dimmed" ff="monospace" lh={1}>
-                      &lt;{detected.tagName}&gt;
-                    </Text>
-                  </td>
                   <td className="py-1.5 pr-2 align-middle">
                     <Text size="sm" lh={1} truncate>
                       {preview}
                     </Text>
                   </td>
-                  <td className="w-32 py-1.5 align-middle">
+                  <td className="w-28 py-1.5 pr-1 align-middle">
                     <Select
                       data={TEXT_SELECT_OPTIONS}
                       value={selections[index]}
@@ -381,6 +404,48 @@ function TextStepContent({
                       allowDeselect={false}
                     />
                   </td>
+                  {hasColorAreas && (
+                    <td className="w-28 py-1.5 align-middle">
+                      <Select
+                        data={areaSelectData}
+                        value={areaValue}
+                        onChange={(v) =>
+                          onTextAreaSelectionsChange({
+                            ...textAreaSelections,
+                            [index]: v ?? NONE_AREA,
+                          })
+                        }
+                        size="xs"
+                        allowDeselect={false}
+                        leftSection={
+                          areaOpt ? (
+                            <ColorSwatch
+                              color={areaOpt.bgHex}
+                              size={10}
+                              withShadow={false}
+                            />
+                          ) : null
+                        }
+                        renderOption={({ option }) => {
+                          const opt = colorAreaOptions.find(
+                            (o) => o.fieldId === option.value
+                          );
+                          return (
+                            <Group gap="xs" wrap="nowrap">
+                              {opt && (
+                                <ColorSwatch
+                                  color={opt.bgHex}
+                                  size={12}
+                                  withShadow={false}
+                                />
+                              )}
+                              <span>{option.label}</span>
+                            </Group>
+                          );
+                        }}
+                      />
+                    </td>
+                  )}
                 </tr>
               );
             })}
@@ -543,15 +608,6 @@ export function DetectionWizardModal({
     Record<number, SelectionValue>
   >(() => buildPreselectedColorSelections(colorClusters, assignments));
 
-  // Render-time sync: reset color selections when clusters change (threshold drag)
-  const [prevColorClusters, setPrevColorClusters] = useState(colorClusters);
-  if (colorClusters !== prevColorClusters) {
-    setPrevColorClusters(colorClusters);
-    setColorSelections(
-      buildPreselectedColorSelections(colorClusters, assignments)
-    );
-  }
-
   const [textSelections, setTextSelections] = useState<
     Record<number, SelectionValue>
   >(() => buildPreselectedNodeSelections(detectedTexts, assignments, 'text'));
@@ -567,12 +623,34 @@ export function DetectionWizardModal({
     )
   );
 
+  // ── Foreground sub-step state ──────────────────────────────────
+  const [showFgSubStep, setShowFgSubStep] = useState(false);
+  const [fgSelections, setFgSelections] = useState<Record<string, string>>({});
+  const [fgColorAreas, setFgColorAreas] = useState<ColorAreaBrief[]>([]);
+  const [textAreaSelections, setTextAreaSelections] = useState<
+    Record<number, string>
+  >({});
+
+  // Render-time sync: reset color selections + fg sub-step when clusters change (threshold drag)
+  const [prevColorClusters, setPrevColorClusters] = useState(colorClusters);
+  if (colorClusters !== prevColorClusters) {
+    setPrevColorClusters(colorClusters);
+    setColorSelections(
+      buildPreselectedColorSelections(colorClusters, assignments)
+    );
+    setShowFgSubStep(false);
+  }
+
   // Reset all wizard state when reopened
   const [prevOpened, setPrevOpened] = useState(opened);
   if (opened !== prevOpened) {
     setPrevOpened(opened);
     if (opened) {
       setActiveStep(0);
+      setShowFgSubStep(false);
+      setFgSelections({});
+      setFgColorAreas([]);
+      setTextAreaSelections({});
       setColorSelections(
         buildPreselectedColorSelections(colorClusters, assignments)
       );
@@ -665,7 +743,152 @@ export function DetectionWizardModal({
     }
   }
 
+  function buildColorAreaData() {
+    const colorAreaMembers = new Map<EditableFieldId, string[]>();
+    const bgHexMap = new Map<EditableFieldId, string>();
+    const areas: ColorAreaBrief[] = [];
+
+    // Group clusters by selected field
+    const grouped = new Map<EditableFieldId, ColorCluster[]>();
+    for (let i = 0; i < colorClusters.length; i++) {
+      const sel = colorSelections[i] as SelectionValue | undefined;
+      if (!sel || sel === SKIP_VALUE) continue;
+      const existing = grouped.get(sel);
+      if (existing) existing.push(colorClusters[i]);
+      else grouped.set(sel, [colorClusters[i]]);
+    }
+
+    for (const [fieldId, fieldClusters] of grouped) {
+      const nodeIds: string[] = [];
+      for (const cluster of fieldClusters) {
+        for (const member of cluster.members) {
+          for (const occ of member.occurrences) {
+            nodeIds.push(occ.nodeId);
+          }
+        }
+      }
+      colorAreaMembers.set(fieldId, nodeIds);
+      // Use the base hex of the largest cluster as representative color
+      const sorted = [...fieldClusters].sort(
+        (a, b) => clusterOccurrenceCount(b) - clusterOccurrenceCount(a)
+      );
+      const bgHex = sorted[0].baseHex;
+      bgHexMap.set(fieldId, bgHex);
+      areas.push({ fieldId, label: EDITABLE_FIELDS[fieldId].label, bgHex });
+    }
+
+    return { colorAreaMembers, bgHexMap, areas };
+  }
+
   function handleNext() {
+    if (!currentStep) return;
+
+    // Color step: first click applies bg, shows fg sub-step; second click advances
+    if (currentStep.key === 'color') {
+      if (!showFgSubStep) {
+        // Apply bg color assignments
+        applyCurrentStep();
+
+        // Run fg auto-detection
+        const svgEl = querySvgElement();
+        const { colorAreaMembers, bgHexMap, areas } = buildColorAreaData();
+
+        if (svgEl && areas.length > 0) {
+          const textNodeIds = detectedTexts.map((t) => t.nodeId);
+          const result = detectForegroundColors(
+            svgEl,
+            colorAreaMembers,
+            textNodeIds,
+            nodeMap,
+            bgHexMap
+          );
+
+          const fgSel: Record<string, string> = {};
+          for (const [fieldId, hex] of result.fgColors) {
+            fgSel[fieldId] = hex;
+          }
+          setFgSelections(fgSel);
+
+          setFgColorAreas(areas);
+
+          // Pre-populate text area selections from spatial detection
+          const areaSel: Record<number, string> = {};
+          for (let i = 0; i < detectedTexts.length; i++) {
+            let linked: EditableFieldId | undefined;
+            for (const [fieldId, textIds] of result.textAreaLinks) {
+              if (textIds.includes(detectedTexts[i].nodeId)) {
+                linked = fieldId;
+                break;
+              }
+            }
+            areaSel[i] = linked ?? NONE_AREA;
+          }
+          setTextAreaSelections(areaSel);
+        }
+
+        setShowFgSubStep(true);
+        return;
+      }
+
+      // Second click: fg confirmed — persist fg to store, then advance
+      const fgMap = new Map<EditableFieldId, string>();
+      for (const [fId, hex] of Object.entries(fgSelections)) {
+        fgMap.set(fId as EditableFieldId, hex);
+      }
+      if (fgMap.size > 0) {
+        useAnnotatorStore.getState().bulkSetDefaultPaletteFg(fgMap);
+      }
+      setShowFgSubStep(false);
+      if (isLastStep) {
+        onClose();
+      } else {
+        setActiveStep((s) => s + 1);
+      }
+      return;
+    }
+
+    // Text step: apply with user's text area selections + fg
+    if (currentStep.key === 'text') {
+      const mappings: { fieldId: EditableFieldId; nodeId: string }[] = [];
+      for (let i = 0; i < detectedTexts.length; i++) {
+        const selection = textSelections[i];
+        if (selection === SKIP_VALUE) continue;
+        mappings.push({ fieldId: selection, nodeId: detectedTexts[i].nodeId });
+      }
+
+      const textColorAreaMap = new Map<string, EditableFieldId>();
+      for (let i = 0; i < detectedTexts.length; i++) {
+        const areaSel = textAreaSelections[i];
+        if (areaSel && areaSel !== NONE_AREA) {
+          textColorAreaMap.set(
+            detectedTexts[i].nodeId,
+            areaSel as EditableFieldId
+          );
+        }
+      }
+
+      const fgColorMap = new Map<EditableFieldId, string>();
+      for (const [fieldId, hex] of Object.entries(fgSelections)) {
+        fgColorMap.set(fieldId as EditableFieldId, hex);
+      }
+
+      if (mappings.length > 0) {
+        bulkAssignTexts(
+          mappings,
+          textColorAreaMap.size > 0 ? textColorAreaMap : undefined,
+          fgColorMap.size > 0 ? fgColorMap : undefined
+        );
+      }
+
+      if (isLastStep) {
+        onClose();
+      } else {
+        setActiveStep((s) => s + 1);
+      }
+      return;
+    }
+
+    // Default: image step or other
     applyCurrentStep();
     if (isLastStep) {
       onClose();
@@ -675,6 +898,12 @@ export function DetectionWizardModal({
   }
 
   function handleSkip() {
+    if (showFgSubStep) {
+      // Skip fg sub-step, clear pending fg data
+      setShowFgSubStep(false);
+      setFgSelections({});
+      setTextAreaSelections({});
+    }
     if (isLastStep) {
       onClose();
     } else {
@@ -683,6 +912,10 @@ export function DetectionWizardModal({
   }
 
   function handleBack() {
+    if (showFgSubStep) {
+      setShowFgSubStep(false);
+      return;
+    }
     setActiveStep((s) => Math.max(0, s - 1));
   }
 
@@ -705,21 +938,33 @@ export function DetectionWizardModal({
           ))}
         </Stepper>
 
-        {currentStep?.key === 'color' && (
-          <ColorStepContent
-            colorClusters={colorClusters}
-            threshold={colorThreshold}
-            onThresholdChange={setColorThreshold}
-            selections={colorSelections}
-            onSelectionsChange={setColorSelections}
-          />
-        )}
+        {currentStep?.key === 'color' &&
+          (showFgSubStep ? (
+            <FgColorSubStep
+              colorAreas={fgColorAreas}
+              fgSelections={fgSelections}
+              onFgChange={(fieldId, hex) =>
+                setFgSelections((prev) => ({ ...prev, [fieldId]: hex }))
+              }
+            />
+          ) : (
+            <ColorStepContent
+              colorClusters={colorClusters}
+              threshold={colorThreshold}
+              onThresholdChange={setColorThreshold}
+              selections={colorSelections}
+              onSelectionsChange={setColorSelections}
+            />
+          ))}
 
         {currentStep?.key === 'text' && (
           <TextStepContent
             detectedTexts={detectedTexts}
             selections={textSelections}
             onSelectionsChange={setTextSelections}
+            colorAreaOptions={fgColorAreas}
+            textAreaSelections={textAreaSelections}
+            onTextAreaSelectionsChange={setTextAreaSelections}
           />
         )}
 
@@ -736,7 +981,7 @@ export function DetectionWizardModal({
             variant="subtle"
             leftSection={<ArrowLeft size={16} />}
             onClick={handleBack}
-            disabled={activeStep === 0}
+            disabled={activeStep === 0 && !showFgSubStep}
           >
             Back
           </Button>

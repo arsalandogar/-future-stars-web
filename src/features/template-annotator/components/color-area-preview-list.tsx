@@ -1,5 +1,14 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Button, ColorSwatch, Group, Select, Stack, Text } from '@mantine/core';
+import {
+  Button,
+  ColorPicker,
+  ColorSwatch,
+  Group,
+  Popover,
+  Select,
+  Stack,
+  Text,
+} from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
 import { Palette, Search } from 'lucide-react';
 
@@ -7,7 +16,6 @@ import { useColorTeams } from '@/features/colors';
 
 import type { ColorAreaOption } from '../hooks/use-color-area-options';
 import { useAnnotatorStore } from '../stores/annotator-store';
-import { ColorPreviewPopover } from './color-preview-popover';
 
 // ---------------------------------------------------------------------------
 // Team Search Select
@@ -102,17 +110,84 @@ function TeamSearchSelect({
 }
 
 // ---------------------------------------------------------------------------
-// Per-area preview item
+// Inline color picker popover (reused for BG and FG swatches)
 // ---------------------------------------------------------------------------
 
-function ColorAreaPreviewItem({ option }: { option: ColorAreaOption }) {
-  const previewColors = useAnnotatorStore((s) => s.previewColors);
-  const fieldId = option.value;
-  const previewPair = previewColors.get(fieldId);
-  const previewBg = previewPair?.bg;
+function ColorSwatchPopover({
+  color,
+  label,
+  onChange,
+}: {
+  color: string;
+  label: string;
+  onChange: (color: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Popover
+      opened={open}
+      onChange={setOpen}
+      position="bottom-end"
+      shadow="md"
+      width={220}
+    >
+      <Popover.Target>
+        <ColorSwatch
+          color={color}
+          size={14}
+          withShadow={false}
+          style={{ cursor: 'pointer' }}
+          onClick={() => setOpen((o) => !o)}
+        />
+      </Popover.Target>
+      <Popover.Dropdown p="xs">
+        <Text size="xs" fw={600} mb={4}>
+          {label}
+        </Text>
+        <ColorPicker
+          format="hex"
+          value={color}
+          onChange={onChange}
+          size="sm"
+          fullWidth
+        />
+      </Popover.Dropdown>
+    </Popover>
+  );
+}
 
-  const displayBg = previewBg ?? option.hex ?? '#888';
-  const displayFg = previewPair?.fg ?? option.fgHex;
+// ---------------------------------------------------------------------------
+// Per-area palette item — BG swatch + FG swatch, both editable
+// ---------------------------------------------------------------------------
+
+function ColorAreaPaletteItem({ option }: { option: ColorAreaOption }) {
+  const previewPair = useAnnotatorStore((s) =>
+    s.previewColors.get(option.value)
+  );
+  const setPreviewColor = useAnnotatorStore((s) => s.setPreviewColor);
+  const applyFgToColorArea = useAnnotatorStore((s) => s.applyFgToColorArea);
+  const fieldId = option.value;
+
+  const displayBg = previewPair?.bg ?? option.hex ?? '#888';
+  const displayFg = previewPair?.fg ?? option.fgHex ?? '#ffffff';
+
+  const handleBgChange = useCallback(
+    (color: string) => {
+      const currentFg =
+        useAnnotatorStore.getState().previewColors.get(fieldId)?.fg ??
+        option.fgHex ??
+        '#ffffff';
+      setPreviewColor(fieldId, { bg: color, fg: currentFg });
+    },
+    [fieldId, option.fgHex, setPreviewColor]
+  );
+
+  const handleFgChange = useCallback(
+    (newFg: string) => {
+      applyFgToColorArea(fieldId, newFg);
+    },
+    [fieldId, applyFgToColorArea]
+  );
 
   return (
     <Group gap="xs" wrap="nowrap">
@@ -120,15 +195,18 @@ function ColorAreaPreviewItem({ option }: { option: ColorAreaOption }) {
       <Text size="xs" className="flex-1" truncate>
         {option.label}
       </Text>
-      <Group gap={2} wrap="nowrap" style={{ width: 24 }}>
-        <ColorSwatch color={displayBg} size={10} withShadow={false} />
-        {displayFg ? (
-          <ColorSwatch color={displayFg} size={10} withShadow={false} />
-        ) : (
-          <div style={{ width: 10 }} />
-        )}
+      <Group gap={4} wrap="nowrap">
+        <ColorSwatchPopover
+          color={displayBg}
+          label="Background"
+          onChange={handleBgChange}
+        />
+        <ColorSwatchPopover
+          color={displayFg}
+          label="Text color"
+          onChange={handleFgChange}
+        />
       </Group>
-      <ColorPreviewPopover fieldId={fieldId} />
     </Group>
   );
 }
@@ -142,9 +220,8 @@ export function ColorAreaPreviewList({
 }: {
   colorAreaOptions: ColorAreaOption[];
 }) {
-  const previewColors = useAnnotatorStore((s) => s.previewColors);
+  const hasAnyPreview = useAnnotatorStore((s) => s.previewColors.size > 0);
   const clearPreviewColors = useAnnotatorStore((s) => s.clearPreviewColors);
-  const hasAnyPreview = previewColors.size > 0;
 
   return (
     <div className="rounded-md bg-(--mantine-color-dark-6) p-2.5">
@@ -169,7 +246,7 @@ export function ColorAreaPreviewList({
       <Stack gap={8}>
         <TeamSearchSelect colorAreaOptions={colorAreaOptions} />
         {colorAreaOptions.map((opt) => (
-          <ColorAreaPreviewItem key={opt.value} option={opt} />
+          <ColorAreaPaletteItem key={opt.value} option={opt} />
         ))}
       </Stack>
     </div>

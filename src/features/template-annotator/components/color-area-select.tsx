@@ -5,7 +5,6 @@ import type { EditableFieldId } from '@/features/templates';
 
 import type { ColorAreaOption } from '../hooks/use-color-area-options';
 import { useAnnotatorStore } from '../stores/annotator-store';
-import { ColorPreviewPopover } from './color-preview-popover';
 
 export function ColorAreaSelect({
   currentValue,
@@ -67,9 +66,6 @@ export function ColorAreaSelect({
           ) : null;
         })()}
       />
-      {currentValue && (
-        <ColorPreviewPopover fieldId={currentValue} size="sm" iconSize={14} />
-      )}
     </Group>
   );
 }
