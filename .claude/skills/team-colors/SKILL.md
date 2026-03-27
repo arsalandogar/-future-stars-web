@@ -25,13 +25,13 @@ TeamColorsPage
   └─ TeamColorsLayout (all state via URL search params)
       ├─ Top Controls
       │  ├─ ColorTypeToggle (colors / text)
-      │  ├─ Search input (debounced)
+      │  ├─ Search input (debounced, with CloseButton clear)
       │  └─ LeagueFilterPills (All | Popular | per-league)
       │
       ├─ Left Panel (sidebar + detail)
       │  ├─ PaletteSidebar → PaletteSidebarItem × N
-      │  └─ PaletteDetailPanel
-      │     ├─ PaletteSection (editable color pairs)
+      │  └─ PaletteDetailPanel (inline palette name editing)
+      │     ├─ PaletteSection (editable color pairs, save confirmation modal)
       │     └─ ColorSchemeSection (read-only table)
       │
       ├─ Right Panel
@@ -43,7 +43,7 @@ TeamColorsPage
 
 ### Key design decisions
 
-- **URL search params as state**: All filter/selection state lives in the route's search params (colorType, search, leagueFilter, paletteId, teamPage, teamLimit, templateSide). This makes the page bookmarkable and shareable.
+- **URL search params as state**: All filter/selection state lives in the route's search params (colorType, search, leagueFilter, paletteId, teamPage, teamLimit, templateSide, templateView, templateIndex). This makes the page bookmarkable and shareable.
 - **`getRouteApi()` instead of prop drilling**: Components read search params via `routeApi.useSearch()` and update via `routeApi.useNavigate()`.
 - **Custom layout, not ListingShell**: The 3-panel grid (sidebar 240px + detail | templates 400px) is purpose-built in CSS modules.
 - **Card engine for live preview**: `ColoredTemplateThumbnail` uses `prepareTemplate` + `withPresetColors` + `applyEditsForRender` from `@fs-card-engine` to render SVG templates with the selected palette's colors in real time.
@@ -52,24 +52,24 @@ TeamColorsPage
 
 All feature files live under `src/features/team-colors/`:
 
-| File                                          | Purpose                                        |
-| --------------------------------------------- | ---------------------------------------------- |
-| `index.ts`                                    | Barrel — exports `TeamColorsPage` only         |
-| `pages/team-colors-page.tsx`                  | Thin page wrapper (Head + usePageHeader)       |
-| `components/team-colors-layout.tsx`           | Main layout, state management, data fetching   |
-| `components/palette-sidebar.tsx`              | Scrollable team list with keyboard nav         |
-| `components/palette-sidebar-item.tsx`         | Single team row (name, league, swatches)       |
-| `components/palette-detail-panel.tsx`         | Loads full palette, renders edit + scheme      |
-| `components/palette-section.tsx`              | Editable color pairs with ColorPicker popovers |
-| `components/color-scheme-section.tsx`         | Read-only color table (BG / FG per area)       |
-| `components/template-preview-grid.tsx`        | Template thumbnails filtered by side           |
-| `components/colored-template-thumbnail.tsx`   | SVG render with preset colors applied          |
-| `components/color-type-toggle.tsx`            | SegmentedControl: colors vs text               |
-| `components/league-filter-pills.tsx`          | Pill buttons for league filtering              |
-| `components/team-colors-layout.module.css`    | Main grid layout                               |
-| `components/palette-sidebar-item.module.css`  | Item hover/selected states                     |
-| `components/league-filter-pills.module.css`   | Pill active states                             |
-| `components/template-preview-grid.module.css` | Grid scrolling, thumbnail styling              |
+| File                                          | Purpose                                                                 |
+| --------------------------------------------- | ----------------------------------------------------------------------- |
+| `index.ts`                                    | Barrel — exports `TeamColorsPage` only                                  |
+| `pages/team-colors-page.tsx`                  | Thin page wrapper (Head + usePageHeader)                                |
+| `components/team-colors-layout.tsx`           | Main layout, state management, data fetching                            |
+| `components/palette-sidebar.tsx`              | Scrollable team list with keyboard nav                                  |
+| `components/palette-sidebar-item.tsx`         | Single team row (name, league, swatches)                                |
+| `components/palette-detail-panel.tsx`         | Loads full palette, inline name editing, renders edit + scheme          |
+| `components/palette-section.tsx`              | Editable color pairs with ColorPicker popovers, save confirmation modal |
+| `components/color-scheme-section.tsx`         | Read-only color table (BG / FG per area)                                |
+| `components/template-preview-grid.tsx`        | Template thumbnails with grid/single view toggle                        |
+| `components/colored-template-thumbnail.tsx`   | SVG render with preset colors + viewBox bleed cropping                  |
+| `components/color-type-toggle.tsx`            | SegmentedControl: colors vs text                                        |
+| `components/league-filter-pills.tsx`          | Pill buttons for league filtering                                       |
+| `components/team-colors-layout.module.css`    | Main grid layout                                                        |
+| `components/palette-sidebar-item.module.css`  | Item hover/selected states                                              |
+| `components/league-filter-pills.module.css`   | Pill active states                                                      |
+| `components/template-preview-grid.module.css` | Grid scrolling, thumbnail styling                                       |
 
 **Route file**: `src/routes/_authenticated/admin/team-colors.tsx`
 
@@ -98,6 +98,8 @@ paletteId: number | undefined; // auto-selected to first team
 teamPage: number; // default: 1
 teamLimit: number; // default: 20
 templateSide: 'all' | 'front' | 'back'; // default: 'all'
+templateView: 'grid' | 'single'; // default: 'grid'
+templateIndex: number; // default: 0 — selected template index in single view
 ```
 
 ### Types
@@ -136,7 +138,17 @@ Use `replace: true` for filter changes (search, league filter) to avoid pollutin
 
 ### Editing color pairs
 
-`PaletteSection` maintains local state initialized from the palette's `colorPairs` prop, with a `useEffect` sync when the prop changes (palette switch). The "Save" button appears only when local state diverges from the server state (`isDirty` check via JSON comparison). Mutations use `useUpdateColorPalette()`.
+`TeamColorsLayout` owns the edited color pairs state via the `editedPairs: ColorPair[] | null` pattern — `null` means no edits (use API data), non-null means the user has made local changes. The live pairs are computed as `livePairs = editedPairs ?? apiColorPairs`. When the selected palette changes, edits are cleared using render-time state adjustment (`prevPaletteId` pattern) instead of `useEffect`, avoiding a render cycle where `livePairs` would briefly be `[]`.
+
+`PaletteSection` receives the color pairs and an `onChange` callback. The "Save" button appears only when local state diverges from the server state (`isDirty` check via JSON comparison). On save, a `modals.openConfirmModal` confirmation dialog is shown (using the `paletteName` prop for display text) before calling `useUpdateColorPalette()`.
+
+### Inline palette name editing
+
+`PaletteDetailPanel` supports inline editing of the palette name. It tracks `isEditingName` and `editedName` state, rendering a `TextInput` with Check/X icon buttons when editing. Keyboard handlers: Enter saves, Escape cancels. Uses the render-time state adjustment (`prevPaletteId` pattern) to reset editing state when the selected palette changes, avoiding stale edit state.
+
+### Search clear button
+
+`TeamColorsLayout` renders a `CloseButton` inside the search `TextInput`'s `rightSection`. The `handleSearchClear()` handler clears the input ref value and flushes the debounced search callback to immediately update the URL param.
 
 ### Template color preview
 
@@ -146,7 +158,8 @@ The `ColoredTemplateThumbnail` component:
 2. Runs `prepareTemplate()` to get editable fields
 3. Applies `withPresetColors()` using the selected palette's bg colors
 4. Applies `withPresetTextColors()` to set foreground colors on text elements linked to color areas (via `data-text-color-area` annotations)
-5. Renders via `<SvgRenderer />`
+5. Crops bleed areas from the SVG viewBox using `parseViewBox()`, `formatViewBox()`, `hasBleeds()`, and `getCardBounds()` from `@fs-card-engine` — applied via `getRootProps`
+6. Renders via `<SvgRenderer />`
 
 The component receives full `ColorPair[]` (not just bg strings). The flow:
 
@@ -190,8 +203,7 @@ Key endpoints:
 These are placeholders or unfinished pieces that need implementation:
 
 - **"Add" button in PaletteSidebar header** — no handler, should open a create-team flow
-- **"Add +" and "Edit" buttons in PaletteDetailPanel** — no handlers
-- **Image/Gallery view toggles in TemplatePreviewGrid** — buttons exist but aren't wired
+- **"Add +" button in PaletteDetailPanel** — no handler
 - **Client-side team filtering** (`userId == null`) — ideally should be a server-side param
 - **Pagination** — teams have pagination; templates currently fetch all (limit: 100)
 - **Template-palette linking** — palette `templates` relationship exists but isn't surfaced in the UI yet

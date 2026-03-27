@@ -109,6 +109,8 @@ The store holds the SVG tree, node indices, selection state, assignments, and un
 - `editingTouchBoundsNodeId`, `editingTransformNodeId` — overlay mode
 - `expandedNodeIds: Set<string>` — tree expand state
 - `assignments: FieldAssignment[]` — all current annotations
+- `defaultPaletteFg: Map<EditableFieldId, string>` — foreground color overrides per color area
+- `defaultPaletteBg: Map<EditableFieldId, string>` — background color overrides per color area
 - `undoStack`, `redoStack` — max 50 entries each
 
 ### Key actions:
@@ -116,6 +118,7 @@ The store holds the SVG tree, node indices, selection state, assignments, and un
 - **Loading:** `loadSvg()` — hydrates store with parsed SVG + pre-extracted assignments
 - **Assignment:** `assignField()`, `removeAssignment()` — single node
 - **Bulk:** `bulkAssignColors()`, `bulkAssignTexts()`, `bulkAssignImages()` — from detection wizard
+- **Palette defaults:** `setDefaultPaletteBg()`, `bulkSetDefaultPaletteBg()`, `applyBgToColorAreas()` (applies bg colors to color area nodes in SVG tree, respects colorOffset for derived colors)
 - **Text:** `setTextDimensions()`, `commitTextAreaResize()`, `setTextAlign()`, `setTextMultiline()`, `setTextColorArea()`, `setTextFillColor()`, `setFontSize()`
 - **Transform:** `rotateNode()`, `commitNodeTransform()`, `resetNodeTransform()`, `removeNodeScale()`
 - **Touch bounds:** `commitTouchBounds()`, `removeTouchBounds()`
@@ -150,14 +153,17 @@ Route loader fetches SVG JSON → `loadSvgJson()` in `svg-json-loader.ts`:
 
 ### 2. Auto-Detection (Detection Wizard)
 
-Auto-opens when SVG loaded with zero assignments. Three steps:
+Auto-opens when SVG loaded with zero assignments. The modal is wide (`size="80rem"`) with a **two-column layout**: the left side shows a **live SVG preview** (using `SvgRenderer`), the right side contains the wizard steps. A `previewTree` useMemo clones `svgTree` and applies the current bg/fg selections to the clone for real-time visual feedback as the user makes choices.
+
+Three steps:
 
 **Color step:**
 
 1. `extractSvgColors(nodeMap)` — scans fill, stroke, stop-color attributes
 2. `extractColorClusters(nodeMap, threshold)` — perceptual clustering in OKLAB space
 3. User maps each cluster → colorOne/Two/Three etc.
-4. → `bulkAssignColors()` creates assignments with per-member OKLAB offsets
+4. After cluster assignment, a **foreground color sub-step** appears where `bgSelections` and `fgSelections` state track background and foreground color choices per color area. Both are passed to `FgColorSubStep`.
+5. → `bulkAssignColors()` creates assignments with per-member OKLAB offsets
 
 **Text step:**
 
@@ -349,7 +355,7 @@ Color math re-exported through `src/utils/color-math.ts`:
 
 ### Color & Text Utils
 
-- `utils/node-color-helpers.ts` — `getTextFillColor()`, `getNodeColor()` for extracting colors from SVG nodes
+- `utils/node-color-helpers.ts` — `getTextFillColor()`, `getNodeColor()` for extracting colors; `applyNodeColor(node, target, color)` writes a color for any target (fill/stroke/stop-color) respecting CSS specificity; `applyNodeFill()` delegates to `applyNodeColor('fill', ...)`
 - `utils/detect-foreground-colors.ts` — Spatial overlap detection (text center inside color element bounds)
 
 ### Geometry & Transform Utils
@@ -361,7 +367,7 @@ Color math re-exported through `src/utils/color-math.ts`:
 
 ### Hooks
 
-- `hooks/use-color-area-options.ts` — Builds `ColorAreaOption[]` with bg/fg hex for color area selects
+- `hooks/use-color-area-options.ts` — Builds `ColorAreaOption[]` with bg/fg hex for color area selects. Sorted by `COLOR_FIELD_ORDER` (vocabulary definition order: colorOne, colorTwo, ...) instead of alphabetically. Uses `defaultPaletteBg` as primary source for the `hex` value, falling back to SVG-derived color.
 - `hooks/use-element-bounds.ts` — Element bounding box calculations
 - `hooks/use-svg-file-reader.ts` — File upload parsing
 
@@ -369,8 +375,8 @@ Color math re-exported through `src/utils/color-math.ts`:
 
 - `components/annotator-canvas.tsx` — SVG rendering + click/hover + overlays
 - `components/field-assignment-panel.tsx` — Right panel field picker
-- `components/detection-wizard-modal.tsx` — 3-step auto-detection
-- `components/fg-color-substep.tsx` — Detection wizard sub-step for setting default foreground colors
+- `components/detection-wizard-modal.tsx` — 3-step auto-detection with two-column layout (live SVG preview + wizard steps)
+- `components/fg-color-substep.tsx` — Detection wizard sub-step rendering a table with Area, BG color, and Text color columns. Accepts `bgSelections`/`onBgChange` props alongside existing fg props.
 - `components/bulk-text-settings-modal.tsx` — Bulk text settings side panel (color areas, text color, auto-detect)
 - `components/color-area-select.tsx` — Dropdown to link a text field to a color area
 - `components/color-area-preview-list.tsx` — Color area palette preview with BG/FG swatches

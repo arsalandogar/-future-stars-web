@@ -88,26 +88,26 @@ The main editing store. Manages both sides of a card (front/back), tracks edits,
 - `workingCopy: SvgJsonNode | null` — live mutable SVG tree (edits applied in-place)
 - `edits: Edits` — serializable edit map (`{ [fieldId]: value | ImageEdit }`)
 - `editableFields`, `editableColorFields`, `editableImageFields` — discovered from SVG annotations
-- `appliedPresetId`, `appliedPresetColors` — tracks active color preset for reset
+- `appliedPresetId`, `appliedPresetColors: { bg: string; fg: string }[] | null` — tracks active color preset (bg+fg per area) for reset
 - `revision: number` — incremented on every edit, drives re-renders
 
 **Key actions:**
 
-| Action                                             | What it does                                                       |
-| -------------------------------------------------- | ------------------------------------------------------------------ |
-| `initializeSideFromSvg(side, svgNode)`             | Parses SVG, discovers fields, loads fonts, starts text compression |
-| `hydrateSavedEdits(frontEdits, backEdits)`         | Restores edits when editing an existing card                       |
-| `updateTextField(fieldId, value)`                  | Updates text edit + schedules compression                          |
-| `updateColorField(fieldId, color)`                 | Updates color edit, clears preset tracking                         |
-| `updateImageField(fieldId, imageUrl)`              | Sets image URL in edits                                            |
-| `removeImageField(fieldId)`                        | Removes image from edits                                           |
-| `adjustImageZoom(fieldId, zoom, offsetX, offsetY)` | Adjusts image zoom + applies to DOM nodes                          |
-| `nudgeImagePosition(fieldId, dx, dy)`              | Pans image + applies to DOM nodes                                  |
-| `applyColorPreset(colors, presetId)`               | Applies a full color palette to all color fields                   |
-| `swapColors(fieldIdA, fieldIdB)`                   | Swaps two color field values                                       |
-| `resetAllColors()`                                 | Resets all colors to template defaults                             |
-| `resetToPreset()`                                  | Re-applies the last-used preset                                    |
-| `getEditsForSave()`                                | Returns clean `{ frontEdits, backEdits }` for API persistence      |
+| Action                                             | What it does                                                        |
+| -------------------------------------------------- | ------------------------------------------------------------------- |
+| `initializeSideFromSvg(side, svgNode)`             | Parses SVG, discovers fields, loads fonts, starts text compression  |
+| `hydrateSavedEdits(frontEdits, backEdits)`         | Restores edits when editing an existing card                        |
+| `updateTextField(fieldId, value)`                  | Updates text edit + schedules compression                           |
+| `updateColorField(fieldId, color)`                 | Updates color edit, resets fg text colors, clears preset tracking   |
+| `updateImageField(fieldId, imageUrl)`              | Sets image URL in edits                                             |
+| `removeImageField(fieldId)`                        | Removes image from edits                                            |
+| `adjustImageZoom(fieldId, zoom, offsetX, offsetY)` | Adjusts image zoom + applies to DOM nodes                           |
+| `nudgeImagePosition(fieldId, dx, dy)`              | Pans image + applies to DOM nodes                                   |
+| `applyColorPreset(colorPairs, presetId)`           | Applies bg colors to color fields + fg colors to linked text fields |
+| `swapColors(fieldIdA, fieldIdB)`                   | Swaps two color field values, clears preset tracking                |
+| `resetAllColors()`                                 | Resets all bg colors + restores original text fg colors             |
+| `resetToPreset()`                                  | Re-applies the last-used preset (both bg and fg)                    |
+| `getEditsForSave()`                                | Returns clean `{ frontEdits, backEdits }` for API persistence       |
 
 **Revision-based rendering:** Components subscribe to `sides[activeSide].revision` to know when to re-render. The `commitSide()` helper bumps revision on every state change.
 
@@ -267,26 +267,27 @@ Text compression fits text content within annotated bounding boxes by adjusting 
 
 The card builder imports these from `@fs-card-engine`:
 
-| Import                                                        | Purpose                                              |
-| ------------------------------------------------------------- | ---------------------------------------------------- |
-| `SvgJsonNode`                                                 | SVG tree type                                        |
-| `EditableFieldId`                                             | Field identifier type                                |
-| `Edits`, `Side`, `SideState`                                  | Edit and state types                                 |
-| `createEmptySideState`                                        | Initial empty state for a card side                  |
-| `initializeSideSnapshot`                                      | Discover fields and initialize working copy from SVG |
-| `applyEditsForRender`                                         | Apply edits to SVG tree for rendering                |
-| `applyTextCompression`                                        | Async text fitting within bounding boxes             |
-| `withTextEdit`, `withColorEdit`, `withImageEdit`              | Create updated edits for each field type             |
-| `withPresetColors`, `withSwappedColors`, `withAllColorsReset` | Color preset operations                              |
-| `withZoomEdit`, `withNudgeEdit`                               | Image position edit helpers                          |
-| `applyImageZoom`, `nudgeImageNodes`                           | Direct DOM manipulation for image positioning        |
-| `withImageRemoved`, `withTextFieldReset`                      | Reset helpers                                        |
-| `renderEditedTemplate`                                        | Bake edits into SVG (used by template defaults page) |
-| `createFontResolver`, `FontRegistryEntry`                     | Font resolution system                               |
-| `hasBleeds`, `getCardBounds`                                  | Viewport/bounds calculations for preview             |
-| `TOUCH_TARGET_ATTR`, `TOUCH_TARGET_TYPE_ATTR`                 | Touch target detection in preview                    |
-| `ZOOM_MIN`, `ZOOM_MAX`, `DEFAULT_IMAGE_POSITION`              | Image zoom/position constants                        |
-| `getEditValue`, `isImageEdit`                                 | Edit value inspection                                |
+| Import                                                              | Purpose                                              |
+| ------------------------------------------------------------------- | ---------------------------------------------------- |
+| `SvgJsonNode`                                                       | SVG tree type                                        |
+| `EditableFieldId`                                                   | Field identifier type                                |
+| `Edits`, `Side`, `SideState`                                        | Edit and state types                                 |
+| `createEmptySideState`                                              | Initial empty state for a card side                  |
+| `initializeSideSnapshot`                                            | Discover fields and initialize working copy from SVG |
+| `applyEditsForRender`                                               | Apply edits to SVG tree for rendering                |
+| `applyTextCompression`                                              | Async text fitting within bounding boxes             |
+| `withTextEdit`, `withColorEdit`, `withImageEdit`                    | Create updated edits for each field type             |
+| `withPresetColors`, `withPresetTextColors`, `resetPresetTextColors` | Color preset operations (bg + fg text colors)        |
+| `withSwappedColors`, `withAllColorsReset`                           | Color swap and reset operations                      |
+| `withZoomEdit`, `withNudgeEdit`                                     | Image position edit helpers                          |
+| `applyImageZoom`, `nudgeImageNodes`                                 | Direct DOM manipulation for image positioning        |
+| `withImageRemoved`, `withTextFieldReset`                            | Reset helpers                                        |
+| `renderEditedTemplate`                                              | Bake edits into SVG (used by template defaults page) |
+| `createFontResolver`, `FontRegistryEntry`                           | Font resolution system                               |
+| `hasBleeds`, `getCardBounds`                                        | Viewport/bounds calculations for preview             |
+| `TOUCH_TARGET_ATTR`, `TOUCH_TARGET_TYPE_ATTR`                       | Touch target detection in preview                    |
+| `ZOOM_MIN`, `ZOOM_MAX`, `DEFAULT_IMAGE_POSITION`                    | Image zoom/position constants                        |
+| `getEditValue`, `isImageEdit`                                       | Edit value inspection                                |
 
 ## File Map
 
