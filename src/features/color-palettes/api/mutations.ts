@@ -1,5 +1,7 @@
 import { createCrudMutations } from '@/lib/react-query';
 
+import { useColorTeams } from '@/features/colors';
+
 import type {
   ColorPalette,
   CreateColorPaletteParams,
@@ -16,5 +18,5 @@ export const colorPaletteMutations = createCrudMutations<
   endpoint: 'admin/color-palettes',
   entityName: 'Color Palette',
   listQueryKey: useColorPalettes.getKey(),
-  extraInvalidations: [colorPaletteQuery.getKey()],
+  extraInvalidations: [colorPaletteQuery.getKey(), useColorTeams.getKey()],
 });
