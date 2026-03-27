@@ -10,6 +10,8 @@ const defaultValues = {
   teamPage: 1,
   teamLimit: 20,
   templateSide: 'all' as const,
+  templateView: 'grid' as const,
+  templateIndex: 0,
 };
 
 const teamColorsSearchSchema = v.object({
@@ -43,6 +45,14 @@ const teamColorsSearchSchema = v.object({
   templateSide: v.optional(
     v.fallback(v.picklist(['all', 'front', 'back']), 'all'),
     'all'
+  ),
+  templateView: v.optional(
+    v.fallback(v.picklist(['grid', 'single']), 'grid'),
+    'grid'
+  ),
+  templateIndex: v.optional(
+    v.fallback(v.pipe(v.number(), v.integer(), v.minValue(0)), 0),
+    0
   ),
 });
 

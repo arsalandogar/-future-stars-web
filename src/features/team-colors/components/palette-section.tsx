@@ -1,12 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   ActionIcon,
+  Button,
   ColorPicker,
   ColorSwatch,
   Group,
   Popover,
   Text,
+  Tooltip,
 } from '@mantine/core';
+import { modals } from '@mantine/modals';
 import { ArrowLeftRight, Plus, RotateCcw } from 'lucide-react';
 
 import {
@@ -17,25 +20,29 @@ import {
 interface PaletteSectionProps {
   colorPairs: ColorPair[];
   paletteId: number;
+  paletteName: string;
   onLivePairsChange?: (pairs: ColorPair[]) => void;
 }
 
 export function PaletteSection({
   colorPairs,
   paletteId,
+  paletteName,
   onLivePairsChange,
 }: PaletteSectionProps) {
   const [localPairs, setLocalPairs] = useState<ColorPair[]>(colorPairs);
+  const [prevColorPairs, setPrevColorPairs] = useState(colorPairs);
   const [editingIndex, setEditingIndex] = useState<{
     index: number;
     field: 'bg' | 'fg';
   } | null>(null);
   const updatePalette = useUpdateColorPalette();
 
-  // Sync local state when the source palette changes (e.g. selecting a different team)
-  useEffect(() => {
+  // Sync local state when the source palette changes (render-time adjustment)
+  if (colorPairs !== prevColorPairs) {
+    setPrevColorPairs(colorPairs);
     setLocalPairs(colorPairs);
-  }, [colorPairs]);
+  }
 
   const isDirty = JSON.stringify(localPairs) !== JSON.stringify(colorPairs);
 
@@ -76,7 +83,22 @@ export function PaletteSection({
   };
 
   const handleSave = () => {
-    updatePalette.mutate({ id: paletteId, colorPairs: localPairs });
+    modals.openConfirmModal({
+      title: <Text fw={700}>Update Palette</Text>,
+      centered: true,
+      children: (
+        <Text size="sm">
+          Are you sure you want to update the color palette for{' '}
+          <strong>{paletteName}</strong>? This will affect all cards using this
+          palette.
+        </Text>
+      ),
+      labels: { confirm: 'Update', cancel: 'Cancel' },
+      confirmProps: { color: 'primary' },
+      onConfirm: () => {
+        updatePalette.mutate({ id: paletteId, colorPairs: localPairs });
+      },
+    });
   };
 
   return (
@@ -85,15 +107,6 @@ export function PaletteSection({
         <Text size="xs" fw={700} tt="uppercase" c="dimmed">
           Palette
         </Text>
-        {isDirty && (
-          <button
-            type="button"
-            className="text-xs font-semibold text-[var(--mantine-color-primary-4)] hover:underline"
-            onClick={handleSave}
-          >
-            Save
-          </button>
-        )}
       </Group>
 
       {localPairs.map((pair, index) => (
@@ -182,6 +195,25 @@ export function PaletteSection({
       >
         <Plus size={14} />
       </button>
+
+      <Tooltip
+        label="No changes to save"
+        disabled={isDirty}
+        position="right"
+        withArrow
+      >
+        <Button
+          size="compact-xs"
+          variant={isDirty ? 'filled' : 'default'}
+          onClick={handleSave}
+          loading={updatePalette.isPending}
+          disabled={!isDirty}
+          mt="xs"
+          w="fit-content"
+        >
+          Save Palette
+        </Button>
+      </Tooltip>
     </div>
   );
 }

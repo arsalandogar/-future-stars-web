@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { TextInput } from '@mantine/core';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { CloseButton, TextInput } from '@mantine/core';
 import { useDebouncedCallback } from '@mantine/hooks';
 import { getRouteApi } from '@tanstack/react-router';
 import { Search } from 'lucide-react';
@@ -26,6 +26,8 @@ export function TeamColorsLayout() {
     teamPage,
     teamLimit,
     templateSide,
+    templateView,
+    templateIndex,
   } = routeApi.useSearch();
   const navigate = routeApi.useNavigate();
 
@@ -57,12 +59,19 @@ export function TeamColorsLayout() {
     () => selectedTeam?.palette?.colorPairs ?? [],
     [selectedTeam?.palette?.colorPairs]
   );
-  const [livePairs, setLivePairs] = useState<ColorPair[]>(apiColorPairs);
 
-  // Reset live pairs when switching palettes
-  useEffect(() => {
-    setLivePairs(apiColorPairs);
-  }, [apiColorPairs]);
+  // Track user edits separately — null means "no edits, use API data".
+  // This avoids the useState+useEffect sync delay that caused livePairs
+  // to be [] for a render cycle when apiColorPairs updated.
+  const [editedPairs, setEditedPairs] = useState<ColorPair[] | null>(null);
+  const [prevPaletteId, setPrevPaletteId] = useState(paletteId);
+  const livePairs = editedPairs ?? apiColorPairs;
+
+  // Clear edits when switching palettes (render-time adjustment)
+  if (paletteId !== prevPaletteId) {
+    setPrevPaletteId(paletteId);
+    setEditedPairs(null);
+  }
 
   // Auto-select first team when none is selected
   useEffect(() => {
@@ -74,12 +83,22 @@ export function TeamColorsLayout() {
     }
   }, [paletteId, teams, navigate]);
 
+  const searchRef = useRef<HTMLInputElement>(null);
+
   const handleSearchChange = useDebouncedCallback((value: string) => {
     void navigate({
       search: (prev) => ({ ...prev, search: value || undefined }),
       replace: true,
     });
   }, 300);
+
+  const handleSearchClear = () => {
+    if (searchRef.current) {
+      searchRef.current.value = '';
+    }
+    handleSearchChange('');
+    handleSearchChange.flush();
+  };
 
   const handleLeagueFilterChange = (value: 'all' | 'popular' | number) => {
     void navigate({
@@ -111,8 +130,14 @@ export function TeamColorsLayout() {
         <div className={styles.leftHeader}>
           <ColorTypeToggle value={colorType} onChange={handleColorTypeChange} />
           <TextInput
+            ref={searchRef}
             placeholder="Search palettes..."
             leftSection={<Search size={16} />}
+            rightSection={
+              search ? (
+                <CloseButton size="sm" onClick={handleSearchClear} />
+              ) : null
+            }
             defaultValue={search}
             onChange={(e) => handleSearchChange(e.currentTarget.value)}
             style={{ width: 260 }}
@@ -143,7 +168,7 @@ export function TeamColorsLayout() {
                 paletteId={paletteId}
                 selectedTeam={selectedTeam}
                 livePairs={livePairs}
-                onLivePairsChange={setLivePairs}
+                onLivePairsChange={setEditedPairs}
               />
             </div>
           </div>
@@ -161,6 +186,27 @@ export function TeamColorsLayout() {
               })
             }
             colorPairs={livePairs}
+            view={templateView}
+            onViewChange={(view) =>
+              void navigate({
+                search: (prev) => ({
+                  ...prev,
+                  templateView: view === 'grid' ? undefined : view,
+                  templateIndex:
+                    view === 'grid' ? undefined : prev.templateIndex,
+                }),
+                replace: true,
+              })
+            }
+            templateIndex={templateIndex}
+            onTemplateIndexChange={(index) =>
+              void navigate({
+                search: (prev) => ({
+                  ...prev,
+                  templateIndex: index === 0 ? undefined : index,
+                }),
+              })
+            }
           />
         </div>
       </div>

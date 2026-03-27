@@ -37,3 +37,44 @@
   height: 100%;
   object-fit: cover;
 }
+
+.singleView {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--mantine-spacing-md);
+  padding: var(--mantine-spacing-md) 0;
+  height: 100%;
+  min-height: 0;
+}
+
+.singleCardWrapper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.singleCard {
+  /* Let height drive width via aspect-ratio instead of padding trick */
+  height: 100%;
+  max-height: 100%;
+  aspect-ratio: 2.5 / 3.5;
+  max-width: 280px;
+}
+
+.singleNav {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-md);
+  flex-shrink: 0;
+}
+
+.singleInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 100px;
+}

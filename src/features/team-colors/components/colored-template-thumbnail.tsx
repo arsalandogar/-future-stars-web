@@ -5,12 +5,28 @@ import {
   withPresetColors,
   withPresetTextColors,
   applyEditsForRender,
+  hasBleeds,
+  getCardBounds,
 } from '@fs-card-engine';
 
 import { SvgRenderer } from '@/components/svg-renderer/svg-renderer';
 import { useTemplateSvgJson } from '@/features/templates';
 
 import type { ColorPair } from '@/features/color-palettes';
+import type { SvgJsonNode, TouchBounds } from '@/types/svg';
+
+function parseViewBox(viewBox: string | undefined): TouchBounds | null {
+  if (!viewBox) return null;
+  const parts = viewBox.split(/[\s,]+/).map(Number);
+  if (parts.length < 4 || parts.some((p) => !Number.isFinite(p))) return null;
+  const [x, y, width, height] = parts;
+  if (width <= 0 || height <= 0) return null;
+  return { x, y, width, height };
+}
+
+function formatViewBox(bounds: TouchBounds): string {
+  return `${bounds.x} ${bounds.y} ${bounds.width} ${bounds.height}`;
+}
 
 interface ColoredTemplateThumbnailProps {
   templateId: number;
@@ -68,9 +84,17 @@ export function ColoredTemplateThumbnail({
       node={renderedNode}
       revision={0}
       options={{
-        getRootProps: () => ({
-          'aria-label': templateName,
-        }),
+        getRootProps: (node: SvgJsonNode) => {
+          const viewBox = parseViewBox(node.attributes.viewBox);
+          if (!viewBox || !hasBleeds(viewBox)) {
+            return { 'aria-label': templateName, overflow: 'hidden' };
+          }
+          return {
+            'aria-label': templateName,
+            viewBox: formatViewBox(getCardBounds(viewBox)),
+            overflow: 'hidden',
+          };
+        },
       }}
     />
   );
