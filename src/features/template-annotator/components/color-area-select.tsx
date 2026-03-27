@@ -51,7 +51,16 @@ export function ColorAreaSelect({
               onMouseLeave={() => hoverHighlightField(null)}
             >
               {opt?.hex && (
-                <ColorSwatch color={opt.hex} size={14} withShadow={false} />
+                <Group gap={2} wrap="nowrap">
+                  <ColorSwatch color={opt.hex} size={14} withShadow={false} />
+                  {opt.fgHex && (
+                    <ColorSwatch
+                      color={opt.fgHex}
+                      size={14}
+                      withShadow={false}
+                    />
+                  )}
+                </Group>
               )}
               <span>{option.label}</span>
               {checked && <Check size={12} style={{ marginLeft: 'auto' }} />}
@@ -61,9 +70,15 @@ export function ColorAreaSelect({
         leftSection={(() => {
           if (!currentValue) return null;
           const opt = colorAreaOptions.find((o) => o.value === currentValue);
-          return opt?.hex ? (
-            <ColorSwatch color={opt.hex} size={12} withShadow={false} />
-          ) : null;
+          if (!opt?.hex) return null;
+          return (
+            <Group gap={2} wrap="nowrap">
+              <ColorSwatch color={opt.hex} size={12} withShadow={false} />
+              {opt.fgHex && (
+                <ColorSwatch color={opt.fgHex} size={12} withShadow={false} />
+              )}
+            </Group>
+          );
         })()}
       />
     </Group>

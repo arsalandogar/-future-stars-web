@@ -9,6 +9,13 @@ import {
   getTextFillColor,
 } from '../utils/node-color-helpers';
 
+/** Vocabulary-definition order for color fields (colorOne=0, colorTwo=1, …). */
+const COLOR_FIELD_ORDER = new Map(
+  Object.entries(EDITABLE_FIELDS)
+    .filter(([, f]) => f.type === 'color')
+    .map(([id], i) => [id as EditableFieldId, i])
+);
+
 export interface ColorAreaOption {
   value: EditableFieldId;
   label: string;
@@ -22,6 +29,7 @@ export function useColorAreaOptions(): ColorAreaOption[] {
   const assignments = useAnnotatorStore((s) => s.assignments);
   const nodeMap = useAnnotatorStore((s) => s.nodeMap);
   const defaultPaletteFg = useAnnotatorStore((s) => s.defaultPaletteFg);
+  const defaultPaletteBg = useAnnotatorStore((s) => s.defaultPaletteBg);
 
   return useMemo(() => {
     // Collect BG color per color field
@@ -50,13 +58,17 @@ export function useColorAreaOptions(): ColorAreaOption[] {
     }
 
     return Array.from(colorFieldMap)
-      .sort(([a], [b]) => a.localeCompare(b))
+      .sort(
+        ([a], [b]) =>
+          (COLOR_FIELD_ORDER.get(a) ?? 0) - (COLOR_FIELD_ORDER.get(b) ?? 0)
+      )
       .map(([id, hex]) => ({
         value: id,
         label: EDITABLE_FIELDS[id].label,
-        hex,
+        // Use default palette bg override first, then SVG-derived color
+        hex: defaultPaletteBg.get(id) ?? hex,
         // Use text-linked fg first, then default palette fg as fallback
         fgHex: fgMap.get(id) ?? defaultPaletteFg.get(id),
       }));
-  }, [assignments, nodeMap, defaultPaletteFg]);
+  }, [assignments, nodeMap, defaultPaletteFg, defaultPaletteBg]);
 }

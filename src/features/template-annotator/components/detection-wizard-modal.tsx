@@ -22,7 +22,13 @@ import {
   Wand2,
 } from 'lucide-react';
 
+import { SvgRenderer } from '@/components/svg-renderer/svg-renderer';
 import type { SvgJsonNode } from '@/types/svg';
+import {
+  writeColorValue,
+  applyOklabOffset,
+  isZeroOffset,
+} from '@fs-card-engine';
 import {
   computeOklabOffset,
   type ClusterMember,
@@ -338,6 +344,8 @@ function TextStepContent({
   colorAreaOptions,
   textAreaSelections,
   onTextAreaSelectionsChange,
+  fgSelections,
+  bgSelections,
 }: {
   detectedTexts: { nodeId: string; textContent: string; tagName: string }[];
   selections: Record<number, SelectionValue>;
@@ -345,6 +353,8 @@ function TextStepContent({
   colorAreaOptions: ColorAreaBrief[];
   textAreaSelections: Record<number, string>;
   onTextAreaSelectionsChange: (s: Record<number, string>) => void;
+  fgSelections: Record<string, string>;
+  bgSelections: Record<string, string>;
 }) {
   const duplicates = hasDuplicates(selections);
   const hasColorAreas = colorAreaOptions.length > 0;
@@ -419,11 +429,22 @@ function TextStepContent({
                         allowDeselect={false}
                         leftSection={
                           areaOpt ? (
-                            <ColorSwatch
-                              color={areaOpt.bgHex}
-                              size={10}
-                              withShadow={false}
-                            />
+                            <Group gap={2} wrap="nowrap">
+                              <ColorSwatch
+                                color={
+                                  bgSelections[areaOpt.fieldId] ?? areaOpt.bgHex
+                                }
+                                size={10}
+                                withShadow={false}
+                              />
+                              {fgSelections[areaOpt.fieldId] && (
+                                <ColorSwatch
+                                  color={fgSelections[areaOpt.fieldId]}
+                                  size={10}
+                                  withShadow={false}
+                                />
+                              )}
+                            </Group>
                           ) : null
                         }
                         renderOption={({ option }) => {
@@ -433,11 +454,22 @@ function TextStepContent({
                           return (
                             <Group gap="xs" wrap="nowrap">
                               {opt && (
-                                <ColorSwatch
-                                  color={opt.bgHex}
-                                  size={12}
-                                  withShadow={false}
-                                />
+                                <Group gap={2} wrap="nowrap">
+                                  <ColorSwatch
+                                    color={
+                                      bgSelections[opt.fieldId] ?? opt.bgHex
+                                    }
+                                    size={12}
+                                    withShadow={false}
+                                  />
+                                  {fgSelections[opt.fieldId] && (
+                                    <ColorSwatch
+                                      color={fgSelections[opt.fieldId]}
+                                      size={12}
+                                      withShadow={false}
+                                    />
+                                  )}
+                                </Group>
                               )}
                               <span>{option.label}</span>
                             </Group>
@@ -561,6 +593,7 @@ export function DetectionWizardModal({
   onClose,
   nodeMap,
 }: DetectionWizardModalProps) {
+  const svgTree = useAnnotatorStore((s) => s.svgTree);
   const assignments = useAnnotatorStore((s) => s.assignments);
   const bulkAssignColors = useAnnotatorStore((s) => s.bulkAssignColors);
   const bulkAssignTexts = useAnnotatorStore((s) => s.bulkAssignTexts);
@@ -626,6 +659,7 @@ export function DetectionWizardModal({
   // ── Foreground sub-step state ──────────────────────────────────
   const [showFgSubStep, setShowFgSubStep] = useState(false);
   const [fgSelections, setFgSelections] = useState<Record<string, string>>({});
+  const [bgSelections, setBgSelections] = useState<Record<string, string>>({});
   const [fgColorAreas, setFgColorAreas] = useState<ColorAreaBrief[]>([]);
   const [textAreaSelections, setTextAreaSelections] = useState<
     Record<number, string>
@@ -649,6 +683,7 @@ export function DetectionWizardModal({
       setActiveStep(0);
       setShowFgSubStep(false);
       setFgSelections({});
+      setBgSelections({});
       setFgColorAreas([]);
       setTextAreaSelections({});
       setColorSelections(
@@ -777,6 +812,12 @@ export function DetectionWizardModal({
       areas.push({ fieldId, label: EDITABLE_FIELDS[fieldId].label, bgHex });
     }
 
+    // Sort by vocabulary definition order (Color 1, Color 2, …)
+    areas.sort(
+      (a, b) =>
+        COLOR_FIELD_IDS.indexOf(a.fieldId) - COLOR_FIELD_IDS.indexOf(b.fieldId)
+    );
+
     return { colorAreaMembers, bgHexMap, areas };
   }
 
@@ -811,6 +852,13 @@ export function DetectionWizardModal({
 
           setFgColorAreas(areas);
 
+          // Pre-populate bg selections from cluster base hex
+          const bgSel: Record<string, string> = {};
+          for (const area of areas) {
+            bgSel[area.fieldId] = area.bgHex;
+          }
+          setBgSelections(bgSel);
+
           // Pre-populate text area selections from spatial detection
           const areaSel: Record<number, string> = {};
           for (let i = 0; i < detectedTexts.length; i++) {
@@ -830,13 +878,20 @@ export function DetectionWizardModal({
         return;
       }
 
-      // Second click: fg confirmed — persist fg to store, then advance
+      // Second click: fg + bg confirmed — persist to store, then advance
       const fgMap = new Map<EditableFieldId, string>();
       for (const [fId, hex] of Object.entries(fgSelections)) {
         fgMap.set(fId as EditableFieldId, hex);
       }
       if (fgMap.size > 0) {
         useAnnotatorStore.getState().bulkSetDefaultPaletteFg(fgMap);
+      }
+      const bgMap = new Map<EditableFieldId, string>();
+      for (const [fId, hex] of Object.entries(bgSelections)) {
+        bgMap.set(fId as EditableFieldId, hex);
+      }
+      if (bgMap.size > 0) {
+        useAnnotatorStore.getState().applyBgToColorAreas(bgMap);
       }
       setShowFgSubStep(false);
       if (isLastStep) {
@@ -899,9 +954,10 @@ export function DetectionWizardModal({
 
   function handleSkip() {
     if (showFgSubStep) {
-      // Skip fg sub-step, clear pending fg data
+      // Skip fg sub-step, clear pending fg/bg data
       setShowFgSubStep(false);
       setFgSelections({});
+      setBgSelections({});
       setTextAreaSelections({});
     }
     if (isLastStep) {
@@ -919,6 +975,60 @@ export function DetectionWizardModal({
     setActiveStep((s) => Math.max(0, s - 1));
   }
 
+  // ── Live preview tree for the modal SVG ────────────────────────
+  const previewTree = useMemo(() => {
+    if (!svgTree || !showFgSubStep) return null;
+
+    const hasBg = Object.keys(bgSelections).length > 0;
+    const hasFg = Object.keys(fgSelections).length > 0;
+    if (!hasBg && !hasFg) return null;
+
+    const clone = structuredClone(svgTree);
+
+    // Build a nodeMap for the clone
+    const cloneNodes = new Map<string, SvgJsonNode>();
+    function walkClone(node: SvgJsonNode) {
+      const id = node.attributes?.['__nodeId'];
+      if (id) cloneNodes.set(id, node);
+      if (node.children) {
+        for (const child of node.children) walkClone(child);
+      }
+    }
+    walkClone(clone);
+
+    const currentAssignments = useAnnotatorStore.getState().assignments;
+
+    // Apply bg colors to color field assignments
+    for (const a of currentAssignments) {
+      if (EDITABLE_FIELDS[a.fieldId].type !== 'color') continue;
+      const bg = bgSelections[a.fieldId];
+      if (!bg) continue;
+
+      const node = cloneNodes.get(a.nodeId);
+      if (!node) continue;
+
+      const target = a.colorTarget ?? 'fill';
+      const derived =
+        a.colorOffset && !isZeroOffset(a.colorOffset)
+          ? applyOklabOffset(bg, a.colorOffset)
+          : bg;
+      writeColorValue(node, target, derived);
+    }
+
+    // Apply fg colors to text fields linked via textColorArea
+    for (const a of currentAssignments) {
+      if (!a.textColorArea) continue;
+      const fg = fgSelections[a.textColorArea];
+      if (!fg) continue;
+
+      const node = cloneNodes.get(a.nodeId);
+      if (!node) continue;
+      writeColorValue(node, 'fill', fg);
+    }
+
+    return clone;
+  }, [svgTree, showFgSubStep, bgSelections, fgSelections]);
+
   return (
     <Modal
       opened={opened}
@@ -929,85 +1039,121 @@ export function DetectionWizardModal({
           <Text fw={600}>Auto-Detect Elements</Text>
         </Group>
       }
-      size="lg"
+      size="80rem"
     >
-      <Stack gap="lg">
-        <Stepper active={activeStep} allowNextStepsSelect={false} size="sm">
-          {steps.map((step) => (
-            <Stepper.Step key={step.key} label={step.label} icon={step.icon} />
-          ))}
-        </Stepper>
-
-        {currentStep?.key === 'color' &&
-          (showFgSubStep ? (
-            <FgColorSubStep
-              colorAreas={fgColorAreas}
-              fgSelections={fgSelections}
-              onFgChange={(fieldId, hex) =>
-                setFgSelections((prev) => ({ ...prev, [fieldId]: hex }))
-              }
-            />
-          ) : (
-            <ColorStepContent
-              colorClusters={colorClusters}
-              threshold={colorThreshold}
-              onThresholdChange={setColorThreshold}
-              selections={colorSelections}
-              onSelectionsChange={setColorSelections}
-            />
-          ))}
-
-        {currentStep?.key === 'text' && (
-          <TextStepContent
-            detectedTexts={detectedTexts}
-            selections={textSelections}
-            onSelectionsChange={setTextSelections}
-            colorAreaOptions={fgColorAreas}
-            textAreaSelections={textAreaSelections}
-            onTextAreaSelectionsChange={setTextAreaSelections}
-          />
+      <div className="flex min-h-[500px] gap-6">
+        {/* ── SVG preview ── */}
+        {svgTree && (
+          <div className="hidden shrink-0 basis-[340px] md:block">
+            <div className="sticky top-0 overflow-hidden rounded-md border border-(--mantine-color-dark-4) bg-(--mantine-color-dark-7)">
+              <SvgRenderer node={previewTree ?? svgTree} />
+            </div>
+          </div>
         )}
 
-        {currentStep?.key === 'image' && (
-          <ImageStepContent
-            detectedImages={detectedImages}
-            selections={imageSelections}
-            onSelectionsChange={setImageSelections}
-          />
-        )}
-
-        <Group justify="space-between">
-          <Button
-            variant="subtle"
-            leftSection={<ArrowLeft size={16} />}
-            onClick={handleBack}
-            disabled={activeStep === 0 && !showFgSubStep}
-          >
-            Back
-          </Button>
-
-          <Group gap="xs">
-            <Button variant="subtle" onClick={handleSkip}>
-              Skip
-            </Button>
-            <Button
-              leftSection={
-                isLastStep ? <Wand2 size={16} /> : <ArrowRight size={16} />
+        {/* ── Wizard content ── */}
+        <Stack
+          gap="lg"
+          justify="space-between"
+          style={{ flex: 1, minWidth: 0 }}
+        >
+          <Stack gap="lg">
+            <Stepper
+              active={
+                showFgSubStep && currentStep?.key === 'color'
+                  ? activeStep + 1
+                  : activeStep
               }
-              onClick={handleNext}
-              disabled={currentHasBlockingDuplicate}
+              allowNextStepsSelect={false}
+              size="sm"
             >
-              {isLastStep
-                ? currentHasAssignment
-                  ? 'Apply'
-                  : 'Done'
-                : currentHasAssignment
-                  ? 'Apply & Continue'
-                  : 'Next'}
+              {steps.map((step) => (
+                <Stepper.Step
+                  key={step.key}
+                  label={step.label}
+                  icon={step.icon}
+                />
+              ))}
+            </Stepper>
+
+            {currentStep?.key === 'color' &&
+              (showFgSubStep ? (
+                <FgColorSubStep
+                  colorAreas={fgColorAreas}
+                  fgSelections={fgSelections}
+                  onFgChange={(fieldId, hex) =>
+                    setFgSelections((prev) => ({ ...prev, [fieldId]: hex }))
+                  }
+                  bgSelections={bgSelections}
+                  onBgChange={(fieldId, hex) =>
+                    setBgSelections((prev) => ({ ...prev, [fieldId]: hex }))
+                  }
+                />
+              ) : (
+                <ColorStepContent
+                  colorClusters={colorClusters}
+                  threshold={colorThreshold}
+                  onThresholdChange={setColorThreshold}
+                  selections={colorSelections}
+                  onSelectionsChange={setColorSelections}
+                />
+              ))}
+
+            {currentStep?.key === 'text' && (
+              <TextStepContent
+                detectedTexts={detectedTexts}
+                selections={textSelections}
+                onSelectionsChange={setTextSelections}
+                colorAreaOptions={fgColorAreas}
+                textAreaSelections={textAreaSelections}
+                onTextAreaSelectionsChange={setTextAreaSelections}
+                fgSelections={fgSelections}
+                bgSelections={bgSelections}
+              />
+            )}
+
+            {currentStep?.key === 'image' && (
+              <ImageStepContent
+                detectedImages={detectedImages}
+                selections={imageSelections}
+                onSelectionsChange={setImageSelections}
+              />
+            )}
+          </Stack>
+
+          <Group justify="space-between">
+            <Button
+              variant="subtle"
+              leftSection={<ArrowLeft size={16} />}
+              onClick={handleBack}
+              disabled={activeStep === 0 && !showFgSubStep}
+            >
+              Back
             </Button>
+
+            <Group gap="xs">
+              <Button variant="subtle" onClick={handleSkip}>
+                Skip
+              </Button>
+              <Button
+                leftSection={
+                  isLastStep ? <Wand2 size={16} /> : <ArrowRight size={16} />
+                }
+                onClick={handleNext}
+                disabled={currentHasBlockingDuplicate}
+              >
+                {isLastStep
+                  ? currentHasAssignment
+                    ? 'Apply'
+                    : 'Done'
+                  : currentHasAssignment
+                    ? 'Apply & Continue'
+                    : 'Next'}
+              </Button>
+            </Group>
           </Group>
-        </Group>
-      </Stack>
+        </Stack>
+      </div>
     </Modal>
   );
 }

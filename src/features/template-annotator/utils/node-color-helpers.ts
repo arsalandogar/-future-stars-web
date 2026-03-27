@@ -46,22 +46,34 @@ export function getTextFillColor(node: SvgJsonNode): string {
 }
 
 /**
- * Write a fill color to a node, respecting CSS specificity:
- * inline style > attribute. Mutates node in place.
+ * Write a color value to a node for the given target (fill/stroke/stop-color).
+ * Respects CSS specificity: inline style > attribute. Mutates node in place.
+ */
+export function applyNodeColor(
+  node: SvgJsonNode,
+  target: ColorTarget,
+  color: string
+): void {
+  const prop = target;
+  const re = STYLE_REGEXES[prop] ?? new RegExp(`${prop}:\\s*[^;]+`);
+  if (node.attributes.style && re.test(node.attributes.style)) {
+    node.attributes.style = node.attributes.style.replace(
+      re,
+      `${prop}: ${color}`
+    );
+  } else if (node.attributes.style && target === 'fill') {
+    // fill may not be in style but still needs style-level override
+    node.attributes.style = `${prop}: ${color}; ${node.attributes.style}`;
+  } else {
+    node.attributes[prop] = color;
+  }
+}
+
+/**
+ * Shorthand for applying a fill color. Delegates to applyNodeColor.
  */
 export function applyNodeFill(node: SvgJsonNode, color: string): void {
-  if (node.attributes.style) {
-    if (/fill\s*:/.test(node.attributes.style)) {
-      node.attributes.style = node.attributes.style.replace(
-        /fill\s*:\s*[^;]+/,
-        `fill: ${color}`
-      );
-    } else {
-      node.attributes.style = `fill: ${color}; ${node.attributes.style}`;
-    }
-  } else {
-    node.attributes.fill = color;
-  }
+  applyNodeColor(node, 'fill', color);
 }
 
 export function getNodeFontSize(node: SvgJsonNode): number | undefined {

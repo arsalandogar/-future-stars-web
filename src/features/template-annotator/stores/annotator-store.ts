@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 import type { SvgJsonNode } from '@/types/svg';
-import { isZeroOffset } from '@/utils/color-math';
+import { isZeroOffset, applyOklabOffset } from '@/utils/color-math';
 
 import { EDITABLE_FIELDS, type EditableFieldId } from '@/features/templates';
 
@@ -25,7 +25,7 @@ import {
   applyTranslate,
   removeScaleFromTransform,
 } from '../utils/svg-transform-helpers';
-import { applyNodeFill } from '../utils/node-color-helpers';
+import { applyNodeFill, applyNodeColor } from '../utils/node-color-helpers';
 import { getComputedTextAnchor } from '../utils/svg-overlay-helpers';
 
 type UndoEntry =
@@ -85,6 +85,9 @@ interface AnnotatorState {
 
   // Default palette foreground colors per color area (independent of text links)
   defaultPaletteFg: Map<EditableFieldId, string>;
+
+  // Default palette background colors per color area (overrides detected bg)
+  defaultPaletteBg: Map<EditableFieldId, string>;
 
   // Touch bounds editing
   editingTouchBoundsNodeId: string | null;
@@ -192,6 +195,9 @@ interface AnnotatorState {
   clearPreviewColors: () => void;
   setDefaultPaletteFg: (fieldId: EditableFieldId, fg: string) => void;
   bulkSetDefaultPaletteFg: (fgMap: Map<EditableFieldId, string>) => void;
+  setDefaultPaletteBg: (fieldId: EditableFieldId, bg: string) => void;
+  bulkSetDefaultPaletteBg: (bgMap: Map<EditableFieldId, string>) => void;
+  applyBgToColorAreas: (bgMap: Map<EditableFieldId, string>) => void;
   applyFgToColorArea: (fieldId: EditableFieldId, fgHex: string) => void;
   setTextColorArea: (
     nodeId: string,
@@ -473,6 +479,7 @@ const initialState = {
   hoveredHighlightFieldId: null as EditableFieldId | null,
   previewColors: new Map<EditableFieldId, { bg: string; fg: string }>(),
   defaultPaletteFg: new Map<EditableFieldId, string>(),
+  defaultPaletteBg: new Map<EditableFieldId, string>(),
   editingTouchBoundsNodeId: null as string | null,
   editingTransformNodeId: null as string | null,
   bulkTouchBoundsEditing: false,
@@ -504,6 +511,7 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
       hoveredHighlightFieldId: null,
       previewColors: new Map<EditableFieldId, { bg: string; fg: string }>(),
       defaultPaletteFg: new Map<EditableFieldId, string>(),
+      defaultPaletteBg: new Map<EditableFieldId, string>(),
       expandedNodeIds: expanded,
       assignments: opts.assignments ?? [],
       undoStack: [],
@@ -595,6 +603,53 @@ export const useAnnotatorStore = create<AnnotatorState>()((set, get) => ({
       next.set(fieldId, fg);
     }
     set({ defaultPaletteFg: next });
+  },
+
+  setDefaultPaletteBg: (fieldId, bg) => {
+    const next = new Map(get().defaultPaletteBg);
+    next.set(fieldId, bg);
+    set({ defaultPaletteBg: next });
+  },
+
+  bulkSetDefaultPaletteBg: (bgMap) => {
+    const next = new Map(get().defaultPaletteBg);
+    for (const [fieldId, bg] of bgMap) {
+      next.set(fieldId, bg);
+    }
+    set({ defaultPaletteBg: next });
+  },
+
+  applyBgToColorAreas: (bgMap) => {
+    const { assignments, nodeMap, svgTree, defaultPaletteBg } = get();
+    if (!svgTree) return;
+
+    let mutated = false;
+    for (const a of assignments) {
+      if (EDITABLE_FIELDS[a.fieldId].type !== 'color') continue;
+      const bg = bgMap.get(a.fieldId);
+      if (!bg) continue;
+
+      const node = nodeMap.get(a.nodeId);
+      if (!node || node.type !== 'element') continue;
+
+      const target = a.colorTarget ?? 'fill';
+      const derived =
+        a.colorOffset && !isZeroOffset(a.colorOffset)
+          ? applyOklabOffset(bg, a.colorOffset)
+          : bg;
+      applyNodeColor(node, target, derived);
+      mutated = true;
+    }
+
+    const nextBg = new Map(defaultPaletteBg);
+    for (const [fieldId, bg] of bgMap) {
+      nextBg.set(fieldId, bg);
+    }
+
+    set({
+      ...(mutated ? { svgTree: { ...svgTree } } : {}),
+      defaultPaletteBg: nextBg,
+    });
   },
 
   applyFgToColorArea: (fieldId, fgHex) => {
