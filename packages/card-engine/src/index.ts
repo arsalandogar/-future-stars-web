@@ -126,6 +126,7 @@ export {
   withTextEdit,
   withPresetColors,
   withPresetTextColors,
+  resetPresetTextColors,
   withSwappedColors,
   withAllColorsReset,
   withImageRemoved,

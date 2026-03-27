@@ -42,6 +42,8 @@ export interface EditableTextField {
   touchBounds?: TouchBounds;
   /** Links this text field to a color area for foreground color application. */
   textColorArea?: EditableFieldId;
+  /** Original fill color of this text element, captured when textColorArea is set. */
+  originalTextColor?: string;
 }
 
 export function discoverEditableTextFields(
@@ -89,6 +91,10 @@ export function discoverEditableTextFields(
         ? (textColorAreaRaw as EditableFieldId)
         : undefined;
 
+    const originalTextColor = textColorArea
+      ? readColorValue(elementNodes[0], 'fill') || undefined
+      : undefined;
+
     fields.push({
       fieldId,
       label: fieldDef.label,
@@ -97,6 +103,7 @@ export function discoverEditableTextFields(
       elementNodes,
       ...(touchBounds && { touchBounds }),
       ...(textColorArea && { textColorArea }),
+      ...(originalTextColor && { originalTextColor }),
     });
   }
 

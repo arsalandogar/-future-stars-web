@@ -9,6 +9,7 @@ import {
   prepareTemplate,
   applyEditsForRender,
   withPresetColors,
+  withPresetTextColors,
 } from './edit-operations.ts';
 
 export type Side = 'front' | 'back';
@@ -21,7 +22,7 @@ export interface SideState {
   edits: Edits;
   revision: number;
   appliedPresetId: number | null;
-  appliedPresetColors: string[] | null;
+  appliedPresetColors: { bg: string; fg: string }[] | null;
 }
 
 export function createEmptySideState(): SideState {
@@ -50,9 +51,19 @@ export function initializeSideSnapshot(
     // Reapply preset colors positionally on the new template before replaying
     // explicit edits. This preserves preset intent across template changes even
     // when some preset colors were not stored in edits on the previous template.
-    withPresetColors({}, fields.colorFields, previous.appliedPresetColors);
+    const bgColors = previous.appliedPresetColors.map((p) => p.bg);
+    withPresetColors({}, fields.colorFields, bgColors);
   }
   applyEditsForRender(fields, preservedEdits);
+
+  // Apply fg text colors after edits so they take final precedence on text fills
+  if (previous.appliedPresetColors) {
+    withPresetTextColors(
+      fields.textFields,
+      fields.colorFields,
+      previous.appliedPresetColors
+    );
+  }
 
   return {
     workingCopy,

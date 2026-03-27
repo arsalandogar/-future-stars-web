@@ -473,3 +473,17 @@ export function withPresetTextColors(
     }
   }
 }
+
+/**
+ * Reset text elements linked to color areas back to their original fill color.
+ * Used when a preset is cleared or the user deviates from a preset.
+ * Mutates SVG nodes directly.
+ */
+export function resetPresetTextColors(textFields: EditableTextField[]): void {
+  for (const textField of textFields) {
+    if (!textField.textColorArea || !textField.originalTextColor) continue;
+    for (const node of textField.elementNodes) {
+      writeColorValue(node, 'fill', textField.originalTextColor);
+    }
+  }
+}
