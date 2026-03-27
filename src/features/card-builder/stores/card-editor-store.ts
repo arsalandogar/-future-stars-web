@@ -19,6 +19,8 @@ import {
   withNudgeEdit,
   withTextEdit,
   withPresetColors,
+  withPresetTextColors,
+  resetPresetTextColors,
   withSwappedColors,
   withAllColorsReset,
   withImageRemoved,
@@ -73,7 +75,11 @@ interface CardEditorState {
     dy: number,
     side?: Side
   ) => void;
-  applyColorPreset: (colors: string[], presetId: number, side?: Side) => void;
+  applyColorPreset: (
+    colorPairs: { bg: string; fg: string }[],
+    presetId: number,
+    side?: Side
+  ) => void;
   swapColors: (
     fieldIdA: EditableFieldId,
     fieldIdB: EditableFieldId,
@@ -306,25 +312,42 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => {
 
       const newEdits = withColorEdit(sideState.edits, field, color);
 
+      // Reset fg text colors when deviating from a preset
+      if (sideState.appliedPresetColors) {
+        resetPresetTextColors(sideState.editableFields);
+      }
+
       set(
-        commitSide(state, target, { edits: newEdits, appliedPresetId: null })
+        commitSide(state, target, {
+          edits: newEdits,
+          appliedPresetId: null,
+          appliedPresetColors: null,
+        })
       );
     },
 
-    applyColorPreset: (colors, presetId, side) => {
+    applyColorPreset: (colorPairs, presetId, side) => {
       const state = get();
       const [target, sideState] = getSide(state, side);
+      const bgColors = colorPairs.map((p) => p.bg);
       const newEdits = withPresetColors(
         sideState.edits,
         sideState.editableColorFields,
-        colors
+        bgColors
+      );
+
+      // Apply fg colors to text elements linked to color areas
+      withPresetTextColors(
+        sideState.editableFields,
+        sideState.editableColorFields,
+        colorPairs
       );
 
       set(
         commitSide(state, target, {
           edits: newEdits,
           appliedPresetId: presetId,
-          appliedPresetColors: colors,
+          appliedPresetColors: colorPairs,
         })
       );
     },
@@ -342,14 +365,26 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => {
 
       const newEdits = withSwappedColors(sideState.edits, fieldA, fieldB);
 
+      // Reset fg text colors when deviating from a preset
+      if (sideState.appliedPresetColors) {
+        resetPresetTextColors(sideState.editableFields);
+      }
+
       set(
-        commitSide(state, target, { edits: newEdits, appliedPresetId: null })
+        commitSide(state, target, {
+          edits: newEdits,
+          appliedPresetId: null,
+          appliedPresetColors: null,
+        })
       );
     },
 
     resetAllColors: (side) => {
       const state = get();
       const [target, sideState] = getSide(state, side);
+
+      // Restore original fg text colors before resetting bg colors
+      resetPresetTextColors(sideState.editableFields);
 
       set(
         commitSide(state, target, {
@@ -366,18 +401,28 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => {
     resetToPreset: (side) => {
       const state = get();
       const [target, sideState] = getSide(state, side);
+      const colorPairs = sideState.appliedPresetColors ?? [];
+      const bgColors = colorPairs.map((p) => p.bg);
       const newEdits = withPresetColors(
         sideState.edits,
         sideState.editableColorFields,
-        sideState.appliedPresetColors ?? []
+        bgColors
       );
+
+      // Re-apply fg text colors from the preset
+      if (colorPairs.length > 0) {
+        withPresetTextColors(
+          sideState.editableFields,
+          sideState.editableColorFields,
+          colorPairs
+        );
+      }
 
       set(
         commitSide(state, target, {
           edits: newEdits,
-          appliedPresetId: sideState.appliedPresetColors
-            ? sideState.appliedPresetId
-            : null,
+          appliedPresetId:
+            colorPairs.length > 0 ? sideState.appliedPresetId : null,
         })
       );
     },

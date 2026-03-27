@@ -6,7 +6,7 @@ import { Head } from '@/components/seo/head';
 import { usePageHeader } from '@/hooks/use-page-header';
 import type { SvgJsonNode } from '@/types/svg';
 
-import { renderEditedTemplate } from '@fs-card-engine';
+import { renderEditedTemplate, withPresetTextColors } from '@fs-card-engine';
 
 import { BuilderTabsPanel } from '../components/builder-tabs-panel';
 import { CardPreview } from '../components/card-preview';
@@ -63,10 +63,16 @@ export function TemplateDefaultsPage({
   }, [resetBuilder, resetEditor]);
 
   const handleSave = () => {
-    const { frontEdits } = useCardEditorStore.getState().getEditsForSave();
-    const { workingCopy } = renderEditedTemplate(svgNode, frontEdits);
+    const state = useCardEditorStore.getState();
+    const { frontEdits } = state.getEditsForSave();
+    const { workingCopy, fields } = renderEditedTemplate(svgNode, frontEdits);
 
-    // Save the modified SVG
+    // Bake fg text colors into the saved SVG if a preset was applied
+    const presetColors = state.sides.front.appliedPresetColors;
+    if (presetColors) {
+      withPresetTextColors(fields.textFields, fields.colorFields, presetColors);
+    }
+
     onSave({ id, svgJson: workingCopy });
   };
 

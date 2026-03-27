@@ -23,7 +23,11 @@ const SUB_TAB_ITEMS: { label: string; value: ColorSubTab }[] = [
 ];
 
 interface SwatchGridProps {
-  items: { paletteId: number; colors: string[]; label?: string }[];
+  items: {
+    paletteId: number;
+    colorPairs: { bg: string; fg: string }[];
+    label?: string;
+  }[];
   appliedPresetId: number | null;
   children?: React.ReactNode;
 }
@@ -36,7 +40,7 @@ function SwatchGrid({ items, appliedPresetId, children }: SwatchGridProps) {
         <ColorPaletteSwatch
           key={item.paletteId}
           paletteId={item.paletteId}
-          colors={item.colors}
+          colorPairs={item.colorPairs}
           selected={appliedPresetId === item.paletteId}
           label={item.label}
         />
@@ -109,7 +113,8 @@ function PopularContent() {
   const featured = (data?.data ?? []).filter((t) => t.isFeatured);
   const items = featured.map((t) => ({
     paletteId: t.colorPaletteId,
-    colors: t.palette?.colorPairs.map((p) => p.bg) ?? [],
+    colorPairs:
+      t.palette?.colorPairs.map((p) => ({ bg: p.bg, fg: p.fg })) ?? [],
   }));
 
   return (
@@ -145,7 +150,8 @@ function TeamContent() {
 
   const items = filtered.map((t) => ({
     paletteId: t.colorPaletteId,
-    colors: t.palette?.colorPairs.map((p) => p.bg) ?? [],
+    colorPairs:
+      t.palette?.colorPairs.map((p) => ({ bg: p.bg, fg: p.fg })) ?? [],
     label: t.abbreviation,
   }));
 
@@ -191,7 +197,7 @@ function MyColorsContent() {
 
   const items = favorites.map((p) => ({
     paletteId: p.id,
-    colors: p.colorPairs.map((c) => c.bg),
+    colorPairs: p.colorPairs.map((c) => ({ bg: c.bg, fg: c.fg })),
   }));
 
   return <SwatchGrid items={items} appliedPresetId={appliedPresetId} />;

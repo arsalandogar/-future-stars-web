@@ -4,14 +4,14 @@ import styles from './color-palette-swatch.module.css';
 
 interface ColorPaletteSwatchProps {
   paletteId: number;
-  colors: string[];
+  colorPairs: { bg: string; fg: string }[];
   selected: boolean;
   label?: string;
 }
 
 export function ColorPaletteSwatch({
   paletteId,
-  colors,
+  colorPairs,
   selected,
   label,
 }: ColorPaletteSwatchProps) {
@@ -21,15 +21,15 @@ export function ColorPaletteSwatch({
     <button
       type="button"
       className={styles.wrapper}
-      onClick={() => applyColorPreset(colors, paletteId)}
+      onClick={() => applyColorPreset(colorPairs, paletteId)}
       aria-label={`Apply ${label ?? 'palette'} colors`}
     >
       <div className={styles.swatch} data-selected={selected || undefined}>
-        {colors.map((color, i) => (
+        {colorPairs.map((pair, i) => (
           <div
-            key={`${color}-${i}`}
+            key={`${pair.bg}-${i}`}
             className={styles.band}
-            style={{ backgroundColor: color }}
+            style={{ backgroundColor: pair.bg }}
           />
         ))}
       </div>
