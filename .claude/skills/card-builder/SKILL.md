@@ -36,8 +36,10 @@ CardBuilderShell (main layout orchestrator)
        └─ BuilderTabsPanel  (Content | Colors | Photo | Templates)
             ├─ ContentTab        (text field editing)
             ├─ ColorsTab         (color picker + presets + favorites)
-            │   ├─ ActiveColorsBar    (current color circles)
-            │   └─ ColorSourceTabs    (Popular | Team | My Colors)
+            │   ├─ ActiveColorsBar    (current color circles with per-field bg/fg editing,
+            │   │                      color picker popover, eye dropper, hex input,
+            │   │                      swap/rotate, favorites, popular flame toggle)
+            │   └─ ColorSourceTabs    (Popular | Team | My Colors, with drag-to-reorder on Popular)
             ├─ PhotoTab          (image upload, crop, position)
             │   ├─ ImageFieldsList
             │   ├─ ImageActions
@@ -68,6 +70,8 @@ interface CardBuilderState {
   activeColorSubTab: ColorSubTab; // 'popular' | 'team' | 'my-colors'
   activePhotoSubTab: PhotoSubTab; // 'image' | 'position'
   selectedImageFieldId: EditableFieldId | null;
+  activeTemplateId: number | null; // current template being edited
+  templateDefaultsId: number | null; // template ID when in defaults editor mode
 }
 ```
 
@@ -105,6 +109,8 @@ The main editing store. Manages both sides of a card (front/back), tracks edits,
 | `nudgeImagePosition(fieldId, dx, dy)`              | Pans image + applies to DOM nodes                                   |
 | `applyColorPreset(colorPairs, presetId)`           | Applies bg colors to color fields + fg colors to linked text fields |
 | `swapColors(fieldIdA, fieldIdB)`                   | Swaps two color field values, clears preset tracking                |
+| `rotateColors()`                                   | Rotates all color field values by one position                      |
+| `updateTextColorForArea(fieldId, color)`           | Updates foreground text color for a color area                      |
 | `resetAllColors()`                                 | Resets all bg colors + restores original text fg colors             |
 | `resetToPreset()`                                  | Re-applies the last-used preset (both bg and fg)                    |
 | `getEditsForSave()`                                | Returns clean `{ frontEdits, backEdits }` for API persistence       |
@@ -190,17 +196,19 @@ After a drag, sets `wasDragRef` to prevent the subsequent click from firing.
 
 ## API Integration
 
-| Hook                     | Endpoint                           | Purpose                                         |
-| ------------------------ | ---------------------------------- | ----------------------------------------------- |
-| `cardQuery`              | `GET cards/:id`                    | Fetch card details                              |
-| `useSaveCard`            | `POST cards/v2`                    | Create new card (seeds cache, invalidates list) |
-| `useUpdateCard`          | `PUT cards/v2/:id`                 | Update existing card                            |
-| `useUploadCardImage`     | `POST images/upload`               | Upload image blob as FormData                   |
-| `useColorFavorites`      | `GET color-teams/favorites`        | User's saved color palettes                     |
-| `useAddColorFavorite`    | `POST color-teams/favorites`       | Save a palette                                  |
-| `useRemoveColorFavorite` | `DELETE color-teams/favorites/:id` | Remove a saved palette                          |
-| `useBrowseColorTeams`    | `GET color-teams`                  | Popular/featured palettes (10min stale)         |
-| `useBrowseLeagues`       | `GET leagues`                      | Leagues for team color filtering (30min stale)  |
+| Hook                         | Endpoint                                         | Purpose                                             |
+| ---------------------------- | ------------------------------------------------ | --------------------------------------------------- |
+| `cardQuery`                  | `GET cards/:id`                                  | Fetch card details                                  |
+| `useSaveCard`                | `POST cards/v2`                                  | Create new card (seeds cache, invalidates list)     |
+| `useUpdateCard`              | `PUT cards/v2/:id`                               | Update existing card                                |
+| `useUploadCardImage`         | `POST images/upload`                             | Upload image blob as FormData                       |
+| `useColorFavorites`          | `GET color-teams/favorites`                      | User's saved color palettes                         |
+| `useAddColorFavorite`        | `POST color-teams/favorites`                     | Save a palette                                      |
+| `useRemoveColorFavorite`     | `DELETE color-teams/favorites/:id`               | Remove a saved palette                              |
+| `useBrowseColorTeams`        | `GET color-teams`                                | Popular/featured palettes (10min stale)             |
+| `useBrowseLeagues`           | `GET leagues`                                    | Leagues for team color filtering (30min stale)      |
+| `useTemplateColorPalettes`   | `GET templates/:id/color-palettes`               | Popular color palettes for a template (10min stale) |
+| `useReorderTemplatePalettes` | `PUT admin/templates/:id/color-palettes/reorder` | Reorder popular palettes for a template             |
 
 **Payload shape for save/update:**
 
@@ -320,11 +328,15 @@ The card builder imports these from `@fs-card-engine`:
 - `api/upload-card-image.ts` — `useUploadCardImage` mutation
 - `api/color-favorites.ts` — Favorite palette CRUD
 - `api/browse-color-teams.ts` — Color team/league browsing
+- `api/template-color-palettes.ts` — Popular palettes for a template
+- `api/reorder-template-palettes.ts` — Reorder popular palettes mutation
 
 ### Hooks
 
 - `hooks/use-card-preview-render-options.ts` — Maps SVG clicks to builder actions
 - `hooks/use-preview-gestures.ts` — Wheel zoom, drag-to-pan, pinch-to-zoom
+- `hooks/use-image-colors.ts` — Extracts dominant colors from card images for color picker suggestions
+- `hooks/use-is-template-palette.ts` — Detects if current color edits match a template's popular palette
 
 ### Library
 
@@ -342,9 +354,12 @@ The card builder imports these from `@fs-card-engine`:
 - `components/content-tab.tsx` — Text fields tab
 - `components/content-field.tsx` — Individual text field input
 - `components/colors-tab.tsx` — Color editing tab
-- `components/active-colors-bar.tsx` — Current color circles
-- `components/color-source-tabs.tsx` — Popular/Team/My Colors sub-tabs
+- `components/active-colors-bar.tsx` — Current color circles with per-field popover editing (bg/fg pickers, eye dropper, hex input, swap/rotate, favorites, flame toggle)
+- `components/active-colors-bar.module.css` — Styles for the active colors bar and its popovers
+- `components/color-source-tabs.tsx` — Popular/Team/My Colors sub-tabs (Popular supports drag-to-reorder)
+- `components/color-source-tabs.module.css` — Styles for color source tabs
 - `components/color-palette-swatch.tsx` — Color palette preview
+- `components/color-palette-swatch.module.css` — Styles for palette swatches
 - `components/photo-tab.tsx` — Photo/image tab
 - `components/image-fields-list.tsx` — Image field selection
 - `components/image-actions.tsx` — Upload/remove actions
@@ -359,6 +374,8 @@ The card builder imports these from `@fs-card-engine`:
 ### Utils
 
 - `utils/crop-image.ts` — Canvas-based image cropping with MIME detection
+- `utils/extract-image-colors.ts` — Dominant color extraction from images (canvas-based, LRU-cached)
+- `utils/read-node-fill.ts` — Shared utility to read fill color from SVG node attributes/style
 
 ## Common Tasks
 
