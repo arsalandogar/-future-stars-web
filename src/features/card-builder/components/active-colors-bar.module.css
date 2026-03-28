@@ -29,6 +29,70 @@
   }
 }
 
+.colorCircle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.2);
+}
+
+.fgText {
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: -0.5px;
+}
+
+.pickerTabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: var(--mantine-spacing-xs);
+}
+
+.pickerTab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border: 1px solid #2a3045;
+  border-radius: var(--mantine-radius-sm);
+  background: transparent;
+  color: var(--mantine-color-dark-2);
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease,
+    border-color 150ms ease;
+
+  &:hover {
+    color: var(--mantine-color-dark-0);
+  }
+
+  &[data-active] {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--mantine-color-white);
+    border-color: var(--mantine-color-primary-4);
+  }
+}
+
+.pickerTabDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
 .swapButton {
   display: flex;
   align-items: center;
@@ -77,10 +141,155 @@
     color: #ff6b6b;
   }
 
+  &[data-active-flame] {
+    color: #f59e0b;
+  }
+
   &:disabled,
   &[data-disabled] {
     opacity: 0.3;
     cursor: default;
     pointer-events: none;
+  }
+}
+
+.popoverArrow {
+  --popover-arrow-bg: #1a1f2e;
+  border-color: #2a3045;
+}
+
+.closeButton {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: var(--mantine-radius-sm);
+  background: none;
+  color: var(--mantine-color-dark-2);
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease;
+
+  &:hover {
+    color: var(--mantine-color-white);
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* ── Popover: palette fields view ── */
+
+.sectionLabel {
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--mantine-color-dark-2);
+  margin-bottom: var(--mantine-spacing-xs);
+}
+
+.colorRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: var(--mantine-spacing-md);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.popoverCircle {
+  width: 48px;
+  height: 48px;
+  padding: 3px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: none;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    transform 150ms ease;
+
+  &:hover {
+    transform: scale(1.05);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  &[data-selected] {
+    border-color: var(--mantine-color-primary-4);
+  }
+}
+
+.popoverCircleInner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.imageColorCircle {
+  width: 36px;
+  height: 36px;
+  padding: 2px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  background: none;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    transform 150ms ease;
+
+  &:hover {
+    transform: scale(1.08);
+    border-color: rgba(255, 255, 255, 0.35);
+  }
+}
+
+.addButton {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px dashed rgba(255, 255, 255, 0.25);
+  background: none;
+  color: var(--mantine-color-dark-2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
+  transition:
+    border-color 150ms ease,
+    color 150ms ease;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.45);
+    color: var(--mantine-color-dark-0);
+  }
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--mantine-color-dark-2);
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: var(--mantine-spacing-xs);
+  transition: color 150ms ease;
+
+  &:hover {
+    color: var(--mantine-color-white);
   }
 }

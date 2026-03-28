@@ -68,3 +68,35 @@
     color: var(--mantine-color-white);
   }
 }
+
+.sortableItem {
+  position: relative;
+}
+
+.dragHandle {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: var(--mantine-radius-xs);
+  background: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.7);
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 150ms ease;
+
+  .sortableItem:hover & {
+    opacity: 1;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+}

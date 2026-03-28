@@ -25,6 +25,7 @@ import {
   withAllColorsReset,
   withImageRemoved,
   withTextFieldReset,
+  writeColorValue,
 } from '@fs-card-engine';
 import { ensureSvgFontsLoaded } from '../lib/ensure-svg-fonts-loaded';
 import { resolveCardBuilderFont } from '../lib/font-resolver';
@@ -56,6 +57,11 @@ interface CardEditorState {
     color: string,
     side?: Side
   ) => void;
+  updateTextColorForArea: (
+    colorFieldId: EditableFieldId,
+    fgColor: string,
+    side?: Side
+  ) => void;
   updateImageField: (
     fieldId: EditableFieldId,
     imageUrl: string,
@@ -85,6 +91,7 @@ interface CardEditorState {
     fieldIdB: EditableFieldId,
     side?: Side
   ) => void;
+  rotateColors: (side?: Side) => void;
   resetAllColors: (side?: Side) => void;
   resetToPreset: (side?: Side) => void;
   resetField: (fieldId: EditableFieldId, side?: Side) => void;
@@ -326,6 +333,29 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => {
       );
     },
 
+    updateTextColorForArea: (colorFieldId, fgColor, side) => {
+      const state = get();
+      const [target, sideState] = getSide(state, side);
+
+      let updated = false;
+      for (const textField of sideState.editableFields) {
+        if (textField.textColorArea !== colorFieldId) continue;
+        for (const node of textField.elementNodes) {
+          writeColorValue(node, 'fill', fgColor);
+        }
+        updated = true;
+      }
+
+      if (!updated) return;
+
+      set(
+        commitSide(state, target, {
+          appliedPresetId: null,
+          appliedPresetColors: null,
+        })
+      );
+    },
+
     applyColorPreset: (colorPairs, presetId, side) => {
       const state = get();
       const [target, sideState] = getSide(state, side);
@@ -366,6 +396,40 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => {
       const newEdits = withSwappedColors(sideState.edits, fieldA, fieldB);
 
       // Reset fg text colors when deviating from a preset
+      if (sideState.appliedPresetColors) {
+        resetPresetTextColors(sideState.editableFields);
+      }
+
+      set(
+        commitSide(state, target, {
+          edits: newEdits,
+          appliedPresetId: null,
+          appliedPresetColors: null,
+        })
+      );
+    },
+
+    rotateColors: (side) => {
+      const state = get();
+      const [target, sideState] = getSide(state, side);
+      const fields = sideState.editableColorFields;
+      if (fields.length < 2) return;
+
+      // Read current colors for each field
+      const colors = fields.map((f) => {
+        const v = sideState.edits[f.fieldId];
+        return typeof v === 'string' ? v : f.originalValue;
+      });
+
+      // Rotate: shift left (first goes to last)
+      const rotated = [...colors.slice(1), colors[0]];
+
+      // Build new edits with rotated colors
+      let newEdits = { ...sideState.edits };
+      for (let i = 0; i < fields.length; i++) {
+        newEdits = withColorEdit(newEdits, fields[i], rotated[i]);
+      }
+
       if (sideState.appliedPresetColors) {
         resetPresetTextColors(sideState.editableFields);
       }

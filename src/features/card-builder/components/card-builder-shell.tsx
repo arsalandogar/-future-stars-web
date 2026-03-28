@@ -30,6 +30,7 @@ export function CardBuilderShell({
 }: CardBuilderShellProps) {
   const resetBuilder = useCardBuilderStore((s) => s.reset);
   const setActiveTab = useCardBuilderStore((s) => s.setActiveTab);
+  const setActiveTemplateId = useCardBuilderStore((s) => s.setActiveTemplateId);
   const initializeSideFromSvg = useCardEditorStore(
     (s) => s.initializeSideFromSvg
   );
@@ -62,6 +63,10 @@ export function CardBuilderShell({
     variables: backTemplateId ?? 0,
     enabled: backTemplateId != null,
   });
+
+  useEffect(() => {
+    setActiveTemplateId(templateId);
+  }, [templateId, setActiveTemplateId]);
 
   useEffect(() => {
     if (templateId == null) {

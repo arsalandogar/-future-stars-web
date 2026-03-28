@@ -39,6 +39,10 @@ export function TemplateDefaultsPage({
   });
 
   const resetBuilder = useCardBuilderStore((s) => s.reset);
+  const setActiveTemplateId = useCardBuilderStore((s) => s.setActiveTemplateId);
+  const setTemplateDefaultsId = useCardBuilderStore(
+    (s) => s.setTemplateDefaultsId
+  );
   const initializeSideFromSvg = useCardEditorStore(
     (s) => s.initializeSideFromSvg
   );
@@ -47,6 +51,12 @@ export function TemplateDefaultsPage({
 
   const { previewRef, wasDragRef } = usePreviewGestures();
   const renderOptions = useCardPreviewRenderOptions(wasDragRef);
+
+  // Signal that we're in template-defaults admin mode
+  useEffect(() => {
+    setActiveTemplateId(id);
+    setTemplateDefaultsId(id);
+  }, [id, setActiveTemplateId, setTemplateDefaultsId]);
 
   // Initialize editor when SVG loads
   useEffect(() => {
