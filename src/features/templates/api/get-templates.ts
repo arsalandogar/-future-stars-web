@@ -6,6 +6,6 @@ import type { TemplatesListParams, TemplatesListResponse } from '../types';
 export const useTemplates = createQuery({
   queryKey: ['admin', 'templates'],
   fetcher: (params: TemplatesListParams): Promise<TemplatesListResponse> => {
-    return api.get('admin/templates', { params });
+    return api.get('admin/templates', { params: { ...params, mode: 'light' } });
   },
 });

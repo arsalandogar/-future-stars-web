@@ -1,0 +1,132 @@
+.sortableItem {
+  position: relative;
+}
+
+.dragHandle {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: var(--mantine-radius-xs);
+  background: rgba(0, 0, 0, 0.6);
+  color: rgba(255, 255, 255, 0.8);
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 150ms ease;
+
+  .sortableItem:hover & {
+    opacity: 1;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--mantine-radius-md);
+  background: var(--mantine-color-dark-7);
+  border: 1px solid var(--mantine-color-dark-5);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 150ms ease;
+
+  &:hover {
+    border-color: var(--mantine-color-dark-3);
+  }
+}
+
+.imageWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--mantine-spacing-md);
+  background: var(--mantine-color-dark-8);
+  aspect-ratio: 3 / 4;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--mantine-spacing-sm);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mantine-spacing-xs);
+}
+
+/* Enlarge / preview button */
+.enlargeBtn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  z-index: 2;
+  opacity: 0;
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+  pointer-events: none;
+
+  .imageWrap:hover & {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    pointer-events: auto;
+  }
+}
+
+@media (hover: none) {
+  .enlargeBtn {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1);
+    pointer-events: auto;
+  }
+}
+
+/* Back template PiP thumbnail */
+.backThumb {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 28%;
+  border-radius: var(--mantine-radius-xs);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  border: 1.5px solid var(--mantine-color-dark-4);
+  opacity: 0.92;
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+  z-index: 1;
+
+  &:hover {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+.backThumbDefault {
+  border: 1.5px dashed var(--mantine-color-yellow-5);
+}
+
+.backThumbImg {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: contain;
+  background: var(--mantine-color-dark-8);
+}

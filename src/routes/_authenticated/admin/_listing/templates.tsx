@@ -5,10 +5,12 @@ import { TemplatesListPage } from '@/features/templates';
 
 const defaultValues = {
   side: 'front' as const,
+  view: 'grid' as const,
 };
 
 const templatesSearchSchema = v.object({
   side: v.optional(v.fallback(v.picklist(['front', 'back']), 'front'), 'front'),
+  view: v.optional(v.fallback(v.picklist(['grid', 'list']), 'grid'), 'grid'),
 });
 
 export const Route = createFileRoute(
