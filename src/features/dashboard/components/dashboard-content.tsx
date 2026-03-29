@@ -2,7 +2,8 @@ import { lazy, Suspense } from 'react';
 
 import { SegmentedControl, Skeleton, Text } from '@mantine/core';
 import { getRouteApi } from '@tanstack/react-router';
-import { Clock, DollarSign, ShoppingCart, TrendingUp } from 'lucide-react';
+import { Clock, DollarSign, TrendingUp } from 'lucide-react';
+import { MdOutlineShoppingCart } from 'react-icons/md';
 
 import { formatCurrency } from '@/utils/currency';
 import { formatNumber } from '@/utils/number';
@@ -92,7 +93,7 @@ export function DashboardContent() {
             <StatCard
               change={stats?.totalOrders.change}
               color={STAT_COLORS.orders}
-              icon={ShoppingCart}
+              icon={MdOutlineShoppingCart}
               label="Total Orders"
               value={stats ? formatNumber(stats.totalOrders.current) : '0'}
             />

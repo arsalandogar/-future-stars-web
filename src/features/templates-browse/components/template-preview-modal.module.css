@@ -144,29 +144,39 @@
 
   & :global(.mantine-Drawer-body) {
     padding: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
   & .header {
     padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
+    flex-shrink: 0;
   }
 
   & .title {
-    font-size: var(--mantine-font-size-md);
+    font-size: var(--mantine-font-size-sm);
   }
 
   & .previewSection {
-    gap: var(--mantine-spacing-sm);
-    padding: var(--mantine-spacing-sm);
+    gap: var(--mantine-spacing-md);
+    padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    align-items: center;
   }
 
   & .previewCard {
-    width: 120px;
+    width: min(180px, 40vw);
   }
 
   & .tabsSection {
     padding: 0 var(--mantine-spacing-md);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    flex-shrink: 0;
 
     & :global(.mantine-Tabs-list) {
       gap: var(--mantine-spacing-md);
@@ -181,8 +191,9 @@
   }
 
   & .carouselSection {
-    padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+    padding: var(--mantine-spacing-sm) var(--mantine-spacing-sm);
     gap: var(--mantine-spacing-xs);
+    flex-shrink: 0;
   }
 
   & .arrowLeft,

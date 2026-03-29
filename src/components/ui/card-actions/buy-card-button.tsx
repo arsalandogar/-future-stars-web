@@ -1,5 +1,5 @@
 import { Button } from '@mantine/core';
-import { ShoppingCart } from 'lucide-react';
+import { MdOutlineShoppingCart } from 'react-icons/md';
 
 import { useCreatePackModalStore } from '@/features/customer';
 
@@ -26,7 +26,7 @@ export function BuyCardButton({
       size={size}
       radius="xl"
       fw={600}
-      leftSection={<ShoppingCart size={size === 'sm' ? 16 : 20} />}
+      leftSection={<MdOutlineShoppingCart size={size === 'sm' ? 16 : 20} />}
       className={className}
       onClick={() => openBuy(cardId, quantity)}
       loading={loading}

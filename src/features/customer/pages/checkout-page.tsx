@@ -3,11 +3,11 @@ import {
   Button,
   Checkbox,
   Loader,
+  Modal,
   Text,
   Title,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
 import { Elements } from '@stripe/react-stripe-js';
 import { useNavigate } from '@tanstack/react-router';
 import { ArrowLeft, CreditCard } from 'lucide-react';
@@ -45,6 +45,8 @@ export function CheckoutPage() {
     paymentModalOpened,
     { open: openPaymentModal, close: closePaymentModal },
   ] = useDisclosure(false);
+  const [errorModalOpened, { open: openErrorModal, close: closeErrorModal }] =
+    useDisclosure(false);
 
   // State
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
@@ -54,6 +56,7 @@ export function CheckoutPage() {
   const [orderId, setOrderId] = useState<number | null>(null);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [isInitiatingCheckout, setIsInitiatingCheckout] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
   // Store cart items snapshot before checkout to preserve display during payment
   const [checkoutCartItems, setCheckoutCartItems] = useState<CartItem[]>([]);
 
@@ -71,12 +74,13 @@ export function CheckoutPage() {
   );
   const shipping = 0; // Free shipping
   const total = subtotal + shipping;
+  const showErrors = validationErrors.length > 0;
 
   // Set default address on load
   if (!selectedAddress) {
     const defaultAddress = addresses.find((addr) => addr.isDefault);
     if (defaultAddress) {
-      setSelectedAddress(defaultAddress ?? addresses[0]);
+      setSelectedAddress(defaultAddress);
     }
   }
 
@@ -92,22 +96,13 @@ export function CheckoutPage() {
   };
 
   const handleInitiateCheckout = () => {
-    if (!selectedAddress) {
-      notifications.show({
-        title: 'Address Required',
-        message: 'Please select a shipping address to continue.',
-        color: 'red',
-      });
-      openAddressModal();
-      return;
-    }
+    const errors: string[] = [];
+    if (!selectedAddress) errors.push('Please add a shipping address');
+    if (!acceptTerms) errors.push('Please accept the Terms & Conditions');
 
-    if (!acceptTerms) {
-      notifications.show({
-        title: 'Terms Required',
-        message: 'Please accept the terms and conditions to continue.',
-        color: 'red',
-      });
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      openErrorModal();
       return;
     }
 
@@ -118,7 +113,7 @@ export function CheckoutPage() {
     checkout.mutate(
       {
         cartItemIds: cartItems.map((item) => item.id),
-        shippingAddressId: selectedAddress.id,
+        shippingAddressId: selectedAddress!.id,
         acceptTerms,
       },
       {
@@ -163,10 +158,21 @@ export function CheckoutPage() {
     });
   };
 
-  const isLoading = isCartLoading || isAddressLoading;
-  const canProceed =
-    selectedAddress && acceptTerms && displayCartItems.length > 0;
+  const confirmPayButton = (
+    <Button
+      variant="filled"
+      size="md"
+      radius="xl"
+      fullWidth
+      leftSection={<CreditCard size={18} />}
+      onClick={handleInitiateCheckout}
+      loading={isInitiatingCheckout}
+    >
+      Confirm & Pay
+    </Button>
+  );
 
+  const isLoading = isCartLoading || isAddressLoading;
   if (isLoading) {
     return (
       <>
@@ -226,20 +232,6 @@ export function CheckoutPage() {
               </span>
             </Title>
           </div>
-          {!clientSecret && (
-            <Button
-              variant="filled"
-              size="md"
-              radius="xl"
-              leftSection={<CreditCard size={18} />}
-              onClick={handleInitiateCheckout}
-              loading={isInitiatingCheckout}
-              disabled={!canProceed}
-              className={styles.confirmButton}
-            >
-              Confirm & Pay
-            </Button>
-          )}
         </div>
 
         {/* Content */}
@@ -257,6 +249,7 @@ export function CheckoutPage() {
             <CheckoutShippingSection
               address={selectedAddress}
               onEdit={openAddressModal}
+              error={showErrors && !selectedAddress}
             />
           </div>
 
@@ -268,54 +261,49 @@ export function CheckoutPage() {
               total={total}
             />
             {!clientSecret && (
-              <div className={styles.termsSection}>
-                <Checkbox
-                  checked={acceptTerms}
-                  onChange={(e) => setAcceptTerms(e.currentTarget.checked)}
-                  radius={0}
-                  color="primary"
-                  label={
-                    <Text size="sm" c="white">
-                      I agree to the{' '}
-                      <a
-                        href="/terms"
-                        target="_blank"
-                        className={styles.termsLink}
-                      >
-                        Terms & Conditions
-                      </a>{' '}
-                      and{' '}
-                      <a
-                        href="/privacy"
-                        target="_blank"
-                        className={styles.termsLink}
-                      >
-                        Privacy Policy
-                      </a>
+              <>
+                <div className={styles.termsSection}>
+                  <Checkbox
+                    checked={acceptTerms}
+                    onChange={(e) => setAcceptTerms(e.currentTarget.checked)}
+                    radius={0}
+                    color="primary"
+                    label={
+                      <Text size="sm" c="white">
+                        I agree to the{' '}
+                        <a
+                          href="/terms"
+                          target="_blank"
+                          className={styles.termsLink}
+                        >
+                          Terms & Conditions
+                        </a>{' '}
+                        and{' '}
+                        <a
+                          href="/privacy"
+                          target="_blank"
+                          className={styles.termsLink}
+                        >
+                          Privacy Policy
+                        </a>
+                      </Text>
+                    }
+                  />
+                  {showErrors && !acceptTerms && (
+                    <Text size="xs" c="red" mt="xs">
+                      Please accept terms & conditions to continue
                     </Text>
-                  }
-                />
-              </div>
+                  )}
+                </div>
+                <div className={styles.confirmButton}>{confirmPayButton}</div>
+              </>
             )}
           </div>
         </div>
 
         {/* Mobile Footer - only show before payment form */}
         {!clientSecret && (
-          <div className={styles.mobileFooter}>
-            <Button
-              variant="filled"
-              size="md"
-              radius="xl"
-              fullWidth
-              leftSection={<CreditCard size={18} />}
-              onClick={handleInitiateCheckout}
-              loading={isInitiatingCheckout}
-              disabled={!canProceed}
-            >
-              Confirm & Pay
-            </Button>
-          </div>
+          <div className={styles.mobileFooter}>{confirmPayButton}</div>
         )}
       </div>
 
@@ -328,6 +316,25 @@ export function CheckoutPage() {
           onSelectAddress={handleSelectAddress}
         />
       )}
+
+      {/* Error Modal */}
+      <Modal
+        opened={errorModalOpened}
+        onClose={closeErrorModal}
+        title="Please fix the following"
+        centered
+      >
+        <div className={styles.errorList}>
+          {validationErrors.map((err) => (
+            <Text key={err} size="sm" c="red">
+              {'\u2022'} {err}
+            </Text>
+          ))}
+        </div>
+        <Button fullWidth mt="lg" onClick={closeErrorModal}>
+          Got it
+        </Button>
+      </Modal>
 
       {/* Payment Modal */}
       {clientSecret && orderId && (

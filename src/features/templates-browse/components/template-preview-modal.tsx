@@ -120,7 +120,7 @@ export function TemplatePreviewModal({
           to="/create-card"
           search={{ templateId: template.id }}
           size="sm"
-          leftSection={<Plus size={16} />}
+          leftSection={!isMobile ? <Plus size={16} /> : undefined}
         >
           Create Card
         </ButtonLink>
@@ -235,6 +235,7 @@ export function TemplatePreviewModal({
         opened={opened}
         onClose={onClose}
         position="bottom"
+        size="60%"
         withCloseButton={false}
         classNames={{ content: styles.drawer }}
       >

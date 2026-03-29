@@ -27,3 +27,20 @@
 .link:hover {
   color: #34d399;
 }
+
+@media (max-width: 576px) {
+  .container {
+    gap: var(--mantine-spacing-sm);
+    padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+  }
+
+  .container p {
+    font-size: var(--mantine-font-size-xs);
+  }
+
+  .link {
+    font-size: var(--mantine-font-size-xs);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}

@@ -81,45 +81,36 @@ export function PackAutofillModal() {
       return;
     }
 
-    if (selectedOption === 'proceed') {
-      // Skip autofill - proceed with current cards
-      const navigateToCart = () => {
-        setIsExiting(true);
-        exitTimeoutRef.current = setTimeout(() => {
-          close();
-          closeCreatePackModal();
-          void navigate({ to: '/cart' });
-          setIsExiting(false);
-        }, 400);
-      };
+    const navigateToCart = () => {
+      setIsExiting(true);
+      exitTimeoutRef.current = setTimeout(() => {
+        close();
+        closeCreatePackModal();
+        void navigate({ to: '/cart' });
+        setIsExiting(false);
+      }, 400);
+    };
 
+    const addToCartThenNavigate = () => {
       if (needsAddToCart) {
-        // Pack not in cart yet - add it first
         addCartItem.mutate(
           { packId: pack.id, quantity: 1 },
           { onSuccess: navigateToCart }
         );
       } else {
-        // Pack already in cart - just navigate
         navigateToCart();
       }
+    };
+
+    if (selectedOption === 'proceed') {
+      addToCartThenNavigate();
       return;
     }
 
     // Call API for auto-fill
     autofillPack.mutate(
       { id: pack.id, mode: selectedOption },
-      {
-        onSuccess: () => {
-          setIsExiting(true);
-          exitTimeoutRef.current = setTimeout(() => {
-            close();
-            closeCreatePackModal();
-            void navigate({ to: '/cart' });
-            setIsExiting(false);
-          }, 400);
-        },
-      }
+      { onSuccess: addToCartThenNavigate }
     );
   };
 

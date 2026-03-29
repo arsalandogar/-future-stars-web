@@ -266,9 +266,11 @@ export function CardPreviewModal({
           </button>
         </div>
 
-        <Text className={styles.createdDate}>
-          Created: {formatDate(card.createdAt)}
-        </Text>
+        {!isMobile && (
+          <Text className={styles.createdDate}>
+            Created: {formatDate(card.createdAt)}
+          </Text>
+        )}
       </div>
 
       <div className={styles.footer}>
@@ -292,7 +294,7 @@ export function CardPreviewModal({
         opened={opened}
         onClose={onClose}
         position="bottom"
-        size="65%"
+        size="75%"
         withCloseButton={false}
         classNames={{ content: styles.drawer }}
       >

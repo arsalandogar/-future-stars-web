@@ -1,10 +1,10 @@
 import { Card, Text, ThemeIcon, type MantineColor } from '@mantine/core';
-import type { LucideIcon } from 'lucide-react';
+import type { ComponentType } from 'react';
 
 import { ChangeBadge } from './change-badge';
 
 interface StatCardProps {
-  icon: LucideIcon;
+  icon: ComponentType<{ size: number }>;
   label: string;
   value: string;
   change?: number;

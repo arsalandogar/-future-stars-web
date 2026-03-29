@@ -36,6 +36,7 @@ export function OrderPackItem({ item }: OrderPackItemProps) {
           ) : (
             <div className={styles.thumbnailPlaceholder} />
           )}
+          <span className={styles.thumbnailBadge}>{totalCardCount}</span>
         </div>
 
         <div className={styles.info}>
@@ -69,7 +70,7 @@ export function OrderPackItem({ item }: OrderPackItemProps) {
                 />
                 {cardSnapshot.quantity > 1 && (
                   <span className={styles.quantityBadge}>
-                    x{cardSnapshot.quantity}
+                    {cardSnapshot.quantity}
                   </span>
                 )}
               </div>

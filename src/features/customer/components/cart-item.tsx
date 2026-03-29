@@ -57,6 +57,7 @@ export function CartItem({
           ) : (
             <div className={styles.thumbnailPlaceholder} />
           )}
+          <span className={styles.thumbnailBadge}>{totalPackQuantity}</span>
         </button>
 
         <div className={styles.info}>
@@ -81,11 +82,13 @@ export function CartItem({
                   onClick={() => setIsExpanded(!isExpanded)}
                 >
                   <span>View Cards</span>
-                  <ChevronDown
-                    size={isMobile ? 14 : 16}
-                    strokeWidth={3}
-                    className={`${styles.chevron} ${isExpanded ? styles.open : ''}`}
-                  />
+                  {!isMobile && (
+                    <ChevronDown
+                      size={16}
+                      strokeWidth={3}
+                      className={`${styles.chevron} ${isExpanded ? styles.open : ''}`}
+                    />
+                  )}
                 </button>
               )}
               {quantity !== undefined && onQuantityChange && onDelete && (
@@ -109,9 +112,7 @@ export function CartItem({
           <div
             className={`${styles.expandedContent} ${isExpanded ? styles.open : ''}`}
           >
-            <PackCardsPreview
-              cards={item.pack.packCards.map((pc) => pc.card)}
-            />
+            <PackCardsPreview packCards={item.pack.packCards} />
           </div>
         </div>
       )}

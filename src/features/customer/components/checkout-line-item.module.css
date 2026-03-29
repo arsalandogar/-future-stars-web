@@ -13,10 +13,11 @@
 
 .thumbnail {
   flex-shrink: 0;
-  width: 30px;
+  width: 48px;
   aspect-ratio: 2.5 / 3.5;
-  overflow: hidden;
+  overflow: visible;
   border: 2px solid var(--mantine-color-primary-4);
+  position: relative;
 }
 
 .thumbnailImage {
@@ -92,7 +93,7 @@
 
 .cardsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   gap: var(--mantine-spacing-sm);
 }
 
@@ -109,14 +110,38 @@
 
 .quantityBadge {
   position: absolute;
-  bottom: 4px;
-  right: 4px;
+  bottom: -6px;
+  right: -6px;
   background-color: var(--mantine-color-primary-4);
   color: white;
   font-size: var(--mantine-font-size-xs);
   font-weight: 600;
-  padding: 2px 6px;
-  border-radius: var(--mantine-radius-sm);
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thumbnailBadge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background-color: var(--mantine-color-primary-4);
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  line-height: 1.2;
 }
 
 .addMoreBanner {
@@ -129,7 +154,7 @@
   }
 
   .thumbnail {
-    width: 25px;
+    width: 40px;
   }
 
   .packName {
@@ -137,6 +162,6 @@
   }
 
   .cardsGrid {
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   }
 }

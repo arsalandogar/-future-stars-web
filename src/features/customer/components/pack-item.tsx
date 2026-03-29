@@ -1,5 +1,6 @@
 import { ActionIcon, Button, Menu, Text, TextInput } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { useMediaQuery } from '@mantine/hooks';
 import {
   Check,
   ChevronDown,
@@ -48,6 +49,7 @@ export function PackItem({
   onCopy,
   readOnly = false,
 }: PackItemProps) {
+  const isMobile = useMediaQuery('(max-width: 576px)');
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingName, setEditingName] = useState(pack.name);
@@ -124,6 +126,7 @@ export function PackItem({
           ) : (
             <div className={styles.thumbnailPlaceholder} />
           )}
+          <span className={styles.thumbnailBadge}>{totalQuantity}</span>
         </button>
 
         <div className={styles.info}>
@@ -233,17 +236,21 @@ export function PackItem({
                   onClick={() => setIsExpanded(!isExpanded)}
                 >
                   <span>View Cards</span>
-                  <ChevronDown
-                    size={16}
-                    className={`${styles.chevron} ${isExpanded ? styles.open : ''}`}
-                  />
+                  {!isMobile && (
+                    <ChevronDown
+                      size={16}
+                      className={`${styles.chevron} ${isExpanded ? styles.open : ''}`}
+                    />
+                  )}
                 </button>
               )}
               <Button
                 variant="outline"
-                size="sm"
+                size={isMobile ? 'xs' : 'sm'}
                 radius="xl"
-                leftSection={<MdOutlineShoppingCart size={16} />}
+                leftSection={
+                  !isMobile ? <MdOutlineShoppingCart size={16} /> : undefined
+                }
                 onClick={() => onAddToCart?.(pack)}
                 className={styles.addToCartButton}
               >
@@ -261,7 +268,7 @@ export function PackItem({
           <div
             className={`${styles.expandedContent} ${isExpanded ? styles.open : ''}`}
           >
-            <PackCardsPreview cards={pack.packCards.map((pc) => pc.card)} />
+            <PackCardsPreview packCards={pack.packCards} />
           </div>
         </div>
       )}

@@ -35,6 +35,7 @@ export function CheckoutLineItem({ item }: CheckoutLineItemProps) {
           ) : (
             <div className={styles.thumbnailPlaceholder} />
           )}
+          <span className={styles.thumbnailBadge}>{totalCardCount}</span>
         </div>
 
         <div className={styles.info}>
@@ -74,7 +75,7 @@ export function CheckoutLineItem({ item }: CheckoutLineItemProps) {
                   />
                   {packCard.quantity > 1 && (
                     <span className={styles.quantityBadge}>
-                      x{packCard.quantity}
+                      {packCard.quantity}
                     </span>
                   )}
                 </div>

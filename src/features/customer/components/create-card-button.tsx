@@ -8,7 +8,8 @@ export function CreateCardButton() {
     <Link to="/create-card" className={styles.container}>
       <div className={styles.card}>
         <div className={styles.innerBorder}>
-          <Plus size={64} className={styles.icon} />
+          <Plus size={48} className={styles.icon} />
+          <span className={styles.label}>Create a Card</span>
         </div>
       </div>
     </Link>

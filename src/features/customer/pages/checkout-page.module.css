@@ -37,7 +37,7 @@
 }
 
 .confirmButton {
-  min-width: 160px;
+  margin-top: var(--mantine-spacing-md);
 }
 
 .mobileFooter {
@@ -96,7 +96,6 @@
 
 .termsSection {
   margin-top: var(--mantine-spacing-xl);
-  padding: 0 var(--mantine-spacing-md);
 }
 
 .termsLink {
@@ -125,8 +124,10 @@
   .mobileFooter {
     display: block;
   }
+}
 
-  .termsSection {
-    padding: 0 var(--mantine-spacing-sm);
-  }
+.errorList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }

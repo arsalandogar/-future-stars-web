@@ -280,6 +280,10 @@
     padding-bottom: var(--mantine-spacing-md);
   }
 
+  .title {
+    font-size: var(--mantine-font-size-md);
+  }
+
   .content {
     padding: var(--mantine-spacing-sm) 0;
   }

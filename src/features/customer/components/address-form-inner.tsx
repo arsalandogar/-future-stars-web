@@ -5,6 +5,7 @@ import type { CreateAddressParams } from '@/types';
 
 export interface AddressFormInnerProps {
   addressCount: number;
+  defaultPhone?: string;
   onAddressChange: (
     data: CreateAddressParams | null,
     complete: boolean
@@ -17,6 +18,7 @@ export interface AddressFormInnerProps {
  */
 export function AddressFormInner({
   addressCount,
+  defaultPhone,
   onAddressChange,
 }: AddressFormInnerProps) {
   const handleChange = (event: StripeAddressElementChangeEvent) => {
@@ -51,13 +53,14 @@ export function AddressFormInner({
           address: {
             country: 'US',
           },
+          ...(defaultPhone ? { phone: `+${defaultPhone}` } : {}),
         },
         fields: {
           phone: 'always',
         },
         validation: {
           phone: {
-            required: 'always',
+            required: addressCount === 0 ? 'always' : 'never',
           },
         },
         allowedCountries: ['US'],

@@ -117,11 +117,23 @@
     padding: var(--mantine-spacing-md) var(--mantine-spacing-lg);
   }
 
+  .header h4 {
+    font-size: var(--mantine-font-size-md);
+  }
+
   .content {
     padding: var(--mantine-spacing-md) var(--mantine-spacing-lg);
   }
 
   .footer {
     padding: var(--mantine-spacing-md) var(--mantine-spacing-lg);
+  }
+
+  .viewCartButton,
+  .checkoutButton {
+    font-size: var(--mantine-font-size-sm);
+    padding-left: var(--mantine-spacing-sm);
+    padding-right: var(--mantine-spacing-sm);
+    white-space: nowrap;
   }
 }

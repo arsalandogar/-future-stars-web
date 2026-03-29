@@ -1,6 +1,7 @@
 import { Button, Title } from '@mantine/core';
 import { useNavigate } from '@tanstack/react-router';
-import { Check, CreditCard, ShoppingCart, X } from 'lucide-react';
+import { Check, CreditCard, X } from 'lucide-react';
+import { MdOutlineShoppingCart } from 'react-icons/md';
 import { useCallback, useEffect, useRef } from 'react';
 
 import type { CartItem as CartItemType } from '@/types';
@@ -92,7 +93,7 @@ export function AddedToCartPopup({ cartItem, onClose }: AddedToCartPopupProps) {
             variant="outline"
             size="md"
             radius="xl"
-            leftSection={<ShoppingCart size={20} />}
+            leftSection={<MdOutlineShoppingCart size={20} />}
             onClick={handleViewCart}
             className={styles.viewCartButton}
           >

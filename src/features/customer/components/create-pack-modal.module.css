@@ -116,7 +116,7 @@
   }
 
   .title {
-    font-size: var(--mantine-font-size-lg);
+    font-size: var(--mantine-font-size-md);
   }
 
   .closeButton {

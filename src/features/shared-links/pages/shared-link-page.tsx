@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button, Loader } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
+import { useNavigate } from '@tanstack/react-router';
 import { ArrowRight } from 'lucide-react';
 import { MdOutlineShoppingCart } from 'react-icons/md';
 
@@ -29,6 +30,7 @@ function isDesktopBrowser() {
 }
 
 export function SharedLinkPage({ code, initialMode }: SharedLinkPageProps) {
+  const navigate = useNavigate();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
   const resolvedInitialMode =
@@ -63,6 +65,32 @@ export function SharedLinkPage({ code, initialMode }: SharedLinkPageProps) {
     );
   }
 
+  const handleSharedLinkError = (
+    err: unknown,
+    action: 'claim' | 'purchase'
+  ) => {
+    const status = (err as { response?: { status?: number } }).response?.status;
+    if (status === 400) {
+      notifications.show({
+        title: action === 'claim' ? 'Cannot claim' : 'Cannot purchase',
+        message:
+          action === 'claim'
+            ? "You can't claim your own card."
+            : "You can't buy your own card.",
+        color: 'yellow',
+      });
+    } else {
+      notifications.show({
+        title: 'Error',
+        message:
+          action === 'claim'
+            ? 'Failed to add to collection. Please try again.'
+            : 'Failed to add to cart. Please try again.',
+        color: 'red',
+      });
+    }
+  };
+
   const handleAddToCollection = () => {
     if (!isAuthenticated || user?.isGuest) {
       window.location.href = `/login?redirectTo=${encodeURIComponent(`/shared/${code}`)}`;
@@ -79,24 +107,14 @@ export function SharedLinkPage({ code, initialMode }: SharedLinkPageProps) {
               : 'The pack has been added to your collection!',
           color: 'green',
         });
+        void navigate({
+          to: '/my-cards',
+          search: {
+            tab: sharedLink?.shareableType === 'card' ? 'cards' : 'packs',
+          },
+        });
       },
-      onError: (err) => {
-        const status = (err as { response?: { status?: number } }).response
-          ?.status;
-        if (status === 400) {
-          notifications.show({
-            title: 'Cannot claim',
-            message: "You can't claim your own card.",
-            color: 'yellow',
-          });
-        } else {
-          notifications.show({
-            title: 'Error',
-            message: 'Failed to add to collection. Please try again.',
-            color: 'red',
-          });
-        }
-      },
+      onError: (err) => handleSharedLinkError(err, 'claim'),
     });
   };
 
@@ -111,24 +129,9 @@ export function SharedLinkPage({ code, initialMode }: SharedLinkPageProps) {
               : 'The pack has been added to your cart!',
           color: 'green',
         });
+        void navigate({ to: '/cart' });
       },
-      onError: (err) => {
-        const status = (err as { response?: { status?: number } }).response
-          ?.status;
-        if (status === 400) {
-          notifications.show({
-            title: 'Cannot purchase',
-            message: "You can't buy your own card.",
-            color: 'yellow',
-          });
-        } else {
-          notifications.show({
-            title: 'Error',
-            message: 'Failed to add to cart. Please try again.',
-            color: 'red',
-          });
-        }
-      },
+      onError: (err) => handleSharedLinkError(err, 'purchase'),
     });
   };
 
@@ -170,7 +173,7 @@ export function SharedLinkPage({ code, initialMode }: SharedLinkPageProps) {
     <div className={styles.page}>
       <section className={styles.stage}>
         <h1 className={styles.headline}>
-          {sharerName} has shared a {itemLabel} with you!
+          {sharerName} shared a {itemLabel} with you!
         </h1>
 
         <div className={styles.previewWrap}>
