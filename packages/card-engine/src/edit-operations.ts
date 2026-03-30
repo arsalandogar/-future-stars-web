@@ -385,7 +385,7 @@ export function withTextEdit(
   return newEdits;
 }
 
-/** Apply preset colors positionally to color fields, falling back to original values. */
+/** Apply preset colors positionally to color fields, cycling when preset has fewer colors. */
 export function withPresetColors(
   edits: Edits,
   colorFields: EditableColorField[],
@@ -395,7 +395,9 @@ export function withPresetColors(
   for (let i = 0; i < colorFields.length; i++) {
     const field = colorFields[i];
     const color =
-      i < presetColors.length ? presetColors[i] : field.originalValue;
+      presetColors.length > 0
+        ? presetColors[i % presetColors.length]
+        : field.originalValue;
     result = withColorEdit(result, field, color);
   }
   return result;
@@ -452,6 +454,7 @@ export function withTextFieldReset(
  * Apply foreground colors from color pairs to text elements linked to color areas.
  * Text elements with a `textColorArea` get the `fg` color from the matching
  * color pair at the same index as their linked color field.
+ * When the palette has fewer pairs than color fields, colors cycle (T1,T2,T1,T2...).
  * Mutates SVG nodes directly.
  */
 export function withPresetTextColors(
@@ -459,15 +462,16 @@ export function withPresetTextColors(
   colorFields: EditableColorField[],
   colorPairs: { fg: string }[]
 ): void {
+  if (colorPairs.length === 0) return;
   const colorIndexMap = new Map(colorFields.map((cf, i) => [cf.fieldId, i]));
 
   for (const textField of textFields) {
     if (!textField.textColorArea) continue;
 
     const colorIndex = colorIndexMap.get(textField.textColorArea);
-    if (colorIndex == null || colorIndex >= colorPairs.length) continue;
+    if (colorIndex == null) continue;
 
-    const fgColor = colorPairs[colorIndex].fg;
+    const fgColor = colorPairs[colorIndex % colorPairs.length].fg;
     for (const node of textField.elementNodes) {
       writeColorValue(node, 'fill', fgColor);
     }
