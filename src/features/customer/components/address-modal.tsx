@@ -1,33 +1,20 @@
 import {
   ActionIcon,
-  Anchor,
   Button,
   Loader,
   Modal,
-  PinInput,
   Radio,
-  Stack,
   Text,
   Title,
 } from '@mantine/core';
 import { Elements } from '@stripe/react-stripe-js';
-import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Check, Plus, Trash2, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import type { Address, CreateAddressParams } from '@/types';
 
 import { getStripePromise, stripeAppearance } from '@/lib/stripe';
 import { useAuthStore } from '@/stores/auth-store';
-import { formatPhone } from '@/utils/format-phone';
-import { getErrorMessage } from '@/utils/get-error-message';
-
-import {
-  useCheckPhone,
-  useMergeGuest,
-  useSendOtp,
-  useVerifyOtp,
-} from '@/features/customer-auth';
 
 import { useCreateAddress } from '../api/create-address';
 import { useDeleteAddress } from '../api/delete-address';
@@ -44,13 +31,7 @@ interface AddressModalProps {
   onSelectAddress: (address: Address) => void;
 }
 
-type ModalView = 'list' | 'add-new' | 'verify-phone';
-
-function formatCountdown(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${s.toString().padStart(2, '0')}`;
-}
+type ModalView = 'list' | 'add-new';
 
 export function AddressModal({
   opened,
@@ -58,17 +39,11 @@ export function AddressModal({
   selectedAddress,
   onSelectAddress,
 }: AddressModalProps) {
-  const queryClient = useQueryClient();
   const user = useAuthStore((s) => s.user);
   const { data, isLoading } = useAddresses();
   const createAddress = useCreateAddress();
   const deleteAddress = useDeleteAddress();
   const setDefaultAddress = useSetDefaultAddress();
-
-  const checkPhone = useCheckPhone();
-  const sendOtp = useSendOtp();
-  const verifyOtp = useVerifyOtp();
-  const mergeGuest = useMergeGuest();
 
   const addresses = data?.data ?? [];
 
@@ -78,17 +53,6 @@ export function AddressModal({
     null
   );
   const [isAddressComplete, setIsAddressComplete] = useState(false);
-
-  // OTP verification state
-  const [otpValue, setOtpValue] = useState('');
-  const [otpFlow, setOtpFlow] = useState<'login' | 'signup'>('signup');
-  const [countdown, setCountdown] = useState(0);
-
-  useEffect(() => {
-    if (countdown <= 0) return;
-    const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [countdown]);
 
   // Compute effective view: user choice or default based on addresses
   const view = viewOverride ?? (addresses.length === 0 ? 'add-new' : 'list');
@@ -101,7 +65,7 @@ export function AddressModal({
     setAddressData(data);
   };
 
-  const saveAddress = () => {
+  const handleSaveAddress = () => {
     if (!addressData) return;
 
     createAddress.mutate(addressData, {
@@ -110,105 +74,8 @@ export function AddressModal({
         setViewOverride('list');
         setAddressData(null);
         setIsAddressComplete(false);
-        resetOtpState();
       },
     });
-  };
-
-  const handleSaveAddress = () => {
-    if (!addressData) return;
-
-    // If user is a guest and phone is provided, verify phone first
-    if (user?.isGuest && addressData.phone) {
-      const phone = addressData.phone;
-      checkPhone.mutate(
-        { phone },
-        {
-          onSuccess: (data) => {
-            if (data.exists) {
-              // Existing user — OTP was sent by check-phone
-              setOtpFlow('login');
-              if (data.expiresIn) setCountdown(data.expiresIn);
-            } else {
-              // New user — send OTP
-              setOtpFlow('signup');
-              sendOtp.mutate(
-                { phone, type: 'new' },
-                {
-                  onSuccess: (otpData) => {
-                    setCountdown(otpData.expiresIn);
-                  },
-                }
-              );
-            }
-            setViewOverride('verify-phone');
-          },
-        }
-      );
-      return;
-    }
-
-    saveAddress();
-  };
-
-  const handleVerifyOtp = (value: string) => {
-    if (!addressData) return;
-    const phone = addressData.phone;
-
-    const onSuccess = () => {
-      void queryClient.clear();
-      saveAddress();
-    };
-
-    const onError = () => {
-      setOtpValue('');
-    };
-
-    if (otpFlow === 'login') {
-      mergeGuest.mutate({ phone, otp: value }, { onSuccess, onError });
-    } else {
-      verifyOtp.mutate(
-        {
-          phone,
-          otp: value,
-          type: 'new',
-          firstName: addressData.firstName,
-          lastName: addressData.lastName,
-        },
-        { onSuccess, onError }
-      );
-    }
-  };
-
-  const handleResendOtp = () => {
-    if (!addressData || countdown > 0) return;
-    const phone = addressData.phone;
-
-    if (otpFlow === 'login') {
-      checkPhone.mutate(
-        { phone },
-        {
-          onSuccess: (data) => {
-            if (data.expiresIn) setCountdown(data.expiresIn);
-          },
-        }
-      );
-    } else {
-      sendOtp.mutate(
-        { phone, type: 'new' },
-        {
-          onSuccess: (data) => {
-            setCountdown(data.expiresIn);
-          },
-        }
-      );
-    }
-    setOtpValue('');
-  };
-
-  const resetOtpState = () => {
-    setOtpValue('');
-    setCountdown(0);
   };
 
   const handleSelectAddress = (address: Address) => {
@@ -227,10 +94,7 @@ export function AddressModal({
   };
 
   const handleBack = () => {
-    if (view === 'verify-phone') {
-      setViewOverride('add-new');
-      resetOtpState();
-    } else if (view === 'add-new' && addresses.length > 0) {
+    if (view === 'add-new' && addresses.length > 0) {
       setViewOverride('list');
       setAddressData(null);
       setIsAddressComplete(false);
@@ -239,16 +103,7 @@ export function AddressModal({
     }
   };
 
-  const otpMutation = otpFlow === 'login' ? mergeGuest : verifyOtp;
-  const resendPending = checkPhone.isPending || sendOtp.isPending;
-  const resendDisabled = resendPending || countdown > 0;
-
-  const headerTitle =
-    view === 'list'
-      ? 'SELECT ADDRESS'
-      : view === 'add-new'
-        ? 'ADD NEW ADDRESS'
-        : 'VERIFY PHONE';
+  const headerTitle = view === 'list' ? 'SELECT ADDRESS' : 'ADD NEW ADDRESS';
 
   return (
     <Modal
@@ -360,62 +215,6 @@ export function AddressModal({
               Add new address
             </Button>
           </>
-        ) : view === 'verify-phone' ? (
-          <Stack gap="lg" align="center" py="xl">
-            <Stack gap={4} align="center">
-              <Text size="sm" c="dimmed">
-                Enter the 6-digit code sent to
-              </Text>
-              <Text size="sm" fw={600} c="white">
-                +{addressData?.phone.slice(0, 1)}{' '}
-                {formatPhone(addressData?.phone.slice(1) ?? '')}
-              </Text>
-            </Stack>
-
-            <PinInput
-              length={6}
-              type="number"
-              size="md"
-              value={otpValue}
-              onChange={setOtpValue}
-              onComplete={handleVerifyOtp}
-              disabled={otpMutation.isPending}
-            />
-
-            {otpMutation.isPending && (
-              <Text size="sm" c="dimmed">
-                Verifying...
-              </Text>
-            )}
-
-            {otpMutation.isError && (
-              <Text size="sm" c="red">
-                {getErrorMessage(otpMutation.error)}
-              </Text>
-            )}
-
-            {countdown > 0 && (
-              <Text size="sm" c="dimmed">
-                Code expires in {formatCountdown(countdown)}
-              </Text>
-            )}
-
-            <Anchor
-              size="sm"
-              c="dimmed"
-              onClick={handleResendOtp}
-              style={{
-                cursor: resendDisabled ? 'not-allowed' : 'pointer',
-                opacity: resendDisabled ? 0.5 : 1,
-              }}
-            >
-              {resendPending
-                ? 'Sending...'
-                : countdown > 0
-                  ? `Resend code (${formatCountdown(countdown)})`
-                  : 'Resend code'}
-            </Anchor>
-          </Stack>
         ) : (
           <div className={styles.addressForm}>
             <Elements
@@ -446,7 +245,7 @@ export function AddressModal({
           <Button
             variant="filled"
             onClick={handleSaveAddress}
-            loading={createAddress.isPending || checkPhone.isPending}
+            loading={createAddress.isPending}
             disabled={!isAddressComplete}
           >
             Save Address

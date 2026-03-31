@@ -1,8 +1,12 @@
 import { Container, Loader, Text, Title } from '@mantine/core';
 import { Check } from 'lucide-react';
+import { useEffect } from 'react';
 
 import { CardSidePreview } from '@/components/card-side-preview';
 import { Head } from '@/components/seo/head';
+import { api } from '@/lib/api-client';
+import { useAuthStore } from '@/stores/auth-store';
+import type { User } from '@/types';
 
 import { type Order, useOrder } from '../api/get-order';
 
@@ -54,6 +58,20 @@ function getOrderSummary(order: Order | undefined) {
 
 export function OrderSuccessPage({ orderId }: OrderSuccessPageProps) {
   const { data: order, isLoading } = useOrder({ variables: orderId });
+
+  useEffect(() => {
+    const { user } = useAuthStore.getState();
+    if (!user?.isGuest) return;
+
+    api
+      .get<unknown, { data: User }>('profile')
+      .then((response) => {
+        useAuthStore.getState().setUser(response.data);
+      })
+      .catch(() => {
+        // Best-effort — don't break the success page
+      });
+  }, []);
 
   const cardPreviews = getCardPreviews(order);
   const summary = getOrderSummary(order);

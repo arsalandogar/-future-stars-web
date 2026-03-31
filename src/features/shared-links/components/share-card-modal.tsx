@@ -78,6 +78,9 @@ export function ShareCardModal({ card, opened, onClose }: ShareCardModalProps) {
     setLinkCopied(true);
   };
 
+  const imageUnavailable =
+    card.status === 'processing' || card.status === 'draft';
+
   const handleCopyImage = async () => {
     if (!card.frontCardImage) return;
     try {
@@ -242,9 +245,13 @@ export function ShareCardModal({ card, opened, onClose }: ShareCardModalProps) {
             className={styles.ctaButton}
             leftSection={imageCopied ? <Check size={20} /> : <Copy size={20} />}
             onClick={() => void handleCopyImage()}
-            disabled={imageCopied}
+            disabled={imageCopied || imageUnavailable}
           >
-            {imageCopied ? 'Image Copied' : 'Copy Image'}
+            {imageUnavailable
+              ? 'Processing Image...'
+              : imageCopied
+                ? 'Image Copied'
+                : 'Copy Image'}
           </Button>
         )}
       </div>

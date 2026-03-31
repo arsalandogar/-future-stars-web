@@ -6,6 +6,7 @@ import {
   EditCardButton,
   ShareCardButton,
 } from '@/components/ui/card-actions';
+import { useShareModalStore } from '@/stores/share-modal-store';
 import type { Card } from '@/types';
 
 import styles from './card-success.module.css';
@@ -15,6 +16,8 @@ interface CardSuccessProps {
 }
 
 export function CardSuccess({ card }: CardSuccessProps) {
+  const openShareCard = useShareModalStore((s) => s.openCard);
+
   return (
     <div className={styles.panel}>
       <h2 className={styles.title}>
@@ -40,7 +43,7 @@ export function CardSuccess({ card }: CardSuccessProps) {
 
       <div className={styles.actionsRow}>
         <EditCardButton cardId={card.id} />
-        <ShareCardButton disabled />
+        <ShareCardButton onClick={() => openShareCard(card)} />
       </div>
 
       <BuyCardButton cardId={card.id} className={styles.buyButton} />
