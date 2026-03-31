@@ -53,8 +53,8 @@ export const CARD_WIDTH = 750;
 export const CARD_HEIGHT = 1050;
 
 /** Card dimensions with bleeds (extra area trimmed during printing). */
-export const CARD_BLEED_WIDTH = 833.34;
-export const CARD_BLEED_HEIGHT = 1133.34;
+export const CARD_BLEED_WIDTH = 825;
+export const CARD_BLEED_HEIGHT = 1125;
 
 /** Returns true when the viewBox is larger than the standard card safe zone. */
 export function hasBleeds(vb: TouchBounds): boolean {
