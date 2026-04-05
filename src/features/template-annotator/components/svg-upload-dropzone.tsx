@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Stack, Text } from '@mantine/core';
+import { Checkbox, Stack, Text } from '@mantine/core';
 import { FileUp } from 'lucide-react';
 
 import { useSvgFileReader } from '../hooks/use-svg-file-reader';
@@ -10,10 +10,15 @@ export function SvgUploadDropzone() {
   const { readFile, loadFromString, error } = useSvgFileReader();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [preprocess, setPreprocess] = useState(false);
+  const preprocessRef = useRef(preprocess);
+  useEffect(() => {
+    preprocessRef.current = preprocess;
+  }, [preprocess]);
 
   const handleFile = useCallback(
     (file: File | undefined) => {
-      if (file) readFile(file);
+      if (file) readFile(file, preprocessRef.current);
     },
     [readFile]
   );
@@ -38,7 +43,6 @@ export function SvgUploadDropzone() {
 
   useEffect(() => {
     function handlePaste(e: ClipboardEvent) {
-      // Don't intercept pastes into inputs or textareas
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
 
@@ -46,13 +50,13 @@ export function SvgUploadDropzone() {
         (f) => f.type === 'image/svg+xml' || f.name.endsWith('.svg')
       );
       if (svgFile) {
-        readFile(svgFile);
+        readFile(svgFile, preprocessRef.current);
         return;
       }
 
       const text = (e.clipboardData?.getData('text/plain') ?? '').trim();
       if (text.startsWith('<svg') || text.startsWith('<?xml')) {
-        loadFromString(text);
+        loadFromString(text, preprocessRef.current);
       }
     }
 
@@ -88,6 +92,13 @@ export function SvgUploadDropzone() {
           </Text>
         </div>
       </div>
+
+      <Checkbox
+        label="Pre-process Figma SVG"
+        checked={preprocess}
+        onChange={(e) => setPreprocess(e.currentTarget.checked)}
+        onClick={(e) => e.stopPropagation()}
+      />
 
       <input
         ref={inputRef}

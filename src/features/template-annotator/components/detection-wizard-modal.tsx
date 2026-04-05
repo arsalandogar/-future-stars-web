@@ -197,11 +197,21 @@ function buildPreselectedNodeSelections(
     nodeToField.set(a.nodeId, a.fieldId);
   }
 
+  // Auto-fill unmatched items with next unused field IDs
+  const usedFieldIds = new Set(nodeToField.values());
+  const unusedFieldIds = autoAssignIds
+    ? autoAssignIds.filter((id) => !usedFieldIds.has(id))
+    : [];
+  let unusedIdx = 0;
+
   return Object.fromEntries(
-    detectedItems.map((item, i) => [
-      i,
-      nodeToField.get(item.nodeId) ?? SKIP_VALUE,
-    ])
+    detectedItems.map((item, i) => {
+      const existing = nodeToField.get(item.nodeId);
+      if (existing) return [i, existing];
+      if (unusedIdx < unusedFieldIds.length)
+        return [i, unusedFieldIds[unusedIdx++]];
+      return [i, SKIP_VALUE];
+    })
   );
 }
 
@@ -643,7 +653,14 @@ export function DetectionWizardModal({
 
   const [textSelections, setTextSelections] = useState<
     Record<number, SelectionValue>
-  >(() => buildPreselectedNodeSelections(detectedTexts, assignments, 'text'));
+  >(() =>
+    buildPreselectedNodeSelections(
+      detectedTexts,
+      assignments,
+      'text',
+      TEXT_FIELD_IDS
+    )
+  );
 
   const [imageSelections, setImageSelections] = useState<
     Record<number, SelectionValue>
@@ -690,7 +707,12 @@ export function DetectionWizardModal({
         buildPreselectedColorSelections(colorClusters, assignments)
       );
       setTextSelections(
-        buildPreselectedNodeSelections(detectedTexts, assignments, 'text')
+        buildPreselectedNodeSelections(
+          detectedTexts,
+          assignments,
+          'text',
+          TEXT_FIELD_IDS
+        )
       );
       setImageSelections(
         buildPreselectedNodeSelections(
