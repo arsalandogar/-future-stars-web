@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -26,11 +26,13 @@ import {
   Button,
   Group,
   Image,
+  Loader,
   Menu,
   SimpleGrid,
   Skeleton,
   Table,
   Text,
+  Tooltip,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
@@ -39,6 +41,7 @@ import {
   Eye,
   Grid2x2,
   GripVertical,
+  ImageDown,
   List,
   MoreHorizontal,
   PenLine,
@@ -59,9 +62,15 @@ import { usePageHeader } from '@/hooks/use-page-header';
 import { formatDate } from '@/utils/date';
 
 import { useTemplates } from '../api/get-templates';
+import { useRegenerateSnapshots } from '../api/regenerate-snapshots';
 import { useReorderTemplates } from '../api/reorder-templates';
 import { useSetDefaultBack } from '../api/set-default-back';
-import type { Template, TemplateSide, TemplatesListResponse } from '../types';
+import {
+  isThumbnailProcessing,
+  type Template,
+  type TemplateSide,
+  type TemplatesListResponse,
+} from '../types';
 
 import { TemplateRow } from './template-row';
 import { SetTagsModal } from './set-tags-modal';
@@ -108,15 +117,17 @@ function TemplateActions({
   size = 'md',
   onSetTags,
   onSetDefaultBack,
+  onRegenerateSnapshot,
 }: {
   template: Template;
   side: TemplateSide;
   size?: 'sm' | 'md';
   onSetTags: (template: Template) => void;
   onSetDefaultBack: (template: Template) => void;
+  onRegenerateSnapshot: (template: Template) => void;
 }) {
   return (
-    <Menu shadow="md" width={160} position="bottom-end">
+    <Menu shadow="md" width={200} position="bottom-end">
       <Menu.Target>
         <ActionIcon variant="subtle" color="gray" size={size}>
           <MoreHorizontal size={size === 'sm' ? 14 : 16} />
@@ -157,6 +168,12 @@ function TemplateActions({
           onClick={() => onSetTags(template)}
         >
           Set Tags
+        </Menu.Item>
+        <Menu.Item
+          leftSection={<ImageDown size={14} />}
+          onClick={() => onRegenerateSnapshot(template)}
+        >
+          Regenerate Snapshot
         </Menu.Item>
         {side === 'back' && (
           <Menu.Item
@@ -202,15 +219,19 @@ function BackThumbPreview({ template }: { template: Template }) {
 function TemplateCard({
   template,
   side,
+  isProcessing,
   onSetTags,
   onSetDefaultBack,
+  onRegenerateSnapshot,
   onPreview,
   onNavigate,
 }: {
   template: Template;
   side: TemplateSide;
+  isProcessing: boolean;
   onSetTags: (template: Template) => void;
   onSetDefaultBack: (template: Template) => void;
+  onRegenerateSnapshot: (template: Template) => void;
   onPreview: (template: Template) => void;
   onNavigate: (template: Template) => void;
 }) {
@@ -236,6 +257,13 @@ function TemplateCard({
           h="100%"
           w="100%"
         />
+        {isProcessing && (
+          <Tooltip label="Generating snapshot...">
+            <div className="absolute inset-0 z-[3] flex cursor-default items-center justify-center bg-black/50">
+              <Loader size="sm" color="white" />
+            </div>
+          </Tooltip>
+        )}
         <ActionIcon
           className={styles.enlargeBtn}
           variant="filled"
@@ -264,6 +292,7 @@ function TemplateCard({
               size="sm"
               onSetTags={onSetTags}
               onSetDefaultBack={onSetDefaultBack}
+              onRegenerateSnapshot={onRegenerateSnapshot}
             />
           </div>
         </div>
@@ -297,15 +326,19 @@ function TemplateCard({
 function SortableGridCard({
   template,
   side,
+  isProcessing,
   onSetTags,
   onSetDefaultBack,
+  onRegenerateSnapshot,
   onPreview,
   onNavigate,
 }: {
   template: Template;
   side: TemplateSide;
+  isProcessing: boolean;
   onSetTags: (template: Template) => void;
   onSetDefaultBack: (template: Template) => void;
+  onRegenerateSnapshot: (template: Template) => void;
   onPreview: (template: Template) => void;
   onNavigate: (template: Template) => void;
 }) {
@@ -337,8 +370,10 @@ function SortableGridCard({
       <TemplateCard
         template={template}
         side={side}
+        isProcessing={isProcessing}
         onSetTags={onSetTags}
         onSetDefaultBack={onSetDefaultBack}
+        onRegenerateSnapshot={onRegenerateSnapshot}
         onPreview={onPreview}
         onNavigate={onNavigate}
       />
@@ -371,13 +406,17 @@ function GridSkeleton() {
 function SortableListRow({
   template,
   side,
+  isProcessing,
   onSetTags,
   onSetDefaultBack,
+  onRegenerateSnapshot,
 }: {
   template: Template;
   side: TemplateSide;
+  isProcessing: boolean;
   onSetTags: (template: Template) => void;
   onSetDefaultBack: (template: Template) => void;
+  onRegenerateSnapshot: (template: Template) => void;
 }) {
   const {
     attributes,
@@ -410,8 +449,10 @@ function SortableListRow({
       <TemplateRow
         template={template}
         side={side}
+        isProcessing={isProcessing}
         onSetTags={onSetTags}
         onSetDefaultBack={onSetDefaultBack}
+        onRegenerateSnapshot={onRegenerateSnapshot}
       />
     </Table.Tr>
   );
@@ -456,6 +497,7 @@ export function TemplatesList() {
 
   const setDefaultBackMutation = useSetDefaultBack();
   const reorderMutation = useReorderTemplates();
+  const regenerateSnapshotsMutation = useRegenerateSnapshots();
   const queryClient = useQueryClient();
 
   const sensors = useSensors(
@@ -467,6 +509,13 @@ export function TemplatesList() {
 
   const handleSetDefaultBack = (template: Template) => {
     setDefaultBackMutation.mutate(template.id);
+  };
+
+  const handleRegenerateSnapshot = (template: Template) => {
+    regenerateSnapshotsMutation.mutate({
+      templateId: template.id,
+      force: true,
+    });
   };
 
   const handleSetTags = (template: Template) => {
@@ -509,10 +558,27 @@ export function TemplatesList() {
       search: search || undefined,
       side,
     },
+    refetchInterval: (query) => {
+      const data = query.state.data?.data;
+      if (!data) return false;
+      return data.some((t) => isThumbnailProcessing(t.thumbnailStatus))
+        ? 3000
+        : false;
+    },
   });
 
   const templates = queryResult.data?.data ?? [];
   const meta = queryResult.data?.meta;
+
+  const processingIds = useMemo(
+    () =>
+      new Set(
+        (queryResult.data?.data ?? [])
+          .filter((t) => isThumbnailProcessing(t.thumbnailStatus))
+          .map((t) => t.id)
+      ),
+    [queryResult.data?.data]
+  );
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -585,6 +651,16 @@ export function TemplatesList() {
               </ActionIcon>
             </ActionIcon.Group>
             <Button
+              variant="default"
+              leftSection={<ImageDown size={16} />}
+              loading={regenerateSnapshotsMutation.isPending}
+              onClick={() =>
+                regenerateSnapshotsMutation.mutate({ force: true })
+              }
+            >
+              Regenerate Snapshots
+            </Button>
+            <Button
               component={Link}
               to="/admin/templates/create"
               leftSection={<Plus size={16} />}
@@ -636,8 +712,10 @@ export function TemplatesList() {
                       key={template.id}
                       template={template}
                       side={side}
+                      isProcessing={processingIds.has(template.id)}
                       onSetTags={handleSetTags}
                       onSetDefaultBack={handleSetDefaultBack}
+                      onRegenerateSnapshot={handleRegenerateSnapshot}
                       onPreview={handlePreview}
                       onNavigate={handleNavigate}
                     />
@@ -671,8 +749,10 @@ export function TemplatesList() {
                         key={template.id}
                         template={template}
                         side={side}
+                        isProcessing={processingIds.has(template.id)}
                         onSetTags={handleSetTags}
                         onSetDefaultBack={handleSetDefaultBack}
+                        onRegenerateSnapshot={handleRegenerateSnapshot}
                       />
                     ))}
                   </Table.Tbody>

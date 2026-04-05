@@ -31,6 +31,12 @@ export interface TemplateBackTemplate {
   templateImageMedium: string;
 }
 
+export type ThumbnailStatus = 'pending' | 'processing' | 'completed' | 'failed';
+
+export function isThumbnailProcessing(status: ThumbnailStatus | null): boolean {
+  return status === 'pending' || status === 'processing';
+}
+
 export interface Template {
   id: number;
   side: TemplateSide;
@@ -39,6 +45,7 @@ export interface Template {
   description: string | null;
   templateImage: string;
   templateImageMedium: string;
+  thumbnailStatus: ThumbnailStatus | null;
   templateTypeId: number;
   frontendComponentName?: string;
   frontendComponentFileName?: string;

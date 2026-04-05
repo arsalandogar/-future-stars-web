@@ -5,6 +5,7 @@ import {
   Badge,
   Group,
   Image,
+  Loader,
   Menu,
   Table,
   Text,
@@ -13,6 +14,7 @@ import {
 import {
   Edit,
   Eye,
+  ImageDown,
   MoreHorizontal,
   PenLine,
   SlidersHorizontal,
@@ -27,8 +29,10 @@ import type { Template, TemplateSide } from '../types';
 interface TemplateRowProps {
   template: Template;
   side: TemplateSide;
+  isProcessing?: boolean;
   onSetTags?: (template: Template) => void;
   onSetDefaultBack?: (template: Template) => void;
+  onRegenerateSnapshot?: (template: Template) => void;
   hideTags?: boolean;
   hideBack?: boolean;
 }
@@ -73,22 +77,33 @@ function BackTemplatePreview({
 export function TemplateRow({
   template,
   side,
+  isProcessing,
   onSetTags,
   onSetDefaultBack,
+  onRegenerateSnapshot,
   hideTags,
   hideBack,
 }: TemplateRowProps) {
   return (
     <>
       <Table.Td>
-        <Image
-          src={template.templateImageMedium}
-          alt={template.label}
-          h={48}
-          w={48}
-          fit="contain"
-          className="rounded border border-gray-200"
-        />
+        <div className="relative inline-block">
+          <Image
+            src={template.templateImageMedium}
+            alt={template.label}
+            h={48}
+            w={48}
+            fit="contain"
+            className="rounded border border-gray-200"
+          />
+          {isProcessing && (
+            <Tooltip label="Generating snapshot...">
+              <div className="absolute inset-0 flex items-center justify-center rounded bg-black/50">
+                <Loader size="xs" color="white" />
+              </div>
+            </Tooltip>
+          )}
+        </div>
       </Table.Td>
       {side === 'front' && !hideBack && (
         <Table.Td>
@@ -154,7 +169,7 @@ export function TemplateRow({
         <Text size="sm">{formatDate(template.createdAt)}</Text>
       </Table.Td>
       <Table.Td>
-        <Menu shadow="md" width={160} position="bottom-end">
+        <Menu shadow="md" width={200} position="bottom-end">
           <Menu.Target>
             <ActionIcon variant="subtle" color="gray">
               <MoreHorizontal size={16} />
@@ -189,16 +204,22 @@ export function TemplateRow({
             >
               Edit Defaults
             </Menu.Item>
+            {(onSetTags || onRegenerateSnapshot) && <Menu.Divider />}
             {onSetTags && (
-              <>
-                <Menu.Divider />
-                <Menu.Item
-                  leftSection={<Tags size={14} />}
-                  onClick={() => onSetTags(template)}
-                >
-                  Set Tags
-                </Menu.Item>
-              </>
+              <Menu.Item
+                leftSection={<Tags size={14} />}
+                onClick={() => onSetTags(template)}
+              >
+                Set Tags
+              </Menu.Item>
+            )}
+            {onRegenerateSnapshot && (
+              <Menu.Item
+                leftSection={<ImageDown size={14} />}
+                onClick={() => onRegenerateSnapshot(template)}
+              >
+                Regenerate Snapshot
+              </Menu.Item>
             )}
             {side === 'back' && onSetDefaultBack && (
               <Menu.Item
