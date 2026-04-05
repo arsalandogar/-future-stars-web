@@ -246,7 +246,8 @@ export function withColorEdit(
 export function withImageEdit(
   edits: Edits,
   field: EditableImageField,
-  imageUrl: string
+  imageUrl: string,
+  sourceDimensions?: { width: number; height: number }
 ): Edits {
   applyImageEdit(field, imageUrl);
   const newEdits = { ...edits };
@@ -255,7 +256,12 @@ export function withImageEdit(
   } else {
     const prev = edits[field.fieldId];
     const position = isImageEdit(prev) ? prev : DEFAULT_IMAGE_POSITION;
-    newEdits[field.fieldId] = { ...position, url: imageUrl };
+    const edit: ImageEdit = { ...position, url: imageUrl };
+    if (sourceDimensions) {
+      edit.sourceWidth = sourceDimensions.width;
+      edit.sourceHeight = sourceDimensions.height;
+    }
+    newEdits[field.fieldId] = edit;
   }
   return newEdits;
 }

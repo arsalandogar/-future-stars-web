@@ -6,6 +6,11 @@ body,
   overflow-x: clip;
 }
 
+body {
+  background-color: var(--mantine-color-body);
+  color: var(--mantine-color-text);
+}
+
 /* Customer site variables */
 :root {
   --customer-bg-gradient-start: #000000;

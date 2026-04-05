@@ -8,7 +8,11 @@ import { usePrintBatches } from './get-print-batches';
 const ORDERS_QUERY_KEY = ['admin', 'orders'] as const;
 
 export const useCreatePrintBatch = createMutation({
-  mutationFn: (params: CreatePrintBatchParams): Promise<PrintBatch> =>
-    api.post('admin/print-batches', params),
+  mutationFn: ({
+    name,
+    orderIds,
+    exclude,
+  }: CreatePrintBatchParams): Promise<PrintBatch> =>
+    api.post('admin/print-batches', { name, orderIds, exclude }),
   use: [invalidateQueries([usePrintBatches.getKey(), ORDERS_QUERY_KEY])],
 });

@@ -12,8 +12,9 @@ export const useAddOrdersToBatch = createMutation({
   mutationFn: ({
     batchId,
     orderIds,
+    exclude,
   }: AddOrdersToBatchParams): Promise<PrintBatch> =>
-    api.post(`admin/print-batches/${batchId}/orders`, { orderIds }),
+    api.post(`admin/print-batches/${batchId}/orders`, { orderIds, exclude }),
   use: [
     invalidateQueries([
       usePrintBatches.getKey(),

@@ -1,11 +1,4 @@
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { ImageIcon } from 'lucide-react';
 
 import { ContentTabs, type ContentTabItem } from '@/components/ui/content-tabs';
@@ -28,10 +21,6 @@ import { TabEmptyState } from './tab-empty-state';
 
 import photoStyles from './photo-tab.module.css';
 import styles from './tab-panel.module.css';
-
-const CropModal = lazy(() =>
-  import('./crop-modal').then((m) => ({ default: m.CropModal }))
-);
 
 const SUB_TAB_ITEMS: ContentTabItem[] = [
   { label: 'Image', value: 'image' },
@@ -115,8 +104,6 @@ export function PhotoTab() {
   const uploadMutation = useUploadCardImage();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [cropSrc, setCropSrc] = useState<string | null>(null);
-  const rawFileUrlRef = useRef<string | null>(null);
 
   // Auto-select first image field if none selected
   useEffect(() => {
@@ -148,63 +135,56 @@ export function PhotoTab() {
   const handleFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
-      if (!file) return;
-
-      if (rawFileUrlRef.current) {
-        URL.revokeObjectURL(rawFileUrlRef.current);
-      }
-      const url = URL.createObjectURL(file);
-      rawFileUrlRef.current = url;
-      setCropSrc(url);
+      if (!file || !selectedImageFieldId) return;
 
       // Reset file input so the same file can be re-selected
       e.target.value = '';
-    },
-    []
-  );
 
-  const handleCropConfirm = useCallback(
-    (blob: Blob) => {
-      if (!selectedImageFieldId) return;
-
-      if (rawFileUrlRef.current) {
-        URL.revokeObjectURL(rawFileUrlRef.current);
-        rawFileUrlRef.current = null;
-      }
-      setCropSrc(null);
-
-      // Create local preview
-      const previewUrl = URL.createObjectURL(blob);
-
-      // Store upload entry and apply local preview
+      const previewUrl = URL.createObjectURL(file);
       const sideAtUploadStart = activeSide;
-      const key = toUploadKey(sideAtUploadStart, selectedImageFieldId);
-      addUpload(key, previewUrl);
-      updateImageField(selectedImageFieldId, previewUrl, sideAtUploadStart);
-
-      // Upload in background
       const fieldId = selectedImageFieldId;
-      uploadMutation.mutate(
-        { image: blob, name: `card-${fieldId}`, category: 'user-card' },
-        {
-          onSuccess: (cdnUrl) => {
-            void preloadImage(cdnUrl)
-              .catch(() => {
-                // Best effort: still persist the CDN URL even if preload fails.
-              })
-              .finally(() => {
-                updateImageField(fieldId, cdnUrl, sideAtUploadStart);
-                setUploadSuccess(key, cdnUrl);
-              });
-          },
-          onError: (error) => {
-            setUploadError(
-              key,
-              error instanceof Error ? error.message : 'Upload failed'
-            );
-          },
-        }
-      );
+      const key = toUploadKey(sideAtUploadStart, fieldId);
+
+      // Load image to get natural dimensions for cover-aware scaling
+      const img = new Image();
+      img.onload = () => {
+        const sourceDimensions = {
+          width: img.naturalWidth,
+          height: img.naturalHeight,
+        };
+
+        addUpload(key, previewUrl);
+        updateImageField(
+          fieldId,
+          previewUrl,
+          sideAtUploadStart,
+          sourceDimensions
+        );
+
+        // Upload in background
+        uploadMutation.mutate(
+          { image: file, name: `card-${fieldId}`, category: 'user-card' },
+          {
+            onSuccess: (cdnUrl) => {
+              void preloadImage(cdnUrl)
+                .catch(() => {
+                  // Best effort: still persist the CDN URL even if preload fails.
+                })
+                .finally(() => {
+                  updateImageField(fieldId, cdnUrl, sideAtUploadStart);
+                  setUploadSuccess(key, cdnUrl);
+                });
+            },
+            onError: (error) => {
+              setUploadError(
+                key,
+                error instanceof Error ? error.message : 'Upload failed'
+              );
+            },
+          }
+        );
+      };
+      img.src = previewUrl;
     },
     [
       selectedImageFieldId,
@@ -216,23 +196,6 @@ export function PhotoTab() {
       setUploadError,
     ]
   );
-
-  const handleCropClose = useCallback(() => {
-    if (rawFileUrlRef.current) {
-      URL.revokeObjectURL(rawFileUrlRef.current);
-      rawFileUrlRef.current = null;
-    }
-    setCropSrc(null);
-  }, []);
-
-  const handleRecrop = useCallback(() => {
-    if (!selectedField || !currentUrl) return;
-    if (rawFileUrlRef.current) {
-      URL.revokeObjectURL(rawFileUrlRef.current);
-    }
-    rawFileUrlRef.current = null;
-    setCropSrc(currentUrl);
-  }, [selectedField, currentUrl]);
 
   const handleDelete = useCallback(() => {
     if (!selectedImageFieldId) return;
@@ -309,7 +272,6 @@ export function PhotoTab() {
           hasImage={hasImage}
           disabled={!selectedField}
           onUpload={handleUploadClick}
-          onRecrop={handleRecrop}
           onDelete={handleDelete}
         />
       )}
@@ -330,17 +292,6 @@ export function PhotoTab() {
         className={photoStyles.hiddenInput}
         onChange={handleFileChange}
       />
-
-      {cropSrc && selectedField && (
-        <Suspense>
-          <CropModal
-            imageSrc={cropSrc}
-            aspectRatio={selectedField.aspectRatio}
-            onConfirm={handleCropConfirm}
-            onClose={handleCropClose}
-          />
-        </Suspense>
-      )}
     </div>
   );
 }

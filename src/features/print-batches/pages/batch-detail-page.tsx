@@ -15,7 +15,9 @@ import { notifications } from '@mantine/notifications';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import {
+  Calendar,
   ChevronDown,
+  CreditCard,
   MoreHorizontal,
   Package,
   Plus,
@@ -33,6 +35,7 @@ import { formatDate, formatDateTime } from '@/utils/date';
 
 import { printBatchQuery } from '../api/get-print-batch';
 import { useRemoveOrdersFromBatch } from '../api/remove-orders-from-batch';
+import { useSendPrintBatch } from '../api/send-print-batch';
 import { BATCH_STATUS_COLORS } from '../constants';
 import { BatchStatusModal } from '../components/batch-status-modal';
 import { BatchNameModal } from '../components/batch-name-modal';
@@ -154,14 +157,32 @@ export function BatchDetailPage({ batchId }: BatchDetailPageProps) {
     );
   };
 
-  const handleReprint = () => {
-    // TODO: Implement reprint batch functionality
-    notifications.show({
-      title: 'Reprint initiated',
-      message: 'Batch reprint has been initiated',
-      color: 'blue',
+  const sendPrintBatch = useSendPrintBatch();
+
+  const handleSendToPrint = () => {
+    sendPrintBatch.mutate(batch.id, {
+      onSuccess: () => {
+        notifications.show({
+          title: 'Sent to printer',
+          message: 'Batch has been sent to the printer successfully',
+          color: 'green',
+        });
+      },
+      onError: (error) => {
+        notifications.show({
+          title: 'Error',
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Failed to send batch to printer',
+          color: 'red',
+        });
+      },
     });
   };
+
+  const printButtonLabel =
+    batch.status === 'pending' ? 'Print Batch' : 'Reprint Batch';
 
   const createdByName = batch.creator
     ? `${batch.creator.firstName} ${batch.creator.lastName}`
@@ -200,7 +221,7 @@ export function BatchDetailPage({ batchId }: BatchDetailPageProps) {
             <div className={styles.statsGrid}>
               <div className={styles.statCard}>
                 <div className={styles.statLabel}>
-                  <Text size="sm" c="dimmed">
+                  <Text size="xs" tt="uppercase" fw={600} c="dimmed">
                     Status
                   </Text>
                   <Anchor size="xs" c="primary" onClick={openStatusModal}>
@@ -210,32 +231,42 @@ export function BatchDetailPage({ batchId }: BatchDetailPageProps) {
                 <MappedBadge
                   value={batch.status}
                   colorMap={BATCH_STATUS_COLORS}
+                  size="md"
                 />
               </div>
 
               <div className={styles.statCard}>
-                <Text size="sm" c="dimmed" mb="xs">
-                  Creation Date
+                <div className={styles.statIcon}>
+                  <Calendar size={16} />
+                </div>
+                <Text size="xs" tt="uppercase" fw={600} c="dimmed">
+                  Created
                 </Text>
-                <Text size="lg" fw={500}>
+                <Text size="lg" fw={600}>
                   {formatDate(batch.createdAt)}
                 </Text>
               </div>
 
               <div className={styles.statCard}>
-                <Text size="sm" c="dimmed" mb="xs">
+                <div className={styles.statIcon}>
+                  <Package size={16} />
+                </div>
+                <Text size="xs" tt="uppercase" fw={600} c="dimmed">
                   Total Packs
                 </Text>
-                <Text size="lg" fw={500}>
+                <Text size="xl" fw={700} c="primary">
                   {batch.totalPacks}
                 </Text>
               </div>
 
               <div className={styles.statCard}>
-                <Text size="sm" c="dimmed" mb="xs">
+                <div className={styles.statIcon}>
+                  <CreditCard size={16} />
+                </div>
+                <Text size="xs" tt="uppercase" fw={600} c="dimmed">
                   Total Cards
                 </Text>
-                <Text size="lg" fw={500}>
+                <Text size="xl" fw={700} c="primary">
                   {batch.totalCards}
                 </Text>
               </div>
@@ -250,9 +281,10 @@ export function BatchDetailPage({ batchId }: BatchDetailPageProps) {
               <Button
                 variant="filled"
                 leftSection={<Printer size={16} />}
-                onClick={handleReprint}
+                onClick={handleSendToPrint}
+                loading={sendPrintBatch.isPending}
               >
-                Reprint Batch
+                {printButtonLabel}
               </Button>
               <Button
                 variant="outline"

@@ -28,7 +28,7 @@ export function AppProvider({ children }: AppProviderProps) {
         <QueryClientProvider client={queryClient}>
           <MantineProvider
             theme={theme}
-            forceColorScheme="dark"
+            defaultColorScheme="dark"
             cssVariablesResolver={cssVariableResolver}
           >
             <NavigationProgress />

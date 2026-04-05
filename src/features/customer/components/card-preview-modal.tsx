@@ -19,6 +19,7 @@ import {
   X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { Link } from '@tanstack/react-router';
 
 import { FlipIcon } from '@/components/icons/flip-icon';
 import { useShareModalStore } from '@/stores/share-modal-store';
@@ -150,6 +151,9 @@ export function CardPreviewModal({
           </Menu.Target>
           <Menu.Dropdown className={styles.menuDropdown}>
             <Menu.Item
+              component={Link}
+              to="/edit-card/$cardId"
+              params={{ cardId: String(card.id) }}
               leftSection={<Pencil size={16} />}
               className={styles.menuItem}
             >
@@ -300,7 +304,7 @@ export function CardPreviewModal({
       >
         {content}
         <DeleteCardModal
-          cardId={card?.id}
+          cardId={card.id}
           opened={deleteModalOpened}
           onClose={closeDeleteModal}
           onDeleted={onClose}
@@ -324,7 +328,7 @@ export function CardPreviewModal({
     >
       {content}
       <DeleteCardModal
-        cardId={card?.id}
+        cardId={card.id}
         opened={deleteModalOpened}
         onClose={closeDeleteModal}
         onDeleted={onClose}

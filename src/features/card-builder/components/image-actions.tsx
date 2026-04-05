@@ -1,5 +1,5 @@
 import { Text } from '@mantine/core';
-import { CloudUpload, Crop, Trash2 } from 'lucide-react';
+import { CloudUpload, Trash2 } from 'lucide-react';
 
 import styles from './image-actions.module.css';
 
@@ -7,7 +7,6 @@ interface ImageActionsProps {
   hasImage: boolean;
   disabled: boolean;
   onUpload: () => void;
-  onRecrop: () => void;
   onDelete: () => void;
 }
 
@@ -15,7 +14,6 @@ export function ImageActions({
   hasImage,
   disabled,
   onUpload,
-  onRecrop,
   onDelete,
 }: ImageActionsProps) {
   return (
@@ -30,17 +28,6 @@ export function ImageActions({
         >
           <CloudUpload size={24} />
           <Text size="xs">Upload</Text>
-        </button>
-
-        <button
-          type="button"
-          className={styles.actionCard}
-          onClick={onRecrop}
-          disabled={disabled || !hasImage}
-          aria-label="Re-crop image"
-        >
-          <Crop size={24} />
-          <Text size="xs">Re-crop</Text>
         </button>
 
         <button

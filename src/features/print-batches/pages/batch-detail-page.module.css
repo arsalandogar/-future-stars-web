@@ -29,9 +29,25 @@
 }
 
 .statCard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   padding: var(--mantine-spacing-md);
-  border: 1px solid var(--mantine-color-gray-3);
+  border: 1px solid var(--mantine-color-default-border);
   border-radius: var(--mantine-radius-md);
+  background-color: var(--mantine-color-body);
+}
+
+.statIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--mantine-radius-sm);
+  background-color: var(--mantine-color-default-hover);
+  color: var(--mantine-color-dimmed);
+  margin-bottom: 4px;
 }
 
 .statLabel {

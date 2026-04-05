@@ -36,9 +36,15 @@ export interface PrintBatchesListResponse {
   data: PrintBatch[];
 }
 
+export interface InvalidOrder {
+  orderId: number;
+  reasons: string[];
+}
+
 export interface CreatePrintBatchParams {
   name?: string;
   orderIds: number[];
+  exclude?: boolean;
 }
 
 export interface UpdatePrintBatchParams {
@@ -50,6 +56,7 @@ export interface UpdatePrintBatchParams {
 export interface AddOrdersToBatchParams {
   batchId: number;
   orderIds: number[];
+  exclude?: boolean;
 }
 
 export interface RemoveOrdersFromBatchParams {

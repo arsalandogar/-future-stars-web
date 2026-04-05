@@ -12,6 +12,7 @@ import {
   applyEditsForRender,
   applyTextCompression,
   withColorEdit,
+  isImageEdit,
   withImageEdit,
   applyImageZoom,
   nudgeImageNodes,
@@ -65,7 +66,8 @@ interface CardEditorState {
   updateImageField: (
     fieldId: EditableFieldId,
     imageUrl: string,
-    side?: Side
+    side?: Side,
+    sourceDimensions?: { width: number; height: number }
   ) => void;
   removeImageField: (fieldId: EditableFieldId, side?: Side) => void;
   adjustImageZoom: (
@@ -491,7 +493,7 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => {
       );
     },
 
-    updateImageField: (fieldId, imageUrl, side) => {
+    updateImageField: (fieldId, imageUrl, side, sourceDimensions) => {
       const state = get();
       const [target, sideState] = getSide(state, side);
       const field = sideState.editableImageFields.find(
@@ -499,11 +501,26 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => {
       );
       if (!field) return;
 
-      set(
-        commitSide(state, target, {
-          edits: withImageEdit(sideState.edits, field, imageUrl),
-        })
+      const newEdits = withImageEdit(
+        sideState.edits,
+        field,
+        imageUrl,
+        sourceDimensions
       );
+
+      // Apply cover-aware zoom immediately so the image fills the area
+      const edit = newEdits[fieldId];
+      if (isImageEdit(edit) && edit.sourceWidth && edit.sourceHeight) {
+        applyImageZoom(
+          field.elementNodes,
+          edit.zoom,
+          edit.offsetX,
+          edit.offsetY,
+          edit
+        );
+      }
+
+      set(commitSide(state, target, { edits: newEdits }));
     },
 
     removeImageField: (fieldId, side) => {
@@ -529,7 +546,9 @@ export const useCardEditorStore = create<CardEditorState>()((set, get) => {
       );
       if (!field) return;
 
-      applyImageZoom(field.elementNodes, zoom, offsetX, offsetY);
+      const prev = sideState.edits[fieldId];
+      const edit = isImageEdit(prev) ? prev : undefined;
+      applyImageZoom(field.elementNodes, zoom, offsetX, offsetY, edit);
 
       set(
         commitSide(state, target, {

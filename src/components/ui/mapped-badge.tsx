@@ -16,7 +16,7 @@ export function MappedBadge<T extends string>({
   value,
   colorMap,
   size = 'sm',
-  variant = 'light',
+  variant = 'filled',
 }: MappedBadgeProps<T>) {
   return (
     <Badge
